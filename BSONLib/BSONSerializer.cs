@@ -82,7 +82,7 @@ namespace BSONLib
                 retval[0] = new byte[] { (byte)BSONTypes.Null };
                 retval[3] = new byte[0];
             }
-            if (value is int?)
+            else if (value is int?)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Int32 };
                 retval[3] = BitConverter.GetBytes(((int?)value).Value);
@@ -90,14 +90,7 @@ namespace BSONLib
             else if (value is double?)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Double };
-                retval[3] = BitConverter.GetBytes(((double?)value).Value);
-            }
-            else if (value is float?)
-            {
-                retval[0] = new byte[] { (byte)BSONTypes.Double };
-
-                double f = (double)((float?)value).Value;
-                retval[3] = BitConverter.GetBytes(f);
+                retval[3] = BitConverter.GetBytes((double)value);
             }
             else if (value is String)
             {
@@ -210,7 +203,22 @@ namespace BSONLib
 
                 }
             }
+            
             return retval;
+        }
+
+        /// <summary>
+        /// Overload that constructs a BinaryReader in memory and then deserializes the values.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectData"></param>
+        /// <returns></returns>
+        public T Deserialize<T>(byte[] objectData) where T : class, new()
+        {
+            var ms = new MemoryStream();
+            ms.Write(objectData, 0, objectData.Length);
+            ms.Position = 0;
+            return this.Deserialize<T>(new BinaryReader(ms));
         }
 
         private object DeserializeMember(BSONTypes t, byte[] objectData, out int usedBytes)

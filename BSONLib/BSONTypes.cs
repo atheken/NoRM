@@ -10,7 +10,7 @@ namespace BSONLib
     /// types available from within
     /// MongoDB
     /// </summary>
-    public enum BSONTypes : sbyte
+    public enum BSONTypes
     {
         Double  = 1,
         String = 2,
@@ -30,7 +30,7 @@ namespace BSONLib
         Int32 = 15,
         Timestamp = 17,
         Int64 = 18,
-        MinKey = -1,
-        MaxKey = 127
+        //MinKey = -1,
+        //MaxKey = 127
     }
 }
