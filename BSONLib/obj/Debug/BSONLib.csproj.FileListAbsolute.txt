@@ -1,0 +1,5 @@
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib\bin\Debug\BSONLib.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib\bin\Debug\BSONLib.pdb
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib\obj\Debug\BSONLib.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib\obj\Debug\BSONLib.pdb

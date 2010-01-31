@@ -14,6 +14,9 @@ namespace BSONLib
     /// </summary>
     public class BSONSerializer
     {
+        private const int CODE_LENGTH = 1;
+        private const int KEY_TERMINATOR_LENGTH = 1;
+
         public BSONSerializer()
         {
             this.Load();
@@ -34,17 +37,23 @@ namespace BSONLib
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
             var getters = BSONSerializer._setters[typeof(T)];
-            List<byte[]> retval = new List<byte[]>(getters.Count + 2);
+            List<byte[]> retval = new List<byte[]>();
+            for (int i = 0; i < getters.Count + 2; i++)
+            {
+                retval.Insert(i, new byte[0]);
+            }
+
             int index = 1;
             foreach (var member in getters)
             {
-                retval[index] = this.SerializeMember(member.Value.Name, member.Value.GetValue(document, null));
+                retval[index] = this.SerializeMember(member.Value.Name,
+                        member.Value.GetValue(document, null));
                 index++;
             }
             retval[0] = new byte[4];//allocate a size.
             retval[index] = new byte[1];//null terminat it.
             var arr = retval.SelectMany(y => y).ToArray();
-            
+
             //concat the whole binary sequence and return.
             var bitLength = BitConverter.GetBytes(arr.Length);
             arr[0] = bitLength[0];
@@ -59,6 +68,10 @@ namespace BSONLib
         {
             //type + name + data
             List<byte[]> retval = new List<byte[]>(4);
+            for (int i = 0; i < 4; i++)
+            {
+                retval.Add(new byte[0]);
+            }
             retval[0] = new byte[] { (byte)BSONTypes.Null };
             retval[1] = Encoding.UTF8.GetBytes(key); //push the key into the retval;
             retval[2] = new byte[1];//allocate a null between the key and the value.
@@ -95,7 +108,7 @@ namespace BSONLib
             }
             else if (value is Regex)
             {
-                retval[0] = new byte[] { (byte)BSONTypes.Regex};
+                retval[0] = new byte[] { (byte)BSONTypes.Regex };
                 //TODO.
             }
             else if (value is bool?)
@@ -110,7 +123,7 @@ namespace BSONLib
 
                 //not sure if this is correct.
                 retval[3] = BitConverter.GetBytes(binary.Length)
-                    .Concat(new byte[]{(byte)2}).Concat(binary).ToArray();
+                    .Concat(new byte[] { (byte)2 }).Concat(binary).ToArray();
             }
             else if (value is BSONOID)
             {
@@ -157,9 +170,119 @@ namespace BSONLib
         /// <returns></returns>
         public T Deserialize<T>(BinaryReader stream) where T : class, new()
         {
+            if (!BSONSerializer.CanBeSerialized(typeof(T)))
+            {
+                throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
+            }
+
+            var setters = BSONSerializer._setters[typeof(T)];
+
+            int length = stream.ReadInt32();
+            //get the object length minus the header and the null (5)
+            byte[] buffer = new byte[length - 5];
+            stream.Read(buffer, 0, length - 5);
+            //push the position forward past the null terminator.
+            stream.Read(new byte[1], 0, 1);
             T retval = new T();
 
+            while (buffer.Length > 0)
+            {
+                BSONTypes t = (BSONTypes)buffer[0];
+                var stringBytes = buffer.Skip(1)
+                    .TakeWhile(y => y != (byte)0)
+                    .ToArray();
 
+                String key = Encoding.UTF8.GetString(stringBytes);
+                //the object data is everything other than the key and the null.
+                var objectData = buffer.Skip(stringBytes.Length + 2).ToArray();
+
+
+                int usedBytes;
+                var obj = this.DeserializeMember(t, objectData, out usedBytes);
+
+                //skip type, the key, the null, the object data
+                buffer = buffer.Skip(CODE_LENGTH + stringBytes.Length + KEY_TERMINATOR_LENGTH + usedBytes).ToArray();
+
+                if (setters.ContainsKey(key.ToLower()))
+                {
+                    var prop = setters[key.ToLower()];
+                    prop.SetValue(retval, obj, null);
+
+                }
+            }
+            return retval;
+        }
+
+        private object DeserializeMember(BSONTypes t, byte[] objectData, out int usedBytes)
+        {
+            object retval = null;
+            usedBytes = 0;
+            //type + name + data
+            if (t == BSONTypes.Null)
+            {
+                retval = null;
+                usedBytes = 0;
+            }
+            if (t == BSONTypes.Int32)
+            {
+                retval = BitConverter.ToInt32(objectData, 0);
+                usedBytes = 4;
+            }
+            else if (t == BSONTypes.Double)
+            {
+                retval = BitConverter.ToDouble(objectData, 0);
+                usedBytes = 8;
+                //handle FLOAT.
+
+            }
+            else if (t == BSONTypes.String)
+            {
+                var stringData = objectData.TakeWhile(y => y != (byte)0).ToArray();
+                retval = Encoding.UTF8.GetString(stringData);
+                usedBytes = stringData.Length + 1;//account for null
+
+            }
+            else if (t == BSONTypes.Regex)
+            {
+                //TODO.
+            }
+            else if (t == BSONTypes.Boolean)
+            {
+                retval = BitConverter.ToBoolean(objectData, 0);
+                usedBytes = 1;
+            }
+            else if (t == BSONTypes.Binary)
+            {
+                //TODO. 
+            }
+            else if (t == BSONTypes.MongoOID)
+            {
+                retval = new BSONOID() { Value = objectData };
+                usedBytes = 12;
+            }
+            else if (t == BSONTypes.Reference)
+            {
+                //TODO: deserialize document reference.
+            }
+            else if (t == BSONTypes.ScopedCode)
+            {
+                //TODO: deserialize scoped code.
+            }
+            else if (t == BSONTypes.DateTime)
+            {
+                //TODO: deserialize date time
+            }
+            else if (t == BSONTypes.Int64)
+            {
+                retval = BitConverter.ToInt64(objectData, 0);
+                usedBytes = 8;
+            }
+            //TODO: implement something for "Symbol"
+            //TODO: implement non-scoped code handling.
+            else
+            {
+                //Object deserialization needs to be handled a level up.   
+            }
             return retval;
         }
 
@@ -195,7 +318,9 @@ namespace BSONLib
                 BSONSerializer._allowedTypes.Add(typeof(BSONOID));
                 BSONSerializer._allowedTypes.Add(typeof(Regex));
                 BSONSerializer._allowedTypes.Add(typeof(byte[]));
+                BSONSerializer._prohibittedTypes.Add(typeof(float?));
             }
+
         }
 
         /// <summary>

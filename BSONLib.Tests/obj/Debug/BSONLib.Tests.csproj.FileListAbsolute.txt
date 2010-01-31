@@ -1,0 +1,9 @@
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib.Tests\bin\Debug\BSONLib.Tests.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib.Tests\bin\Debug\BSONLib.Tests.pdb
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib.Tests\bin\Debug\BSONLib.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib.Tests\bin\Debug\nunit.framework.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib.Tests\bin\Debug\BSONLib.pdb
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib.Tests\bin\Debug\nunit.framework.xml
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib.Tests\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib.Tests\obj\Debug\BSONLib.Tests.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib.Tests\obj\Debug\BSONLib.Tests.pdb

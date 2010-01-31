@@ -1,0 +1,7 @@
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONHarness\bin\Debug\BSONHarness.exe
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONHarness\bin\Debug\BSONHarness.pdb
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONHarness\bin\Debug\BSONLib.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONHarness\bin\Debug\BSONLib.pdb
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONHarness\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONHarness\obj\Debug\BSONHarness.exe
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONHarness\obj\Debug\BSONHarness.pdb

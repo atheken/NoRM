@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Data.Mongo.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSONLib.Tests", "BSONLib.Tests\BSONLib.Tests.csproj", "{C7A7691F-89B2-451E-B9F3-3B09D50F2FAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSONHarness", "BSONHarness\BSONHarness.csproj", "{F8E1F3A1-7012-444A-98C0-2C69EF14BC72}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{C7A7691F-89B2-451E-B9F3-3B09D50F2FAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7A7691F-89B2-451E-B9F3-3B09D50F2FAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7A7691F-89B2-451E-B9F3-3B09D50F2FAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8E1F3A1-7012-444A-98C0-2C69EF14BC72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8E1F3A1-7012-444A-98C0-2C69EF14BC72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8E1F3A1-7012-444A-98C0-2C69EF14BC72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8E1F3A1-7012-444A-98C0-2C69EF14BC72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

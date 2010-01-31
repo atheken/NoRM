@@ -1,0 +1,9 @@
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.pdb
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\bin\Debug\nunit.framework.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.pdb
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\bin\Debug\nunit.framework.xml
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.pdb
