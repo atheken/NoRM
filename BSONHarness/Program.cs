@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using BSONLib;
 using System.IO;
+using System.Data.Mongo;
 
 namespace BSONHarness
 {
@@ -24,7 +25,12 @@ namespace BSONHarness
 
         static void Main(string[] args)
         {
-            SerializationBenchmark(1);
+            MongoContext context = new MongoContext();
+
+            var t = context.GetDatabase("Test1").GetCollection<GeneralDTO>("TestCollection");
+            var f = t.Find(new GeneralDTO() { IsFun = true });
+
+            //SerializationBenchmark(1);
             //SerializationBenchmark(100);
             //SerializationBenchmark(1000);
             //SerializationBenchmark(10000);

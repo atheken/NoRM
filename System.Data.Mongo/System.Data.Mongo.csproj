@@ -62,6 +62,12 @@
     <Compile Include="Protocol\Messages\QueryMessage.cs" />
     <Compile Include="Protocol\Messages\ReplyMessage.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BSONLib\BSONLib.csproj">
+      <Project>{D4222A9C-C769-4E51-BB96-BE01D9950549}</Project>
+      <Name>BSONLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

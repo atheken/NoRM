@@ -48,11 +48,11 @@ namespace System.Data.Mongo
         /// Constructs a socket to the server.
         /// </summary>
         /// <returns></returns>
-        protected TcpClient TCPSocket()
+        internal Socket Socket()
         {
-            TcpClient client = new TcpClient(this._serverName, this._serverPort);
-            
-            return client;
+            Socket sock = new Socket(this._endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            sock.Connect(this._serverName, this._serverPort);
+            return sock;
         }
 
         /// <summary>

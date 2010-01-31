@@ -21,6 +21,17 @@ namespace System.Data.Mongo
         }
 
         /// <summary>
+        /// The database name for this database.
+        /// </summary>
+        public String DatabaseName
+        {
+            get
+            {
+                return this._dbName;
+            }
+        }
+
+        /// <summary>
         /// Produces a mongodb collection that will produce and
         /// manipulate objects of the specified type.
         /// </summary>

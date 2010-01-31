@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data.Mongo.Protocol.Messages;
 
 namespace System.Data.Mongo
 {
@@ -24,14 +25,24 @@ namespace System.Data.Mongo
             this._collectionName = collectionName;
         }
 
+        public String FullyQualifiedName
+        {
+            get
+            {
+                return String.Format("{0}.{1}", this._db.DatabaseName, this._collectionName);
+            }
+        }
+
         /// <summary>
         /// Produces the set of documents in the collection from the 
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        public IEnumerable<T> Find(String query)
+        public IEnumerable<T> Find(T templateDocument)
         {
-            return Enumerable.Empty<T>();
+            var qm = new QueryMessage<T>(this._context, this._collectionName);
+            qm.Query = templateDocument;
+            return qm.Execute();
         }
 
     }

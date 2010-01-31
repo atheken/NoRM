@@ -53,6 +53,10 @@
       <Project>{D4222A9C-C769-4E51-BB96-BE01D9950549}</Project>
       <Name>BSONLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\System.Data.Mongo\System.Data.Mongo.csproj">
+      <Project>{297A83DB-DACE-4264-B28E-769CF165D4E4}</Project>
+      <Name>System.Data.Mongo</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

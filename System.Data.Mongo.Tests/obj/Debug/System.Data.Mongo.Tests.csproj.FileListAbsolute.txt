@@ -16,3 +16,5 @@ Z:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\nunit.framework.xml
 Z:\Code\MongoSharp\System.Data.Mongo.Tests\obj\Debug\ResolveAssemblyReference.cache
 Z:\Code\MongoSharp\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.dll
 Z:\Code\MongoSharp\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.pdb
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\BSONLib.dll
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\BSONLib.pdb

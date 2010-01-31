@@ -12,3 +12,5 @@ Z:\Code\MongoSharp\BSONHarness\bin\Debug\BSONLib.pdb
 Z:\Code\MongoSharp\BSONHarness\obj\Debug\ResolveAssemblyReference.cache
 Z:\Code\MongoSharp\BSONHarness\obj\Debug\BSONHarness.exe
 Z:\Code\MongoSharp\BSONHarness\obj\Debug\BSONHarness.pdb
+Z:\Code\MongoSharp\BSONHarness\bin\Debug\System.Data.Mongo.dll
+Z:\Code\MongoSharp\BSONHarness\bin\Debug\System.Data.Mongo.pdb
