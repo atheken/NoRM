@@ -1,0 +1,15 @@
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\bin\Debug\System.Data.Mongo.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\bin\Debug\System.Data.Mongo.pdb
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\obj\Debug\System.Data.Mongo.dll
+C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\obj\Debug\System.Data.Mongo.pdb
+Z:\Code\MongoSharp\MongoContext\bin\Debug\System.Data.Mongo.dll
+Z:\Code\MongoSharp\MongoContext\bin\Debug\System.Data.Mongo.pdb
+Z:\Code\MongoSharp\MongoContext\obj\Debug\ResolveAssemblyReference.cache
+Z:\Code\MongoSharp\MongoContext\obj\Debug\System.Data.Mongo.dll
+Z:\Code\MongoSharp\MongoContext\obj\Debug\System.Data.Mongo.pdb
+Z:\Code\MongoSharp\System.Data.Mongo\bin\Debug\System.Data.Mongo.dll
+Z:\Code\MongoSharp\System.Data.Mongo\bin\Debug\System.Data.Mongo.pdb
+Z:\Code\MongoSharp\System.Data.Mongo\obj\Debug\ResolveAssemblyReference.cache
+Z:\Code\MongoSharp\System.Data.Mongo\obj\Debug\System.Data.Mongo.dll
+Z:\Code\MongoSharp\System.Data.Mongo\obj\Debug\System.Data.Mongo.pdb

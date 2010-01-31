@@ -51,7 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MongoContext\System.Data.Mongo.csproj">
+    <ProjectReference Include="..\System.Data.Mongo\System.Data.Mongo.csproj">
       <Project>{297A83DB-DACE-4264-B28E-769CF165D4E4}</Project>
       <Name>System.Data.Mongo</Name>
     </ProjectReference>

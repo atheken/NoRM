@@ -1,5 +1,0 @@
-C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\bin\Debug\System.Data.Mongo.dll
-C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\bin\Debug\System.Data.Mongo.pdb
-C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\obj\Debug\ResolveAssemblyReference.cache
-C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\obj\Debug\System.Data.Mongo.dll
-C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\MongoContext\obj\Debug\System.Data.Mongo.pdb

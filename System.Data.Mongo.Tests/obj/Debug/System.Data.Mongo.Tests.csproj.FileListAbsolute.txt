@@ -7,3 +7,12 @@ C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONL
 C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\obj\Debug\ResolveAssemblyReference.cache
 C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.dll
 C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.pdb
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.pdb
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\nunit.framework.dll
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.dll
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.pdb
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\nunit.framework.xml
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\obj\Debug\ResolveAssemblyReference.cache
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.dll
+Z:\Code\MongoSharp\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.pdb

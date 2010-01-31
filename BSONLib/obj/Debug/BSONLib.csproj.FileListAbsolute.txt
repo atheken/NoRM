@@ -3,3 +3,8 @@ C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONL
 C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib\obj\Debug\ResolveAssemblyReference.cache
 C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib\obj\Debug\BSONLib.dll
 C:\Documents and Settings\atheken\My Documents\Visual Studio 2008\Projects\BSONLib\BSONLib\obj\Debug\BSONLib.pdb
+Z:\Code\MongoSharp\BSONLib\bin\Debug\BSONLib.dll
+Z:\Code\MongoSharp\BSONLib\bin\Debug\BSONLib.pdb
+Z:\Code\MongoSharp\BSONLib\obj\Debug\ResolveAssemblyReference.cache
+Z:\Code\MongoSharp\BSONLib\obj\Debug\BSONLib.dll
+Z:\Code\MongoSharp\BSONLib\obj\Debug\BSONLib.pdb
