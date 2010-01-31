@@ -75,6 +75,7 @@ namespace BSONLib
             retval[0] = new byte[] { (byte)BSONTypes.Null };
             retval[1] = Encoding.UTF8.GetBytes(key); //push the key into the retval;
             retval[2] = new byte[1];//allocate a null between the key and the value.
+            
             retval[3] = new byte[0];
             //this is where the magic occurs.
             if (value == null)
@@ -96,8 +97,10 @@ namespace BSONLib
             {
                 retval[0] = new byte[] { (byte)BSONTypes.String };
                 //get bytes and append a null to the end.
-                retval[3] = Encoding.UTF8.GetBytes((String)value)
+
+                var bytes = Encoding.UTF8.GetBytes((String)value)
                     .Concat(new byte[1]).ToArray();
+                retval[3] = BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray();
             }
             else if (value is Regex)
             {
@@ -194,7 +197,8 @@ namespace BSONLib
                 var obj = this.DeserializeMember(t, objectData, out usedBytes);
 
                 //skip type, the key, the null, the object data
-                buffer = buffer.Skip(CODE_LENGTH + stringBytes.Length + KEY_TERMINATOR_LENGTH + usedBytes).ToArray();
+                buffer = buffer.Skip(CODE_LENGTH + stringBytes.Length + 
+                    KEY_TERMINATOR_LENGTH + usedBytes).ToArray();
 
                 if (setters.ContainsKey(key.ToLower()))
                 {
@@ -245,9 +249,10 @@ namespace BSONLib
             }
             else if (t == BSONTypes.String)
             {
-                var stringData = objectData.TakeWhile(y => y != (byte)0).ToArray();
+                var stringLength = BitConverter.ToInt32(objectData, 0)-1;//remove the null.
+                var stringData = objectData.Skip(4).Take(stringLength).ToArray();
                 retval = Encoding.UTF8.GetString(stringData);
-                usedBytes = stringData.Length + 1;//account for null
+                usedBytes = stringLength + 5;//account for size and null
 
             }
             else if (t == BSONTypes.Regex)

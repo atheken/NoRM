@@ -18,17 +18,17 @@ namespace BSONHarness
                 //this.Title = this.Random.ToString();
                 //this.IsFun = true;
             }
-            public bool? IsFun { get; set; }
-            public String Title { get; set; }
-            public int? Random { get; set; }
+            //public bool? IsFun { get; set; }
+            //public String Title { get; set; }
+            public bool? c { get; set; }
         }
 
         static void Main(string[] args)
         {
             MongoContext context = new MongoContext();
 
-            var t = context.GetDatabase("Test1").GetCollection<GeneralDTO>("TestCollection");
-            var f = t.Find(new GeneralDTO() { IsFun = true });
+            var t = context.GetDatabase("a").GetCollection<GeneralDTO>("b");
+            var f = t.Find(new GeneralDTO() { c = true });
 
             //SerializationBenchmark(1);
             //SerializationBenchmark(100);

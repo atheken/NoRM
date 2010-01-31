@@ -40,7 +40,7 @@ namespace System.Data.Mongo
         /// <returns></returns>
         public IEnumerable<T> Find(T templateDocument)
         {
-            var qm = new QueryMessage<T>(this._context, this._collectionName);
+            var qm = new QueryMessage<T>(this._context, this.FullyQualifiedName);
             qm.Query = templateDocument;
             return qm.Execute();
         }

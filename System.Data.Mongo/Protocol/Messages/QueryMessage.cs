@@ -14,11 +14,11 @@ namespace System.Data.Mongo.Protocol.Messages
         private MongoOp _op = MongoOp.Query;
         private MongoContext _context;
         private String _collection;
-        private int _messageID = 7890339;//random number.
+        private int _messageID = 0;//random number.
         private byte[] _header = new byte[16];
         private int _options = 4;
-        private int _numberToSkip = 0;
-        private int _numberToTake = 10;
+        private uint _numberToSkip = 0;
+        private uint _numberToTake = uint.MaxValue;
         
         internal QueryMessage(MongoContext context, String fullyQualifiedCollName)
         {
@@ -57,9 +57,9 @@ namespace System.Data.Mongo.Protocol.Messages
         }
 
         /// <summary>
-        /// The number requested by this query.(defaults to 10.)
+        /// The number requested by this query.(defaults to UInt32.MaxValue)
         /// </summary>
-        public int NumberToTake
+        public uint NumberToTake
         {
             get
             {
@@ -74,7 +74,7 @@ namespace System.Data.Mongo.Protocol.Messages
         /// <summary>
         /// The number of documents to skip before starting to return documents.
         /// </summary>
-        public int NumberToSkip
+        public uint NumberToSkip
         {
             get
             {
@@ -99,9 +99,10 @@ namespace System.Data.Mongo.Protocol.Messages
             #region Message Body
             messageBytes.Add(BitConverter.GetBytes(0));//sets option to "none"
             //append the collection name and then null-terminate it.
-            messageBytes.Add(Encoding.UTF8.GetBytes(this._collection).Concat(new byte[0]).ToArray());
-            messageBytes.Add(BitConverter.GetBytes(0));//number to skip.
-            messageBytes.Add(BitConverter.GetBytes(10));//number to take.
+            messageBytes.Add(Encoding.UTF8.GetBytes(this._collection)
+                .Concat(new byte[1]).ToArray());
+            messageBytes.Add(BitConverter.GetBytes(this.NumberToSkip));//number to skip.
+            messageBytes.Add(BitConverter.GetBytes(this.NumberToTake));//number to take.
             messageBytes.Add(this._query);
             #endregion
 
@@ -110,10 +111,9 @@ namespace System.Data.Mongo.Protocol.Messages
             messageBytes[0] = BitConverter.GetBytes(size);
 
             var sock = this._context.Socket();
+            sock.Send(messageBytes.SelectMany(y => y.ToArray()).ToArray());
 
-            sock.Send(messageBytes.SelectMany(y => y).ToArray());
-
-
+            byte[]
             return Enumerable.Empty<T>();
         }
 
