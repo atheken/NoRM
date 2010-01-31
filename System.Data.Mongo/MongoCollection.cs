@@ -42,8 +42,16 @@ namespace System.Data.Mongo
         {
             var qm = new QueryMessage<T>(this._context, this.FullyQualifiedName);
             qm.Query = templateDocument;
-            return qm.Execute();
+            return qm.Execute().Results;
         }
 
+        /// <summary>
+        /// Insert of update these documents into the database.
+        /// </summary>
+        /// <param name="documentsToUpsert"></param>
+        public void Upsert(IEnumerable<T> documentsToUpsert)
+        {
+
+        }
     }
 }

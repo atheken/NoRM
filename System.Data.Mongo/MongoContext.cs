@@ -10,6 +10,34 @@ namespace System.Data.Mongo
     public class MongoContext
     {
         /// <summary>
+        /// This indicates if the context should load properties 
+        /// that are not part of a given class definition into a 
+        /// special flyweight lookup. 
+        /// 
+        /// Disabled by default.
+        /// </summary>
+        /// <remarks>
+        /// This is useful when the class definition you want to use doesn't support a particular property, but the database should 
+        /// still maintain it, or you do not want to squash it on save.
+        /// 
+        /// Enabling this will cause additinal overhead when loading/saving, as well as more memory consumption during the lifetime of the object.
+        /// </remarks>
+        public bool EnableExpandoProperties
+        {
+            get;
+            protected set;
+        }
+
+        /// <summary>
+        /// Number of seconds to wait for a response from the server before throwing a timeout exception.
+        /// Defaults to 30.
+        /// </summary>
+        public int QueryTimeout
+        {
+            get;
+            set;
+        }
+        /// <summary>
         /// The ip/domain name of the server.
         /// </summary>
         protected String _serverName = "127.0.0.1";
@@ -22,6 +50,7 @@ namespace System.Data.Mongo
 
         public MongoContext()
         {
+            this.QueryTimeout = 30;
             var entry = Dns.GetHostEntry(this._serverName);
             var ipe = entry.AddressList.First();
             this._endPoint = new IPEndPoint(ipe, this._serverPort);

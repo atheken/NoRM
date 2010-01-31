@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using BSONLib;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace System.Data.Mongo.Protocol.Messages
 {
@@ -17,9 +18,9 @@ namespace System.Data.Mongo.Protocol.Messages
         private int _messageID = 0;//random number.
         private byte[] _header = new byte[16];
         private int _options = 4;
-        private uint _numberToSkip = 0;
-        private uint _numberToTake = uint.MaxValue;
-        
+        private int _numberToSkip = 0;
+        private int _numberToTake = int.MaxValue;
+
         internal QueryMessage(MongoContext context, String fullyQualifiedCollName)
         {
             this._context = context;
@@ -59,7 +60,7 @@ namespace System.Data.Mongo.Protocol.Messages
         /// <summary>
         /// The number requested by this query.(defaults to UInt32.MaxValue)
         /// </summary>
-        public uint NumberToTake
+        public int NumberToTake
         {
             get
             {
@@ -74,7 +75,7 @@ namespace System.Data.Mongo.Protocol.Messages
         /// <summary>
         /// The number of documents to skip before starting to return documents.
         /// </summary>
-        public uint NumberToSkip
+        public int NumberToSkip
         {
             get
             {
@@ -86,7 +87,11 @@ namespace System.Data.Mongo.Protocol.Messages
             }
         }
 
-        public IEnumerable<T> Execute()
+        /// <summary>
+        /// Causes this message to be sent and a repsonse to be generated.
+        /// </summary>
+        /// <returns></returns>
+        public ReplyMessage<T> Execute()
         {
             List<byte[]> messageBytes = new List<byte[]>(9);
             #region Message Header
@@ -113,8 +118,22 @@ namespace System.Data.Mongo.Protocol.Messages
             var sock = this._context.Socket();
             sock.Send(messageBytes.SelectMany(y => y.ToArray()).ToArray());
 
-            byte[]
-            return Enumerable.Empty<T>();
+            //so, the server can accepted the query, now we do the second part.
+            int timeout = this._context.QueryTimeout;
+            while (sock.Available == 0 && timeout > 0)
+            {
+                timeout--;
+                Thread.Sleep(1000);
+            }
+            if (sock.Available == 0)
+            {
+                throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
+            }
+            
+            var buffer = new byte[sock.Available];
+            sock.Receive(buffer);
+
+            return new ReplyMessage<T>(buffer);
         }
 
     }
