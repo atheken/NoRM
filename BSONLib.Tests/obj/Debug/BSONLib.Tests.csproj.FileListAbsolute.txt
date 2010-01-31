@@ -16,3 +16,12 @@ Z:\Code\MongoSharp\BSONLib.Tests\bin\Debug\nunit.framework.xml
 Z:\Code\MongoSharp\BSONLib.Tests\obj\Debug\ResolveAssemblyReference.cache
 Z:\Code\MongoSharp\BSONLib.Tests\obj\Debug\BSONLib.Tests.dll
 Z:\Code\MongoSharp\BSONLib.Tests\obj\Debug\BSONLib.Tests.pdb
+C:\Code\MongoSharp\BSONLib.Tests\bin\Debug\BSONLib.Tests.dll
+C:\Code\MongoSharp\BSONLib.Tests\bin\Debug\BSONLib.Tests.pdb
+C:\Code\MongoSharp\BSONLib.Tests\bin\Debug\BSONLib.dll
+C:\Code\MongoSharp\BSONLib.Tests\bin\Debug\nunit.framework.dll
+C:\Code\MongoSharp\BSONLib.Tests\bin\Debug\BSONLib.pdb
+C:\Code\MongoSharp\BSONLib.Tests\bin\Debug\nunit.framework.xml
+C:\Code\MongoSharp\BSONLib.Tests\obj\Debug\ResolveAssemblyReference.cache
+C:\Code\MongoSharp\BSONLib.Tests\obj\Debug\BSONLib.Tests.dll
+C:\Code\MongoSharp\BSONLib.Tests\obj\Debug\BSONLib.Tests.pdb

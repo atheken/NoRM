@@ -17,8 +17,8 @@ namespace System.Data.Mongo.Protocol.Messages
         private int _messageID = 7890339;//random number.
         private byte[] _header = new byte[16];
         private int _options = 4;
-        private int _numberToSkip;
-        private int _numberToTake;
+        private int _numberToSkip = 0;
+        private int _numberToTake = 10;
         
         internal QueryMessage(MongoContext context, String fullyQualifiedCollName)
         {
@@ -26,10 +26,6 @@ namespace System.Data.Mongo.Protocol.Messages
             this._collection = fullyQualifiedCollName;
 
             var opCode = BitConverter.GetBytes((int)this._op);
-            //header[0-3] = length (+12 for header.)
-            //header[4-7] = requestID ("unique" identifier) for request.
-            //header[8-11] = responseTo ("unique" identifier) from the server
-            //header[12-15] = message type (MongoOp)
         }
 
         /// <summary>
@@ -60,6 +56,36 @@ namespace System.Data.Mongo.Protocol.Messages
             }
         }
 
+        /// <summary>
+        /// The number requested by this query.(defaults to 10.)
+        /// </summary>
+        public int NumberToTake
+        {
+            get
+            {
+                return this._numberToTake;
+            }
+            set
+            {
+                this._numberToTake = value;
+            }
+        }
+
+        /// <summary>
+        /// The number of documents to skip before starting to return documents.
+        /// </summary>
+        public int NumberToSkip
+        {
+            get
+            {
+                return this._numberToSkip;
+            }
+            set
+            {
+                this._numberToSkip = value;
+            }
+        }
+
         public IEnumerable<T> Execute()
         {
             List<byte[]> messageBytes = new List<byte[]>(9);
@@ -74,6 +100,8 @@ namespace System.Data.Mongo.Protocol.Messages
             messageBytes.Add(BitConverter.GetBytes(0));//sets option to "none"
             //append the collection name and then null-terminate it.
             messageBytes.Add(Encoding.UTF8.GetBytes(this._collection).Concat(new byte[0]).ToArray());
+            messageBytes.Add(BitConverter.GetBytes(0));//number to skip.
+            messageBytes.Add(BitConverter.GetBytes(10));//number to take.
             messageBytes.Add(this._query);
             #endregion
 
