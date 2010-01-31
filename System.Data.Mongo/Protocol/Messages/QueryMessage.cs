@@ -9,7 +9,16 @@ using System.Threading;
 
 namespace System.Data.Mongo.Protocol.Messages
 {
-    internal class QueryMessage<T> : Message where T : class, new()
+    internal class QueryMessage<T> : QueryMessage<T, T> where T : class, new()
+    {
+        internal QueryMessage(MongoContext context, String fullyQualifiedCollName) :
+            base(context, fullyQualifiedCollName)
+        {
+
+        }
+    }
+
+    internal class QueryMessage<T, U> : Message where T : class, new()
     {
         /// <summary>
         /// The available options when creating a query against Mongo.
@@ -39,15 +48,11 @@ namespace System.Data.Mongo.Protocol.Messages
         /// <summary>
         /// A BSON query.
         /// </summary>
-        public T Query
+        public U Query
         {
-            get
-            {
-                return QueryMessage<T>._serializer.Deserialize<T>(this._query);
-            }
             set
             {
-                this._query = QueryMessage<T>._serializer.Serialize<T>(value);
+                this._query = QueryMessage<T, U>._serializer.Serialize<U>(value);
             }
         }
 

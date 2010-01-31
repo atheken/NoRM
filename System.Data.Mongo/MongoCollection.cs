@@ -33,15 +33,10 @@ namespace System.Data.Mongo
             }
         }
 
-        /// <summary>
-        /// Produces the set of documents in the collection from the 
-        /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        public IEnumerable<T> Find(T templateDocument)
+        public IEnumerable<T> Find<U>(U template)
         {
-            var qm = new QueryMessage<T>(this._context, this.FullyQualifiedName);
-            qm.Query = templateDocument;
+            var qm = new QueryMessage<T, U>(this._context, this.FullyQualifiedName);
+            qm.Query = template;
             var reply = qm.Execute();
 
             while (reply.ResultsReturned > 0 && !reply.HasError)
@@ -50,7 +45,8 @@ namespace System.Data.Mongo
                 {
                     yield return r;
                 }
-                var getMore = new GetMoreMessage<T>(this._context, this._collectionName, reply.CursorID);
+                var getMore = new GetMoreMessage<T>(this._context,
+                    this._collectionName, reply.CursorID);
                 reply = getMore.Execute();
             }
             yield break;

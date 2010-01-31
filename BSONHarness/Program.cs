@@ -15,29 +15,31 @@ namespace BSONHarness
             public GeneralDTO()
             {
             }
-            //public BSONOID _id { get; set; }
+            public BSONOID _id { get; set; }
             public String Title { get; set; }
-            public int? Random { get; set; }
+            //public int? Random { get; set; }
         }
 
         static void Main(string[] args)
         {
             MongoContext context = new MongoContext();
 
-            var collection = context.GetDatabase("c").GetCollection<GeneralDTO>("d");
+            var collection = context.GetDatabase("delta").GetCollection<GeneralDTO>("gamma");
 
-            int count = 50000;
+            int count = 10000;
             List<GeneralDTO> addList = new List<GeneralDTO>();
             for (int i = 0; i < count; i++)
             {
-                addList.Add(new GeneralDTO() { Title = "B" });
+                addList.Add(new GeneralDTO() { Title = "C", _id = BSONOID.NewOID() });
             }
 
             var start = DateTime.Now;
             collection.Insert(addList);
             Console.WriteLine("Wrote {0} in {1:s} seconds", count, DateTime.Now - start);
             start = DateTime.Now;
-            var resultCount = collection.Find(new GeneralDTO { Title = "B" }).Count();
+            
+            var resultCount = collection.Find(new { Title = "C" }).Count();
+
             Console.WriteLine("Then queried and found {0} in {1:s} seconds.", resultCount, DateTime.Now - start);
 
             //SerializationBenchmark(1);

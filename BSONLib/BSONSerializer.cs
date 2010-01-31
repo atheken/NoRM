@@ -30,13 +30,13 @@ namespace BSONLib
         /// when the T is not a "serializable" type.</exception>
         /// <param name="document"></param>
         /// <returns></returns>
-        public byte[] Serialize<T>(T document) where T : class, new()
+        public byte[] Serialize<T>(T document)
         {
             if (!BSONSerializer.CanBeSerialized(typeof(T)))
             {
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
-            var getters = BSONSerializer._setters[typeof(T)];
+            var getters = BSONSerializer.PropertyInfoFor(document);
             List<byte[]> retval = new List<byte[]>();
             for (int i = 0; i < getters.Count + 2; i++)
             {
@@ -75,7 +75,7 @@ namespace BSONLib
             retval[0] = new byte[] { (byte)BSONTypes.Null };
             retval[1] = Encoding.UTF8.GetBytes(key); //push the key into the retval;
             retval[2] = new byte[1];//allocate a null between the key and the value.
-            
+
             retval[3] = new byte[0];
             //this is where the magic occurs.
             if (value == null)
@@ -166,12 +166,10 @@ namespace BSONLib
         /// <returns></returns>
         public T Deserialize<T>(BinaryReader stream) where T : class, new()
         {
-            if (!BSONSerializer.CanBeSerialized(typeof(T)))
+            if (!BSONSerializer.CanBeDeserialized(typeof(T)))
             {
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
-
-            var setters = BSONSerializer._setters[typeof(T)];
 
             int length = stream.ReadInt32();
             //get the object length minus the header and the null (5)
@@ -180,6 +178,7 @@ namespace BSONLib
             //push the position forward past the null terminator.
             stream.Read(new byte[1], 0, 1);
             T retval = new T();
+            var setters = BSONSerializer.PropertyInfoFor(retval);
 
             while (buffer.Length > 0)
             {
@@ -197,7 +196,7 @@ namespace BSONLib
                 var obj = this.DeserializeMember(t, objectData, out usedBytes);
 
                 //skip type, the key, the null, the object data
-                buffer = buffer.Skip(CODE_LENGTH + stringBytes.Length + 
+                buffer = buffer.Skip(CODE_LENGTH + stringBytes.Length +
                     KEY_TERMINATOR_LENGTH + usedBytes).ToArray();
 
                 if (setters.ContainsKey(key.ToLower()))
@@ -207,7 +206,7 @@ namespace BSONLib
 
                 }
             }
-            
+
             return retval;
         }
 
@@ -249,7 +248,7 @@ namespace BSONLib
             }
             else if (t == BSONTypes.String)
             {
-                var stringLength = BitConverter.ToInt32(objectData, 0)-1;//remove the null.
+                var stringLength = BitConverter.ToInt32(objectData, 0) - 1;//remove the null.
                 var stringData = objectData.Skip(4).Take(stringLength).ToArray();
                 retval = Encoding.UTF8.GetString(stringData);
                 usedBytes = stringLength + 5;//account for size and null
@@ -305,6 +304,11 @@ namespace BSONLib
         private static HashSet<Type> _allowedTypes = new HashSet<Type>();
 
         /// <summary>
+        /// The types that can be deserialized.
+        /// </summary>
+        private static HashSet<Type> _canDeserialize = new HashSet<Type>();
+        
+        /// <summary>
         /// Types that cannot be serialized to/from BSON.
         /// </summary>
         private static HashSet<Type> _prohibittedTypes = new HashSet<Type>();
@@ -324,16 +328,25 @@ namespace BSONLib
                 //these are all known "safe" types that the reader handles.
                 BSONSerializer._allowedTypes.Add(typeof(int?));
                 BSONSerializer._allowedTypes.Add(typeof(long?));
-                BSONSerializer._allowedTypes.Add(typeof(DateTime?));
                 BSONSerializer._allowedTypes.Add(typeof(bool?));
                 BSONSerializer._allowedTypes.Add(typeof(double?));
+                BSONSerializer._allowedTypes.Add(typeof(DateTime?));
                 BSONSerializer._allowedTypes.Add(typeof(String));
                 BSONSerializer._allowedTypes.Add(typeof(BSONOID));
                 BSONSerializer._allowedTypes.Add(typeof(Regex));
                 BSONSerializer._allowedTypes.Add(typeof(byte[]));
-                BSONSerializer._prohibittedTypes.Add(typeof(float?));
-            }
+                foreach (var t in BSONSerializer._allowedTypes)
+                {
+                    BSONSerializer._canDeserialize.Add(t);
+                }
 
+                //these can be serialized, but not deserialized.
+                BSONSerializer._allowedTypes.Add(typeof(int));
+                BSONSerializer._allowedTypes.Add(typeof(double));
+                BSONSerializer._allowedTypes.Add(typeof(long));
+                BSONSerializer._allowedTypes.Add(typeof(bool));
+                BSONSerializer._allowedTypes.Add(typeof(DateTime));
+            }
         }
 
         /// <summary>
@@ -360,8 +373,7 @@ namespace BSONLib
                 ///we only care about public properties on instances, not statics.
                 foreach (var pi in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                 {
-
-                    retval &= pi.CanWrite & pi.CanWrite;
+                    retval &= pi.CanRead;
                     var propType = pi.PropertyType;
                     if (!propType.IsValueType)
                     {
@@ -375,17 +387,44 @@ namespace BSONLib
             }
 
             //if we get all the way to the end, this type is "safe" and we should include actions.
-            if (retval == true && !BSONSerializer._allowedTypes.Contains(t))
+            if (retval == true)
             {
                 BSONSerializer._allowedTypes.Add(t);
-                BSONSerializer._setters[t] = new Dictionary<string, PropertyInfo>();
-                foreach (var p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
-                {
-                    BSONSerializer._setters[t][p.Name.ToLower()] = p;
-                }
             }
             return retval;
 
+        }
+
+        internal static bool CanBeDeserialized(Type t)
+        {
+            bool retval = true;
+            //we want to check to see if this type can be serialized.
+            if (!BSONSerializer._canDeserialize.Contains(t) && 
+                !BSONSerializer._prohibittedTypes.Contains(t))
+            {
+                ///we only care about public properties on instances, not statics.
+                foreach (var pi in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    retval &= pi.CanWrite & pi.CanWrite;
+                    var propType = pi.PropertyType;
+                    if (!propType.IsValueType)
+                    {
+                        retval &= BSONSerializer.CanBeDeserialized(propType);
+                    }
+                }
+            }
+            else if (BSONSerializer._prohibittedTypes.Contains(t))
+            {
+                retval = false;
+            }
+
+            //if we get all the way to the end, this type is "safe" and we should include actions.
+            if (retval == true && !BSONSerializer._canDeserialize.Contains(t))
+            {
+                BSONSerializer._canDeserialize.Add(t);
+                BSONSerializer._allowedTypes.Add(t);
+            }
+            return retval;
         }
 
         /// <summary>
@@ -395,18 +434,17 @@ namespace BSONLib
         /// <typeparam name="T"></typeparam>
         /// <param name="document"></param>
         /// <returns></returns>
-        protected static IDictionary<String, PropertyInfo> PropertyInfoFor<T>(T document) where T : class, new()
+        protected static IDictionary<String, PropertyInfo> PropertyInfoFor<T>(T document)
         {
-            IDictionary<String, PropertyInfo> retval = null;
-
-            if (BSONSerializer._setters.ContainsKey(typeof(T)))
+            if (!BSONSerializer._setters.ContainsKey(typeof(T)))
             {
-                retval = new Dictionary<String, PropertyInfo>(BSONSerializer._setters[typeof(T)]);
+                BSONSerializer._setters[typeof(T)] = new Dictionary<string, PropertyInfo>();
+                foreach (var p in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    BSONSerializer._setters[typeof(T)][p.Name.ToLower()] = p;
+                }
             }
-
-            return retval ?? new Dictionary<String, PropertyInfo>(0);
+            return new Dictionary<String, PropertyInfo>(BSONSerializer._setters[typeof(T)]);
         }
-
-
     }
 }

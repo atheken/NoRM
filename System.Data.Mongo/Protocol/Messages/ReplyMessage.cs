@@ -16,7 +16,8 @@ namespace System.Data.Mongo.Protocol.Messages
         /// Processes a response stream.
         /// </summary>
         /// <param name="reply"></param>
-        internal ReplyMessage(MongoContext context, String fullyQualifiedCollestionName, byte[] reply) :
+        internal ReplyMessage(MongoContext context,
+            String fullyQualifiedCollestionName, byte[] reply) :
             base(context, fullyQualifiedCollestionName)
         {
             this._messageLength = BitConverter.ToInt32(reply, 0);
@@ -28,7 +29,7 @@ namespace System.Data.Mongo.Protocol.Messages
             this.CursorPosition = BitConverter.ToInt32(reply, 28);
             this.ResultsReturned = BitConverter.ToInt32(reply, 32);
 
-            this._results = new List<T>(this.ResultsReturned);
+            this._results = new List<T>(100);//arbitrary number seems like a sweet spot for many queries.
             var memstream = new MemoryStream(reply.Skip(36).ToArray());
             memstream.Position = 0;
             var bin = new BinaryReader(memstream);
