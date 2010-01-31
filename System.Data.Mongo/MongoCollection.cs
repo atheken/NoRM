@@ -42,7 +42,18 @@ namespace System.Data.Mongo
         {
             var qm = new QueryMessage<T>(this._context, this.FullyQualifiedName);
             qm.Query = templateDocument;
-            return qm.Execute().Results;
+            var reply = qm.Execute();
+
+            while (reply.ResultsReturned > 0 && !reply.HasError)
+            {
+                foreach (var r in reply.Results)
+                {
+                    yield return r;
+                }
+                var getMore = new GetMoreMessage<T>(this._context, this._collectionName, reply.CursorID);
+                reply = getMore.Execute();
+            }
+            yield break;
         }
 
         /// <summary>

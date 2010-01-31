@@ -26,7 +26,9 @@ namespace BSONLib
         public static BSONOID NewOID()
         {
             //TODO: generate random-ish bits.
-            return new BSONOID();
+            var n = new BSONOID();
+            n.Value = OidGenerator.Generate();
+            return n;
         }
 
         /// <summary>

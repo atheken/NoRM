@@ -55,6 +55,7 @@
     <Compile Include="BSONTypes.cs" />
     <Compile Include="BSONOID.cs" />
     <Compile Include="BSONReference.cs" />
+    <Compile Include="OIDGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

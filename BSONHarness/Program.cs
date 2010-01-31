@@ -14,34 +14,31 @@ namespace BSONHarness
         {
             public GeneralDTO()
             {
-                //this.Random = DateTime.Now.Millisecond;
-                //this.Title = this.Random.ToString();
-                //this.IsFun = true;
             }
-            //public bool? IsFun { get; set; }
-            //public String Title { get; set; }
-            public bool? c { get; set; }
+            //public BSONOID _id { get; set; }
+            public String Title { get; set; }
+            public int? Random { get; set; }
         }
 
         static void Main(string[] args)
         {
             MongoContext context = new MongoContext();
 
-            var t = context.GetDatabase("a").GetCollection<GeneralDTO>("b");
-            for (int i = 0; i < 5; i++)
+            var collection = context.GetDatabase("c").GetCollection<GeneralDTO>("d");
+
+            int count = 50000;
+            List<GeneralDTO> addList = new List<GeneralDTO>();
+            for (int i = 0; i < count; i++)
             {
-                t.Insert(new GeneralDTO[] { new GeneralDTO() { c = false } });
+                addList.Add(new GeneralDTO() { Title = "B" });
             }
 
-            var f = t.Find(new GeneralDTO() { c = false });
-
-            foreach (var o in f)
-            {
-                if (o.c.HasValue)
-                {
-                    Console.WriteLine(o.c.Value);
-                }
-            }
+            var start = DateTime.Now;
+            collection.Insert(addList);
+            Console.WriteLine("Wrote {0} in {1:s} seconds", count, DateTime.Now - start);
+            start = DateTime.Now;
+            var resultCount = collection.Find(new GeneralDTO { Title = "B" }).Count();
+            Console.WriteLine("Then queried and found {0} in {1:s} seconds.", resultCount, DateTime.Now - start);
 
             //SerializationBenchmark(1);
             //SerializationBenchmark(100);

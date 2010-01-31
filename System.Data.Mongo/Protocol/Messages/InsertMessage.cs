@@ -38,6 +38,9 @@ namespace System.Data.Mongo.Protocol.Messages
             #endregion
 
             var sock = this._context.Socket();
+
+            var bytes = message.SelectMany(y => y).ToArray();
+
             sock.Send(message.SelectMany(y => y).ToArray());
         }
     }

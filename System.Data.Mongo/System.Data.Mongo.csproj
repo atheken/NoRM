@@ -51,6 +51,7 @@
     <Compile Include="MongoDatabase.cs" />
     <Compile Include="MongoException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocol\Messages\GetMoreMessage.cs" />
     <Compile Include="Protocol\Messages\InsertMessage.cs" />
     <Compile Include="Protocol\Messages\KillCursorsMessage.cs" />
     <Compile Include="Protocol\Messages\Message.cs" />
