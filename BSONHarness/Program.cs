@@ -28,7 +28,20 @@ namespace BSONHarness
             MongoContext context = new MongoContext();
 
             var t = context.GetDatabase("a").GetCollection<GeneralDTO>("b");
-            var f = t.Find(new GeneralDTO() { c = true });
+            for (int i = 0; i < 5; i++)
+            {
+                t.Insert(new GeneralDTO[] { new GeneralDTO() { c = false } });
+            }
+
+            var f = t.Find(new GeneralDTO() { c = false });
+
+            foreach (var o in f)
+            {
+                if (o.c.HasValue)
+                {
+                    Console.WriteLine(o.c.Value);
+                }
+            }
 
             //SerializationBenchmark(1);
             //SerializationBenchmark(100);

@@ -46,12 +46,15 @@ namespace System.Data.Mongo
         }
 
         /// <summary>
-        /// Insert of update these documents into the database.
+        /// Insert these documents into the database.
         /// </summary>
+        /// <exception cref="MongoError">Will return void if all goes well, of throw an exception otherwise.</exception>
         /// <param name="documentsToUpsert"></param>
-        public void Upsert(IEnumerable<T> documentsToUpsert)
+        public void Insert(IEnumerable<T> documentsToInsert)
         {
-
+            var insertMessage = new InsertMessage<T>
+                (this._context, this.FullyQualifiedName, documentsToInsert);
+            insertMessage.Execute();
         }
     }
 }

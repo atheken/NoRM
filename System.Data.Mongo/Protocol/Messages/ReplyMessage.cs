@@ -9,10 +9,6 @@ namespace System.Data.Mongo.Protocol.Messages
 {
     internal class ReplyMessage<T> : Message where T : class, new()
     {
-        private int _messageLength;
-        private int _requestID;
-        private int _responseID;
-        private MongoOp _mongoOp;
 
         private List<T> _results;
 
@@ -20,19 +16,19 @@ namespace System.Data.Mongo.Protocol.Messages
         /// Processes a response stream.
         /// </summary>
         /// <param name="reply"></param>
-        internal ReplyMessage(byte[] reply)
+        internal ReplyMessage(MongoContext context, String fullyQualifiedCollestionName, byte[] reply) :
+            base(context, fullyQualifiedCollestionName)
         {
             this._messageLength = BitConverter.ToInt32(reply, 0);
             this._requestID = BitConverter.ToInt32(reply, 4);
             this._responseID = BitConverter.ToInt32(reply, 8);
-            this._mongoOp = (MongoOp)BitConverter.ToInt32(reply, 12);
+            this._op = (MongoOp)BitConverter.ToInt32(reply, 12);
             this.HasError = BitConverter.ToInt32(reply, 16) == 1 ? true : false;
             this.CursorID = BitConverter.ToInt64(reply, 20);
             this.CursorPosition = BitConverter.ToInt32(reply, 28);
             this.ResultsReturned = BitConverter.ToInt32(reply, 32);
 
             this._results = new List<T>(this.ResultsReturned);
-            BSONSerializer serializer = new BSONSerializer();
             var memstream = new MemoryStream(reply.Skip(36).ToArray());
             memstream.Position = 0;
             var bin = new BinaryReader(memstream);
@@ -40,7 +36,7 @@ namespace System.Data.Mongo.Protocol.Messages
             {
                 while (bin.BaseStream.Position < bin.BaseStream.Length)
                 {
-                    this._results.Add(serializer.Deserialize<T>(bin));
+                    this._results.Add(Message._serializer.Deserialize<T>(bin));
                 }
             }
             else

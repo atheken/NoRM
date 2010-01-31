@@ -11,33 +11,27 @@ namespace System.Data.Mongo.Protocol.Messages
 {
     internal class QueryMessage<T> : Message where T : class, new()
     {
-        private static BSONSerializer _serializer = new BSONSerializer();
-        private MongoOp _op = MongoOp.Query;
-        private MongoContext _context;
-        private String _collection;
-        private int _messageID = 0;//random number.
-        private byte[] _header = new byte[16];
-        private int _options = 4;
+        /// <summary>
+        /// The available options when creating a query against Mongo.
+        /// </summary>
+        [Flags]
+        internal enum QueryOptions : int
+        {
+            None = 0,
+            TailabileCursor = 2,
+            SlaveOK = 4,
+            //OplogReplay = 8 -- not for use by driver implementors
+            NoCursorTimeout = 16
+        }
+
+        private QueryOptions _queryOptions = QueryOptions.None;
         private int _numberToSkip = 0;
         private int _numberToTake = int.MaxValue;
 
-        internal QueryMessage(MongoContext context, String fullyQualifiedCollName)
+        internal QueryMessage(MongoContext context, String fullyQualifiedCollName) :
+            base(context, fullyQualifiedCollName)
         {
-            this._context = context;
-            this._collection = fullyQualifiedCollName;
-
-            var opCode = BitConverter.GetBytes((int)this._op);
-        }
-
-        /// <summary>
-        /// The id that was/will be used in the request to the server.
-        /// </summary>
-        public int MessageID
-        {
-            get
-            {
-                return this._messageID;
-            }
+            this._op = MongoOp.Query;
         }
 
         private byte[] _query;
@@ -96,13 +90,13 @@ namespace System.Data.Mongo.Protocol.Messages
             List<byte[]> messageBytes = new List<byte[]>(9);
             #region Message Header
             messageBytes.Add(new byte[4]);//allocate 4 bytes for the query.
-            messageBytes.Add(BitConverter.GetBytes(this.MessageID));//the requestid
+            messageBytes.Add(BitConverter.GetBytes(this._requestID));//the requestid
             messageBytes.Add(BitConverter.GetBytes(0));//the response id
             messageBytes.Add(BitConverter.GetBytes((int)MongoOp.Query));//the op type. 
             #endregion
 
             #region Message Body
-            messageBytes.Add(BitConverter.GetBytes(0));//sets option to "none"
+            messageBytes.Add(BitConverter.GetBytes((int)this._queryOptions));//sets option to "none"
             //append the collection name and then null-terminate it.
             messageBytes.Add(Encoding.UTF8.GetBytes(this._collection)
                 .Concat(new byte[1]).ToArray());
@@ -129,11 +123,11 @@ namespace System.Data.Mongo.Protocol.Messages
             {
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
             }
-            
+
             var buffer = new byte[sock.Available];
             sock.Receive(buffer);
 
-            return new ReplyMessage<T>(buffer);
+            return new ReplyMessage<T>(this._context, this._collection, buffer);
         }
 
     }

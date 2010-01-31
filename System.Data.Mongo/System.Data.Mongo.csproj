@@ -49,16 +49,13 @@
     <Compile Include="MongoCollection.cs" />
     <Compile Include="MongoContext.cs" />
     <Compile Include="MongoDatabase.cs" />
+    <Compile Include="MongoException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Protocol\Messages\DeleteMessage.cs" />
-    <Compile Include="Protocol\Messages\GeneralMessage.cs" />
-    <Compile Include="Protocol\Messages\GetMoreMessage.cs" />
     <Compile Include="Protocol\Messages\InsertMessage.cs" />
     <Compile Include="Protocol\Messages\KillCursorsMessage.cs" />
     <Compile Include="Protocol\Messages\Message.cs" />
     <Compile Include="Protocol\MessageHeader.cs" />
     <Compile Include="Protocol\Messages\QueryOptions.cs" />
-    <Compile Include="Protocol\Messages\UpdateMessage.cs" />
     <Compile Include="Protocol\MongoOp.cs" />
     <Compile Include="Protocol\Messages\QueryMessage.cs" />
     <Compile Include="Protocol\Messages\ReplyMessage.cs" />
