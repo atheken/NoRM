@@ -34,14 +34,15 @@ namespace System.Data.Mongo.Protocol.Messages
                 message.Add(Message._serializer.Serialize(obj));
             }
 
-            message[0] = BitConverter.GetBytes(message.Sum(y => y.Length));
+            var size = message.Sum(y => y.Length);
+            message[0] = BitConverter.GetBytes(size);
             #endregion
 
-            var sock = this._context.Socket();
+            var sock = this._context.ServerConnection();
 
             var bytes = message.SelectMany(y => y).ToArray();
 
-            sock.Send(message.SelectMany(y => y).ToArray());
+            sock.GetStream().Write(bytes, 0,size );
         }
     }
 }

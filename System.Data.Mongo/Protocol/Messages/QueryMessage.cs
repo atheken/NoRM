@@ -114,25 +114,25 @@ namespace System.Data.Mongo.Protocol.Messages
             var size = messageBytes.Sum(y => y.Length);
             messageBytes[0] = BitConverter.GetBytes(size);
 
-            var sock = this._context.Socket();
-            sock.Send(messageBytes.SelectMany(y => y.ToArray()).ToArray());
+            var sock = this._context.ServerConnection();
 
+            sock.GetStream().Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
             //so, the server can accepted the query, now we do the second part.
             int timeout = this._context.QueryTimeout;
-            while (sock.Available == 0 && timeout > 0)
+
+            var stream = sock.GetStream();
+
+            while (!stream.DataAvailable && timeout > 0)
             {
                 timeout--;
                 Thread.Sleep(1000);
             }
-            if (sock.Available == 0)
+
+            if (!stream.DataAvailable)
             {
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
             }
-
-            var buffer = new byte[sock.Available];
-            sock.Receive(buffer);
-
-            return new ReplyMessage<T>(this._context, this._collection, buffer);
+            return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(stream));
         }
 
     }

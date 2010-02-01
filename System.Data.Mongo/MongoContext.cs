@@ -77,11 +77,10 @@ namespace System.Data.Mongo
         /// Constructs a socket to the server.
         /// </summary>
         /// <returns></returns>
-        internal Socket Socket()
+        internal TcpClient ServerConnection()
         {
-            Socket sock = new Socket(this._endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            sock.Connect(this._serverName, this._serverPort);
-            return sock;
+            return new TcpClient(this._serverName, this._serverPort);
+            
         }
 
         /// <summary>

@@ -24,9 +24,9 @@ namespace BSONHarness
         {
             MongoContext context = new MongoContext();
 
-            var collection = context.GetDatabase("delta").GetCollection<GeneralDTO>("gamma");
+            var collection = context.GetDatabase("omega").GetCollection<GeneralDTO>("gamma");
 
-            int count = 10000;
+            int count = 1;
             List<GeneralDTO> addList = new List<GeneralDTO>();
             for (int i = 0; i < count; i++)
             {

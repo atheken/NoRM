@@ -17,26 +17,27 @@ namespace System.Data.Mongo.Protocol.Messages
         /// </summary>
         /// <param name="reply"></param>
         internal ReplyMessage(MongoContext context,
-            String fullyQualifiedCollestionName, byte[] reply) :
+            String fullyQualifiedCollestionName, BinaryReader reply) :
             base(context, fullyQualifiedCollestionName)
         {
-            this._messageLength = BitConverter.ToInt32(reply, 0);
-            this._requestID = BitConverter.ToInt32(reply, 4);
-            this._responseID = BitConverter.ToInt32(reply, 8);
-            this._op = (MongoOp)BitConverter.ToInt32(reply, 12);
-            this.HasError = BitConverter.ToInt32(reply, 16) == 1 ? true : false;
-            this.CursorID = BitConverter.ToInt64(reply, 20);
-            this.CursorPosition = BitConverter.ToInt32(reply, 28);
-            this.ResultsReturned = BitConverter.ToInt32(reply, 32);
+            this._messageLength = reply.ReadInt32();
+            this._requestID = reply.ReadInt32();
+            this._responseID = reply.ReadInt32();
+            this._op = (MongoOp)reply.ReadInt32();
+            this.HasError = reply.ReadInt32() == 1 ? true : false;
+            this.CursorID = reply.ReadInt64();
+            this.CursorPosition = reply.ReadInt32();
+            this.ResultsReturned = reply.ReadInt32();
 
             this._results = new List<T>(100);//arbitrary number seems like a sweet spot for many queries.
-            var memstream = new MemoryStream(reply.Skip(36).ToArray());
-            memstream.Position = 0;
-            var bin = new BinaryReader(memstream);
+            
             if (!this.HasError)
             {
-                while (bin.BaseStream.Position < bin.BaseStream.Length)
+                while (reply.BaseStream.CanRead)
                 {
+                    int length = reply.ReadInt32();
+                    var bin = BitConverter.GetBytes(length).Concat(
+                    reply.ReadBytes(length - 4)).ToArray();
                     this._results.Add(Message._serializer.Deserialize<T>(bin));
                 }
             }
