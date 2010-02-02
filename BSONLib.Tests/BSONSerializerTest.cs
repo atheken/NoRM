@@ -6,6 +6,7 @@ using NUnit.Framework;
 
 namespace BSONLib.Tests
 {
+
     [TestFixture]
     public class BSONSerializerTest
     {
