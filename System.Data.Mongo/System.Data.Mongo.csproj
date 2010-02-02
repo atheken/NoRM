@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExpandoProps.cs" />
     <Compile Include="IMongoFlyweight.cs" />
     <Compile Include="MongoCollection.cs" />
     <Compile Include="MongoContext.cs" />

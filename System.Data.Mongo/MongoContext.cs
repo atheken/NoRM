@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading;
 
 namespace System.Data.Mongo
 {
@@ -25,7 +26,7 @@ namespace System.Data.Mongo
         public bool EnableExpandoProperties
         {
             get;
-            protected set;
+            private set;
         }
 
         /// <summary>
@@ -53,19 +54,29 @@ namespace System.Data.Mongo
         /// </summary>
         /// <param name="server">The server IP or hostname (127.0.0.1 is the default)</param>
         /// <param name="port">The port on which mongo is running (27017 is the default)</param>
-        public MongoContext(String server, int port)
+        /// <param name="enableExpandoProps">Should requests to this database push/pull props from the DB that are not part of the specified object?</param>
+        public MongoContext(String server, int port, bool enableExpandoProps)
         {
             this.QueryTimeout = 30;
             this._serverName = server;
             this._serverPort = port;
+            this.EnableExpandoProperties = enableExpandoProps;
         }
 
+        
+
+        
+        
         /// <summary>
         /// Creates a context that will connect to 127.0.0.1:27017 (MongoDB on the default port).
         /// </summary>
+        /// <remarks>
+        /// This also disabled Expando props for documents.
+        /// </remarks>
         public MongoContext()
-            : this("127.0.0.1", 27017)
+            : this("127.0.0.1", 27017, false)
         {
+
         }
 
         /// <summary>

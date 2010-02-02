@@ -68,6 +68,10 @@ namespace BSONHarness
             Console.WriteLine("   Deleted {0} objects in {1}ms\r\n", count, (DateTime.Now - now).TotalMilliseconds);
         }
 
+        /// <summary>
+        /// Tests the speed of the BSON serializer/deserializer.
+        /// </summary>
+        /// <param name="count"></param>
         private static void SerializationBenchmark(int count)
         {
             DateTime now = DateTime.Now;
@@ -75,12 +79,10 @@ namespace BSONHarness
             {
                 var inTo = new GeneralDTO();
                 var bytes = BSONSerializer.Serialize(inTo);
-                var ms = new MemoryStream();
-                ms.Write(bytes, 0, bytes.Length);
-                ms.Position = 0;
-                var outTo = BSONSerializer.Deserialize<GeneralDTO>(new BinaryReader(ms));
+
+                var outTo = BSONSerializer.Deserialize<GeneralDTO>(bytes);
             }
-            Console.WriteLine("Serialized/deserialized {0} objects in {1:s.fff} seconds", count, (DateTime.Now - now));
+            Console.WriteLine("Serialized/deserialized {0} objects in {1}ms", count, (DateTime.Now - now).TotalMilliseconds);
         }
 
         /// <summary>

@@ -37,17 +37,22 @@ namespace System.Data.Mongo.Protocol.Messages
             if (!this.HasError)
             {
                 int length = 0;
-                while(this._messageLength > 0)
+                while (this._messageLength > 0)
                 {
                     length = reply.ReadInt32();
                     if (length > 0)
                     {
                         var bin = BitConverter.GetBytes(length).Concat(
                         reply.ReadBytes(length - 4)).ToArray();
-                        this._results.Add(BSONSerializer.Deserialize<T>(bin));
+
+                        IDictionary<String, object> outProps;
+                        var obj = BSONSerializer.Deserialize<T>(bin, out outProps);
+                        this._results.Add(obj);
+                        ExpandoProps.SetPropsForObject(obj, outProps, this._context);
+
                     }
                     this._messageLength -= length;
-                } 
+                }
             }
             else
             {
