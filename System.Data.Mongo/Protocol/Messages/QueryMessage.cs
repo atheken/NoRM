@@ -35,7 +35,7 @@ namespace System.Data.Mongo.Protocol.Messages
 
         private QueryOptions _queryOptions = QueryOptions.None;
         private int _numberToSkip = 0;
-        private int _numberToTake = int.MaxValue;
+        private int _numberToTake = Int32.MaxValue;
 
         internal QueryMessage(MongoContext context, String fullyQualifiedCollName) :
             base(context, fullyQualifiedCollName)
@@ -52,22 +52,7 @@ namespace System.Data.Mongo.Protocol.Messages
         {
             set
             {
-                this._query = QueryMessage<T, U>._serializer.Serialize<U>(value);
-            }
-        }
-
-        /// <summary>
-        /// The number requested by this query.(defaults to UInt32.MaxValue)
-        /// </summary>
-        public int NumberToTake
-        {
-            get
-            {
-                return this._numberToTake;
-            }
-            set
-            {
-                this._numberToTake = value;
+                this._query = BSONSerializer.Serialize<U>(value);
             }
         }
 
@@ -106,7 +91,7 @@ namespace System.Data.Mongo.Protocol.Messages
             messageBytes.Add(Encoding.UTF8.GetBytes(this._collection)
                 .Concat(new byte[1]).ToArray());
             messageBytes.Add(BitConverter.GetBytes(this.NumberToSkip));//number to skip.
-            messageBytes.Add(BitConverter.GetBytes(this.NumberToTake));//number to take.
+            messageBytes.Add(BitConverter.GetBytes(this._numberToTake));//number to take.
             messageBytes.Add(this._query);
             #endregion
 
@@ -132,7 +117,7 @@ namespace System.Data.Mongo.Protocol.Messages
             {
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
             }
-            return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(stream));
+            return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(new BufferedStream(stream)));
         }
 
     }

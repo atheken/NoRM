@@ -12,14 +12,14 @@ namespace BSONLib
     /// <summary>
     /// A class that is capable serializing simple .net objects to/from BSON.
     /// </summary>
-    public class BSONSerializer
+    public static class BSONSerializer
     {
         private const int CODE_LENGTH = 1;
         private const int KEY_TERMINATOR_LENGTH = 1;
 
-        public BSONSerializer()
+        static BSONSerializer()
         {
-            this.Load();
+            BSONSerializer.Load();
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace BSONLib
         /// when the T is not a "serializable" type.</exception>
         /// <param name="document"></param>
         /// <returns></returns>
-        public byte[] Serialize<T>(T document)
+        public static byte[] Serialize<T>(T document)
         {
             if (!BSONSerializer.CanBeSerialized(typeof(T)))
             {
@@ -46,7 +46,7 @@ namespace BSONLib
             int index = 1;
             foreach (var member in getters)
             {
-                retval[index] = this.SerializeMember(member.Value.Name,
+                retval[index] = BSONSerializer.SerializeMember(member.Value.Name,
                         member.Value.GetValue(document, null));
                 index++;
             }
@@ -64,7 +64,7 @@ namespace BSONLib
             return arr;
         }
 
-        private byte[] SerializeMember(string key, object value)
+        private static byte[] SerializeMember(string key, object value)
         {
             //type + name + data
             List<byte[]> retval = new List<byte[]>(4);
@@ -152,7 +152,7 @@ namespace BSONLib
             else
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Object };
-                retval[3] = this.Serialize(value);
+                retval[3] = BSONSerializer.Serialize(value);
             }
 
             return retval.SelectMany(h => h).ToArray();
@@ -164,7 +164,7 @@ namespace BSONLib
         /// <typeparam name="T">The type to be converted back to.</typeparam>
         /// <param name="documentBytes"></param>
         /// <returns></returns>
-        public T Deserialize<T>(BinaryReader stream) where T : class, new()
+        public static T Deserialize<T>(BinaryReader stream) where T : class, new()
         {
             if (!BSONSerializer.CanBeDeserialized(typeof(T)))
             {
@@ -193,7 +193,7 @@ namespace BSONLib
 
 
                 int usedBytes;
-                var obj = this.DeserializeMember(t, objectData, out usedBytes);
+                var obj = BSONSerializer.DeserializeMember(t, objectData, out usedBytes);
 
                 //skip type, the key, the null, the object data
                 buffer = buffer.Skip(CODE_LENGTH + stringBytes.Length +
@@ -216,15 +216,15 @@ namespace BSONLib
         /// <typeparam name="T"></typeparam>
         /// <param name="objectData"></param>
         /// <returns></returns>
-        public T Deserialize<T>(byte[] objectData) where T : class, new()
+        public static T Deserialize<T>(byte[] objectData) where T : class, new()
         {
             var ms = new MemoryStream();
             ms.Write(objectData, 0, objectData.Length);
             ms.Position = 0;
-            return this.Deserialize<T>(new BinaryReader(ms));
+            return BSONSerializer.Deserialize<T>(new BinaryReader(ms));
         }
 
-        private object DeserializeMember(BSONTypes t, byte[] objectData, out int usedBytes)
+        private static object DeserializeMember(BSONTypes t, byte[] objectData, out int usedBytes)
         {
             object retval = null;
             usedBytes = 0;
@@ -265,7 +265,7 @@ namespace BSONLib
             }
             else if (t == BSONTypes.Binary)
             {
-                //TODO. 
+                 //TODO.
             }
             else if (t == BSONTypes.MongoOID)
             {
@@ -319,7 +319,7 @@ namespace BSONLib
         private static Dictionary<Type, Dictionary<String, PropertyInfo>> _setters =
             new Dictionary<Type, Dictionary<string, PropertyInfo>>();
 
-        private void Load()
+        private static void Load()
         {
             // whitelist a few "complex" types (reference types that have 
             // additional properties that will not be serialized)
@@ -395,7 +395,7 @@ namespace BSONLib
 
         }
 
-        internal static bool CanBeDeserialized(Type t)
+        private static bool CanBeDeserialized(Type t)
         {
             bool retval = true;
             //we want to check to see if this type can be serialized.
@@ -434,7 +434,7 @@ namespace BSONLib
         /// <typeparam name="T"></typeparam>
         /// <param name="document"></param>
         /// <returns></returns>
-        protected static IDictionary<String, PropertyInfo> PropertyInfoFor<T>(T document)
+        private static IDictionary<String, PropertyInfo> PropertyInfoFor<T>(T document)
         {
             if (!BSONSerializer._setters.ContainsKey(typeof(T)))
             {

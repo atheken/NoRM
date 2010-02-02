@@ -32,7 +32,7 @@ namespace System.Data.Mongo.Protocol.Messages
             requestBytes.Add(new byte[4]);//allocate ZERO because we were told to.
             requestBytes.Add(Encoding.UTF8.GetBytes(this._collection)
                 .Concat(new byte[1]).ToArray());
-            requestBytes.Add(BitConverter.GetBytes(0));//number to return.
+            requestBytes.Add(BitConverter.GetBytes(100));//number to return.
             requestBytes.Add(BitConverter.GetBytes(this._cursorID));
             int size = requestBytes.Sum(h => h.Length);
             requestBytes[0] = BitConverter.GetBytes(size);
@@ -55,8 +55,7 @@ namespace System.Data.Mongo.Protocol.Messages
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
             }
 
-
-            return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(stream));
+            return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(new BufferedStream(stream)));
         }
     }
 }

@@ -9,7 +9,6 @@ namespace System.Data.Mongo.Protocol.Messages
 {
     internal class ReplyMessage<T> : Message where T : class, new()
     {
-
         private List<T> _results;
 
         /// <summary>
@@ -27,19 +26,28 @@ namespace System.Data.Mongo.Protocol.Messages
             this.HasError = reply.ReadInt32() == 1 ? true : false;
             this.CursorID = reply.ReadInt64();
             this.CursorPosition = reply.ReadInt32();
-            this.ResultsReturned = reply.ReadInt32();
+            //this.ResultsReturned = reply.ReadInt32();
+            int read = reply.ReadInt32();
+
+            //decrement the length for all the reads.
+            this._messageLength -= (4 + 4 + 4 + 4 + 4 + 4 + 8 + 4 + 4);
 
             this._results = new List<T>(100);//arbitrary number seems like a sweet spot for many queries.
-            
+
             if (!this.HasError)
             {
-                while (reply.BaseStream.CanRead)
+                int length = 0;
+                while(this._messageLength > 0)
                 {
-                    int length = reply.ReadInt32();
-                    var bin = BitConverter.GetBytes(length).Concat(
-                    reply.ReadBytes(length - 4)).ToArray();
-                    this._results.Add(Message._serializer.Deserialize<T>(bin));
-                }
+                    length = reply.ReadInt32();
+                    if (length > 0)
+                    {
+                        var bin = BitConverter.GetBytes(length).Concat(
+                        reply.ReadBytes(length - 4)).ToArray();
+                        this._results.Add(BSONSerializer.Deserialize<T>(bin));
+                    }
+                    this._messageLength -= length;
+                } 
             }
             else
             {
@@ -79,8 +87,10 @@ namespace System.Data.Mongo.Protocol.Messages
         /// </summary>
         public int ResultsReturned
         {
-            get;
-            protected set;
+            get
+            {
+                return this._results.Count;
+            }
         }
 
         public IEnumerable<T> Results

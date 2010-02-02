@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using BSONLib;
 
 namespace System.Data.Mongo.Protocol.Messages
 {
@@ -31,7 +32,7 @@ namespace System.Data.Mongo.Protocol.Messages
             message.Add(Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray());
             foreach (var obj in this._elementsToInsert)
             {
-                message.Add(Message._serializer.Serialize(obj));
+                message.Add(BSONSerializer.Serialize(obj));
             }
 
             var size = message.Sum(y => y.Length);

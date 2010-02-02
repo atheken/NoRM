@@ -25,9 +25,8 @@ namespace BSONLib.Tests
         [Test]
         public void Serializing_POCO_Generates_Bytes()
         {
-            BSONSerializer serializer = new BSONSerializer();
-            GeneralDTO dummy = new GeneralDTO(){Title ="Testing"};
-            Assert.IsNotEmpty(serializer.Serialize(dummy));
+            GeneralDTO dummy = new GeneralDTO() { Title = "Testing" };
+            Assert.IsNotEmpty(BSONSerializer.Serialize(dummy));
         }
 
         [Test]
@@ -36,12 +35,11 @@ namespace BSONLib.Tests
             var obj1 = new GeneralDTO() { Title = null };
             var obj2 = new GeneralDTO() { Title = "Hello World" };
 
-            BSONSerializer serializer = new BSONSerializer();
-            var obj1Bytes = serializer.Serialize(obj1);
-            var obj2Bytes = serializer.Serialize(obj2);
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2Bytes = BSONSerializer.Serialize(obj2);
 
-            var hydratedObj1 = serializer.Deserialize<GeneralDTO>(obj1Bytes);
-            var hydratedObj2 = serializer.Deserialize<GeneralDTO>(obj2Bytes);
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            var hydratedObj2 = BSONSerializer.Deserialize<GeneralDTO>(obj2Bytes);
 
             Assert.AreEqual(null, hydratedObj1.Title);
             Assert.AreEqual(obj2.Title, hydratedObj2.Title);
@@ -53,12 +51,11 @@ namespace BSONLib.Tests
             var obj1 = new GeneralDTO() { Pi = 3.1415927d };
             var obj2 = new GeneralDTO() { Pi = null };
 
-            BSONSerializer serializer = new BSONSerializer();
-            var obj1Bytes = serializer.Serialize(obj1);
-            var obj2Bytes = serializer.Serialize(obj2);
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2Bytes = BSONSerializer.Serialize(obj2);
 
-            var hydratedObj1 = serializer.Deserialize<GeneralDTO>(obj1Bytes);
-            var hydratedObj2 = serializer.Deserialize<GeneralDTO>(obj2Bytes);
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            var hydratedObj2 = BSONSerializer.Deserialize<GeneralDTO>(obj2Bytes);
 
             Assert.AreEqual(obj1.Pi, hydratedObj1.Pi);
             Assert.AreEqual(null, hydratedObj2.Pi);
@@ -69,14 +66,13 @@ namespace BSONLib.Tests
         {
             var obj1 = new GeneralDTO() { AnInt = 100 };
             var obj2 = new GeneralDTO() { AnInt = null };
-            
 
-            BSONSerializer serializer = new BSONSerializer();
-            var obj1Bytes = serializer.Serialize(obj1);
-            var obj2Bytes = serializer.Serialize(obj2);
 
-            var hydratedObj1 = serializer.Deserialize<GeneralDTO>(obj1Bytes);
-            var hydratedObj2 = serializer.Deserialize<GeneralDTO>(obj2Bytes);
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2Bytes = BSONSerializer.Serialize(obj2);
+
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            var hydratedObj2 = BSONSerializer.Deserialize<GeneralDTO>(obj2Bytes);
 
             Assert.AreEqual(obj1.AnInt, hydratedObj1.AnInt);
             Assert.AreEqual(null, hydratedObj2.AnInt);
@@ -89,12 +85,11 @@ namespace BSONLib.Tests
             var obj2 = new GeneralDTO() { ABoolean = null };
 
 
-            BSONSerializer serializer = new BSONSerializer();
-            var obj1Bytes = serializer.Serialize(obj1);
-            var obj2Bytes = serializer.Serialize(obj2);
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2Bytes = BSONSerializer.Serialize(obj2);
 
-            var hydratedObj1 = serializer.Deserialize<GeneralDTO>(obj1Bytes);
-            var hydratedObj2 = serializer.Deserialize<GeneralDTO>(obj2Bytes);
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            var hydratedObj2 = BSONSerializer.Deserialize<GeneralDTO>(obj2Bytes);
 
             Assert.AreEqual(obj1.ABoolean, hydratedObj1.ABoolean);
             Assert.AreEqual(null, hydratedObj2.ABoolean);
