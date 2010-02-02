@@ -51,6 +51,7 @@
     <Compile Include="MongoContext.cs" />
     <Compile Include="MongoDatabase.cs" />
     <Compile Include="MongoException.cs" />
+    <Compile Include="MongoFlyweight.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocol\Messages\DeleteMessage.cs" />
     <Compile Include="Protocol\Messages\GetMoreMessage.cs" />
