@@ -33,22 +33,40 @@ namespace System.Data.Mongo
             }
         }
 
+        /// <summary>
+        /// Delete the documents that mact the specified template.
+        /// </summary>
+        /// <typeparam name="U">a document that has properties 
+        /// that match what you want to delete.</typeparam>
+        /// <param name="template"></param>
+        public void Delete<U>(U template)
+        {
+            var dm = new DeleteMessage<U>(this._context, this.FullyQualifiedName, template);
+            dm.Execute();
+        }
+
+        /// <summary>
+        /// Get the documents that match the specified template.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <returns></returns>
         public IEnumerable<T> Find<U>(U template)
         {
             var qm = new QueryMessage<T, U>(this._context, this.FullyQualifiedName);
             qm.Query = template;
             var reply = qm.Execute();
 
-            while (reply.ResultsReturned > 0 && !reply.HasError)
+            //while (reply.ResultsReturned > 0 && !reply.HasError)
+            //{
+            foreach (var r in reply.Results)
             {
-                foreach (var r in reply.Results)
-                {
-                    yield return r;
-                }
-                var getMore = new GetMoreMessage<T>(this._context,
-                    this._collectionName, reply.CursorID);
-                reply = getMore.Execute();
+                yield return r;
             }
+            //    var getMore = new GetMoreMessage<T>(this._context,
+            //        this._collectionName, reply.CursorID);
+            //    reply = getMore.Execute();
+            //}
             yield break;
         }
 

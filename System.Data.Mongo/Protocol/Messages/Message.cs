@@ -9,7 +9,6 @@ namespace System.Data.Mongo.Protocol
 {
     internal class Message
     {
-        protected static BSONSerializer _serializer = new BSONSerializer();
         protected MongoOp _op = MongoOp.Message;
         protected MongoContext _context;
         protected String _collection;
