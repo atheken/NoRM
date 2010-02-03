@@ -16,6 +16,8 @@ namespace BSONLib.Tests
             public int? AnInt { get; set; }
             public String Title { get; set; }
             public bool? ABoolean { get; set; }
+            public byte[] Bytes { get; set; }
+            public Guid? AGuid { get; set; }
         }
 
         protected class EmptyDTO
@@ -95,5 +97,38 @@ namespace BSONLib.Tests
             Assert.AreEqual(obj1.ABoolean, hydratedObj1.ABoolean);
             Assert.AreEqual(null, hydratedObj2.ABoolean);
         }
+
+        [Test]
+        public void Serialization_Of_Bytes_Is_Not_Lossy()
+        {
+            var obj1 = new GeneralDTO() { Bytes = BitConverter.GetBytes(Int32.MaxValue) };
+            var obj2 = new GeneralDTO() { Bytes = null };
+
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2Bytes = BSONSerializer.Serialize(obj2);
+
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            var hydratedObj2 = BSONSerializer.Deserialize<GeneralDTO>(obj2Bytes);
+
+            Assert.AreEqual(obj1.Bytes, hydratedObj1.Bytes);
+            Assert.AreEqual(null, hydratedObj2.Bytes);
+        }
+
+        [Test]
+        public void Serialization_Of_Guid_Is_Not_Lossy()
+        {
+            var obj1 = new GeneralDTO() { AGuid = Guid.NewGuid() };
+            var obj2 = new GeneralDTO() { AGuid = null };
+
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2Bytes = BSONSerializer.Serialize(obj2);
+
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            var hydratedObj2 = BSONSerializer.Deserialize<GeneralDTO>(obj2Bytes);
+
+            Assert.AreEqual(obj1.AGuid, hydratedObj1.AGuid);
+            Assert.AreEqual(null, hydratedObj2.AGuid);
+        }
+
     }
 }

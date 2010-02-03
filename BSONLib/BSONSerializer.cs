@@ -40,7 +40,7 @@ namespace BSONLib
             var getters = BSONSerializer.PropertyInfoFor(document);
             List<byte[]> retval = new List<byte[]>();
             retval.Add(new byte[4]);//allocate size.
-            
+
             foreach (var member in getters)
             {
                 retval.Add(BSONSerializer.SerializeMember(member.Value.Name,
@@ -53,11 +53,11 @@ namespace BSONLib
             }
 
             retval.Add(new byte[1]);//null terminate the retval;
-            
+
             var size = retval.Sum(y => y.Length);
             retval[0] = BitConverter.GetBytes(size);
 
-            return retval.SelectMany(y=>y).ToArray();
+            return retval.SelectMany(y => y).ToArray();
         }
 
         private static byte[] SerializeMember(string key, object value)
@@ -111,11 +111,25 @@ namespace BSONLib
             else if (value is byte[])
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Binary };
-                byte[] binary = (byte[])value;
-
+                var binary = new List<byte[]>();
+                binary.Add(new byte[0]);//do NOT allocate space for the size -- this is different than most BSON cases.
+                binary.Add(new byte[] { (byte)2 });//describe the binary
+                var theBytes = (byte[])value;
+                binary.Add(BitConverter.GetBytes(theBytes.Length));//describe the number of bytes.
+                binary.Add(theBytes);//add the bytes
+                binary[0] = BitConverter.GetBytes(binary.Sum(y => y.Length) -1);//set the total binary size (after the subtype.. weird)
                 //not sure if this is correct.
-                retval[3] = BitConverter.GetBytes(binary.Length)
-                    .Concat(new byte[] { (byte)2 }).Concat(binary).ToArray();
+                retval[3] = binary.SelectMany(h => h).ToArray();
+            }
+            else if (value is Guid?)
+            {
+                retval[0] = new byte[] { (byte)BSONTypes.Binary };
+                var binary = new List<byte[]>();
+                binary.Add(BitConverter.GetBytes(16));
+                Guid? val = (Guid?)value;
+                binary.Add(new byte[]{(byte)3});
+                binary.Add(val.Value.ToByteArray());
+                retval[3] = binary.SelectMany(y => y).ToArray();
             }
             else if (value is BSONOID)
             {
@@ -216,8 +230,8 @@ namespace BSONLib
             return BSONSerializer.Serialize<T>(objectToSerialize, new Dictionary<String, object>(0));
         }
 
-        
-        
+
+
 
         /// <summary>
         /// Overload that constructs a BinaryReader in memory and then deserializes the values.
@@ -232,7 +246,7 @@ namespace BSONLib
             ms.Position = 0;
             return BSONSerializer.Deserialize<T>(new BinaryReader(ms), out outProps);
         }
-        
+
         public static T Deserialize<T>(byte[] objectData) where T : class, new()
         {
             IDictionary<String, object> outprops;
@@ -280,7 +294,19 @@ namespace BSONLib
             }
             else if (t == BSONTypes.Binary)
             {
-                //TODO.
+                var length = BitConverter.ToInt32(objectData,0);
+                var binaryType = (int)objectData[4];
+                if(binaryType == 2)
+                {
+                    var binaryLength = BitConverter.ToInt32(objectData,5);
+                    retval = objectData.Skip(9).Take(binaryLength).ToArray();
+                    usedBytes = binaryLength + 9;
+                }
+                else if (binaryType == 3)
+                {
+                    retval = new Guid(objectData.Skip(5).Take(16).ToArray());
+                    usedBytes = 21;
+                }
             }
             else if (t == BSONTypes.MongoOID)
             {
@@ -348,6 +374,7 @@ namespace BSONLib
                 BSONSerializer._allowedTypes.Add(typeof(long?));
                 BSONSerializer._allowedTypes.Add(typeof(bool?));
                 BSONSerializer._allowedTypes.Add(typeof(double?));
+                BSONSerializer._allowedTypes.Add(typeof(Guid?));
                 BSONSerializer._allowedTypes.Add(typeof(DateTime?));
                 BSONSerializer._allowedTypes.Add(typeof(String));
                 BSONSerializer._allowedTypes.Add(typeof(BSONOID));
@@ -364,6 +391,7 @@ namespace BSONLib
                 BSONSerializer._allowedTypes.Add(typeof(long));
                 BSONSerializer._allowedTypes.Add(typeof(bool));
                 BSONSerializer._allowedTypes.Add(typeof(DateTime));
+                BSONSerializer._allowedTypes.Add(typeof(Guid));
             }
         }
 
