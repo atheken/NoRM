@@ -101,7 +101,22 @@ namespace BSONLib
             else if (value is Regex)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Regex };
-                //TODO.
+                var rex = (Regex)value;
+                var pattern = rex.ToString();
+                String options = "";
+                //compiled option can't be set on deserialized regex, therefore - no good can come of this.
+                if (rex.Options == RegexOptions.ECMAScript) options += "e";
+                if (rex.Options == RegexOptions.IgnoreCase) options += "i";
+                if (rex.Options == RegexOptions.CultureInvariant) options += "l";
+                if (rex.Options == RegexOptions.Multiline) options += "m";
+                if (rex.Options == RegexOptions.Singleline) options += "s";
+                //all .net regex are unicode regex, therefore:
+                options += "u";
+                if (rex.Options == RegexOptions.IgnorePatternWhitespace) options += "w";
+                if (rex.Options == RegexOptions.ExplicitCapture) options += "x";
+
+                retval[3] = Encoding.UTF8.GetBytes(pattern).Concat(new byte[1])
+                    .Concat(Encoding.UTF8.GetBytes(options)).Concat(new byte[1]).ToArray();
             }
             else if (value is bool?)
             {
@@ -117,7 +132,7 @@ namespace BSONLib
                 var theBytes = (byte[])value;
                 binary.Add(BitConverter.GetBytes(theBytes.Length));//describe the number of bytes.
                 binary.Add(theBytes);//add the bytes
-                binary[0] = BitConverter.GetBytes(binary.Sum(y => y.Length) -1);//set the total binary size (after the subtype.. weird)
+                binary[0] = BitConverter.GetBytes(binary.Sum(y => y.Length) - 1);//set the total binary size (after the subtype.. weird)
                 //not sure if this is correct.
                 retval[3] = binary.SelectMany(h => h).ToArray();
             }
@@ -127,7 +142,7 @@ namespace BSONLib
                 var binary = new List<byte[]>();
                 binary.Add(BitConverter.GetBytes(16));
                 Guid? val = (Guid?)value;
-                binary.Add(new byte[]{(byte)3});
+                binary.Add(new byte[] { (byte)3 });
                 binary.Add(val.Value.ToByteArray());
                 retval[3] = binary.SelectMany(y => y).ToArray();
             }
@@ -285,8 +300,26 @@ namespace BSONLib
             }
             else if (t == BSONTypes.Regex)
             {
-                //TODO.
+
+                var patternBytes = objectData.TakeWhile(y => y != 0).ToArray();
+                var optionBytes = objectData.Skip(patternBytes.Length + 1).TakeWhile(y => y != 0).ToArray();
+
+                String optionString = Encoding.UTF8.GetString(optionBytes);
+                String pattern = Encoding.UTF8.GetString(patternBytes);
+
+                RegexOptions options = RegexOptions.None;
+                if (optionString.Contains("e")) options = options == RegexOptions.None ? RegexOptions.ECMAScript : (options | RegexOptions.ECMAScript);
+                if (optionString.Contains("i")) options = options == RegexOptions.None ? RegexOptions.IgnoreCase : (options | RegexOptions.IgnoreCase);
+                if (optionString.Contains("l")) options = options == RegexOptions.None ? RegexOptions.CultureInvariant : (options | RegexOptions.CultureInvariant);
+                if (optionString.Contains("m")) options = options == RegexOptions.None ? RegexOptions.Multiline : (options | RegexOptions.Multiline);
+                if (optionString.Contains("s")) options = options == RegexOptions.None ? RegexOptions.Singleline : (options | RegexOptions.Singleline);
+                if (optionString.Contains("w")) options = options == RegexOptions.None ? RegexOptions.IgnorePatternWhitespace : (options | RegexOptions.IgnorePatternWhitespace);
+                if (optionString.Contains("x")) options = options == RegexOptions.None ? RegexOptions.ExplicitCapture : (options | RegexOptions.ExplicitCapture);
+
+                usedBytes = patternBytes.Length + optionBytes.Length + 2;
+                retval = new Regex(pattern, options);
             }
+
             else if (t == BSONTypes.Boolean)
             {
                 retval = BitConverter.ToBoolean(objectData, 0);
@@ -294,11 +327,11 @@ namespace BSONLib
             }
             else if (t == BSONTypes.Binary)
             {
-                var length = BitConverter.ToInt32(objectData,0);
+                var length = BitConverter.ToInt32(objectData, 0);
                 var binaryType = (int)objectData[4];
-                if(binaryType == 2)
+                if (binaryType == 2)
                 {
-                    var binaryLength = BitConverter.ToInt32(objectData,5);
+                    var binaryLength = BitConverter.ToInt32(objectData, 5);
                     retval = objectData.Skip(9).Take(binaryLength).ToArray();
                     usedBytes = binaryLength + 9;
                 }
@@ -380,6 +413,7 @@ namespace BSONLib
                 BSONSerializer._allowedTypes.Add(typeof(BSONOID));
                 BSONSerializer._allowedTypes.Add(typeof(Regex));
                 BSONSerializer._allowedTypes.Add(typeof(byte[]));
+                BSONSerializer._allowedTypes.Add(typeof(Regex));
                 foreach (var t in BSONSerializer._allowedTypes)
                 {
                     BSONSerializer._canDeserialize.Add(t);

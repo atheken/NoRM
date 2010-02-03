@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using System.Text.RegularExpressions;
 
 namespace BSONLib.Tests
 {
@@ -18,6 +19,7 @@ namespace BSONLib.Tests
             public bool? ABoolean { get; set; }
             public byte[] Bytes { get; set; }
             public Guid? AGuid { get; set; }
+            public Regex ARex { get; set; }
         }
 
         protected class EmptyDTO
@@ -28,8 +30,7 @@ namespace BSONLib.Tests
         [Test]
         public void Serializing_POCO_Generates_Bytes()
         {
-            
-            GeneralDTO dummy = new GeneralDTO(){Title ="Testing"};
+            GeneralDTO dummy = new GeneralDTO() { Title = "Testing" };
             Assert.IsNotEmpty(BSONSerializer.Serialize(dummy));
         }
 
@@ -70,7 +71,7 @@ namespace BSONLib.Tests
         {
             var obj1 = new GeneralDTO() { AnInt = 100 };
             var obj2 = new GeneralDTO() { AnInt = null };
-            
+
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
             var obj2Bytes = BSONSerializer.Serialize(obj2);
@@ -130,5 +131,22 @@ namespace BSONLib.Tests
             Assert.AreEqual(null, hydratedObj2.AGuid);
         }
 
+        [Test]
+        public void Serialization_Of_Regex_Is_Not_Lossy()
+        {
+            var obj1 = new GeneralDTO() { ARex = new Regex("[0-9]{5}", RegexOptions.Multiline) };
+            var obj2 = new GeneralDTO() { ARex = null };
+
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2Bytes = BSONSerializer.Serialize(obj2);
+
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            var hydratedObj2 = BSONSerializer.Deserialize<GeneralDTO>(obj2Bytes);
+
+            Assert.AreEqual(obj1.ARex.ToString(), hydratedObj1.ARex.ToString());
+            Assert.AreEqual(obj1.ARex.Options, hydratedObj1.ARex.Options);
+            Assert.AreEqual(null, hydratedObj2.ARex);
+            //more tests would be useful for all the options.
+        }
     }
 }

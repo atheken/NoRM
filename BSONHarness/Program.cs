@@ -5,6 +5,7 @@ using System.Text;
 using BSONLib;
 using System.IO;
 using System.Data.Mongo;
+using System.Text.RegularExpressions;
 
 namespace BSONHarness
 {
@@ -14,6 +15,8 @@ namespace BSONHarness
 
         static void Main(string[] args)
         {
+            GeneralDTO gto = new GeneralDTO() { Rex = new Regex("[0-9]{6}", RegexOptions.ExplicitCapture|RegexOptions.Compiled) };
+            var x = BSONSerializer.Deserialize<GeneralDTO>(BSONSerializer.Serialize(gto));
 
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);
@@ -92,6 +95,7 @@ namespace BSONHarness
         {
             public BSONOID _id { get; set; }
             public String Title { get; set; }
+            public Regex Rex { get; set; }
         }
     }
 }
