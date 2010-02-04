@@ -25,6 +25,59 @@ namespace System.Data.Mongo
             this._collectionName = collectionName;
         }
 
+
+        /// <summary>
+        /// Overload of Update that updates one document and doesn't upsert if no matches are found.
+        /// </summary>
+        /// <typeparam name="X"></typeparam>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="matchDocument"></param>
+        /// <param name="valueDocument"></param>
+        public void UpdateOne<X, U>(X matchDocument, U valueDocument)
+        {
+            this.Update(matchDocument, valueDocument, false, false);
+        }
+
+
+        /// <summary>
+        /// Overload of Update that updates all matching documents, and doesn't upsert if no matches are found.
+        /// </summary>
+        /// <typeparam name="X"></typeparam>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="matchDocument"></param>
+        /// <param name="valueDocument"></param>
+        public void UpdateMultiple<X, U>(X matchDocument, U valueDocument)
+        {
+            this.Update(matchDocument, valueDocument, true, false);
+        }
+
+
+        /// <summary>
+        /// Updates documents in the db.
+        /// </summary>
+        /// <typeparam name="X">A BSON serializable type.</typeparam>
+        /// <typeparam name="U">A BSON serializable type.(more to this)</typeparam>
+        /// <param name="matchDocument">A document that has the values that must match in order for the document to match.</param>
+        /// <param name="valueDocument">A document that has the values that should be set on matching documents in the db.</param>
+        /// <param name="updateMultiple">true if you want to update all documents that match, not just the first</param>
+        /// <param name="upsert">true if you want to insert the value document if no matches are found.</param>
+        public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert)
+        {
+            UpdateOption ops = UpdateOption.None;
+            if(updateMultiple)
+            {
+                ops |= UpdateOption.MultiUpdate;
+            }
+            if(upsert)
+            {
+                ops |= UpdateOption.Upsert;
+            }
+
+            var um = new UpdateMessage<X, U>(this._context, this._collectionName, ops, matchDocument, valueDocument);
+            um.Execute();
+        }
+
+
         public String FullyQualifiedName
         {
             get

@@ -65,7 +65,9 @@ namespace BSONHarness
 
             var first = coll.Find(new { _id = oid }).First();
             Console.WriteLine("   Search for 1 object in {1}ms", count, (DateTime.Now - now).TotalMilliseconds);
-
+            now = DateTime.Now;
+            coll.UpdateOne(new { _id = oid }, new { Title = "WXYZ" });
+            Console.WriteLine("   Updated that 1 object in {1}ms", count, (DateTime.Now - now).TotalMilliseconds);
             now = DateTime.Now;
             coll.Delete(new { Title = "ABCDEFG" });
             Console.WriteLine("   Deleted {0} objects in {1}ms\r\n", count, (DateTime.Now - now).TotalMilliseconds);
