@@ -17,6 +17,16 @@ namespace BSONLib
         private const int CODE_LENGTH = 1;
         private const int KEY_TERMINATOR_LENGTH = 1;
 
+        /// <summary>
+        /// Encodes a string to UTF-8 bytes and adds a null byte to the end.
+        /// </summary>
+        /// <param name="stringToEncode"></param>
+        /// <returns></returns>
+        public static byte[] CStringBytes(this String stringToEncode)
+        {
+            return Encoding.UTF8.GetBytes(stringToEncode).Concat(new byte[1]).ToArray();
+        }
+
         static BSONSerializer()
         {
             BSONSerializer.Load();
@@ -43,8 +53,29 @@ namespace BSONLib
 
             foreach (var member in getters)
             {
-                retval.Add(BSONSerializer.SerializeMember(member.Value.Name,
-                        member.Value.GetValue(document, null)));
+
+                var obj = member.Value.GetValue(document, null);
+                var name = member.Value.Name;
+
+                //"special" case.
+                if (obj is ModifierOperation)
+                {
+                    var o = obj as ModifierOperation;
+                    retval.Add(o.CommandName.CStringBytes());
+                    var modValue = new List<byte[]>();
+                    modValue.Add(new byte[4]);
+                    modValue.Add(new byte[] { (byte)BSONTypes.Object });
+                    modValue.Add(BSONSerializer.SerializeMember(name, o.ValueForCommand));
+                    modValue.Add(new byte[1]);//null terminate this.
+                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));
+                    
+                    retval.AddRange(modValue);
+
+                }
+                else
+                {
+                    retval.Add(BSONSerializer.SerializeMember(name, obj));
+                }
             }
 
             foreach (var p in addedProps)
@@ -64,10 +95,12 @@ namespace BSONLib
         {
             //type + name + data
             List<byte[]> retval = new List<byte[]>(4);
-            for (int i = 0; i < 4; i++)
-            {
-                retval.Add(new byte[0]);
-            }
+            retval.Add(new byte[0]);
+            retval.Add(new byte[0]);
+            retval.Add(new byte[0]);
+            retval.Add(new byte[0]);
+
+            
             retval[0] = new byte[] { (byte)BSONTypes.Null };
             retval[1] = Encoding.UTF8.GetBytes(key); //push the key into the retval;
             retval[2] = new byte[1];//allocate a null between the key and the value.
@@ -329,13 +362,13 @@ namespace BSONLib
             {
                 var length = BitConverter.ToInt32(objectData, 0);
                 var binaryType = (int)objectData[4];
-                if (binaryType == 2)
+                if (binaryType == 2)//general binary.
                 {
                     var binaryLength = BitConverter.ToInt32(objectData, 5);
                     retval = objectData.Skip(9).Take(binaryLength).ToArray();
                     usedBytes = binaryLength + 9;
                 }
-                else if (binaryType == 3)
+                else if (binaryType == 3)//UUID
                 {
                     retval = new Guid(objectData.Skip(5).Take(16).ToArray());
                     usedBytes = 21;
@@ -343,7 +376,7 @@ namespace BSONLib
             }
             else if (t == BSONTypes.MongoOID)
             {
-                retval = new BSONOID() { Value = objectData };
+                retval = new BSONOID() { Value = objectData.Take(12).ToArray() };
                 usedBytes = 12;
             }
             else if (t == BSONTypes.Reference)

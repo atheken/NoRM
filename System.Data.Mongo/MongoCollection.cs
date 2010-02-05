@@ -73,7 +73,7 @@ namespace System.Data.Mongo
                 ops |= UpdateOption.Upsert;
             }
 
-            var um = new UpdateMessage<X, U>(this._context, this._collectionName, ops, matchDocument, valueDocument);
+            var um = new UpdateMessage<X, U>(this._context, this.FullyQualifiedName, ops, matchDocument, valueDocument);
             um.Execute();
         }
 

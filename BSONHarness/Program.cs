@@ -15,7 +15,7 @@ namespace BSONHarness
 
         static void Main(string[] args)
         {
-            GeneralDTO gto = new GeneralDTO() { Rex = new Regex("[0-9]{6}", RegexOptions.ExplicitCapture|RegexOptions.Compiled) };
+            GeneralDTO gto = new GeneralDTO() { Rex = new Regex("[0-9]{6}", RegexOptions.ExplicitCapture | RegexOptions.Compiled) };
             var x = BSONSerializer.Deserialize<GeneralDTO>(BSONSerializer.Serialize(gto));
 
             InsertFindDeleteBenchmark(1);
@@ -30,7 +30,6 @@ namespace BSONHarness
             SerializationBenchmark(10000);
             SerializationBenchmark(50000);
 
-
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey(true);
         }
@@ -43,6 +42,8 @@ namespace BSONHarness
         {
             MongoContext context = new MongoContext();
             var coll = context.GetDatabase("benchmark").GetCollection<GeneralDTO>("test");
+            coll.Delete(new { });
+            
             BSONOID oid = BSONOID.EMPTY;
             DateTime now = DateTime.Now;
 
@@ -53,6 +54,7 @@ namespace BSONHarness
                 var into = new GeneralDTO();
                 into._id = BSONOID.NewOID();
                 into.Title = "ABCDEFG";
+                into.Incremental = 1;
                 if (i == toUse)
                 {
                     oid = into._id;
@@ -60,17 +62,25 @@ namespace BSONHarness
                 cache.Add(into);
             }
             coll.Insert(cache);
-            Console.WriteLine("Inserted {0} objects in {1}ms", count, (DateTime.Now - now).TotalMilliseconds);
+            Console.WriteLine("Inserted {0} objects in {1}ms", count,
+                (DateTime.Now - now).TotalMilliseconds);
             now = DateTime.Now;
 
             var first = coll.Find(new { _id = oid }).First();
-            Console.WriteLine("   Search for 1 object in {1}ms", count, (DateTime.Now - now).TotalMilliseconds);
+            Console.WriteLine("   Search for 1 object in {1}ms", count,
+                (DateTime.Now - now).TotalMilliseconds);
             now = DateTime.Now;
-            coll.UpdateOne(new { _id = oid }, new { Title = "WXYZ" });
-            Console.WriteLine("   Updated that 1 object in {1}ms", count, (DateTime.Now - now).TotalMilliseconds);
+
+            coll.UpdateOne(new { _id = oid }, new { Incremental = M.Inc(5) });
+            Console.WriteLine("   Updated that 1 object in {1}ms", count,
+                (DateTime.Now - now).TotalMilliseconds);
             now = DateTime.Now;
-            coll.Delete(new { Title = "ABCDEFG" });
-            Console.WriteLine("   Deleted {0} objects in {1}ms\r\n", count, (DateTime.Now - now).TotalMilliseconds);
+
+            first = coll.Find(new { _id = oid }).First();
+
+            coll.Delete(new {});
+            Console.WriteLine("   Deleted {0} objects in {1}ms\r\n", count,
+                (DateTime.Now - now).TotalMilliseconds);
         }
 
         /// <summary>
@@ -96,6 +106,7 @@ namespace BSONHarness
         public class GeneralDTO
         {
             public BSONOID _id { get; set; }
+            public int? Incremental { get; set; }
             public String Title { get; set; }
             public Regex Rex { get; set; }
         }
