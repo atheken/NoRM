@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Data.Linq;
+using System.Collections;
 
 namespace BSONLib
 {
@@ -61,13 +62,17 @@ namespace BSONLib
                 if (obj is ModifierOperation)
                 {
                     var o = obj as ModifierOperation;
+                    //set type of member.
+                    retval.Add(new byte[] { (byte)BSONTypes.Object });
+                    //set name of member
                     retval.Add(o.CommandName.CStringBytes());
+
+                    //construct member bytes
                     var modValue = new List<byte[]>();
-                    modValue.Add(new byte[4]);
-                    modValue.Add(new byte[] { (byte)BSONTypes.Object });
-                    modValue.Add(BSONSerializer.SerializeMember(name, o.ValueForCommand));
-                    modValue.Add(new byte[1]);//null terminate this.
-                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));
+                    modValue.Add(new byte[4]);//allocate size.
+                    modValue.Add(BSONSerializer.SerializeMember(name, o.ValueForCommand));//then serialize the member.
+                    modValue.Add(new byte[1]);//null terminate this member.
+                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));//add this to the main retval.
                     
                     retval.AddRange(modValue);
 

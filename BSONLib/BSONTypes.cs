@@ -27,7 +27,7 @@ namespace BSONLib
         Code = 13,
         Symbol = 14,
         ScopedCode = 15,
-        Int32 = 15,
+        Int32 = 16,
         Timestamp = 17,
         Int64 = 18,
         //MinKey = -1,

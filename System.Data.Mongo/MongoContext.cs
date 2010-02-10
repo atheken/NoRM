@@ -85,8 +85,7 @@ namespace System.Data.Mongo
         /// <remarks>
         /// I would recommend adding extension methods, or subclassing MongoContext 
         /// to provide strongly-typed members for each database in your context, this
-        /// will removed strings except for a localized places - which can should 
-        /// reduce typo problems..
+        /// will localize Strings to a few places - reducing typo issues.
         /// </remarks>
         /// <param name="dbName"></param>
         /// <returns></returns>

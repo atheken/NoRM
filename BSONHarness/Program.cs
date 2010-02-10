@@ -15,9 +15,6 @@ namespace BSONHarness
 
         static void Main(string[] args)
         {
-            GeneralDTO gto = new GeneralDTO() { Rex = new Regex("[0-9]{6}", RegexOptions.ExplicitCapture | RegexOptions.Compiled) };
-            var x = BSONSerializer.Deserialize<GeneralDTO>(BSONSerializer.Serialize(gto));
-
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);
             InsertFindDeleteBenchmark(1000);
