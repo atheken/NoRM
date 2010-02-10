@@ -1,0 +1,8 @@
+﻿<NUnitProject>
+  <Settings activeconfig="Debug" />
+  <Config name="Debug" binpathtype="Auto">
+    <assembly path="System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" />
+    <assembly path="BSONLib.Tests\bin\Debug\BSONLib.Tests.dll" />
+  </Config>
+  <Config name="Release" binpathtype="Auto" />
+</NUnitProject>

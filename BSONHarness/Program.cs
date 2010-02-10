@@ -11,8 +11,6 @@ namespace BSONHarness
 {
     class Program
     {
-
-
         static void Main(string[] args)
         {
             InsertFindDeleteBenchmark(1);
