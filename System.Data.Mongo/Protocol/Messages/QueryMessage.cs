@@ -56,6 +56,18 @@ namespace System.Data.Mongo.Protocol.Messages
             }
         }
 
+        public int NumberToTake
+        {
+            get
+            {
+                return this._numberToTake;
+            }
+            set
+            {
+                this._numberToTake = value;
+            }
+        }
+
         /// <summary>
         /// The number of documents to skip before starting to return documents.
         /// </summary>

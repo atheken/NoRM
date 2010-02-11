@@ -25,8 +25,15 @@ namespace BSONHarness
             SerializationBenchmark(10000);
             SerializationBenchmark(50000);
 
+            AuthenticateAConnection();
+
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey(true);
+        }
+
+        private static void AuthenticateAConnection()
+        {
+            var auth = new MongoContext().Authenticate("testing", "testing");
         }
 
         /// <summary>

@@ -97,16 +97,27 @@ namespace System.Data.Mongo
             var dm = new DeleteMessage<U>(this._context, this.FullyQualifiedName, template);
             dm.Execute();
         }
+        public T FindOne<U>(U template)
+        {
+            return this.Find(template, 1).First();
+        }
+
+        public IEnumerable<T> Find<U>(U template)
+        {
+            return this.Find(template, Int32.MaxValue);
+        }
 
         /// <summary>
         /// Get the documents that match the specified template.
         /// </summary>
         /// <typeparam name="U"></typeparam>
         /// <param name="template"></param>
+        /// <param name="limit">The number to return from this command.</param>
         /// <returns></returns>
-        public IEnumerable<T> Find<U>(U template)
+        public IEnumerable<T> Find<U>(U template, int limit)
         {
             var qm = new QueryMessage<T, U>(this._context, this.FullyQualifiedName);
+            qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
 

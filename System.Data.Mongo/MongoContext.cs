@@ -5,11 +5,16 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
+using System.Data.Mongo.CommandResponsesMessages;
+using System.Data.Mongo.Protocol.Messages;
+using System.Data.Mongo.CommandRequestMessages;
+using System.Security.Cryptography;
 
 namespace System.Data.Mongo
 {
     public class MongoContext
     {
+        private static MD5 _md5 = MD5.Create();
         /// <summary>
         /// This indicates if the context should load properties 
         /// that are not part of a given class definition into a 
@@ -63,10 +68,33 @@ namespace System.Data.Mongo
             this.EnableExpandoProperties = enableExpandoProps;
         }
 
-        
 
-        
-        
+        /// <summary>
+        /// Attempt to authenticate this user.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public bool Authenticate(String username, String password)
+        {
+            bool retval = false;
+
+            //HACK: not sure how to send a query without selecting a database, so I am hooking admin. my bad.
+            var qm = new QueryMessage<GetNonceResponse, GetNonceRequest>(this, "admin.$cmd");
+            qm.NumberToSkip = 0;
+            qm.NumberToTake = 1;
+            qm.Query = new GetNonceRequest();
+            var nonce = qm.Execute().Results.First();
+
+            if (nonce.OK == 1)
+            {
+                //TODO: arg! the docs for this on Mongo's site are terrible!
+            }
+
+            return retval;
+        }
+
+
         /// <summary>
         /// Creates a context that will connect to 127.0.0.1:27017 (MongoDB on the default port).
         /// </summary>

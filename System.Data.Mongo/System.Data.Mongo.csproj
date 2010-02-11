@@ -45,6 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandRequestMessages\AuthenticationRequest.cs" />
+    <Compile Include="CommandRequestMessages\GetNonceRequest.cs" />
+    <Compile Include="CommandResponsesMessages\GenericCommandResponse.cs" />
+    <Compile Include="CommandResponsesMessages\GetNonceResponse.cs" />
     <Compile Include="Commands\IncrementOperation.cs" />
     <Compile Include="ExpandoProps.cs" />
     <Compile Include="IMongoFlyweight.cs" />
