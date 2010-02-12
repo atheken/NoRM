@@ -48,15 +48,15 @@ namespace BSONLib
             {
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
-            var getters = BSONSerializer.PropertyInfoFor(document);
+            var getters = BSONSerializer.GettersForType(document);
             List<byte[]> retval = new List<byte[]>();
             retval.Add(new byte[4]);//allocate size.
 
             foreach (var member in getters)
             {
 
-                var obj = member.Value.GetValue(document, null);
-                var name = member.Value.Name;
+                var obj = member.Value.Invoke(document);
+                var name = member.Key;
 
                 //"special" case.
                 if (obj is ModifierOperation)
@@ -73,7 +73,7 @@ namespace BSONLib
                     modValue.Add(BSONSerializer.SerializeMember(name, o.ValueForCommand));//then serialize the member.
                     modValue.Add(new byte[1]);//null terminate this member.
                     modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));//add this to the main retval.
-                    
+
                     retval.AddRange(modValue);
 
                 }
@@ -105,7 +105,7 @@ namespace BSONLib
             retval.Add(new byte[0]);
             retval.Add(new byte[0]);
 
-            
+
             retval[0] = new byte[] { (byte)BSONTypes.Null };
             retval[1] = Encoding.UTF8.GetBytes(key); //push the key into the retval;
             retval[2] = new byte[1];//allocate a null between the key and the value.
@@ -242,7 +242,7 @@ namespace BSONLib
             //push the position forward past the null terminator.
             stream.Read(new byte[1], 0, 1);
             T retval = new T();
-            var setters = BSONSerializer.PropertyInfoFor(retval);
+            var setters = BSONSerializer.SettersForType(retval);
             outProps = new Dictionary<String, object>(0);
 
             while (buffer.Length > 0)
@@ -264,10 +264,10 @@ namespace BSONLib
                 buffer = buffer.Skip(CODE_LENGTH + stringBytes.Length +
                     KEY_TERMINATOR_LENGTH + usedBytes).ToArray();
 
-                if (setters.ContainsKey(key.ToLower()))
+                if (setters.ContainsKey(key))
                 {
-                    var prop = setters[key.ToLower()];
-                    prop.SetValue(retval, obj, null);
+                    var prop = setters[key];
+                    prop.Invoke(retval, obj);
                 }
                 else
                 {
@@ -428,8 +428,14 @@ namespace BSONLib
         /// <summary>
         /// delegates to setters for specific types.
         /// </summary>
-        private static Dictionary<Type, Dictionary<String, PropertyInfo>> _setters =
-            new Dictionary<Type, Dictionary<string, PropertyInfo>>();
+        private static Dictionary<Type, Dictionary<String, Action<object, object>>> _setters =
+            new Dictionary<Type, Dictionary<string, Action<object, object>>>();
+
+        /// <summary>
+        /// The delegates to getters for specific types.
+        /// </summary>
+        private static Dictionary<Type, Dictionary<String, Func<object, object>>> _getters =
+            new Dictionary<Type, Dictionary<string, Func<object, object>>>();
 
         /// <summary>
         /// Sets some "white-listed" types that the BSONSerializer knows about.
@@ -553,22 +559,44 @@ namespace BSONLib
 
         /// <summary>
         /// Key: Lowercase name of the property
-        /// Value: MethodInfo to be used to call said property.
+        /// Value: A delegate to set the value on the target.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="document"></param>
         /// <returns></returns>
-        private static IDictionary<String, PropertyInfo> PropertyInfoFor<T>(T document)
+        private static IDictionary<String, Action<object, object>> SettersForType<T>(T document)
         {
             if (!BSONSerializer._setters.ContainsKey(typeof(T)))
             {
-                BSONSerializer._setters[typeof(T)] = new Dictionary<string, PropertyInfo>();
+                BSONSerializer._setters[typeof(T)] = new Dictionary<string, Action<object, object>>(StringComparer.InvariantCultureIgnoreCase);
                 foreach (var p in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public))
                 {
-                    BSONSerializer._setters[typeof(T)][p.Name.ToLower()] = p;
+                    BSONSerializer._setters[typeof(T)][p.Name] = ReflectionHelpers.SetterMethod(p);
                 }
             }
-            return new Dictionary<String, PropertyInfo>(BSONSerializer._setters[typeof(T)]);
+            return new Dictionary<String, Action<object, object>>(BSONSerializer._setters[typeof(T)],
+                StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        /// <summary>
+        /// Key: Lowercase name of the property
+        /// Value: A delegate to set the value on the target.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="document"></param>
+        /// <returns></returns>
+        private static IDictionary<String, Func<object, object>> GettersForType<T>(T document)
+        {
+            if (!BSONSerializer._getters.ContainsKey(typeof(T)))
+            {
+                BSONSerializer._getters[typeof(T)] = new Dictionary<string, Func<object, object>>(StringComparer.InvariantCultureIgnoreCase);
+                foreach (var p in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    BSONSerializer._getters[typeof(T)][p.Name] = ReflectionHelpers.GetterMethod(p);
+                }
+            }
+            return new Dictionary<String, Func<object, object>>(BSONSerializer._getters[typeof(T)],
+                StringComparer.InvariantCultureIgnoreCase);
         }
     }
 }

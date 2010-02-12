@@ -13,6 +13,14 @@ namespace BSONHarness
     {
         static void Main(string[] args)
         {
+            var f = BSONLib.ReflectionHelpers.SetterMethod(typeof(GeneralDTO).GetProperty("Title"));
+
+            var dto = new GeneralDTO();
+            f.Invoke(dto, "hello");
+
+            var p = BSONLib.ReflectionHelpers.GetterMethod(typeof(GeneralDTO).GetProperty("Title"));
+            var x = p.Invoke(dto);
+
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);
             InsertFindDeleteBenchmark(1000);
