@@ -26,8 +26,7 @@ namespace System.Data.Mongo.Tests
 
             MongoCollection<TestClass> coll = db.GetCollection<TestClass>("foo");
 
-
-            TestClass found = coll.FindOne<TestClass>(new { a = "1" } );
+            TestClass found = coll.FindOne(new { a = "1" } );
 
             Assert.IsNotNull(found);
         }

@@ -23,3 +23,12 @@ C:\Code\MongoSharp\BSONHarness\bin\Debug\System.Data.Mongo.dll
 C:\Code\MongoSharp\BSONHarness\bin\Debug\System.Data.Mongo.pdb
 C:\Code\MongoSharp\BSONHarness\bin\Debug\BSONLib.pdb
 C:\Code\MongoSharp\BSONHarness\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\MongoSharp\BSONHarness\obj\Debug\BSONHarness.exe
+C:\mydata\git\MongoSharp\BSONHarness\obj\Debug\BSONHarness.pdb
+C:\mydata\git\MongoSharp\BSONHarness\bin\Debug\BSONHarness.exe
+C:\mydata\git\MongoSharp\BSONHarness\bin\Debug\BSONHarness.pdb
+C:\mydata\git\MongoSharp\BSONHarness\bin\Debug\BSONLib.dll
+C:\mydata\git\MongoSharp\BSONHarness\bin\Debug\System.Data.Mongo.dll
+C:\mydata\git\MongoSharp\BSONHarness\bin\Debug\System.Data.Mongo.pdb
+C:\mydata\git\MongoSharp\BSONHarness\bin\Debug\BSONLib.pdb
+C:\mydata\git\MongoSharp\BSONHarness\obj\Debug\ResolveAssemblyReference.cache
