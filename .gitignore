@@ -2,3 +2,5 @@
 *.exe
 *.pdb
 *.cache
+*.suo
+.svn
