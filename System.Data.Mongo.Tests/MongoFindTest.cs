@@ -9,7 +9,7 @@ namespace System.Data.Mongo.Tests
     public class TestClass
     {
         public TestClass() { }
-        public string a { get; set; }
+        public int? a { get; set; }
     }
 
     [TestFixture]
@@ -26,7 +26,7 @@ namespace System.Data.Mongo.Tests
 
             MongoCollection<TestClass> coll = db.GetCollection<TestClass>("foo");
 
-            TestClass found = coll.FindOne(new { a = "1" } );
+            TestClass found = coll.Find(new { a = 1 } ).First();
 
             Assert.IsNotNull(found);
         }

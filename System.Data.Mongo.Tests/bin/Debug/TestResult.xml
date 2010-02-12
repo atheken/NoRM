@@ -1,52 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" total="3" errors="1" failures="2" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-12" time="08:36:47">
+<test-results name="C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" total="1" errors="1" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-12" time="14:37:47">
   <environment nunit-version="2.5.3.9345" clr-version="2.0.50727.4927" os-version="Microsoft Windows NT 6.1.7600.0" platform="Win32NT" cwd="C:\mydata\NUnit-2.5.3.9345\bin\net-2.0" machine-name="JALEXANDER-WORK" user="jalexander" user-domain="jalexander-work" />
   <culture-info current-culture="en-US" current-uiculture="en-US" />
-  <test-suite name="C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" executed="True" success="False" time="0.501" asserts="0">
+  <test-suite name="C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" executed="True" success="False" time="0.453" asserts="0">
     <results>
-      <test-suite name="System" executed="True" success="False" time="0.492" asserts="0">
+      <test-suite name="System" executed="True" success="False" time="0.444" asserts="0">
         <results>
-          <test-suite name="Data" executed="True" success="False" time="0.491" asserts="0">
+          <test-suite name="Data" executed="True" success="False" time="0.444" asserts="0">
             <results>
-              <test-suite name="Mongo" executed="True" success="False" time="0.489" asserts="0">
+              <test-suite name="Mongo" executed="True" success="False" time="0.441" asserts="0">
                 <results>
-                  <test-suite name="Tests" executed="True" success="False" time="0.489" asserts="0">
+                  <test-suite name="Tests" executed="True" success="False" time="0.438" asserts="0">
                     <results>
-                      <test-suite name="MongoContextTest" executed="True" success="False" time="0.087" asserts="0">
+                      <test-suite name="MongoFindTest" executed="True" success="False" time="0.433" asserts="0">
                         <results>
-                          <test-case name="System.Data.Mongo.Tests.MongoContextTest.GetAllDatabases_Returns_DBs" executed="True" success="False" time="0.042" asserts="1">
+                          <test-case name="System.Data.Mongo.Tests.MongoFindTest.MongoDatabase_FindOne_Returns" executed="True" success="False" time="0.413" asserts="0">
                             <failure>
-                              <message><![CDATA[  Expected: not <empty>
-  But was:  <empty>
-]]></message>
-                              <stack-trace><![CDATA[at System.Data.Mongo.Tests.MongoContextTest.GetAllDatabases_Returns_DBs() in C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\MongoContextTest.cs:line 30
-]]></stack-trace>
-                            </failure>
-                          </test-case>
-                        </results>
-                      </test-suite>
-                      <test-suite name="MongoDatabaseTest" executed="True" success="False" time="0.002" asserts="0">
-                        <results>
-                          <test-case name="System.Data.Mongo.Tests.MongoDatabaseTest.GetAllCollections_Returns_Collections" executed="True" success="False" time="0.002" asserts="1">
-                            <failure>
-                              <message><![CDATA[  Expected: not <empty>
-  But was:  <empty>
-]]></message>
-                              <stack-trace><![CDATA[at System.Data.Mongo.Tests.MongoDatabaseTest.GetAllCollections_Returns_Collections() in C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\MongoDatabaseTest.cs:line 17
-]]></stack-trace>
-                            </failure>
-                          </test-case>
-                        </results>
-                      </test-suite>
-                      <test-suite name="MongoFindTest" executed="True" success="False" time="0.378" asserts="0">
-                        <results>
-                          <test-case name="System.Data.Mongo.Tests.MongoFindTest.MongoDatabase_FindOne_Returns" executed="True" success="False" time="0.378" asserts="0">
-                            <failure>
-                              <message><![CDATA[System.InvalidOperationException : Sequence contains no elements]]></message>
-                              <stack-trace><![CDATA[at System.Linq.Enumerable.First[TSource](IEnumerable`1 source)
-at System.Data.Mongo.MongoCollection`1.FindOne[U](U template) in C:\mydata\git\MongoSharp\System.Data.Mongo\MongoCollection.cs:line 102
-at System.Data.Mongo.Tests.MongoFindTest.MongoDatabase_FindOne_Returns() in C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\MongoFindTest.cs:line 30
+                              <message><![CDATA[System.InvalidCastException : Specified cast is not valid.]]></message>
+                              <stack-trace><![CDATA[at BSONLib.ReflectionHelpers.<>c__DisplayClass4`2.<SetterMethod>b__3(Object target, Object param) in C:\mydata\git\MongoSharp\BSONLib\ReflectionHelpers.cs:line 78
+at BSONLib.BSONSerializer.Deserialize[T](BinaryReader stream, IDictionary`2& outProps) in C:\mydata\git\MongoSharp\BSONLib\BSONSerializer.cs:line 270
+at BSONLib.BSONSerializer.Deserialize[T](Byte[] objectData, IDictionary`2& outProps) in C:\mydata\git\MongoSharp\BSONLib\BSONSerializer.cs:line 300
+at System.Data.Mongo.Protocol.Messages.ReplyMessage`1..ctor(MongoContext context, String fullyQualifiedCollestionName, BinaryReader reply) in C:\mydata\git\MongoSharp\System.Data.Mongo\Protocol\Messages\ReplyMessage.cs:line 49
+at System.Data.Mongo.Protocol.Messages.QueryMessage`2.Execute() in C:\mydata\git\MongoSharp\System.Data.Mongo\Protocol\Messages\QueryMessage.cs:line 132
+at System.Data.Mongo.MongoCollection`1.<Find>d__0`1.MoveNext() in C:\mydata\git\MongoSharp\System.Data.Mongo\MongoCollection.cs:line 122
+at System.Linq.Enumerable.First[TSource](IEnumerable`1 source)
+at System.Data.Mongo.Tests.MongoFindTest.MongoDatabase_FindOne_Returns() in C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\MongoFindTest.cs:line 29
 ]]></stack-trace>
                             </failure>
                           </test-case>
