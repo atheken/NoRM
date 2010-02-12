@@ -13,3 +13,8 @@ C:\Code\MongoSharp\BSONLib\bin\Debug\BSONLib.pdb
 C:\Code\MongoSharp\BSONLib\obj\Debug\ResolveAssemblyReference.cache
 C:\Code\MongoSharp\BSONLib\obj\Debug\BSONLib.dll
 C:\Code\MongoSharp\BSONLib\obj\Debug\BSONLib.pdb
+C:\mydata\git\MongoSharp\BSONLib\bin\Debug\BSONLib.dll
+C:\mydata\git\MongoSharp\BSONLib\bin\Debug\BSONLib.pdb
+C:\mydata\git\MongoSharp\BSONLib\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\MongoSharp\BSONLib\obj\Debug\BSONLib.dll
+C:\mydata\git\MongoSharp\BSONLib\obj\Debug\BSONLib.pdb

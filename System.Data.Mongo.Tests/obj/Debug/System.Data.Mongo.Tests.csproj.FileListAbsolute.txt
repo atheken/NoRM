@@ -29,3 +29,12 @@ C:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\nunit.framework.xml
 C:\Code\MongoSharp\System.Data.Mongo.Tests\obj\Debug\ResolveAssemblyReference.cache
 C:\Code\MongoSharp\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.dll
 C:\Code\MongoSharp\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll
+C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.dll
+C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\BSONLib.dll
+C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\BSONLib.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.dll
+C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\obj\Debug\System.Data.Mongo.Tests.pdb
