@@ -482,7 +482,7 @@ namespace BSONLib
                 var list = Activator.CreateInstance(proptype) as IList;
                 var type = proptype.GetGenericArguments().First();
 
-                var arrayData = objectData.Take(length-1).Skip(4).ToArray();
+                var arrayData = objectData.Take(length - 1).Skip(4).ToArray();
 
                 while (arrayData.Length > 0)
                 {
@@ -599,6 +599,11 @@ namespace BSONLib
         /// <returns></returns>
         public static bool CanBeSerialized(Type t)
         {
+            return BSONSerializer.CanBeSerialized(t, new HashSet<Type>());
+        }
+
+        private static bool CanBeSerialized(Type t, HashSet<Type> checkStack)
+        {
             bool retval = true;
             //we want to check to see if this type can be serialized.
             if (!BSONSerializer._prohibittedTypes.Contains(t) &&
@@ -609,9 +614,15 @@ namespace BSONLib
                 {
                     retval &= pi.CanRead;
                     var propType = pi.PropertyType;
-                    if (!propType.IsValueType)
+
+                    //only do a check on a particular type once.
+                    if (!checkStack.Contains(propType))
                     {
-                        retval &= BSONSerializer.CanBeSerialized(propType);
+                        checkStack.Add(propType);
+                        if (!propType.IsValueType)
+                        {
+                            retval &= BSONSerializer.CanBeSerialized(propType, checkStack);
+                        }
                     }
                 }
             }
@@ -637,14 +648,18 @@ namespace BSONLib
         /// <returns></returns>
         public static bool CanBeDeserialized(Type t)
         {
+            return BSONSerializer.CanBeDeserialized(t, new HashSet<Type>());
+        }
+
+        public static bool CanBeDeserialized(Type t, HashSet<Type> searchStack)
+        {
             bool retval = true;
 
-            //lists are special.
+            #region Lists are special, do special work
             bool isSafeList = true;
             if (t.IsGenericType && t.FullName.StartsWith("System.Collections.Generic.List`1"))
             {
                 isSafeList = t.GetGenericArguments().All(y => BSONSerializer.CanBeDeserialized(y));
-
                 retval = isSafeList;
                 if (isSafeList)
                 {
@@ -655,8 +670,9 @@ namespace BSONLib
                     BSONSerializer._prohibittedTypes.Add(t);
                 }
             }
+            #endregion
 
-            //we want to check to see if this type can be deserialized.
+            #region check properties.
             if (!BSONSerializer._canDeserialize.Contains(t) &&
                 !BSONSerializer._prohibittedTypes.Contains(t))
             {
@@ -665,9 +681,13 @@ namespace BSONLib
                 {
                     retval &= pi.CanWrite & pi.CanWrite;
                     var propType = pi.PropertyType;
-                    if (!propType.IsValueType)
+                    if (!searchStack.Contains(propType))
                     {
-                        retval &= BSONSerializer.CanBeDeserialized(propType);
+                        searchStack.Add(propType);
+                        if (!propType.IsValueType)
+                        {
+                            retval &= BSONSerializer.CanBeDeserialized(propType, searchStack);
+                        }
                     }
                 }
             }
@@ -675,6 +695,7 @@ namespace BSONLib
             {
                 retval = false;
             }
+            #endregion
 
             //if we get all the way to the end, this type is "safe" and we should include actions.
             if (retval == true && !BSONSerializer._canDeserialize.Contains(t))
@@ -684,6 +705,8 @@ namespace BSONLib
             }
             return retval;
         }
+
+
 
         /// <summary>
         /// Key: Lowercase name of the property

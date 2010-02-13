@@ -20,7 +20,7 @@ namespace BSONLib.Tests
             public byte[] Bytes { get; set; }
             public Guid? AGuid { get; set; }
             public Regex ARex { get; set; }
-            public NestedGeneralDTO Nester { get; set; }
+            public GeneralDTO Nester { get; set; }
         }
 
         protected class NestedGeneralDTO 
@@ -60,7 +60,7 @@ namespace BSONLib.Tests
         [Test]
         public void Serialization_Of_NestedObjects_Is_Not_Lossy()
         {
-            var obj1 = new GeneralDTO() { Title = "Hello World", Nester = new NestedGeneralDTO() { Title = "Bob", AnInt = 42 } };
+            var obj1 = new GeneralDTO() { Title = "Hello World", Nester = new GeneralDTO() { Title = "Bob", AnInt = 42 } };
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
 
@@ -75,8 +75,10 @@ namespace BSONLib.Tests
         [Test]
         public void Recursive_NestedTypes_Dont_Cause_Infinite_Loop()
         {
-            throw new AssertionException("Right now the BSONSerializer that tests for serialization and deserialization can go into an infinite loop"+
-                " if the properties of a type have circular dependencies on parent types.");
+            var obj1 = new GeneralDTO() { Title = "Hello World", Nester = new GeneralDTO() { Title = "Bob", AnInt = 42 } };
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            
         }
 
         [Test]
