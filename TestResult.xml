@@ -1,70 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\Code\MongoSharp\Tests.nunit" total="10" errors="0" failures="2" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-10" time="06:18:59">
-  <environment nunit-version="2.5.3.9345" clr-version="2.0.50727.3603" os-version="Microsoft Windows NT 5.1.2600 Service Pack 3" platform="Win32NT" cwd="C:\Code\MongoSharp\BSONLib.Tests\bin\Debug" machine-name="XPATT" user="atheken" user-domain="XPATT" />
+<test-results name="C:\Code\MongoSharp\Tests.nunit" total="8" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-12" time="17:41:46">
+  <environment nunit-version="2.5.3.9345" clr-version="2.0.50727.3603" os-version="Microsoft Windows NT 5.1.2600 Service Pack 3" platform="Win32NT" cwd="C:\Code\MongoSharp" machine-name="XPATT" user="atheken" user-domain="XPATT" />
   <culture-info current-culture="en-US" current-uiculture="en-US" />
-  <test-suite name="C:\Code\MongoSharp\Tests.nunit" executed="True" success="False" time="0.547" asserts="0">
+  <test-suite name="C:\Code\MongoSharp\Tests.nunit" executed="True" success="True" time="0.828" asserts="0">
     <results>
-      <test-suite name="C:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" executed="True" success="False" time="0.234" asserts="0">
+      <test-suite name="C:\Code\MongoSharp\BSONLib.Tests\bin\Debug\BSONLib.Tests.dll" executed="True" success="True" time="0.828" asserts="0">
         <results>
-          <test-suite name="System" executed="True" success="False" time="0.234" asserts="0">
+          <test-suite name="BSONLib" executed="True" success="True" time="0.828" asserts="0">
             <results>
-              <test-suite name="Data" executed="True" success="False" time="0.234" asserts="0">
+              <test-suite name="Tests" executed="True" success="True" time="0.828" asserts="0">
                 <results>
-                  <test-suite name="Mongo" executed="True" success="False" time="0.234" asserts="0">
+                  <test-suite name="BSONSerializerTest" executed="True" success="True" time="0.828" asserts="0">
                     <results>
-                      <test-suite name="Tests" executed="True" success="False" time="0.234" asserts="0">
-                        <results>
-                          <test-suite name="MongoContextTest" executed="True" success="False" time="0.109" asserts="0">
-                            <results>
-                              <test-case name="System.Data.Mongo.Tests.MongoContextTest.GetAllDatabases_Returns_DBs" executed="True" success="False" time="0.047" asserts="1">
-                                <failure>
-                                  <message><![CDATA[  Expected: not <empty>
-  But was:  <empty>
-]]></message>
-                                  <stack-trace><![CDATA[at System.Data.Mongo.Tests.MongoContextTest.GetAllDatabases_Returns_DBs() in C:\Code\MongoSharp\System.Data.Mongo.Tests\MongoContextTest.cs:line 30
-]]></stack-trace>
-                                </failure>
-                              </test-case>
-                            </results>
-                          </test-suite>
-                          <test-suite name="MongoDatabaseTest" executed="True" success="False" time="0.016" asserts="0">
-                            <results>
-                              <test-case name="System.Data.Mongo.Tests.MongoDatabaseTest.GetAllCollections_Returns_Collections" executed="True" success="False" time="0.016" asserts="1">
-                                <failure>
-                                  <message><![CDATA[  Expected: not <empty>
-  But was:  <empty>
-]]></message>
-                                  <stack-trace><![CDATA[at System.Data.Mongo.Tests.MongoDatabaseTest.GetAllCollections_Returns_Collections() in C:\Code\MongoSharp\System.Data.Mongo.Tests\MongoDatabaseTest.cs:line 17
-]]></stack-trace>
-                                </failure>
-                              </test-case>
-                            </results>
-                          </test-suite>
-                        </results>
-                      </test-suite>
-                    </results>
-                  </test-suite>
-                </results>
-              </test-suite>
-            </results>
-          </test-suite>
-        </results>
-      </test-suite>
-      <test-suite name="C:\Code\MongoSharp\BSONLib.Tests\bin\Debug\BSONLib.Tests.dll" executed="True" success="True" time="0.313" asserts="0">
-        <results>
-          <test-suite name="BSONLib" executed="True" success="True" time="0.313" asserts="0">
-            <results>
-              <test-suite name="Tests" executed="True" success="True" time="0.297" asserts="0">
-                <results>
-                  <test-suite name="BSONSerializerTest" executed="True" success="True" time="0.297" asserts="0">
-                    <results>
-                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Booleans_Are_Not_Lossy" executed="True" success="True" time="0.172" asserts="2" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Booleans_Are_Not_Lossy" executed="True" success="True" time="0.688" asserts="2" />
                       <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Bytes_Is_Not_Lossy" executed="True" success="True" time="0.000" asserts="2" />
                       <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Doubles_Are_Not_Lossy" executed="True" success="True" time="0.016" asserts="2" />
                       <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Guid_Is_Not_Lossy" executed="True" success="True" time="0.000" asserts="2" />
                       <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Ints_Are_Not_Lossy" executed="True" success="True" time="0.000" asserts="2" />
-                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Regex_Is_Not_Lossy" executed="True" success="True" time="0.094" asserts="3" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Regex_Is_Not_Lossy" executed="True" success="True" time="0.109" asserts="3" />
                       <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Strings_Are_Not_Lossy" executed="True" success="True" time="0.000" asserts="2" />
                       <test-case name="BSONLib.Tests.BSONSerializerTest.Serializing_POCO_Generates_Bytes" executed="True" success="True" time="0.000" asserts="1" />
                     </results>

@@ -31,8 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gallio, Version=3.1.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
-    <Reference Include="MbUnit, Version=3.1.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -47,15 +45,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommandRequestMessages\AuthenticationRequest.cs" />
-    <Compile Include="CommandRequestMessages\GetNonceRequest.cs" />
-    <Compile Include="CommandResponsesMessages\GenericCommandResponse.cs" />
-    <Compile Include="CommandResponsesMessages\GetNonceResponse.cs" />
-    <Compile Include="Commands\IncrementOperation.cs" />
-    <Compile Include="DatabaseInfo.cs" />
+    <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
+    <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />
+    <Compile Include="Commands\Qualifiers\GreaterThanQualifier.cs" />
+    <Compile Include="Commands\Qualifiers\LessOrEqualQualifier.cs" />
+    <Compile Include="Commands\Qualifiers\LessThanQualifier.cs" />
+    <Compile Include="Commands\Qualifiers\NotEqualQualifier.cs" />
+    <Compile Include="Commands\Qualifiers\SizeQualifier.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\AuthenticationRequest.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\GetNonceRequest.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\GenericCommandResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\GetNonceResponse.cs" />
+    <Compile Include="Commands\Modifiers\IncrementOperation.cs" />
     <Compile Include="ExpandoProps.cs" />
     <Compile Include="IMongoFlyweight.cs" />
-    <Compile Include="M.cs" />
+    <Compile Include="Commands\Modifiers\M.cs" />
     <Compile Include="MongoCollection.cs" />
     <Compile Include="MongoContext.cs" />
     <Compile Include="MongoDatabase.cs" />
@@ -74,6 +78,7 @@
     <Compile Include="Protocol\MongoOp.cs" />
     <Compile Include="Protocol\Messages\QueryMessage.cs" />
     <Compile Include="Protocol\Messages\ReplyMessage.cs" />
+    <Compile Include="Commands\Qualifiers\Q.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BSONLib\BSONLib.csproj">

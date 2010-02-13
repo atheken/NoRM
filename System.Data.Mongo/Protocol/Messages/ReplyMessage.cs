@@ -88,9 +88,9 @@ namespace System.Data.Mongo.Protocol.Messages
         }
 
         /// <summary>
-        /// The number of results returned form this request.
+        /// The number of results returned from this request.
         /// </summary>
-        public int ResultsReturned
+        public int Count
         {
             get
             {

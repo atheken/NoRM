@@ -53,9 +53,9 @@ namespace BSONHarness
             MongoContext context = new MongoContext();
             var coll = context.GetDatabase("benchmark").GetCollection<GeneralDTO>("test");
             coll.Delete(new { });
-            
+
             BSONOID oid = BSONOID.EMPTY;
-            DateTime now = DateTime.Now;
+            DateTime start = DateTime.Now;
 
             List<GeneralDTO> cache = new List<GeneralDTO>(count);
             int toUse = (int)Math.Floor(count / 2f);
@@ -63,8 +63,8 @@ namespace BSONHarness
             {
                 var into = new GeneralDTO();
                 into._id = BSONOID.NewOID();
-                into.Title = "ABCDEFG";
-                into.Incremental = 1;
+                into.Title = Guid.NewGuid().ToString();
+                into.Int = i;
                 if (i == toUse)
                 {
                     oid = into._id;
@@ -73,24 +73,30 @@ namespace BSONHarness
             }
             coll.Insert(cache);
             Console.WriteLine("Inserted {0} objects in {1}ms", count,
-                (DateTime.Now - now).TotalMilliseconds);
-            now = DateTime.Now;
+                (DateTime.Now - start).TotalMilliseconds);
 
+            start = DateTime.Now;
             var first = coll.Find(new { _id = oid }).First();
             Console.WriteLine("   Search for 1 object in {1}ms", count,
-                (DateTime.Now - now).TotalMilliseconds);
-            now = DateTime.Now;
+                (DateTime.Now - start).TotalMilliseconds);
 
-            coll.UpdateOne(new { _id = oid }, new { Incremental = M.Inc(5) });
-            Console.WriteLine("   Updated that 1 object in {1}ms", count,
-                (DateTime.Now - now).TotalMilliseconds);
-            now = DateTime.Now;
+            start = DateTime.Now;
+            //find something randomly using a regex.
+            var numLessThan2 = coll.Find(new { Title = new Regex(".*8a.*", RegexOptions.IgnoreCase) }).ToArray().Count();
+            Console.WriteLine("   Found {0} objects that match the regex. in {1}ms", numLessThan2,
+                (DateTime.Now - start).TotalMilliseconds);
 
+            start = DateTime.Now;
+            coll.UpdateOne(new { _id = oid }, new { Int = M.Inc(5) });
+            Console.WriteLine("   Updated that one in {0}ms",
+                (DateTime.Now - start).TotalMilliseconds);
+
+            start = DateTime.Now;
             first = coll.Find(new { _id = oid }).First();
 
-            coll.Delete(new {});
+            coll.Delete(new { Int = Q.LessThan(Int32.MaxValue)});
             Console.WriteLine("   Deleted {0} objects in {1}ms\r\n", count,
-                (DateTime.Now - now).TotalMilliseconds);
+                (DateTime.Now - start).TotalMilliseconds);
         }
 
         /// <summary>
@@ -116,7 +122,7 @@ namespace BSONHarness
         public class GeneralDTO
         {
             public BSONOID _id { get; set; }
-            public int? Incremental { get; set; }
+            public int? Int { get; set; }
             public String Title { get; set; }
             public Regex Rex { get; set; }
         }
