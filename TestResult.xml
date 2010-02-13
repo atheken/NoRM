@@ -1,35 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\Code\MongoSharp\Tests.nunit" total="1" errors="0" failures="1" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-13" time="10:57:20">
+<test-results name="C:\Code\MongoSharp\Tests.nunit" total="10" errors="0" failures="1" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-13" time="15:25:22">
   <environment nunit-version="2.5.3.9345" clr-version="2.0.50727.3603" os-version="Microsoft Windows NT 5.1.2600 Service Pack 3" platform="Win32NT" cwd="C:\Code\MongoSharp" machine-name="XPATT" user="atheken" user-domain="XPATT" />
   <culture-info current-culture="en-US" current-uiculture="en-US" />
-  <test-suite name="C:\Code\MongoSharp\Tests.nunit" executed="True" success="False" time="1.031" asserts="0">
+  <test-suite name="C:\Code\MongoSharp\Tests.nunit" executed="True" success="False" time="0.406" asserts="0">
     <results>
-      <test-suite name="C:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" executed="True" success="False" time="1.031" asserts="0">
+      <test-suite name="C:\Code\MongoSharp\BSONLib.Tests\bin\Debug\BSONLib.Tests.dll" executed="True" success="False" time="0.391" asserts="0">
         <results>
-          <test-suite name="System" executed="True" success="False" time="1.031" asserts="0">
+          <test-suite name="BSONLib" executed="True" success="False" time="0.391" asserts="0">
             <results>
-              <test-suite name="Data" executed="True" success="False" time="1.031" asserts="0">
+              <test-suite name="Tests" executed="True" success="False" time="0.391" asserts="0">
                 <results>
-                  <test-suite name="Mongo" executed="True" success="False" time="1.031" asserts="0">
+                  <test-suite name="BSONSerializerTest" executed="True" success="False" time="0.391" asserts="0">
                     <results>
-                      <test-suite name="Tests" executed="True" success="False" time="1.016" asserts="0">
-                        <results>
-                          <test-suite name="MongoFindTest" executed="True" success="False" time="1.016" asserts="0">
-                            <results>
-                              <test-case name="System.Data.Mongo.Tests.MongoFindTest.MongoDatabase_FindOne_Returns" executed="True" success="False" time="1.000" asserts="1">
-                                <failure>
-                                  <message><![CDATA[  Expected: not null
-  But was:  null
-]]></message>
-                                  <stack-trace><![CDATA[at System.Data.Mongo.Tests.MongoFindTest.MongoDatabase_FindOne_Returns() in C:\Code\MongoSharp\System.Data.Mongo.Tests\MongoFindTest.cs:line 31
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Recursive_NestedTypes_Dont_Cause_Infinite_Loop" executed="True" success="False" time="0.016" asserts="0">
+                        <failure>
+                          <message><![CDATA[Right now the BSONSerializer that tests for serialization and deserialization can go into an infinite loop if the properties of a type have circular dependencies on parent types.]]></message>
+                          <stack-trace><![CDATA[at BSONLib.Tests.BSONSerializerTest.Recursive_NestedTypes_Dont_Cause_Infinite_Loop() in C:\Code\MongoSharp\BSONLib.Tests\BSONSerializerTest.cs:line 78
 ]]></stack-trace>
-                                </failure>
-                              </test-case>
-                            </results>
-                          </test-suite>
-                        </results>
-                      </test-suite>
+                        </failure>
+                      </test-case>
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Booleans_Are_Not_Lossy" executed="True" success="True" time="0.156" asserts="2" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Bytes_Is_Not_Lossy" executed="True" success="True" time="0.016" asserts="2" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Doubles_Are_Not_Lossy" executed="True" success="True" time="0.000" asserts="2" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Guid_Is_Not_Lossy" executed="True" success="True" time="0.000" asserts="2" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Ints_Are_Not_Lossy" executed="True" success="True" time="0.000" asserts="2" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_NestedObjects_Is_Not_Lossy" executed="True" success="True" time="0.016" asserts="3" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Regex_Is_Not_Lossy" executed="True" success="True" time="0.063" asserts="3" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serialization_Of_Strings_Are_Not_Lossy" executed="True" success="True" time="0.000" asserts="2" />
+                      <test-case name="BSONLib.Tests.BSONSerializerTest.Serializing_POCO_Generates_Bytes" executed="True" success="True" time="0.000" asserts="1" />
                     </results>
                   </test-suite>
                 </results>

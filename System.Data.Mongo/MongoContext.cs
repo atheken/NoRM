@@ -139,12 +139,17 @@ namespace System.Data.Mongo
         /// <returns></returns>
         public IEnumerable<DatabaseInfo> GetAllDatabases()
         {
-            var db = this.GetDatabase("admin");
+            var retval = Enumerable.Empty<DatabaseInfo>();
 
-            return db.Command<DatabaseInfo>("$cmd", "listDatabases");
+            var response = this.GetDatabase("admin")
+                .GetCollection<ListDatabasesResponse>("$cmd")
+                .FindOne(new ListDatabasesRequest());
 
+            if (response != null && response.OK == 1.0)
+            {
+                retval = response.Databases;
+            }
+            return retval;
         }
-
-
     }
 }

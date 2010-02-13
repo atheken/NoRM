@@ -13,6 +13,10 @@ namespace BSONHarness
     {
         static void Main(string[] args)
         {
+            MongoContext mc = new MongoContext();
+            var f = mc.GetAllDatabases();
+            
+            
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);
             InsertFindDeleteBenchmark(1000);
@@ -86,7 +90,7 @@ namespace BSONHarness
             start = DateTime.Now;
             first = coll.Find(new { _id = oid }).First();
 
-            coll.Delete(new { Int = Q.LessThan(Int32.MaxValue)});
+            coll.Delete(new { Int = Q.LessThan(Int32.MaxValue) });
             Console.WriteLine("   Deleted {0} objects in {1}ms\r\n", count,
                 (DateTime.Now - start).TotalMilliseconds);
         }
@@ -122,6 +126,7 @@ namespace BSONHarness
             public int? Int { get; set; }
             public String Title { get; set; }
             public Regex Rex { get; set; }
+            public List<DatabaseInfo> AList { get; set; }
         }
     }
 }

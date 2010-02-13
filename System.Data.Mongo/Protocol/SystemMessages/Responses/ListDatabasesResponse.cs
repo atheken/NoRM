@@ -10,8 +10,8 @@ namespace System.Data.Mongo.Protocol.SystemMessages.Responses
     /// </summary>
     public class ListDatabasesResponse
     {
-        public bool? OK { get; set; }
-        public long? TotalSize { get; set; }
+        public double? OK { get; set; }
+        public double? TotalSize { get; set; }
         public List<DatabaseInfo> Databases { get; set; }
     }
 
