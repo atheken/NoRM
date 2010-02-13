@@ -63,7 +63,7 @@ namespace BSONHarness
             {
                 var into = new GeneralDTO();
                 into._id = BSONOID.NewOID();
-                into.Title = "ABCDEFG";
+                into.Title = Guid.NewGuid().ToString();
                 into.Int = i;
                 if (i == toUse)
                 {
@@ -81,9 +81,9 @@ namespace BSONHarness
                 (DateTime.Now - start).TotalMilliseconds);
 
             start = DateTime.Now;
-            //There is no reason whatsoever that this shouldn't work...
-            var numLessThan2 = coll.Find(new { Int = Q.LessThan(10) }).ToArray().Count();
-            Console.WriteLine("   Found {0} objects with a Incremental value less than 10 in {1}ms", numLessThan2,
+            //find something randomly using a regex.
+            var numLessThan2 = coll.Find(new { Title = new Regex(".*8a.*", RegexOptions.IgnoreCase) }).ToArray().Count();
+            Console.WriteLine("   Found {0} objects that match the regex. in {1}ms", numLessThan2,
                 (DateTime.Now - start).TotalMilliseconds);
 
             start = DateTime.Now;
@@ -94,7 +94,7 @@ namespace BSONHarness
             start = DateTime.Now;
             first = coll.Find(new { _id = oid }).First();
 
-            coll.Delete(new { });
+            coll.Delete(new { Int = Q.LessThan(Int32.MaxValue)});
             Console.WriteLine("   Deleted {0} objects in {1}ms\r\n", count,
                 (DateTime.Now - start).TotalMilliseconds);
         }

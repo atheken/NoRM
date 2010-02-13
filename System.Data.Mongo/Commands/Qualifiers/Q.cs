@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.Mongo.Commands.Qualifiers;
+using System.Text.RegularExpressions;
 
 namespace System.Data.Mongo
 {
@@ -54,6 +55,16 @@ namespace System.Data.Mongo
         public static GreaterThanQualifier GreaterThan(double value)
         {
             return new GreaterThanQualifier(value);
+        }
+
+        /// <summary>
+        /// Builds an $exists qualifier for the search.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static ExistsQuallifier Exists(bool value)
+        {
+            return new ExistsQuallifier(value);
         }
     }
 }
