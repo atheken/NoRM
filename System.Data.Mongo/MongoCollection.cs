@@ -133,17 +133,16 @@ namespace System.Data.Mongo
             qm.Query = template;
             var reply = qm.Execute();
 
-            //while (reply.ResultsReturned > 0 && !reply.HasError)
-            //{
             foreach (var r in reply.Results)
             {
                 yield return r;
             }
-            //    var getMore = new GetMoreMessage<T>(this._context,
-            //        this._collectionName, reply.CursorID);
-            //    reply = getMore.Execute();
-            //}
             yield break;
+        }
+
+        public void Insert(params T[] documentsToInsert)
+        {
+            this.Insert(documentsToInsert.AsEnumerable());
         }
 
         /// <summary>

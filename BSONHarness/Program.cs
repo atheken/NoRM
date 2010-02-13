@@ -13,14 +13,6 @@ namespace BSONHarness
     {
         static void Main(string[] args)
         {
-            var f = BSONLib.ReflectionHelpers.SetterMethod(typeof(GeneralDTO).GetProperty("Title"));
-
-            var dto = new GeneralDTO();
-            f.Invoke(dto, "hello");
-
-            var p = BSONLib.ReflectionHelpers.GetterMethod(typeof(GeneralDTO).GetProperty("Title"));
-            var x = p.Invoke(dto);
-
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);
             InsertFindDeleteBenchmark(1000);
@@ -114,6 +106,11 @@ namespace BSONHarness
                 var outTo = BSONSerializer.Deserialize<GeneralDTO>(bytes);
             }
             Console.WriteLine("Serialized/deserialized {0} objects in {1}ms", count, (DateTime.Now - now).TotalMilliseconds);
+        }
+
+        public class GeneralDTOWithNestedObject
+        {
+            public GeneralDTO DTO1 { get; set; }
         }
 
         /// <summary>

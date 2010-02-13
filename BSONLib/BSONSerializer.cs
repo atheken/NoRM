@@ -13,6 +13,9 @@ namespace BSONLib
     /// <summary>
     /// A class that is capable serializing simple .net objects to/from BSON.
     /// </summary>
+    /// <remarks>
+    /// In here there be dragons. Proceed at your own risk.
+    /// </remarks>
     public static class BSONSerializer
     {
         private const int CODE_LENGTH = 1;
@@ -48,7 +51,7 @@ namespace BSONLib
             {
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
-            var getters = BSONSerializer.GettersForType(document);
+            var getters = BSONSerializer.GettersForType(document.GetType());
             List<byte[]> retval = new List<byte[]>();
             retval.Add(new byte[4]);//allocate size.
 
@@ -77,7 +80,7 @@ namespace BSONLib
                     retval.AddRange(modValue);
 
                 }
-                else if(obj is QualifierCommand)
+                else if (obj is QualifierCommand)
                 {
                     //wow, this is insane, the idiom for "query" commands is exactly opposite of that for "update" commands.
                     var o = obj as QualifierCommand;
@@ -228,6 +231,19 @@ namespace BSONLib
                 retval[0] = new byte[] { (byte)BSONTypes.Int64 };
                 retval[3] = BitConverter.GetBytes((long)value);
             }
+            //handle arrays and the like.
+            else if (value is IEnumerable)
+            {
+                retval[0] = new byte[] { (byte)BSONTypes.Array };
+                int index = -1;
+                var o = value as IEnumerable;
+                var memberBytes = o.OfType<Object>().Select(y =>
+                {
+                    index++;
+                    return BSONSerializer.SerializeMember(index.ToString(), y);
+                }).SelectMany(h => h).ToArray();
+                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length).Concat(memberBytes).ToArray();
+            }
             //TODO: implement something for "Symbol"
             //TODO: implement non-scoped code handling.
             else
@@ -239,6 +255,31 @@ namespace BSONLib
             return retval.SelectMany(h => h).ToArray();
         }
 
+        private static Dictionary<Type, Dictionary<String, Type>> _propertyTypes = new Dictionary<Type, Dictionary<string, Type>>();
+
+        private static IDictionary<String, Type> GetPropertyTypes(Type t)
+        {
+            Dictionary<String, Type> retval = null;
+            if (!BSONSerializer._propertyTypes.TryGetValue(t, out retval))
+            {
+                retval = new Dictionary<String, Type>(StringComparer.InvariantCultureIgnoreCase);
+                foreach (var p in t.GetProperties().OfType<PropertyInfo>())
+                {
+                    if (p.CanRead && p.CanWrite)
+                    {
+                        retval[p.Name] = p.PropertyType;
+                    }
+                }
+                BSONSerializer._propertyTypes[t] = retval;
+            }
+            return retval;
+        }
+
+        public static T Deserialize<T>(BinaryReader stream, out IDictionary<String, object> outProps) where T : class, new()
+        {
+            return (T)BSONSerializer.Deserialize(stream, out outProps, typeof(T));
+        }
+
         /// <summary>
         /// Converts a document's byte-form back into a POCO.
         /// </summary>
@@ -246,9 +287,9 @@ namespace BSONLib
         /// <param name="stream">the document's bytes</param>
         /// <param name="outProps">Properties that don't map onto T.</param>
         /// <returns></returns>
-        public static T Deserialize<T>(BinaryReader stream, out IDictionary<String, object> outProps) where T : class, new()
+        private static object Deserialize(BinaryReader stream, out IDictionary<String, object> outProps, Type T)
         {
-            if (!BSONSerializer.CanBeDeserialized(typeof(T)))
+            if (!BSONSerializer.CanBeDeserialized(T))
             {
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
@@ -259,8 +300,8 @@ namespace BSONLib
             stream.Read(buffer, 0, length - 5);
             //push the position forward past the null terminator.
             stream.Read(new byte[1], 0, 1);
-            T retval = new T();
-            var setters = BSONSerializer.SettersForType(retval);
+            var retval = Activator.CreateInstance(T);
+            var setters = BSONSerializer.SettersForType(retval.GetType());
             outProps = new Dictionary<String, object>(0);
 
             while (buffer.Length > 0)
@@ -270,18 +311,45 @@ namespace BSONLib
                     .TakeWhile(y => y != (byte)0)
                     .ToArray();
 
+                Object obj = null;
                 String key = Encoding.UTF8.GetString(stringBytes);
-                //the object data is everything other than the key and the null.
-                var objectData = buffer.Skip(stringBytes.Length + 2).ToArray();
+                var objectData = buffer.Skip(stringBytes.Length + CODE_LENGTH + KEY_TERMINATOR_LENGTH).ToArray();
+                if (t != BSONTypes.Array && t != BSONTypes.Object)
+                {
+                    //the object data is everything other than the key and the null.
+                    
+                    int usedBytes;
+                    obj = BSONSerializer.DeserializeMember(t, objectData, out usedBytes);
 
+                    //skip type, the key, the null, the object data
+                    buffer = buffer.Skip(CODE_LENGTH + stringBytes.Length +
+                        KEY_TERMINATOR_LENGTH + usedBytes).ToArray();
+                }
+                //this is an array or a nested object, so we need to do *slightly* different work.
+                else 
+                {
+                    var propTypes = BSONSerializer.GetPropertyTypes(T);
+                    Type propType = null;
+                    if (propTypes.TryGetValue(key, out propType))
+                    {
+                        if (t == BSONTypes.Object)
+                        {
+                            //TODO: get ready to drop these props on the floor - will come back to this someday..
+                            IDictionary<String, Object> props2;
 
-                int usedBytes;
-                var obj = BSONSerializer.DeserializeMember(t, objectData, out usedBytes);
+                            var objBytes = BitConverter.ToInt32(objectData, 0);
+                            obj = BSONSerializer.Deserialize(new BinaryReader(new MemoryStream(objectData)),
+                                out props2, propType);
+                            //skip the bytes.
+                            buffer = buffer.Skip(objBytes).ToArray();
+                        }
+                        else
+                        {
 
-                //skip type, the key, the null, the object data
-                buffer = buffer.Skip(CODE_LENGTH + stringBytes.Length +
-                    KEY_TERMINATOR_LENGTH + usedBytes).ToArray();
-
+                        }
+                    }
+                }
+                
                 if (setters.ContainsKey(key))
                 {
                     var prop = setters[key];
@@ -324,6 +392,14 @@ namespace BSONLib
             return BSONSerializer.Deserialize<T>(objectData, out outprops);
         }
 
+        /// <summary>
+        /// Hydrates the given member and returns it, also outs the number of bytes used.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="objectData"></param>
+        /// <param name="propertyType"></param>
+        /// <param name="usedBytes"></param>
+        /// <returns></returns>
         private static object DeserializeMember(BSONTypes t, byte[] objectData, out int usedBytes)
         {
             object retval = null;
@@ -419,14 +495,31 @@ namespace BSONLib
                 retval = BitConverter.ToInt64(objectData, 0);
                 usedBytes = 8;
             }
+            else if (t == BSONTypes.Array)
+            {
+                int length = BitConverter.ToInt32(objectData, 0);
+                int cursor = 4;
+
+                List<Object> list = new List<Object>();
+                while (cursor < length)
+                {
+                    //skip the cursor, and then take bytes while not null (index name) and then add the null terminator.
+                    cursor += objectData.Skip(cursor).TakeWhile(y => y != 0).Count() + 1;
+                    BSONTypes memberType = (BSONTypes)objectData.Skip(cursor).FirstOrDefault();
+                    int usedCount = 0;
+                    var outobj = BSONSerializer.DeserializeMember(memberType, objectData.Skip(cursor).ToArray(), out usedCount);
+                    list.Add(outobj);
+                    cursor += usedCount;
+                }
+                usedBytes = length;
+                retval = list;
+            }
             //TODO: implement something for "Symbol"
             //TODO: implement non-scoped code handling.
-            else
-            {
-                //Object deserialization needs to be handled a level up.   
-            }
             return retval;
         }
+
+
 
         /// <summary>
         /// Types that can be serialized to/from BSON.
@@ -476,6 +569,7 @@ namespace BSONLib
                 BSONSerializer._allowedTypes.Add(typeof(Regex));
                 BSONSerializer._allowedTypes.Add(typeof(byte[]));
                 BSONSerializer._allowedTypes.Add(typeof(Regex));
+                BSONSerializer._allowedTypes.Add(typeof(IList));
                 foreach (var t in BSONSerializer._allowedTypes)
                 {
                     BSONSerializer._canDeserialize.Add(t);
@@ -546,7 +640,25 @@ namespace BSONLib
         public static bool CanBeDeserialized(Type t)
         {
             bool retval = true;
-            //we want to check to see if this type can be serialized.
+
+            //lists are special.
+            bool isSafeList = true;
+            if (t.IsGenericType && t.FullName.StartsWith("System.Collections.Generic.List`1"))
+            {
+                isSafeList = t.GetGenericArguments().All(y => BSONSerializer.CanBeDeserialized(y));
+
+                retval = isSafeList;
+                if (isSafeList)
+                {
+                    BSONSerializer._canDeserialize.Add(t);
+                }
+                else
+                {
+                    BSONSerializer._prohibittedTypes.Add(t);
+                }
+            }
+
+            //we want to check to see if this type can be deserialized.
             if (!BSONSerializer._canDeserialize.Contains(t) &&
                 !BSONSerializer._prohibittedTypes.Contains(t))
             {
@@ -582,19 +694,20 @@ namespace BSONLib
         /// <typeparam name="T"></typeparam>
         /// <param name="document"></param>
         /// <returns></returns>
-        private static IDictionary<String, Action<object, object>> SettersForType<T>(T document)
+        private static IDictionary<String, Action<object, object>> SettersForType(Type documentType)
         {
-            if (!BSONSerializer._setters.ContainsKey(typeof(T)))
+            if (!BSONSerializer._setters.ContainsKey(documentType))
             {
-                BSONSerializer._setters[typeof(T)] = new Dictionary<string, Action<object, object>>(StringComparer.InvariantCultureIgnoreCase);
-                foreach (var p in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                BSONSerializer._setters[documentType] = new Dictionary<string, Action<object, object>>(StringComparer.InvariantCultureIgnoreCase);
+                foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                 {
-                    BSONSerializer._setters[typeof(T)][p.Name] = ReflectionHelpers.SetterMethod(p);
+                    BSONSerializer._setters[documentType][p.Name] = ReflectionHelpers.SetterMethod(p);
                 }
             }
-            return new Dictionary<String, Action<object, object>>(BSONSerializer._setters[typeof(T)],
+            return new Dictionary<String, Action<object, object>>(BSONSerializer._setters[documentType],
                 StringComparer.InvariantCultureIgnoreCase);
         }
+
 
         /// <summary>
         /// Key: Lowercase name of the property
@@ -603,17 +716,18 @@ namespace BSONLib
         /// <typeparam name="T"></typeparam>
         /// <param name="document"></param>
         /// <returns></returns>
-        private static IDictionary<String, Func<object, object>> GettersForType<T>(T document)
+        private static IDictionary<String, Func<object, object>> GettersForType(Type documentType)
         {
-            if (!BSONSerializer._getters.ContainsKey(typeof(T)))
+            if (!BSONSerializer._getters.ContainsKey(documentType))
             {
-                BSONSerializer._getters[typeof(T)] = new Dictionary<string, Func<object, object>>(StringComparer.InvariantCultureIgnoreCase);
-                foreach (var p in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                BSONSerializer._getters[documentType] = new Dictionary<string, Func<object, object>>
+                    (StringComparer.InvariantCultureIgnoreCase);
+                foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                 {
-                    BSONSerializer._getters[typeof(T)][p.Name] = ReflectionHelpers.GetterMethod(p);
+                    BSONSerializer._getters[documentType][p.Name] = ReflectionHelpers.GetterMethod(p);
                 }
             }
-            return new Dictionary<String, Func<object, object>>(BSONSerializer._getters[typeof(T)],
+            return new Dictionary<String, Func<object, object>>(BSONSerializer._getters[documentType],
                 StringComparer.InvariantCultureIgnoreCase);
         }
     }

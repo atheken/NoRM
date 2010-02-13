@@ -54,6 +54,7 @@
     <Compile Include="Commands\Qualifiers\SizeQualifier.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\AuthenticationRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\GetNonceRequest.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\ListDatabasesRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\GenericCommandResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\GetNonceResponse.cs" />
     <Compile Include="Commands\Modifiers\IncrementOperation.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Protocol\Messages\QueryMessage.cs" />
     <Compile Include="Protocol\Messages\ReplyMessage.cs" />
     <Compile Include="Commands\Qualifiers\Q.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ListDatabasesResponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BSONLib\BSONLib.csproj">
