@@ -482,7 +482,7 @@ namespace BSONLib
                 var list = Activator.CreateInstance(proptype) as IList;
                 var type = proptype.GetGenericArguments().First();
 
-                var arrayData = objectData.Take(length).Skip(4).ToArray();
+                var arrayData = objectData.Take(length-1).Skip(4).ToArray();
 
                 while (arrayData.Length > 0)
                 {
