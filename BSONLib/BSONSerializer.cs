@@ -46,15 +46,16 @@ namespace BSONLib
         /// <returns></returns>
         public static byte[] Serialize<T>(T document, IDictionary<String, object> addedProps)
         {
+
             if (!BSONSerializer.CanBeSerialized(typeof(T)) || addedProps.Any(y => y.Value != null &&
                 !BSONSerializer.CanBeSerialized(y.Value.GetType())))
             {
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
-            var getters = BSONSerializer.GettersForType(document.GetType());
             List<byte[]> retval = new List<byte[]>();
-            retval.Add(new byte[4]);//allocate size.
 
+            var getters = BSONSerializer.GettersForType(document.GetType());
+            retval.Add(new byte[4]);//allocate size.
             foreach (var member in getters)
             {
 

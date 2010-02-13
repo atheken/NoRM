@@ -11,12 +11,19 @@ namespace BSONHarness
 {
     class Program
     {
+        protected class CollInfo{
+            public string Name { get; set; }
+    }
+
         static void Main(string[] args)
         {
             MongoContext mc = new MongoContext();
             var f = mc.GetAllDatabases();
-            
-            
+
+            var dbInfo = mc.GetDatabase("testing").GetCollection<CollInfo>("system.namespaces");
+           
+            var f2= dbInfo.Find().ToArray();
+
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);
             InsertFindDeleteBenchmark(1000);

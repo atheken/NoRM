@@ -114,6 +114,16 @@ namespace System.Data.Mongo
             return this.Find(template, 1).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Find objects in the collection without any qualifiers.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T> Find()
+        {
+            //this is a hack to get a value that will test for null into the serializer.
+            return this.Find(new Object(), Int32.MaxValue, this.FullyQualifiedName);
+        }
+
         public IEnumerable<T> Find<U>(U template)
         {
             return this.Find(template, Int32.MaxValue);
