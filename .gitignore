@@ -3,4 +3,6 @@
 *.pdb
 *.cache
 *.suo
+*.orig
+*.user
 .svn

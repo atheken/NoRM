@@ -9,7 +9,7 @@ namespace System.Data.Mongo
     {
         public DatabaseInfo() { }
 
-        public string name { get; set; }
-        public double? sizeOnDisk { get; set; }
+        public string Name { get; set; }
+        public double? SizeOnDisk { get; set; }
     }
 }

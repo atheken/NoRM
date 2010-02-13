@@ -12,16 +12,7 @@ namespace System.Data.Mongo.Protocol.SystemMessages.Responses
     {
         public bool? OK { get; set; }
         public long? TotalSize { get; set; }
-        public List<DBDescriptor> Databases { get; set; }
+        public List<DatabaseInfo> Databases { get; set; }
     }
 
-    /// <summary>
-    /// Information about a Mongo Database.
-    /// </summary>
-    public class DBDescriptor
-    {
-        public bool? SizeOnDisk { get; set; }
-        public bool? Empty { get; set; }
-        public String Name { get; set; }
-    }
 }
