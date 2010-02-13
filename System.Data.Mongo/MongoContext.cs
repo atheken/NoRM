@@ -137,11 +137,12 @@ namespace System.Data.Mongo
         /// Returns a list of databases that already exist on this context.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<String> GetAllDatabases()
+        public IEnumerable<DatabaseInfo> GetAllDatabases()
         {
+            var db = this.GetDatabase("admin");
 
+            return db.Command<DatabaseInfo>("$cmd", "listDatabases");
 
-            yield break;
         }
 
 

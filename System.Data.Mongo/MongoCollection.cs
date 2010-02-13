@@ -116,7 +116,12 @@ namespace System.Data.Mongo
         /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit)
         {
-            var qm = new QueryMessage<T, U>(this._context, this.FullyQualifiedName);
+            return Find(template, limit, this.FullyQualifiedName);
+        }
+
+        public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName)
+        {
+            var qm = new QueryMessage<T, U>(this._context, fullyQualifiedName);
             qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
@@ -133,6 +138,7 @@ namespace System.Data.Mongo
             //}
             yield break;
         }
+
 
         /// <summary>
         /// Insert these documents into the database.

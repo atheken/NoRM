@@ -29,3 +29,10 @@ C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\BSONLib.pdb
 C:\mydata\git\MongoSharp\System.Data.Mongo\obj\Debug\ResolveAssemblyReference.cache
 C:\mydata\git\MongoSharp\System.Data.Mongo\obj\Debug\System.Data.Mongo.dll
 C:\mydata\git\MongoSharp\System.Data.Mongo\obj\Debug\System.Data.Mongo.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\Gallio.dll
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\MbUnit.dll
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\Gallio.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\Gallio.xml
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\MbUnit.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\MbUnit.xml
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\Gallio.XmlSerializers.dll
