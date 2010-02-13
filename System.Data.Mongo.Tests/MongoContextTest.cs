@@ -27,6 +27,7 @@ namespace System.Data.Mongo.Tests
         [Test]
         public void GetAllDatabases_Returns_DBs()
         {
+
             Assert.IsNotEmpty(this._context.GetAllDatabases().ToList());
         }
 

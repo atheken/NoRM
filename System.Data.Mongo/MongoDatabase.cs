@@ -18,7 +18,10 @@ namespace System.Data.Mongo
         {
             this._dbName = dbname;
             this._context = context;
+            this.SizeOnDisk = 0.0;
         }
+
+        public Double SizeOnDisk { get; set; }
 
         /// <summary>
         /// The database name for this database.
@@ -29,6 +32,16 @@ namespace System.Data.Mongo
             {
                 return this._dbName;
             }
+        }
+
+        public IEnumerable<T> Command<T>(string commandPrefix, string command) where T : class, new()
+        {
+            MongoCollection<T> coll = new MongoCollection<T>(commandPrefix, this, this._context);
+            
+            var results = coll.Find(new { }, Int32.MaxValue, String.Format("{0}.{1}", "$cmd", command));
+
+           
+            return results;
         }
 
         /// <summary>
