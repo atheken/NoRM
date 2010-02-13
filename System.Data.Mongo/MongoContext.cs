@@ -5,10 +5,10 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
-using System.Data.Mongo.CommandResponsesMessages;
 using System.Data.Mongo.Protocol.Messages;
-using System.Data.Mongo.CommandRequestMessages;
 using System.Security.Cryptography;
+using System.Data.Mongo.Protocol.SystemMessages.Responses;
+using System.Data.Mongo.Protocol.SystemMessages.Requests;
 
 namespace System.Data.Mongo
 {

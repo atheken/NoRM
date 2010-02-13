@@ -59,9 +59,9 @@ namespace BSONLib
                 var name = member.Key;
 
                 //"special" case.
-                if (obj is ModifierOperation)
+                if (obj is ModifierCommand)
                 {
-                    var o = obj as ModifierOperation;
+                    var o = obj as ModifierCommand;
                     //set type of member.
                     retval.Add(new byte[] { (byte)BSONTypes.Object });
                     //set name of member
@@ -76,6 +76,24 @@ namespace BSONLib
 
                     retval.AddRange(modValue);
 
+                }
+                else if(obj is QualifierCommand)
+                {
+                    //wow, this is insane, the idiom for "query" commands is exactly opposite of that for "update" commands.
+                    var o = obj as QualifierCommand;
+                    //set type of member.
+                    retval.Add(new byte[] { (byte)BSONTypes.Object });
+                    //set name of member
+                    retval.Add(name.CStringBytes());
+
+                    //construct member bytes
+                    var modValue = new List<byte[]>();
+                    modValue.Add(new byte[4]);//allocate size.
+                    modValue.Add(BSONSerializer.SerializeMember(o.CommandName, o.ValueForCommand));//then serialize the member.
+                    modValue.Add(new byte[1]);//null terminate this member.
+                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));//add this to the main retval.
+
+                    retval.AddRange(modValue);
                 }
                 else
                 {

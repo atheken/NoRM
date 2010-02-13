@@ -77,7 +77,9 @@ namespace System.Data.Mongo
             um.Execute();
         }
 
-
+        /// <summary>
+        /// The name of this collection, including the database prefix.
+        /// </summary>
         public String FullyQualifiedName
         {
             get
@@ -97,9 +99,19 @@ namespace System.Data.Mongo
             var dm = new DeleteMessage<U>(this._context, this.FullyQualifiedName, template);
             dm.Execute();
         }
+
+        /// <summary>
+        /// This will do a search on the collection using the specified template. 
+        /// If no documents are found, default(T) will be returned.
+        /// </summary>
+        /// <typeparam name="U">A type that has each member set to the value to search. 
+        /// Keep in mind that all the properties must either be concrete values, or the 
+        /// special "Qualifier"-type values.</typeparam>
+        /// <param name="template"></param>
+        /// <returns>The first document that matched the template, or default(T)</returns>
         public T FindOne<U>(U template)
         {
-            return this.Find(template, 1).First();
+            return this.Find(template, 1).FirstOrDefault();
         }
 
         public IEnumerable<T> Find<U>(U template)

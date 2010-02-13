@@ -10,6 +10,10 @@ namespace System.Data.Mongo
     /// Shorthand to construct modifier operations
     /// for MongoDB fields.
     /// </summary>
+    /// <remarks>
+    /// This should remain in the System.Data.Mongo namespace so that it's available 
+    /// automatically when someone is using a MongoCollection.
+    /// </remarks>
     public class M
     {
         /// <summary>
