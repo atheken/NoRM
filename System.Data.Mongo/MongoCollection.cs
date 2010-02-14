@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.Mongo.Protocol.Messages;
+using System.Data.Mongo.Protocol.SystemMessages.Requests;
+using System.Data.Mongo.Protocol.SystemMessages.Responses;
 
 namespace System.Data.Mongo
 {
@@ -24,7 +26,6 @@ namespace System.Data.Mongo
             this._context = context;
             this._collectionName = collectionName;
         }
-
 
         /// <summary>
         /// Overload of Update that updates one document and doesn't upsert if no matches are found.
@@ -77,7 +78,9 @@ namespace System.Data.Mongo
             um.Execute();
         }
 
-
+        /// <summary>
+        /// The name of this collection, including the database prefix.
+        /// </summary>
         public String FullyQualifiedName
         {
             get
@@ -97,9 +100,29 @@ namespace System.Data.Mongo
             var dm = new DeleteMessage<U>(this._context, this.FullyQualifiedName, template);
             dm.Execute();
         }
+
+        /// <summary>
+        /// This will do a search on the collection using the specified template. 
+        /// If no documents are found, default(T) will be returned.
+        /// </summary>
+        /// <typeparam name="U">A type that has each member set to the value to search. 
+        /// Keep in mind that all the properties must either be concrete values, or the 
+        /// special "Qualifier"-type values.</typeparam>
+        /// <param name="template"></param>
+        /// <returns>The first document that matched the template, or default(T)</returns>
         public T FindOne<U>(U template)
         {
-            return this.Find(template, 1).First();
+            return this.Find(template, 1).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Find objects in the collection without any qualifiers.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<T> Find()
+        {
+            //this is a hack to get a value that will test for null into the serializer.
+            return this.Find(new Object(), Int32.MaxValue, this.FullyQualifiedName);
         }
 
         public IEnumerable<T> Find<U>(U template)
@@ -116,23 +139,28 @@ namespace System.Data.Mongo
         /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit)
         {
-            var qm = new QueryMessage<T, U>(this._context, this.FullyQualifiedName);
+            return Find(template, limit, this.FullyQualifiedName);
+        }
+
+        public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName)
+        {
+            var qm = new QueryMessage<T, U>(this._context, fullyQualifiedName);
             qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
 
-            //while (reply.ResultsReturned > 0 && !reply.HasError)
-            //{
             foreach (var r in reply.Results)
             {
                 yield return r;
             }
-            //    var getMore = new GetMoreMessage<T>(this._context,
-            //        this._collectionName, reply.CursorID);
-            //    reply = getMore.Execute();
-            //}
             yield break;
         }
+
+        public void Insert(params T[] documentsToInsert)
+        {
+            this.Insert(documentsToInsert.AsEnumerable());
+        }
+
 
         /// <summary>
         /// Insert these documents into the database.

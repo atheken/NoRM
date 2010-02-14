@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
+    <Compile Include="MongoFindTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

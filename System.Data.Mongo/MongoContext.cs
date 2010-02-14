@@ -5,10 +5,10 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
-using System.Data.Mongo.CommandResponsesMessages;
 using System.Data.Mongo.Protocol.Messages;
-using System.Data.Mongo.CommandRequestMessages;
 using System.Security.Cryptography;
+using System.Data.Mongo.Protocol.SystemMessages.Responses;
+using System.Data.Mongo.Protocol.SystemMessages.Requests;
 
 namespace System.Data.Mongo
 {
@@ -66,6 +66,24 @@ namespace System.Data.Mongo
             this._serverName = server;
             this._serverPort = port;
             this.EnableExpandoProperties = enableExpandoProps;
+        }
+
+        /// <summary>
+        /// Drop this database from the mongo server (be careful what you wish for!)
+        /// </summary>
+        /// <returns></returns>
+        public bool DropDatabase(String dbName)
+        {
+            var retval = false;
+            var result = this.GetDatabase(dbName)
+                .GetCollection<DroppedDatabaseResponse>("$cmd")
+                .FindOne(new DropDatabaseRequest());
+            
+            if (result != null && result.OK == 1.0d)
+            {
+                retval = true;
+            }
+            return retval;
         }
 
 
@@ -137,13 +155,19 @@ namespace System.Data.Mongo
         /// Returns a list of databases that already exist on this context.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<String> GetAllDatabases()
+        public IEnumerable<DatabaseInfo> GetAllDatabases()
         {
+            var retval = Enumerable.Empty<DatabaseInfo>();
 
+            var response = this.GetDatabase("admin")
+                .GetCollection<ListDatabasesResponse>("$cmd")
+                .FindOne(new ListDatabasesRequest());
 
-            yield break;
+            if (response != null && response.OK == 1.0)
+            {
+                retval = response.Databases;
+            }
+            return retval;
         }
-
-
     }
 }

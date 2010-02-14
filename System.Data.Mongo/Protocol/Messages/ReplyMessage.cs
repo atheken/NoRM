@@ -32,7 +32,7 @@ namespace System.Data.Mongo.Protocol.Messages
             //decrement the length for all the reads.
             this._messageLength -= (4 + 4 + 4 + 4 + 4 + 4 + 8 + 4 + 4);
 
-            this._results = new List<T>(100);//arbitrary number seems like a sweet spot for many queries.
+            this._results = new List<T>(100);//arbitrary number seems like it would be a sweet spot for many queries.
 
             if (!this.HasError)
             {
@@ -88,9 +88,9 @@ namespace System.Data.Mongo.Protocol.Messages
         }
 
         /// <summary>
-        /// The number of results returned form this request.
+        /// The number of results returned from this request.
         /// </summary>
-        public int ResultsReturned
+        public int Count
         {
             get
             {

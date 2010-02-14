@@ -20,6 +20,13 @@ namespace BSONLib.Tests
             public byte[] Bytes { get; set; }
             public Guid? AGuid { get; set; }
             public Regex ARex { get; set; }
+            public GeneralDTO Nester { get; set; }
+        }
+
+        protected class NestedGeneralDTO 
+        {
+            public int? AnInt { get; set; }
+            public String Title { get; set; }
         }
 
         protected class EmptyDTO
@@ -48,6 +55,30 @@ namespace BSONLib.Tests
 
             Assert.AreEqual(null, hydratedObj1.Title);
             Assert.AreEqual(obj2.Title, hydratedObj2.Title);
+        }
+
+        [Test]
+        public void Serialization_Of_NestedObjects_Is_Not_Lossy()
+        {
+            var obj1 = new GeneralDTO() { Title = "Hello World", Nester = new GeneralDTO() { Title = "Bob", AnInt = 42 } };
+
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+
+            Assert.AreEqual(obj1.Title, hydratedObj1.Title);
+            Assert.AreEqual(obj1.Nester.Title, hydratedObj1.Nester.Title);
+            Assert.AreEqual(obj1.Nester.AnInt, hydratedObj1.Nester.AnInt);
+
+        }
+
+        [Test]
+        public void Recursive_NestedTypes_Dont_Cause_Infinite_Loop()
+        {
+            var obj1 = new GeneralDTO() { Title = "Hello World", Nester = new GeneralDTO() { Title = "Bob", AnInt = 42 } };
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            
         }
 
         [Test]

@@ -104,7 +104,11 @@ namespace System.Data.Mongo.Protocol.Messages
                 .Concat(new byte[1]).ToArray());
             messageBytes.Add(BitConverter.GetBytes(this.NumberToSkip));//number to skip.
             messageBytes.Add(BitConverter.GetBytes(this._numberToTake));//number to take.
-            messageBytes.Add(this._query);
+
+            if (this._query != null)
+            {
+                messageBytes.Add(this._query);
+            }
             #endregion
 
             //now that we know the full size of the message, we can write it to the first array.

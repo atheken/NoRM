@@ -6,7 +6,7 @@ using BSONLib;
 
 namespace System.Data.Mongo.Commands
 {
-    public class IncrementOperation : ModifierOperation
+    public class IncrementOperation : ModifierCommand
     {
         public IncrementOperation(int amountToIncrement)
         {

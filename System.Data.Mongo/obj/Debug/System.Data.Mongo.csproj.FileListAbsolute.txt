@@ -22,3 +22,10 @@ C:\Code\MongoSharp\System.Data.Mongo\bin\Debug\BSONLib.pdb
 C:\Code\MongoSharp\System.Data.Mongo\obj\Debug\ResolveAssemblyReference.cache
 C:\Code\MongoSharp\System.Data.Mongo\obj\Debug\System.Data.Mongo.dll
 C:\Code\MongoSharp\System.Data.Mongo\obj\Debug\System.Data.Mongo.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\System.Data.Mongo.dll
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\System.Data.Mongo.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\BSONLib.dll
+C:\mydata\git\MongoSharp\System.Data.Mongo\bin\Debug\BSONLib.pdb
+C:\mydata\git\MongoSharp\System.Data.Mongo\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\MongoSharp\System.Data.Mongo\obj\Debug\System.Data.Mongo.dll
+C:\mydata\git\MongoSharp\System.Data.Mongo\obj\Debug\System.Data.Mongo.pdb

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data.Mongo.Protocol.Messages;
+using System.Data.Mongo.Protocol.SystemMessages.Requests;
+using System.Data.Mongo.Protocol.SystemMessages.Responses;
 
 namespace System.Data.Mongo
 {
@@ -18,7 +21,10 @@ namespace System.Data.Mongo
         {
             this._dbName = dbname;
             this._context = context;
+            this.SizeOnDisk = 0.0;
         }
+
+        public Double SizeOnDisk { get; set; }
 
         /// <summary>
         /// The database name for this database.
@@ -31,6 +37,29 @@ namespace System.Data.Mongo
             }
         }
 
+
+        /// <summary>
+        /// Removes the specified collection from the database.
+        /// </summary>
+        /// <param name="collectionName"></param>
+        /// <returns></returns>
+        public bool DropCollection(String collectionName)
+        {
+            var retval = false;
+            var qm = new QueryMessage<GenericCommandResponse, DropCollectionRequest>(this._context, this._dbName);
+            var drop = new DropCollectionRequest(collectionName);
+            qm.Query = drop;
+            qm.NumberToTake = 1;
+            qm.NumberToSkip = 0;
+            var reply = qm.Execute();
+            var result = reply.Results.FirstOrDefault();
+            if (result != null && result.OK == 1.0)
+            {
+                retval = true;
+            }
+            return retval;
+        }
+
         /// <summary>
         /// Produces a mongodb collection that will produce and
         /// manipulate objects of the specified type.
@@ -40,9 +69,7 @@ namespace System.Data.Mongo
         /// <returns></returns>
         public MongoCollection<T> GetCollection<T>(string collectionName) where T : class, new()
         {
-            var retval = new MongoCollection<T>(collectionName, this, this._context);
-
-            return retval;
+            return new MongoCollection<T>(collectionName, this, this._context);
         }
 
 
@@ -50,9 +77,11 @@ namespace System.Data.Mongo
         /// Produces a list of all collections currently in this database.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<String> GetAllCollections()
+        public IEnumerable<CollectionInfo> GetAllCollections()
         {
-            yield break;
+            var results = this.GetCollection<CollectionInfo>("system.namespaces").Find();                
+
+            return results;
         }
     }
 }
