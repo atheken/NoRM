@@ -15,6 +15,11 @@ namespace BSONHarness
         
         static void Main(string[] args)
         {
+            var server = new MongoServer();
+            server.Connect();
+            //server.GetDatabase("test");
+            server.DropDatabase("test");
+
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);
             InsertFindDeleteBenchmark(1000);

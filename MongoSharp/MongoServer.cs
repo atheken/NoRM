@@ -9,6 +9,7 @@ using MongoSharp.Protocol.Messages;
 using System.Security.Cryptography;
 using MongoSharp.Protocol.SystemMessages.Responses;
 using MongoSharp.Protocol.SystemMessages.Requests;
+using MongoSharp.BSON;
 
 namespace MongoSharp
 {
@@ -89,11 +90,12 @@ namespace MongoSharp
         public bool DropDatabase(String dbName)
         {
             var retval = false;
+
             var result = this.GetDatabase(dbName)
                 .GetCollection<DroppedDatabaseResponse>("$cmd")
                 .FindOne(new DropDatabaseRequest());
-            
-            if (result != null && result.OK == 1.0d)
+
+            if (result != null && result.OK == 1.0)
             {
                 retval = true;
             }

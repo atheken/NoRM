@@ -113,6 +113,20 @@ namespace MongoSharp.BSON
             return retval;
         }
 
+        public static IEnumerable<ExpandoProperty> AllProperties(this IFlyweight obj)
+        {
+            var retval = Enumerable.Empty<ExpandoProperty>();
+            
+            ExpandoProps._dictionaryLock.EnterReadLock();
+            var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
+            if (dict.Key != null && dict.Value != null)
+            {
+                retval = dict.Value.AllProperties.ToArray();
+            }
+            ExpandoProps._dictionaryLock.ExitReadLock();
+            return retval;
+        }
+
         /// <summary>
         /// Provides a lookup for a particular property.
         /// </summary>

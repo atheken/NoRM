@@ -7,6 +7,6 @@ namespace MongoSharp.Protocol.SystemMessages.Requests
 {
     public class DropDatabaseRequest
     {
-        public bool dropDatabase { get { return true; } }
+        public double dropDatabase { get { return 1d; } }
     }
 }

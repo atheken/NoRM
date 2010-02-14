@@ -46,13 +46,9 @@ namespace MongoSharp
         public bool DropCollection(String collectionName)
         {
             var retval = false;
-            var qm = new QueryMessage<GenericCommandResponse, DropCollectionRequest>(this._context, this._dbName);
-            var drop = new DropCollectionRequest(collectionName);
-            qm.Query = drop;
-            qm.NumberToTake = 1;
-            qm.NumberToSkip = 0;
-            var reply = qm.Execute();
-            var result = reply.Results.FirstOrDefault();
+            var cmd = this.GetCollection<GenericCommandResponse>("$cmd");
+            var result = cmd.FindOne(new DropCollectionRequest(collectionName));
+            
             if (result != null && result.OK == 1.0)
             {
                 retval = true;

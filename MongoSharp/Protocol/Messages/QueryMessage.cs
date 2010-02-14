@@ -9,6 +9,10 @@ using System.Threading;
 
 namespace MongoSharp.Protocol.Messages
 {
+    /// <summary>
+    /// A query to the db.
+    /// </summary>
+    /// <typeparam name="T">The request document type, and the response document type.</typeparam>
     internal class QueryMessage<T> : QueryMessage<T, T> where T : class, new()
     {
         internal QueryMessage(MongoServer context, String fullyQualifiedCollName) :
@@ -18,6 +22,11 @@ namespace MongoSharp.Protocol.Messages
         }
     }
 
+    /// <summary>
+    /// A query to the db.
+    /// </summary>
+    /// <typeparam name="T">The response type.</typeparam>
+    /// <typeparam name="U">The request type.</typeparam>
     internal class QueryMessage<T, U> : Message where T : class, new()
     {
         /// <summary>
