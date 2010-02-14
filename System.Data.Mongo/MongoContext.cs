@@ -68,6 +68,24 @@ namespace System.Data.Mongo
             this.EnableExpandoProperties = enableExpandoProps;
         }
 
+        /// <summary>
+        /// Drop this database from the mongo server (be careful what you wish for!)
+        /// </summary>
+        /// <returns></returns>
+        public bool DropDatabase(String dbName)
+        {
+            var retval = false;
+            var result = this.GetDatabase(dbName)
+                .GetCollection<DroppedDatabaseResponse>("$cmd")
+                .FindOne(new DropDatabaseRequest());
+            
+            if (result != null && result.OK == 1.0d)
+            {
+                retval = true;
+            }
+            return retval;
+        }
+
 
         /// <summary>
         /// Attempt to authenticate this user.

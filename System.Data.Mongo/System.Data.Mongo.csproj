@@ -45,17 +45,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterThanQualifier.cs" />
+    <Compile Include="Commands\Qualifiers\InQualifier.cs" />
     <Compile Include="Commands\Qualifiers\LessOrEqualQualifier.cs" />
     <Compile Include="Commands\Qualifiers\LessThanQualifier.cs" />
     <Compile Include="Commands\Qualifiers\NotEqualQualifier.cs" />
+    <Compile Include="Commands\Qualifiers\NotInQualifier.cs" />
     <Compile Include="Commands\Qualifiers\SizeQualifier.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\DropCollectionRequest.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\DropDatabaseRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DatabaseInfo.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\AuthenticationRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\GetNonceRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\ListDatabasesRequest.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\DroppedDatabaseResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\GenericCommandResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\GetNonceResponse.cs" />
     <Compile Include="Commands\Modifiers\IncrementOperation.cs" />

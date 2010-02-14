@@ -15,7 +15,6 @@ namespace System.Data.Mongo.Tests
     [TestFixture]
     public class MongoFindTest
     {
-
         [Test]
         public void MongoDatabase_FindOne_Returns()
         {
@@ -30,5 +29,7 @@ namespace System.Data.Mongo.Tests
 
             Assert.IsNotNull(found);
         }
+
+
     }
 }

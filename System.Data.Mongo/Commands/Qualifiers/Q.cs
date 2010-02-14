@@ -58,6 +58,61 @@ namespace System.Data.Mongo
         }
 
         /// <summary>
+        /// Builds an $all statement
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="all"></param>
+        /// <returns></returns>
+        public static AllQualifier<T> All<T>(params T[] all)
+        {
+            return new AllQualifier<T>(all);
+        }
+
+        /// <summary>
+        /// Builds an $in qualifier statement.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="inSet"></param>
+        /// <returns></returns>
+        public static InQualifier<T> In<T>(params T[] inSet)
+        {
+            return new InQualifier<T>(inSet);
+        }
+
+        /// <summary>
+        /// Builds a $ne qualifier against the value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="test"></param>
+        /// <returns></returns>
+        public static NotEqualQualifier NotEqual<T>(T test)
+        {
+            return new NotEqualQualifier(test);
+        }
+
+        /// <summary>
+        /// Builds a $size qualifier.
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public static SizeQualifier Size(double size)
+        {
+            return new SizeQualifier(size);
+        }
+
+        /// <summary>
+        /// Builds an $nin qualifier statement.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="inSet"></param>
+        /// <returns></returns>
+        public static NotInQualifier<T> NotIn<T>(params T[] inSet)
+        {
+            return new NotInQualifier<T>(inSet);
+        }
+
+
+        /// <summary>
         /// Builds an $exists qualifier for the search.
         /// </summary>
         /// <param name="value"></param>
