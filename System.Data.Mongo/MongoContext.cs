@@ -133,6 +133,11 @@ namespace System.Data.Mongo
 
         }
 
+        public bool Connect()
+        {
+            return ServerConnection().Connected;
+        }
+
         /// <summary>
         /// Returns a list of databases that already exist on this context.
         /// </summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using System.Net.Sockets;
 
 namespace System.Data.Mongo.Tests
 {
@@ -29,6 +30,20 @@ namespace System.Data.Mongo.Tests
         {
 
             Assert.IsNotEmpty(this._context.GetAllDatabases().ToList());
+        }
+
+        [Test]
+        public void Check_Invalid_Server()
+        {
+            MongoContext context = new MongoContext("localhost", 11111, false);
+
+            Assert.Throws(typeof(SocketException), delegate { context.Connect(); });
+        }
+
+        [Test]
+        public void Check_Valid_Server()
+        {
+            Assert.IsTrue(this._context.Connect());
         }
 
         
