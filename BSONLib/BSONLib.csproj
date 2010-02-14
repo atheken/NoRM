@@ -56,6 +56,9 @@
     <Compile Include="BSONOID.cs" />
     <Compile Include="BSONReference.cs" />
     <Compile Include="Commands.cs" />
+    <Compile Include="ExpandoProps.cs" />
+    <Compile Include="IMongoFlyweight.cs" />
+    <Compile Include="MongoFlyweight.cs" />
     <Compile Include="OIDGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReflectionHelpers.cs" />

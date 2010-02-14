@@ -44,24 +44,19 @@ namespace BSONHarness
         private static void InsertFindDeleteBenchmark(int count)
         {
             MongoContext context = new MongoContext();
-            var coll = context.GetDatabase("benchmark").GetCollection<GeneralDTO>("test");
+            var coll = context.GetDatabase("benchmark").GetCollection<DatabaseInfo>("dbinfo");
             coll.Delete(new { });
 
             BSONOID oid = BSONOID.EMPTY;
             DateTime start = DateTime.Now;
 
-            List<GeneralDTO> cache = new List<GeneralDTO>(count);
+            List<DatabaseInfo> cache = new List<DatabaseInfo>(count);
             int toUse = (int)Math.Floor(count / 2f);
             for (int i = 0; i < count; i++)
             {
-                var into = new GeneralDTO();
-                into._id = BSONOID.NewOID();
-                into.Title = Guid.NewGuid().ToString();
-                into.Int = i;
-                if (i == toUse)
-                {
-                    oid = into._id;
-                }
+                var into = new DatabaseInfo();
+                into.Name = "DBTest";
+                into.SizeOnDisk = i;
                 cache.Add(into);
             }
             coll.Insert(cache);
@@ -69,25 +64,20 @@ namespace BSONHarness
                 (DateTime.Now - start).TotalMilliseconds);
 
             start = DateTime.Now;
-            var first = coll.Find(new { _id = oid }).First();
+            var first = coll.Find(new { SizeOnDisk = toUse }).First();
             Console.WriteLine("   Search for 1 object in {1}ms", count,
                 (DateTime.Now - start).TotalMilliseconds);
 
+            
             start = DateTime.Now;
-            //find something randomly using a regex.
-            var numLessThan2 = coll.Find(new { Title = new Regex(".*8a.*", RegexOptions.IgnoreCase) }).ToArray().Count();
-            Console.WriteLine("   Found {0} objects that match the regex. in {1}ms", numLessThan2,
-                (DateTime.Now - start).TotalMilliseconds);
-
-            start = DateTime.Now;
-            coll.UpdateOne(new { _id = oid }, new { Int = M.Inc(5) });
+            coll.UpdateOne(new { SizeOnDisk = toUse }, new { SizeOnDisk = M.Inc(5) });
             Console.WriteLine("   Updated that one in {0}ms",
                 (DateTime.Now - start).TotalMilliseconds);
 
             start = DateTime.Now;
-            first = coll.Find(new { _id = oid }).First();
+            first = coll.Find(new { SizeOnDisk = toUse += 5 }).First();
 
-            coll.Delete(new { Int = Q.LessThan(Int32.MaxValue) });
+            coll.Delete(new { SizeOnDisk = Q.LessThan(Double.MaxValue) });
             Console.WriteLine("   Deleted {0} objects in {1}ms\r\n", count,
                 (DateTime.Now - start).TotalMilliseconds);
         }
@@ -101,29 +91,14 @@ namespace BSONHarness
             DateTime now = DateTime.Now;
             for (int i = 0; i < count; i++)
             {
-                var inTo = new GeneralDTO();
-                var bytes = BSONSerializer.Serialize(inTo);
+                var into = new DatabaseInfo();
+                into.Name = "DB1";
+                into.SizeOnDisk = 3829383298;
+                var bytes = BSONSerializer.Serialize(into);
 
-                var outTo = BSONSerializer.Deserialize<GeneralDTO>(bytes);
+                var outTo = BSONSerializer.Deserialize<DatabaseInfo>(bytes);
             }
             Console.WriteLine("Serialized/deserialized {0} objects in {1}ms", count, (DateTime.Now - now).TotalMilliseconds);
-        }
-
-        public class GeneralDTOWithNestedObject
-        {
-            public GeneralDTO DTO1 { get; set; }
-        }
-
-        /// <summary>
-        /// A basic class definition that will be used for testing.
-        /// </summary>
-        public class GeneralDTO
-        {
-            public BSONOID _id { get; set; }
-            public int? Int { get; set; }
-            public String Title { get; set; }
-            public Regex Rex { get; set; }
-            public List<DatabaseInfo> AList { get; set; }
         }
     }
 }

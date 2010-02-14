@@ -45,11 +45,13 @@ namespace System.Data.Mongo.Protocol.Messages
                         var bin = BitConverter.GetBytes(length).Concat(
                         reply.ReadBytes(length - 4)).ToArray();
 
-                        IDictionary<String, object> outProps;
-                        var obj = BSONSerializer.Deserialize<T>(bin, out outProps);
+                        IDictionary<WeakReference, MongoFlyweight> outProps = new Dictionary<WeakReference, MongoFlyweight>(0);
+                        var obj = BSONSerializer.Deserialize<T>(bin, ref outProps);
                         this._results.Add(obj);
-                        ExpandoProps.SetPropsForObject(obj, outProps, this._context);
-
+                        if (this._context.EnableExpandoProperties)
+                        {
+                            ExpandoProps.SetFlyWeightObjects(outProps);
+                        }
                     }
                     this._messageLength -= length;
                 }

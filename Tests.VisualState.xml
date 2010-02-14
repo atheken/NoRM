@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <VisualState xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ShowCheckBoxes="false">
   <TopNode>[0-1000]C:\Code\MongoSharp\Tests.nunit</TopNode>
-  <SelectedNode>[0-1005]System.Data.Mongo.Tests.MongoDatabaseTest.Drop_Collection_Returns_True</SelectedNode>
+  <SelectedNode>[0-1000]C:\Code\MongoSharp\Tests.nunit</SelectedNode>
   <ExcludeCategories>false</ExcludeCategories>
   <Nodes>
-    <Node UniqueName="[0-1000]C:\Code\MongoSharp\Tests.nunit" Expanded="true" />
     <Node UniqueName="[0-1009]C:\Code\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" Expanded="true" />
     <Node UniqueName="[0-1010]System" Expanded="true" />
     <Node UniqueName="[0-1011]System.Data" Expanded="true" />

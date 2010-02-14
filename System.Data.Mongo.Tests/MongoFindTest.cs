@@ -19,12 +19,10 @@ namespace System.Data.Mongo.Tests
         public void MongoDatabase_FindOne_Returns()
         {
             // This test assumes you did the little test from the MongoDB getting started docs
+            //(i.e. there's a document in "test.foo" that looks like "{a:1d}")
             MongoContext context = new MongoContext();
-
             var db = context.GetDatabase("test");
-
             MongoCollection<TestClass> coll = db.GetCollection<TestClass>("foo");
-
             TestClass found = coll.FindOne(new { a = 1d } );
 
             Assert.IsNotNull(found);
