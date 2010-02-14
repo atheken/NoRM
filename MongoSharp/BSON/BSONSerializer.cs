@@ -21,20 +21,293 @@ namespace MongoSharp.BSON
         private const int CODE_LENGTH = 1;
         private const int KEY_TERMINATOR_LENGTH = 1;
 
+        #region Reflection Cache
         /// <summary>
-        /// Encodes a string to UTF-8 bytes and adds a null byte to the end.
+        /// Types that can be serialized to/from BSON.
         /// </summary>
-        /// <param name="stringToEncode"></param>
-        /// <returns></returns>
-        public static byte[] CStringBytes(this String stringToEncode)
+        private static HashSet<Type> _allowedTypes = new HashSet<Type>();
+
+        /// <summary>
+        /// The types that can be deserialized.
+        /// </summary>
+        private static HashSet<Type> _canDeserialize = new HashSet<Type>();
+
+        /// <summary>
+        /// Types that cannot be serialized to/from BSON.
+        /// </summary>
+        private static HashSet<Type> _prohibittedTypes = new HashSet<Type>();
+
+        /// <summary>
+        /// A list of the known properties for a type, and their types.
+        /// </summary>
+        private static Dictionary<Type, Dictionary<String, Type>> _propertyTypes = new Dictionary<Type, Dictionary<string, Type>>();
+
+        /// <summary>
+        /// delegates to setters for specific types.
+        /// </summary>
+        private static Dictionary<Type, Dictionary<String, Action<object, object>>> _setters =
+            new Dictionary<Type, Dictionary<string, Action<object, object>>>();
+
+        /// <summary>
+        /// The delegates to getters for specific types.
+        /// </summary>
+        private static Dictionary<Type, Dictionary<String, Func<object, object>>> _getters =
+            new Dictionary<Type, Dictionary<string, Func<object, object>>>();
+
+
+        /// <summary>
+        /// Sets some "white-listed" types that the BSONSerializer knows about.
+        /// </summary>
+        private static void Load()
         {
-            return Encoding.UTF8.GetBytes(stringToEncode).Concat(new byte[1]).ToArray();
+            // whitelist a few "complex" types (reference types that have 
+            // additional properties that will not be serialized)
+            if (BSONSerializer._allowedTypes.Count == 0)
+            {
+                //these are all known "safe" types that the reader handles.
+                BSONSerializer._allowedTypes.Add(typeof(int?));
+                BSONSerializer._allowedTypes.Add(typeof(long?));
+                BSONSerializer._allowedTypes.Add(typeof(bool?));
+                BSONSerializer._allowedTypes.Add(typeof(double?));
+                BSONSerializer._allowedTypes.Add(typeof(Guid?));
+                BSONSerializer._allowedTypes.Add(typeof(DateTime?));
+                BSONSerializer._allowedTypes.Add(typeof(String));
+                BSONSerializer._allowedTypes.Add(typeof(BSONOID));
+                BSONSerializer._allowedTypes.Add(typeof(Regex));
+                BSONSerializer._allowedTypes.Add(typeof(byte[]));
+                BSONSerializer._allowedTypes.Add(typeof(Regex));
+                BSONSerializer._allowedTypes.Add(typeof(IList));
+                foreach (var t in BSONSerializer._allowedTypes)
+                {
+                    BSONSerializer._canDeserialize.Add(t);
+                }
+
+                //these can be serialized, but not deserialized.
+                BSONSerializer._allowedTypes.Add(typeof(int));
+                BSONSerializer._allowedTypes.Add(typeof(double));
+                BSONSerializer._allowedTypes.Add(typeof(long));
+                BSONSerializer._allowedTypes.Add(typeof(bool));
+                BSONSerializer._allowedTypes.Add(typeof(DateTime));
+                BSONSerializer._allowedTypes.Add(typeof(Guid));
+            }
         }
+
+        #endregion
+
+        #region Reflection Helpers
+        /// <summary>
+        /// Will traverse the class definition for public instance properties and
+        /// determine if their types are serializeable.
+        /// </summary>
+        /// <remarks>
+        /// Only R/W public properties may exist in the specified type. The type must be a class, or
+        /// one of the "whitelisted types" (Oid, MongoRegex, Binary, String, double?,int?,long?, DateTime?, bool?)
+        /// Property types must also follow these constraints. (meaning that "int" is not supported but "int?" is.)
+        /// 
+        /// 'Why?' you ask. Allowing structs that can have default values will lead to confusion and bugs when
+        /// people inevitably assume that a property value of 0 was the one set by the database. no, int? is better.
+        /// </remarks>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static bool CanBeSerialized(Type t)
+        {
+            return BSONSerializer.CanBeSerialized(t, new HashSet<Type>());
+        }
+
+        /// <summary>
+        /// This is a helper method for the public CanBeSerialized that avoids infinite 
+        /// recursion by tracking which types are already being checked and not checking them.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="checkStack"></param>
+        /// <returns></returns>
+        private static bool CanBeSerialized(Type t, HashSet<Type> checkStack)
+        {
+            bool retval = true;
+            //we want to check to see if this type can be serialized.
+            if (!BSONSerializer._prohibittedTypes.Contains(t) &&
+                !BSONSerializer._allowedTypes.Contains(t))
+            {
+                ///we only care about public properties on instances, not statics.
+                foreach (var pi in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    retval &= pi.CanRead;
+                    var propType = pi.PropertyType;
+
+                    //only do a check on a particular type once.
+                    if (!checkStack.Contains(propType))
+                    {
+                        checkStack.Add(propType);
+                        if (!propType.IsValueType)
+                        {
+                            retval &= BSONSerializer.CanBeSerialized(propType, checkStack);
+                        }
+                    }
+                }
+            }
+            else if (BSONSerializer._prohibittedTypes.Contains(t))
+            {
+                retval = false;
+            }
+
+            //if we get all the way to the end, this type is "safe" and we should include actions.
+            if (retval == true)
+            {
+                BSONSerializer._allowedTypes.Add(t);
+            }
+            return retval;
+
+        }
+
+        /// <summary>
+        /// Indicates that a type can be hydrated by the BSONSerializer
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static bool CanBeDeserialized(Type t)
+        {
+            return BSONSerializer.CanBeDeserialized(t, new HashSet<Type>());
+        }
+
+        /// <summary>
+        /// This is a helper method for the public CanBeDeserialized that avoids infinite 
+        /// recursion by tracking which types are already being checked and not checking them.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="checkStack"></param>
+        /// <returns></returns>
+        public static bool CanBeDeserialized(Type t, HashSet<Type> searchStack)
+        {
+            bool retval = true;
+
+            #region Lists are special, do special work
+            bool isSafeList = true;
+            if (t.IsGenericType && t.FullName.StartsWith("System.Collections.Generic.List`1"))
+            {
+                isSafeList = t.GetGenericArguments().All(y => BSONSerializer.CanBeDeserialized(y));
+                retval = isSafeList;
+                if (isSafeList)
+                {
+                    BSONSerializer._canDeserialize.Add(t);
+                }
+                else
+                {
+                    BSONSerializer._prohibittedTypes.Add(t);
+                }
+            }
+            #endregion
+
+            #region check properties.
+            if (!BSONSerializer._canDeserialize.Contains(t) &&
+                !BSONSerializer._prohibittedTypes.Contains(t))
+            {
+                ///we only care about public properties on instances, not statics.
+                foreach (var pi in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    retval &= pi.CanWrite & pi.CanWrite;
+                    var propType = pi.PropertyType;
+                    if (!searchStack.Contains(propType))
+                    {
+                        searchStack.Add(propType);
+                        if (!propType.IsValueType)
+                        {
+                            retval &= BSONSerializer.CanBeDeserialized(propType, searchStack);
+                        }
+                    }
+                }
+            }
+            else if (BSONSerializer._prohibittedTypes.Contains(t))
+            {
+                retval = false;
+            }
+            #endregion
+
+            //if we get all the way to the end, this type is "safe" and we should include actions.
+            if (retval == true && !BSONSerializer._canDeserialize.Contains(t))
+            {
+                BSONSerializer._canDeserialize.Add(t);
+                BSONSerializer._allowedTypes.Add(t);
+            }
+            return retval;
+        }
+
+        /// <summary>
+        /// Retrieve the property types and names for a given type.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        private static IDictionary<String, Type> GetPropertyTypes(Type t)
+        {
+            Dictionary<String, Type> retval = null;
+            if (!BSONSerializer._propertyTypes.TryGetValue(t, out retval))
+            {
+                retval = new Dictionary<String, Type>(StringComparer.InvariantCultureIgnoreCase);
+                foreach (var p in t.GetProperties().OfType<PropertyInfo>())
+                {
+                    if (p.CanRead && p.CanWrite)
+                    {
+                        retval[p.Name] = p.PropertyType;
+                    }
+                }
+                BSONSerializer._propertyTypes[t] = retval;
+            }
+            return retval;
+        }
+
+        /// <summary>
+        /// Key: Lowercase name of the property
+        /// Value: A delegate to set the value on the target.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="document"></param>
+        /// <returns></returns>
+        private static IDictionary<String, Action<object, object>> SettersForType(Type documentType)
+        {
+
+            if (!BSONSerializer._setters.ContainsKey(documentType))
+            {
+                BSONSerializer._setters[documentType] = new Dictionary<string, Action<object, object>>(StringComparer.InvariantCultureIgnoreCase);
+                if (!typeof(IList).IsAssignableFrom(documentType))
+                {
+                    foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                    {
+                        BSONSerializer._setters[documentType][p.Name] = ReflectionHelpers.SetterMethod(p);
+                    }
+                }
+            }
+            return new Dictionary<String, Action<object, object>>(BSONSerializer._setters[documentType],
+                StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        /// <summary>
+        /// Key: Lowercase name of the property
+        /// Value: A delegate to set the value on the target.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="document"></param>
+        /// <returns></returns>
+        private static IDictionary<String, Func<object, object>> GettersForType(Type documentType)
+        {
+            if (!BSONSerializer._getters.ContainsKey(documentType))
+            {
+                BSONSerializer._getters[documentType] = new Dictionary<string, Func<object, object>>
+                    (StringComparer.InvariantCultureIgnoreCase);
+                foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    BSONSerializer._getters[documentType][p.Name] = ReflectionHelpers.GetterMethod(p);
+                }
+            }
+            return new Dictionary<String, Func<object, object>>(BSONSerializer._getters[documentType],
+                StringComparer.InvariantCultureIgnoreCase);
+        }
+        #endregion
 
         static BSONSerializer()
         {
             BSONSerializer.Load();
         }
+
+        #region Serialization
 
         /// <summary>
         /// Converts a document into its BSON byte-form.
@@ -43,12 +316,19 @@ namespace MongoSharp.BSON
         /// <exception cref="NotSupportedException">Throws a not supported exception 
         /// when the T is not a "serializable" type.</exception>
         /// <param name="document"></param>
+        /// <param name="includeExpandoProps">true indicates that Flyweight associated with this object should be included in serialization. 
+        /// False means that it will be ignored.</param>
         /// <returns></returns>
-        public static byte[] Serialize<T>(T document, IDictionary<String, object> addedProps)
+        public static byte[] Serialize<T>(T document, bool includeExpandoProps)
         {
 
-            if (!BSONSerializer.CanBeSerialized(typeof(T)) || addedProps.Any(y => y.Value != null &&
-                !BSONSerializer.CanBeSerialized(y.Value.GetType())))
+            Flyweight props = null;
+            if (includeExpandoProps)
+            {
+                props = ExpandoProps.FlyweightForObject(document);
+            }
+            if (!BSONSerializer.CanBeSerialized(typeof(T)) || (props != null && props.AllProperties.Any(y => y.Value != null &&
+                !BSONSerializer.CanBeSerialized(y.Value.GetType()))))
             {
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
@@ -105,11 +385,13 @@ namespace MongoSharp.BSON
                 }
             }
 
-            foreach (var p in addedProps)
+            if (props != null && includeExpandoProps)
             {
-                retval.Add(BSONSerializer.SerializeMember(p.Key, p.Value));
+                foreach (var p in props.AllProperties)
+                {
+                    retval.Add(BSONSerializer.SerializeMember(p.PropertyName, p.Value));
+                }
             }
-
             retval.Add(new byte[1]);//null terminate the retval;
 
             var size = retval.Sum(y => y.Length);
@@ -118,6 +400,24 @@ namespace MongoSharp.BSON
             return retval.SelectMany(y => y).ToArray();
         }
 
+        /// <summary>
+        /// Serialize an object to bytes, ignoring the expando properties.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectToSerialize"></param>
+        /// <returns></returns>
+        public static byte[] Serialize<T>(T objectToSerialize)
+        {
+            return BSONSerializer.Serialize<T>(objectToSerialize, false);
+        }
+
+        /// <summary>
+        /// Convert an object to a byte array, this should really be broken out into
+        /// separate methods so that we don't have to do so much casting.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         private static byte[] SerializeMember(string key, object value)
         {
             //type + name + data
@@ -256,29 +556,46 @@ namespace MongoSharp.BSON
             return retval.SelectMany(h => h).ToArray();
         }
 
-        private static Dictionary<Type, Dictionary<String, Type>> _propertyTypes = new Dictionary<Type, Dictionary<string, Type>>();
+        #endregion
 
-        private static IDictionary<String, Type> GetPropertyTypes(Type t)
+        #region Deserialization
+        /// <summary>
+        /// converts a binary stream to an object, 
+        /// and outs any associated properties to an object that don't map to the class definition of T.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stream"></param>
+        /// <param name="outProps"></param>
+        /// <returns></returns>
+        public static T Deserialize<T>(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps) where T : class, new()
         {
-            Dictionary<String, Type> retval = null;
-            if (!BSONSerializer._propertyTypes.TryGetValue(t, out retval))
-            {
-                retval = new Dictionary<String, Type>(StringComparer.InvariantCultureIgnoreCase);
-                foreach (var p in t.GetProperties().OfType<PropertyInfo>())
-                {
-                    if (p.CanRead && p.CanWrite)
-                    {
-                        retval[p.Name] = p.PropertyType;
-                    }
-                }
-                BSONSerializer._propertyTypes[t] = retval;
-            }
-            return retval;
+            return (T)BSONSerializer.Deserialize(stream, ref outProps, typeof(T));
         }
 
-        public static T Deserialize<T>(BinaryReader stream, out IDictionary<String, object> outProps) where T : class, new()
+        /// <summary>
+        /// Overload that constructs a BinaryReader in memory and then deserializes the values.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectData"></param>
+        /// <returns></returns>
+        public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Flyweight> outProps) where T : class, new()
         {
-            return (T)BSONSerializer.Deserialize(stream, out outProps, typeof(T));
+            var ms = new MemoryStream();
+            ms.Write(objectData, 0, objectData.Length);
+            ms.Position = 0;
+            return BSONSerializer.Deserialize<T>(new BinaryReader(ms), ref outProps);
+        }
+
+        /// <summary>
+        /// Deserialize an object, and don't worry about getting any of the expando props back.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectData"></param>
+        /// <returns></returns>
+        public static T Deserialize<T>(byte[] objectData) where T : class, new()
+        {
+            IDictionary<WeakReference, Flyweight> outprops = new Dictionary<WeakReference, Flyweight>();
+            return BSONSerializer.Deserialize<T>(objectData, ref outprops);
         }
 
         /// <summary>
@@ -288,9 +605,9 @@ namespace MongoSharp.BSON
         /// <param name="stream">the document's bytes</param>
         /// <param name="outProps">Properties that don't map onto T.</param>
         /// <returns></returns>
-        private static object Deserialize(BinaryReader stream, out IDictionary<String, object> outProps, Type T)
+        private static object Deserialize(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps, Type returnType)
         {
-            if (!BSONSerializer.CanBeDeserialized(T))
+            if (!BSONSerializer.CanBeDeserialized(returnType))
             {
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
@@ -301,10 +618,9 @@ namespace MongoSharp.BSON
             stream.Read(buffer, 0, length - 5);
             //push the position forward past the null terminator.
             stream.Read(new byte[1], 0, 1);
-            var retval = Activator.CreateInstance(T);
+            var retval = Activator.CreateInstance(returnType);
 
             var setters = BSONSerializer.SettersForType(retval.GetType());
-            outProps = new Dictionary<String, object>(0);
 
             #region Read out of the buffer.
             while (buffer.Length > 0)
@@ -315,7 +631,7 @@ namespace MongoSharp.BSON
 
                 Object obj = null;
                 String key = Encoding.UTF8.GetString(keyStringBytes);
-                var propTypes = BSONSerializer.GetPropertyTypes(T);
+                var propTypes = BSONSerializer.GetPropertyTypes(returnType);
 
                 Type propType;
                 if (!propTypes.TryGetValue(key, out propType))
@@ -325,7 +641,7 @@ namespace MongoSharp.BSON
                 var objectData = buffer.Skip(keyStringBytes.Length + CODE_LENGTH + KEY_TERMINATOR_LENGTH).ToArray();
 
                 int usedBytes;
-                obj = BSONSerializer.DeserializeMember(t, objectData, propType, out usedBytes);
+                obj = BSONSerializer.DeserializeMember(t, objectData, propType, out usedBytes, ref outProps);
 
                 //skip type, the key, the null, the object data
                 buffer = buffer.Skip(CODE_LENGTH + keyStringBytes.Length +
@@ -338,40 +654,12 @@ namespace MongoSharp.BSON
                 }
                 else
                 {
-                    outProps[key] = obj;
+                    //outProps[key] = obj;
                 }
             }
             #endregion
 
             return retval;
-        }
-
-        public static byte[] Serialize<T>(T objectToSerialize)
-        {
-            return BSONSerializer.Serialize<T>(objectToSerialize, new Dictionary<String, object>(0));
-        }
-
-
-
-
-        /// <summary>
-        /// Overload that constructs a BinaryReader in memory and then deserializes the values.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="objectData"></param>
-        /// <returns></returns>
-        public static T Deserialize<T>(byte[] objectData, out IDictionary<String, object> outProps) where T : class, new()
-        {
-            var ms = new MemoryStream();
-            ms.Write(objectData, 0, objectData.Length);
-            ms.Position = 0;
-            return BSONSerializer.Deserialize<T>(new BinaryReader(ms), out outProps);
-        }
-
-        public static T Deserialize<T>(byte[] objectData) where T : class, new()
-        {
-            IDictionary<String, object> outprops;
-            return BSONSerializer.Deserialize<T>(objectData, out outprops);
         }
 
         /// <summary>
@@ -382,7 +670,7 @@ namespace MongoSharp.BSON
         /// <param name="propertyType"></param>
         /// <param name="usedBytes"></param>
         /// <returns></returns>
-        private static object DeserializeMember(BSONTypes t, byte[] objectData, Type proptype, out int usedBytes)
+        private static object DeserializeMember(BSONTypes t, byte[] objectData, Type proptype, out int usedBytes, ref IDictionary<WeakReference, Flyweight> outProps)
         {
             object retval = null;
             usedBytes = 0;
@@ -494,7 +782,7 @@ namespace MongoSharp.BSON
 
                     int usedCount = 0;
                     var outobj = BSONSerializer.DeserializeMember(memberType,
-                        arrayData.ToArray(), type, out usedCount);
+                        arrayData.ToArray(), type, out usedCount, ref outProps);
                     list.Add(outobj);
 
                     arrayData = arrayData.Skip(usedCount).ToArray();
@@ -507,254 +795,24 @@ namespace MongoSharp.BSON
             {
                 int length = BitConverter.ToInt32(objectData, 0);
 
-                IDictionary<String, Object> droppedProps;
-
                 var outObj = BSONSerializer.Deserialize(new BinaryReader(new MemoryStream(objectData.Take(length).ToArray())),
-                    out droppedProps, proptype);
+                    ref outProps, proptype);
                 usedBytes = length;
                 retval = outObj;
             }
 
             return retval;
         }
-
-
-
-        /// <summary>
-        /// Types that can be serialized to/from BSON.
-        /// </summary>
-        private static HashSet<Type> _allowedTypes = new HashSet<Type>();
+        #endregion
 
         /// <summary>
-        /// The types that can be deserialized.
+        /// Encodes a string to UTF-8 bytes and adds a null byte to the end.
         /// </summary>
-        private static HashSet<Type> _canDeserialize = new HashSet<Type>();
-
-        /// <summary>
-        /// Types that cannot be serialized to/from BSON.
-        /// </summary>
-        private static HashSet<Type> _prohibittedTypes = new HashSet<Type>();
-
-        /// <summary>
-        /// delegates to setters for specific types.
-        /// </summary>
-        private static Dictionary<Type, Dictionary<String, Action<object, object>>> _setters =
-            new Dictionary<Type, Dictionary<string, Action<object, object>>>();
-
-        /// <summary>
-        /// The delegates to getters for specific types.
-        /// </summary>
-        private static Dictionary<Type, Dictionary<String, Func<object, object>>> _getters =
-            new Dictionary<Type, Dictionary<string, Func<object, object>>>();
-
-        /// <summary>
-        /// Sets some "white-listed" types that the BSONSerializer knows about.
-        /// </summary>
-        private static void Load()
-        {
-            // whitelist a few "complex" types (reference types that have 
-            // additional properties that will not be serialized)
-            if (BSONSerializer._allowedTypes.Count == 0)
-            {
-                //these are all known "safe" types that the reader handles.
-                BSONSerializer._allowedTypes.Add(typeof(int?));
-                BSONSerializer._allowedTypes.Add(typeof(long?));
-                BSONSerializer._allowedTypes.Add(typeof(bool?));
-                BSONSerializer._allowedTypes.Add(typeof(double?));
-                BSONSerializer._allowedTypes.Add(typeof(Guid?));
-                BSONSerializer._allowedTypes.Add(typeof(DateTime?));
-                BSONSerializer._allowedTypes.Add(typeof(String));
-                BSONSerializer._allowedTypes.Add(typeof(BSONOID));
-                BSONSerializer._allowedTypes.Add(typeof(Regex));
-                BSONSerializer._allowedTypes.Add(typeof(byte[]));
-                BSONSerializer._allowedTypes.Add(typeof(Regex));
-                BSONSerializer._allowedTypes.Add(typeof(IList));
-                foreach (var t in BSONSerializer._allowedTypes)
-                {
-                    BSONSerializer._canDeserialize.Add(t);
-                }
-
-                //these can be serialized, but not deserialized.
-                BSONSerializer._allowedTypes.Add(typeof(int));
-                BSONSerializer._allowedTypes.Add(typeof(double));
-                BSONSerializer._allowedTypes.Add(typeof(long));
-                BSONSerializer._allowedTypes.Add(typeof(bool));
-                BSONSerializer._allowedTypes.Add(typeof(DateTime));
-                BSONSerializer._allowedTypes.Add(typeof(Guid));
-            }
-        }
-
-        /// <summary>
-        /// Will traverse the class definition for public instance properties and
-        /// determine if their types are serializeable.
-        /// </summary>
-        /// <remarks>
-        /// Only R/W public properties may exist in the specified type. The type must be a class, or
-        /// one of the "whitelisted types" (Oid, MongoRegex, Binary, String, double?,int?,long?, DateTime?, bool?)
-        /// Property types must also follow these constraints. (meaning that "int" is not supported but "int?" is.)
-        /// 
-        /// 'Why?' you ask. Allowing structs that can have default values will lead to confusion and bugs when
-        /// people inevitably assume that a property value of 0 was the one set by the database. no, int? is better.
-        /// </remarks>
-        /// <param name="t"></param>
+        /// <param name="stringToEncode"></param>
         /// <returns></returns>
-        public static bool CanBeSerialized(Type t)
+        public static byte[] CStringBytes(this String stringToEncode)
         {
-            return BSONSerializer.CanBeSerialized(t, new HashSet<Type>());
-        }
-
-        private static bool CanBeSerialized(Type t, HashSet<Type> checkStack)
-        {
-            bool retval = true;
-            //we want to check to see if this type can be serialized.
-            if (!BSONSerializer._prohibittedTypes.Contains(t) &&
-                !BSONSerializer._allowedTypes.Contains(t))
-            {
-                ///we only care about public properties on instances, not statics.
-                foreach (var pi in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
-                {
-                    retval &= pi.CanRead;
-                    var propType = pi.PropertyType;
-
-                    //only do a check on a particular type once.
-                    if (!checkStack.Contains(propType))
-                    {
-                        checkStack.Add(propType);
-                        if (!propType.IsValueType)
-                        {
-                            retval &= BSONSerializer.CanBeSerialized(propType, checkStack);
-                        }
-                    }
-                }
-            }
-            else if (BSONSerializer._prohibittedTypes.Contains(t))
-            {
-                retval = false;
-            }
-
-            //if we get all the way to the end, this type is "safe" and we should include actions.
-            if (retval == true)
-            {
-                BSONSerializer._allowedTypes.Add(t);
-            }
-            return retval;
-
-        }
-
-
-        /// <summary>
-        /// Indicates that a type can be hydrated by the BSONSerializer
-        /// </summary>
-        /// <param name="t"></param>
-        /// <returns></returns>
-        public static bool CanBeDeserialized(Type t)
-        {
-            return BSONSerializer.CanBeDeserialized(t, new HashSet<Type>());
-        }
-
-        public static bool CanBeDeserialized(Type t, HashSet<Type> searchStack)
-        {
-            bool retval = true;
-
-            #region Lists are special, do special work
-            bool isSafeList = true;
-            if (t.IsGenericType && t.FullName.StartsWith("System.Collections.Generic.List`1"))
-            {
-                isSafeList = t.GetGenericArguments().All(y => BSONSerializer.CanBeDeserialized(y));
-                retval = isSafeList;
-                if (isSafeList)
-                {
-                    BSONSerializer._canDeserialize.Add(t);
-                }
-                else
-                {
-                    BSONSerializer._prohibittedTypes.Add(t);
-                }
-            }
-            #endregion
-
-            #region check properties.
-            if (!BSONSerializer._canDeserialize.Contains(t) &&
-                !BSONSerializer._prohibittedTypes.Contains(t))
-            {
-                ///we only care about public properties on instances, not statics.
-                foreach (var pi in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
-                {
-                    retval &= pi.CanWrite & pi.CanWrite;
-                    var propType = pi.PropertyType;
-                    if (!searchStack.Contains(propType))
-                    {
-                        searchStack.Add(propType);
-                        if (!propType.IsValueType)
-                        {
-                            retval &= BSONSerializer.CanBeDeserialized(propType, searchStack);
-                        }
-                    }
-                }
-            }
-            else if (BSONSerializer._prohibittedTypes.Contains(t))
-            {
-                retval = false;
-            }
-            #endregion
-
-            //if we get all the way to the end, this type is "safe" and we should include actions.
-            if (retval == true && !BSONSerializer._canDeserialize.Contains(t))
-            {
-                BSONSerializer._canDeserialize.Add(t);
-                BSONSerializer._allowedTypes.Add(t);
-            }
-            return retval;
-        }
-
-
-
-        /// <summary>
-        /// Key: Lowercase name of the property
-        /// Value: A delegate to set the value on the target.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="document"></param>
-        /// <returns></returns>
-        private static IDictionary<String, Action<object, object>> SettersForType(Type documentType)
-        {
-
-            if (!BSONSerializer._setters.ContainsKey(documentType))
-            {
-                BSONSerializer._setters[documentType] = new Dictionary<string, Action<object, object>>(StringComparer.InvariantCultureIgnoreCase);
-                if (!typeof(IList).IsAssignableFrom(documentType))
-                {
-                    foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
-                    {
-                        BSONSerializer._setters[documentType][p.Name] = ReflectionHelpers.SetterMethod(p);
-                    }
-                }
-            }
-            return new Dictionary<String, Action<object, object>>(BSONSerializer._setters[documentType],
-                StringComparer.InvariantCultureIgnoreCase);
-        }
-
-
-        /// <summary>
-        /// Key: Lowercase name of the property
-        /// Value: A delegate to set the value on the target.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="document"></param>
-        /// <returns></returns>
-        private static IDictionary<String, Func<object, object>> GettersForType(Type documentType)
-        {
-            if (!BSONSerializer._getters.ContainsKey(documentType))
-            {
-                BSONSerializer._getters[documentType] = new Dictionary<string, Func<object, object>>
-                    (StringComparer.InvariantCultureIgnoreCase);
-                foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
-                {
-                    BSONSerializer._getters[documentType][p.Name] = ReflectionHelpers.GetterMethod(p);
-                }
-            }
-            return new Dictionary<String, Func<object, object>>(BSONSerializer._getters[documentType],
-                StringComparer.InvariantCultureIgnoreCase);
+            return Encoding.UTF8.GetBytes(stringToEncode).Concat(new byte[1]).ToArray();
         }
     }
 }

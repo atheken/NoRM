@@ -8,3 +8,8 @@ C:\@Projects\MongoSharp\MongoSharp\bin\Debug\MongoSharp.pdb
 C:\@Projects\MongoSharp\MongoSharp\obj\Debug\ResolveAssemblyReference.cache
 C:\@Projects\MongoSharp\MongoSharp\obj\Debug\MongoSharp.dll
 C:\@Projects\MongoSharp\MongoSharp\obj\Debug\MongoSharp.pdb
+C:\Code\MongoSharp\MongoSharp\obj\Debug\ResolveAssemblyReference.cache
+C:\Code\MongoSharp\MongoSharp\bin\Debug\MongoSharp.dll
+C:\Code\MongoSharp\MongoSharp\bin\Debug\MongoSharp.pdb
+C:\Code\MongoSharp\MongoSharp\obj\Debug\MongoSharp.dll
+C:\Code\MongoSharp\MongoSharp\obj\Debug\MongoSharp.pdb

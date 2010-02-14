@@ -66,6 +66,9 @@
     <Compile Include="Commands\Qualifiers\NotEqualQualifier.cs" />
     <Compile Include="Commands\Qualifiers\NotInQualifier.cs" />
     <Compile Include="Commands\Qualifiers\SizeQualifier.cs" />
+    <Compile Include="BSON\ExpandoProps.cs" />
+    <Compile Include="BSON\IFlyweight.cs" />
+    <Compile Include="BSON\Flyweight.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\DropCollectionRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\DropDatabaseRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\CollectionInfo.cs" />
@@ -77,14 +80,11 @@
     <Compile Include="Protocol\SystemMessages\Responses\GenericCommandResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\GetNonceResponse.cs" />
     <Compile Include="Commands\Modifiers\IncrementOperation.cs" />
-    <Compile Include="ExpandoProps.cs" />
-    <Compile Include="IMongoFlyweight.cs" />
     <Compile Include="Commands\Modifiers\M.cs" />
     <Compile Include="MongoCollection.cs" />
     <Compile Include="MongoServer.cs" />
     <Compile Include="MongoDatabase.cs" />
     <Compile Include="MongoException.cs" />
-    <Compile Include="MongoFlyweight.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocol\Messages\DeleteMessage.cs" />
     <Compile Include="Protocol\Messages\GetMoreMessage.cs" />
