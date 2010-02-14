@@ -6,6 +6,7 @@ using BSONLib;
 using System.IO;
 using System.Data.Mongo;
 using System.Text.RegularExpressions;
+using System.Data.Mongo.Protocol.SystemMessages.Responses;
 
 namespace BSONHarness
 {
