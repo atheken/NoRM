@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.Mongo.Protocol.Messages;
+using System.Data.Mongo.Protocol.SystemMessages.Requests;
+using System.Data.Mongo.Protocol.SystemMessages.Responses;
 
 namespace System.Data.Mongo
 {
@@ -24,7 +26,6 @@ namespace System.Data.Mongo
             this._context = context;
             this._collectionName = collectionName;
         }
-
 
         /// <summary>
         /// Overload of Update that updates one document and doesn't upsert if no matches are found.
