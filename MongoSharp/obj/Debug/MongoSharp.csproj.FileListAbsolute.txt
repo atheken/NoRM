@@ -1,0 +1,10 @@
+C:\@Projects\MongoSharp\System.Data.Mongo\obj\Debug\ResolveAssemblyReference.cache
+C:\@Projects\MongoSharp\System.Data.Mongo\bin\Debug\MongoSharp.dll
+C:\@Projects\MongoSharp\System.Data.Mongo\bin\Debug\MongoSharp.pdb
+C:\@Projects\MongoSharp\System.Data.Mongo\obj\Debug\MongoSharp.dll
+C:\@Projects\MongoSharp\System.Data.Mongo\obj\Debug\MongoSharp.pdb
+C:\@Projects\MongoSharp\MongoSharp\bin\Debug\MongoSharp.dll
+C:\@Projects\MongoSharp\MongoSharp\bin\Debug\MongoSharp.pdb
+C:\@Projects\MongoSharp\MongoSharp\obj\Debug\ResolveAssemblyReference.cache
+C:\@Projects\MongoSharp\MongoSharp\obj\Debug\MongoSharp.dll
+C:\@Projects\MongoSharp\MongoSharp\obj\Debug\MongoSharp.pdb

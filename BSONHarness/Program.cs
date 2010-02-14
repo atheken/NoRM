@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using BSONLib;
+using MongoSharp.BSON;
 using System.IO;
-using System.Data.Mongo;
+using MongoSharp;
 using System.Text.RegularExpressions;
-using System.Data.Mongo.Protocol.SystemMessages.Responses;
+using MongoSharp.Protocol.SystemMessages.Responses;
 
 namespace BSONHarness
 {
@@ -35,7 +35,7 @@ namespace BSONHarness
 
         private static void AuthenticateAConnection()
         {
-            var auth = new MongoContext().Authenticate("testing", "testing");
+            var auth = new MongoServer().Authenticate("testing", "testing");
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace BSONHarness
         /// <param name="count"></param>
         private static void InsertFindDeleteBenchmark(int count)
         {
-            MongoContext context = new MongoContext();
+            MongoServer context = new MongoServer();
             var coll = context.GetDatabase("benchmark").GetCollection<GeneralDTO>("test");
             coll.Delete(new { });
 
