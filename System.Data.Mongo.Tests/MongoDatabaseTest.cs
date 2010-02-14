@@ -13,7 +13,7 @@ namespace System.Data.Mongo.Tests
         public void GetAllCollections_Returns_Collections()
         {
             MongoContext context = new MongoContext();
-            var db = context.GetDatabase("Test1");
+            var db = context.GetDatabase("test");
             Assert.IsNotEmpty(db.GetAllCollections().ToList());
         }
     }
