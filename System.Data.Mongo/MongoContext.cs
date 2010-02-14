@@ -15,6 +15,7 @@ namespace System.Data.Mongo
     public class MongoContext
     {
         private static MD5 _md5 = MD5.Create();
+
         /// <summary>
         /// This indicates if the context should load properties 
         /// that are not part of a given class definition into a 
@@ -46,11 +47,24 @@ namespace System.Data.Mongo
         /// <summary>
         /// The ip/domain name of the server.
         /// </summary>
-        protected String _serverName = "127.0.0.1";
+        private String _serverName = "127.0.0.1";
+
+        public String ServerName
+        {
+            get { return _serverName; }
+            set { _serverName = value; }
+        }
+
         /// <summary>
         /// The port on which the server is accessible.
         /// </summary>
-        protected int _serverPort = 27017;
+        private int _serverPort = 27017;
+
+        public int ServerPort
+        {
+            get { return _serverPort; }
+            set { _serverPort = value; }
+        }
 
         protected IPEndPoint _endPoint;
 
