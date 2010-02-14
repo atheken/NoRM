@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data.Mongo.Protocol.SystemMessages.Responses;
 
 namespace System.Data.Mongo
 {
@@ -34,15 +35,6 @@ namespace System.Data.Mongo
             }
         }
 
-        public IEnumerable<T> Command<T>(string commandPrefix, string command) where T : class, new()
-        {
-            MongoCollection<T> coll = new MongoCollection<T>(commandPrefix, this, this._context);
-            
-            var results = coll.Find(new { }, Int32.MaxValue, String.Format("{0}.{1}", "$cmd", command));
-
-           
-            return results;
-        }
 
         /// <summary>
         /// Produces a mongodb collection that will produce and
@@ -63,9 +55,11 @@ namespace System.Data.Mongo
         /// Produces a list of all collections currently in this database.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<String> GetAllCollections()
+        public IEnumerable<CollectionInfo> GetAllCollections()
         {
-            yield break;
+            var results = this.GetCollection<CollectionInfo>("system.namespaces").Find();                
+
+            return results;
         }
     }
 }
