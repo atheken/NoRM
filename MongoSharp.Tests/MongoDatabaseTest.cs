@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
-namespace MongoSharp.Query.Tests
+namespace MongoSharp.Tests
 {
     [TestFixture]
     public class MongoDatabaseTest
@@ -24,7 +24,10 @@ namespace MongoSharp.Query.Tests
             var db = context.GetDatabase("test");
             string collName = "testInsertCollection";
             db.GetCollection<object>(collName).Insert(new { Title = "TestInsert" });
-            Assert.IsTrue(db.DropCollection(collName));
+            
+            var results = db.DropCollection(collName);
+
+            Assert.IsTrue((results.OK == 1.0));
         }
     }
 }

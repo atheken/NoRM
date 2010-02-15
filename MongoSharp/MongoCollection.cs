@@ -239,7 +239,7 @@ namespace MongoSharp
             insertMessage.Execute();
         }
 
-        public CollectionStatistics GetStatistics()
+        public CollectionStatistics GetCollectionStatistics()
         {
             return this._db.GetCollectionStatistics(this._collectionName );
         }

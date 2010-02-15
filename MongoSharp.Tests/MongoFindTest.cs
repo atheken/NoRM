@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
-namespace MongoSharp.Query.Tests
+namespace MongoSharp.Tests
 {
     public class TestClass
     {
@@ -28,19 +28,6 @@ namespace MongoSharp.Query.Tests
             Assert.IsNotNull(found);
         }
 
-        [Test]
-        public void Collection_Statistics_Returns()
-        {
-            MongoServer server = new MongoServer();
 
-            var db = server.GetDatabase("test");
-
-            MongoCollection<TestClass> coll = db.GetCollection<TestClass>("foo");
-
-            var stats = coll.GetStatistics();
-
-            Assert.IsTrue((stats.Ns == "test.foo"));
-
-        }
     }
 }

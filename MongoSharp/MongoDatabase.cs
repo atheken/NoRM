@@ -37,25 +37,6 @@ namespace MongoSharp
             }
         }
 
-
-        /// <summary>
-        /// Removes the specified collection from the database.
-        /// </summary>
-        /// <param name="collectionName"></param>
-        /// <returns></returns>
-        public bool DropCollection(String collectionName)
-        {
-            var retval = false;
-            var cmd = this.GetCollection<GenericCommandResponse>("$cmd");
-            var result = cmd.FindOne(new DropCollectionRequest(collectionName));
-            
-            if (result != null && result.OK == 1.0)
-            {
-                retval = true;
-            }
-            return retval;
-        }
-
         /// <summary>
         /// Produces a mongodb collection that will produce and
         /// manipulate objects of the specified type.
@@ -89,6 +70,14 @@ namespace MongoSharp
             return response;
         }
 
+        public DroppedCollectionResponse DropCollection(string collectionName)
+        {
+            var response = this._server.GetDatabase(this.DatabaseName)
+                .GetCollection<DroppedCollectionResponse>("$cmd")
+                .FindOne<DroppedCollectionResponse>(new DroppedCollectionResponse() { drop = collectionName });
+
+            return response;
+        }
 
     }
 }

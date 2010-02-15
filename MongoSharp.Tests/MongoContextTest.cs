@@ -5,7 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using System.Net.Sockets;
 
-namespace MongoSharp.Query.Tests
+namespace MongoSharp.Tests
 {
     [TestFixture]
     public class MongoContextTest

@@ -27,5 +27,17 @@ namespace MongoSharp.Tests
             Assert.AreEqual(cache.Count, testColl.Distinct<BSONOID>("_id").Count());
         }
 
+        [Test]
+        public void Collection_Statistics_Returns()
+        {
+            MongoServer server = new MongoServer();
+
+            var db = server.GetDatabase("test");
+
+            var stats = db.GetCollectionStatistics("foo");
+
+            Assert.IsTrue((stats.Ns == "test.foo"));
+
+        }
     }
 }
