@@ -33,3 +33,10 @@ C:\Code\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.pdb
 C:\Code\MongoSharp\MongoSharp.Tests\bin\Debug\nunit.framework.xml
 C:\Code\MongoSharp\MongoSharp.Tests\obj\Debug\MongoSharp.Tests.dll
 C:\Code\MongoSharp\MongoSharp.Tests\obj\Debug\MongoSharp.Tests.pdb
+C:\mydata\git\MongoSharp\MongoSharp.Tests\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll
+C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.pdb
+C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.dll
+C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.pdb
+C:\mydata\git\MongoSharp\MongoSharp.Tests\obj\Debug\MongoSharp.Tests.dll
+C:\mydata\git\MongoSharp\MongoSharp.Tests\obj\Debug\MongoSharp.Tests.pdb

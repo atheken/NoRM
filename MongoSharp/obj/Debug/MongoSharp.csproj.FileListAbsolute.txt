@@ -13,3 +13,8 @@ C:\Code\MongoSharp\MongoSharp\bin\Debug\MongoSharp.dll
 C:\Code\MongoSharp\MongoSharp\bin\Debug\MongoSharp.pdb
 C:\Code\MongoSharp\MongoSharp\obj\Debug\MongoSharp.dll
 C:\Code\MongoSharp\MongoSharp\obj\Debug\MongoSharp.pdb
+C:\mydata\git\MongoSharp\MongoSharp\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\MongoSharp\MongoSharp\bin\Debug\MongoSharp.dll
+C:\mydata\git\MongoSharp\MongoSharp\bin\Debug\MongoSharp.pdb
+C:\mydata\git\MongoSharp\MongoSharp\obj\Debug\MongoSharp.dll
+C:\mydata\git\MongoSharp\MongoSharp\obj\Debug\MongoSharp.pdb

@@ -12,7 +12,7 @@ namespace MongoSharp
     {
         private String _collectionName;
         private MongoDatabase _db;
-        private MongoServer _context;
+        private MongoServer _server;
 
         /// <summary>
         /// Represents a strongly-typed set of documents in the db.
@@ -20,10 +20,10 @@ namespace MongoSharp
         /// <param name="collectionName"></param>
         /// <param name="db"></param>
         /// <param name="context"></param>
-        public MongoCollection(String collectionName, MongoDatabase db, MongoServer context)
+        public MongoCollection(String collectionName, MongoDatabase db, MongoServer server)
         {
             this._db = db;
-            this._context = context;
+            this._server = server;
             this._collectionName = collectionName;
         }
 
@@ -74,7 +74,7 @@ namespace MongoSharp
                 ops |= UpdateOption.Upsert;
             }
 
-            var um = new UpdateMessage<X, U>(this._context, this.FullyQualifiedName, ops, matchDocument, valueDocument);
+            var um = new UpdateMessage<X, U>(this._server, this.FullyQualifiedName, ops, matchDocument, valueDocument);
             um.Execute();
         }
 
@@ -97,7 +97,7 @@ namespace MongoSharp
         /// <param name="template"></param>
         public void Delete<U>(U template)
         {
-            var dm = new DeleteMessage<U>(this._context, this.FullyQualifiedName, template);
+            var dm = new DeleteMessage<U>(this._server, this.FullyQualifiedName, template);
             dm.Execute();
         }
 
@@ -144,7 +144,7 @@ namespace MongoSharp
 
         public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName)
         {
-            var qm = new QueryMessage<T, U>(this._context, fullyQualifiedName);
+            var qm = new QueryMessage<T, U>(this._server, fullyQualifiedName);
             qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
@@ -170,8 +170,19 @@ namespace MongoSharp
         public void Insert(IEnumerable<T> documentsToInsert)
         {
             var insertMessage = new InsertMessage<T>
-                (this._context, this.FullyQualifiedName, documentsToInsert);
+                (this._server, this.FullyQualifiedName, documentsToInsert);
             insertMessage.Execute();
+        }
+
+        public CollectionStatistics GetStatistics()
+        {
+            var response = this._server.GetDatabase(this._db.DatabaseName)
+                .GetCollection<CollectionStatistics>("$cmd")
+                .FindOne<CollectionStatistics>(new CollectionStatistics() {collstats = this._collectionName });
+
+
+            return response;
+
         }
     }
 }
