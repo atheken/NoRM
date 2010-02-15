@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using MongoSharp.Protocol.SystemMessages.Responses;
 using MongoSharp.Protocol.SystemMessages.Requests;
 using MongoSharp.BSON;
+using MongoSharp.Protocol.SystemMessages;
 
 namespace MongoSharp
 {
@@ -34,6 +35,116 @@ namespace MongoSharp
         {
             get;
             private set;
+        }
+
+        public ForceSyncResponse ForceSync(bool async)
+        {
+            return this.GetDatabase("admin")
+                .GetCollection<ForceSyncResponse>("$cmd")
+                .FindOne(new { fsync = 1d, async = async });
+        }
+
+        /// <summary>
+        /// Clears the last error on this connection.
+        /// </summary>
+        /// <returns></returns>
+        public bool ResetLastError()
+        {
+            bool retval = false;
+
+            var result = this.GetDatabase("admin")
+                .GetCollection<GenericCommandResponse>("$cmd")
+                .FindOne(new { reseterror = 1d });
+
+            if (result != null && result.OK == 1.0)
+            {
+                retval = true;
+            }
+
+            return retval;
+        }
+
+        public AssertInfoResponse AssertionInfo()
+        {
+            return this.GetDatabase("admin")
+                 .GetCollection<AssertInfoResponse>("$cmd")
+                 .FindOne(new { assertinfo = 1d });
+
+        }
+
+        /// <summary>
+        /// Get info about the previous errors on this server
+        /// </summary>
+        public PreviousErrorResponse PreviousErrors()
+        {
+
+            return this.GetDatabase("admin")
+                .GetCollection<PreviousErrorResponse>("$cmd")
+                .FindOne(new { getpreverror = 1d });
+
+        }
+
+        public bool RepairDatabase(bool preserveClonedFilesOnFailure, bool backupOriginalFiles)
+        {
+            var retval = false;
+            var result = this.GetDatabase("admin")
+                .GetCollection<GenericCommandResponse>("$cmd")
+                .FindOne(new
+                {
+                    repairDatabase = 1d,
+                    preserveClonedFilesOnFailure = preserveClonedFilesOnFailure,
+                    backupOriginalFiles = backupOriginalFiles
+                });
+            if (result != null && result.OK == 1.0)
+            {
+                retval = true;
+            }
+            return retval;
+        }
+
+        protected BuildInfoResponse _buildInfo;
+
+        private double? _profileLevel;
+
+        public double ProfileLevel
+        {
+            get
+            {
+                if (this._profileLevel == null)
+                {
+                    this.ProfileLevel = -1;
+                }
+                return this._profileLevel.Value;
+            }
+            set
+            {
+                var result = this.GetDatabase("admin")
+                        .GetCollection<ProfileLevelResponse>("$cmd")
+                        .FindOne(new { profile = value });
+                if (result != null && result.OK == 1.0)
+                {
+                    this._profileLevel = result.Was;
+                }
+            }
+        }
+
+        public BuildInfoResponse BuildInfo()
+        {
+            if (this._buildInfo == null)
+            {
+                this._buildInfo = this.GetDatabase("admin")
+                    .GetCollection<BuildInfoResponse>("$cmd")
+                    .FindOne(new { buildinfo = 1d });
+
+            }
+            return this._buildInfo;
+        }
+
+        public ServerStatusResponse ServerStatus()
+        {
+            return this.GetDatabase("admin")
+                    .GetCollection<ServerStatusResponse>("$cmd")
+                    .FindOne(new { serverStatus = 1d });
         }
 
         /// <summary>
@@ -114,21 +225,18 @@ namespace MongoSharp
             bool retval = false;
 
             //HACK: not sure how to send a query without selecting a database, so I am hooking admin. my bad.
-            var qm = new QueryMessage<GetNonceResponse, GetNonceRequest>(this, "admin.$cmd");
-            qm.NumberToSkip = 0;
-            qm.NumberToTake = 1;
-            qm.Query = new GetNonceRequest();
-            var nonce = qm.Execute().Results.First();
+            var nonce = this.GetDatabase("admin")
+                .GetCollection<GetNonceResponse>("$cmd")
+                .FindOne(new { getnonce = true });
 
             if (nonce.OK == 1)
             {
                 //TODO: arg! the docs for this on Mongo's site are terrible!
             }
-
             return retval;
         }
 
-
+        
         /// <summary>
         /// Creates a context that will connect to 127.0.0.1:27017 (MongoDB on the default port).
         /// </summary>
