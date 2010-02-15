@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using MongoSharp.Protocol.SystemMessages.Responses;
 
 namespace MongoSharp.Tests
 {
@@ -29,5 +30,22 @@ namespace MongoSharp.Tests
 
             Assert.IsTrue((results.OK == 1.0));
         }
+
+        [Test]
+        public void Get_Profiling_Information()
+        {
+            MongoServer server = new MongoServer();
+
+            var db = server.GetDatabase("test");
+
+            var results = db.GetProfilingInformation();
+
+            foreach (ProfilingInformationResponse profile in results)
+            {
+                Console.WriteLine(profile.Info);
+            }
+            Assert.IsTrue((results.Count<ProfilingInformationResponse>() > 0));
+        }
+
     }
 }

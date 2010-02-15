@@ -61,25 +61,44 @@ namespace MongoSharp
             return results;
         }
 
+        /// <summary>
+        /// Returns a class containing information about this particular collection.
+        /// </summary>
+        /// <param name="collectionName"></param>
+        /// <returns></returns>
         public CollectionStatistics GetCollectionStatistics(string collectionName)
         {
-            var response = this._server.GetDatabase(this.DatabaseName)
-                .GetCollection<CollectionStatistics>("$cmd")
+            var response = this.GetCollection<CollectionStatistics>("$cmd")
                 .FindOne<CollectionStatistics>(new CollectionStatistics() { collstats = collectionName });
 
             return response;
         }
 
+        /// <summary>
+        /// Drops the given collection name from the database.
+        /// </summary>
+        /// <param name="collectionName"></param>
+        /// <returns></returns>
         public DroppedCollectionResponse DropCollection(string collectionName)
         {
-            var response = this._server.GetDatabase(this.DatabaseName)
-                .GetCollection<DroppedCollectionResponse>("$cmd")
+            var response = this.GetCollection<DroppedCollectionResponse>("$cmd")
                 .FindOne<DroppedCollectionResponse>(new DroppedCollectionResponse() { drop = collectionName });
 
             return response;
         }
 
+        /// <summary>
+        /// Returns profiling information, IF profiling is enabled for this database. 
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ProfilingInformationResponse> GetProfilingInformation()
+        {
+            // TODO Check this again later - it doesn't seem quite right.
+            var response = this.GetCollection<ProfilingInformationResponse>("system.profile")
+                .Find();
 
+            return response;
+        }
 
     }
 }

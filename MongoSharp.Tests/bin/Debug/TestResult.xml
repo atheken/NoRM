@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" total="1" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-14" time="21:57:14">
+<test-results name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" total="1" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-14" time="22:16:45">
   <environment nunit-version="2.5.3.9345" clr-version="2.0.50727.4927" os-version="Microsoft Windows NT 6.1.7600.0" platform="Win32NT" cwd="C:\mydata\NUnit-2.5.3.9345\bin\net-2.0" machine-name="JALEXANDER-WORK" user="jalexander" user-domain="jalexander-work" />
   <culture-info current-culture="en-US" current-uiculture="en-US" />
-  <test-suite name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" executed="True" success="True" time="0.362" asserts="0">
+  <test-suite name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" executed="True" success="True" time="2.007" asserts="0">
     <results>
-      <test-suite name="MongoSharp" executed="True" success="True" time="0.352" asserts="0">
+      <test-suite name="MongoSharp" executed="True" success="True" time="2.007" asserts="0">
         <results>
-          <test-suite name="Tests" executed="True" success="True" time="0.351" asserts="0">
+          <test-suite name="Tests" executed="True" success="True" time="2.003" asserts="0">
             <results>
-              <test-suite name="MongoContextTest" executed="True" success="True" time="0.348" asserts="0">
+              <test-suite name="MongoDatabaseTest" executed="True" success="True" time="2.002" asserts="0">
                 <results>
-                  <test-case name="MongoSharp.Tests.MongoContextTest.Check_Kill_Operation" executed="True" success="True" time="0.300" asserts="1" />
+                  <test-case name="MongoSharp.Tests.MongoDatabaseTest.Get_Profiling_Information" executed="True" success="True" time="2.002" asserts="1" />
                 </results>
               </test-suite>
             </results>

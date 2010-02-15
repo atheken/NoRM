@@ -113,6 +113,7 @@
     <Compile Include="Commands\Qualifiers\Q.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ListDatabasesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\PreviousErrorResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ProfilingInformationResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
