@@ -5,15 +5,17 @@
   <ExcludeCategories>false</ExcludeCategories>
   <Nodes>
     <Node UniqueName="[0-1000]C:\Code\MongoSharp\Tests.nunit" Expanded="true" />
-    <Node UniqueName="[0-1023]C:\Code\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" Expanded="true" />
-    <Node UniqueName="[0-1027]BSONLib" Expanded="true" />
-    <Node UniqueName="[0-1028]BSONLib.Tests" Expanded="true" />
+    <Node UniqueName="[0-1025]C:\Code\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" Expanded="true" />
+    <Node UniqueName="[0-1029]BSONLib" Expanded="true" />
+    <Node UniqueName="[0-1030]BSONLib.Tests" Expanded="true" />
     <Node UniqueName="[0-1009]BSONLib.Tests.BSONSerializerTest" Expanded="true" />
-    <Node UniqueName="[0-1024]MongoSharp" Expanded="true" />
-    <Node UniqueName="[0-1025]MongoSharp.Query" Expanded="true" />
-    <Node UniqueName="[0-1026]MongoSharp.Query.Tests" Expanded="true" />
+    <Node UniqueName="[0-1026]MongoSharp" Expanded="true" />
+    <Node UniqueName="[0-1027]MongoSharp.Query" Expanded="true" />
+    <Node UniqueName="[0-1028]MongoSharp.Query.Tests" Expanded="true" />
     <Node UniqueName="[0-1004]MongoSharp.Query.Tests.MongoContextTest" Expanded="true" />
     <Node UniqueName="[0-1020]MongoSharp.Query.Tests.MongoDatabaseTest" Expanded="true" />
     <Node UniqueName="[0-1001]MongoSharp.Query.Tests.MongoFindTest" Expanded="true" />
+    <Node UniqueName="[0-1031]MongoSharp.Tests" Expanded="true" />
+    <Node UniqueName="[0-1023]MongoSharp.Tests.MongoCollectionTest" Expanded="true" />
   </Nodes>
 </VisualState>

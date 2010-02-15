@@ -40,6 +40,40 @@ namespace MongoSharp
         }
 
         /// <summary>
+        /// Add an index for this collection.
+        /// </summary>
+        /// <typeparam name="U">A type that has the names of the items to be indexed, with a value of 1.0d or -1.0d depending on 
+        /// if you want the index to be ASC or DESC respectively.</typeparam>
+        /// <param name="indexDefinition"></param>
+        /// <param name="isUnique"></param>
+        /// <param name="indexName"></param>
+        public void CreateIndex<U>(U indexDefinition, bool isUnique, String indexName)
+        {
+            var coll = this._db.GetCollection<MongoIndex<U>>("system.indexes");
+            coll.Insert(new MongoIndex<U>()
+            {
+                key = indexDefinition,
+                ns = this.FullyQualifiedName,
+                name = indexName,
+                unique = isUnique
+            });
+
+        }
+
+        /// <summary>
+        /// Gets the distinct values for the specified key.
+        /// </summary>
+        /// <typeparam name="U">You better know that every value that could come back 
+        /// is of this type, or BAD THINGS will happen.</typeparam>
+        /// <param name="keyName"></param>
+        /// <returns></returns>
+        public IEnumerable<U> Distinct<U>(String keyName) where U : class, new()
+        {
+            return this._db.GetCollection<DistinctValuesResponse<U>>("$cmd")
+                .FindOne(new { distinct = this._collectionName, key = keyName }).Values;
+        }
+
+        /// <summary>
         /// Deletes all indices on this collection.
         /// </summary>
         /// <param name="numberDeleted"></param>
@@ -61,7 +95,7 @@ namespace MongoSharp
             var coll = this._db.GetCollection<DeleteIndicesResponse>("$cmd");
             var result = coll.FindOne(new { deleteIndexes = this._collectionName, index = indexName });
             numberDeleted = 0;
-            
+
             if (result != null && result.OK == 1.0)
             {
                 retval = true;
@@ -96,11 +130,11 @@ namespace MongoSharp
         public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert)
         {
             UpdateOption ops = UpdateOption.None;
-            if(updateMultiple)
+            if (updateMultiple)
             {
                 ops |= UpdateOption.MultiUpdate;
             }
-            if(upsert)
+            if (upsert)
             {
                 ops |= UpdateOption.Upsert;
             }
@@ -209,7 +243,7 @@ namespace MongoSharp
         {
             var response = this._server.GetDatabase(this._db.DatabaseName)
                 .GetCollection<CollectionStatistics>("$cmd")
-                .FindOne<CollectionStatistics>(new CollectionStatistics() {collstats = this._collectionName });
+                .FindOne<CollectionStatistics>(new CollectionStatistics() { collstats = this._collectionName });
 
 
             return response;

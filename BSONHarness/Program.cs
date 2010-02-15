@@ -50,8 +50,10 @@ namespace BSONHarness
         private static void InsertFindDeleteBenchmark(int count)
         {
             MongoServer context = new MongoServer();
-            var coll = context.GetDatabase("benchmark").GetCollection<GeneralDTO>("test");
-            coll.Delete(new { });
+            var db = context.GetDatabase("benchmark");
+            db.DropCollection("test");
+            var coll = db.GetCollection<GeneralDTO>("test");
+            coll.CreateIndex(new { Int = 1d }, false, "testIdx");
 
             BSONOID oid = BSONOID.EMPTY;
             DateTime start = DateTime.Now;

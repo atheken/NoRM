@@ -69,8 +69,10 @@
     <Compile Include="BSON\ExpandoProps.cs" />
     <Compile Include="BSON\IFlyweight.cs" />
     <Compile Include="BSON\Flyweight.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DeleteIndicesResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\DistinctValuesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfileLevelResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\CollectionStatisticsRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\DropCollectionRequest.cs" />

@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BSONSerializerTest.cs" />
+    <Compile Include="MongoCollectionTest.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
     <Compile Include="MongoFindTest.cs" />
