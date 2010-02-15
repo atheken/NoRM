@@ -12,6 +12,7 @@ namespace MongoSharp.Query.Tests
         public double? a { get; set; }
     }
 
+    // TODO rename this to MongoCollectionTest
     [TestFixture]
     public class MongoFindTest
     {
@@ -27,6 +28,19 @@ namespace MongoSharp.Query.Tests
             Assert.IsNotNull(found);
         }
 
+        [Test]
+        public void Collection_Statistics_Returns()
+        {
+            MongoServer server = new MongoServer();
 
+            var db = server.GetDatabase("test");
+
+            MongoCollection<TestClass> coll = db.GetCollection<TestClass>("foo");
+
+            var stats = coll.GetStatistics();
+
+            Assert.IsTrue((stats.Ns == "test.foo"));
+
+        }
     }
 }

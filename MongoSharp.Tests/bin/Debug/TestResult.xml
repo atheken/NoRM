@@ -1,53 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" total="7" errors="0" failures="2" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-13" time="23:27:33">
+<test-results name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" total="1" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-14" time="18:09:13">
   <environment nunit-version="2.5.3.9345" clr-version="2.0.50727.4927" os-version="Microsoft Windows NT 6.1.7600.0" platform="Win32NT" cwd="C:\mydata\NUnit-2.5.3.9345\bin\net-2.0" machine-name="JALEXANDER-WORK" user="jalexander" user-domain="jalexander-work" />
   <culture-info current-culture="en-US" current-uiculture="en-US" />
-  <test-suite name="C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\bin\Debug\System.Data.Mongo.Tests.dll" executed="True" success="False" time="6.569" asserts="0">
+  <test-suite name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" executed="True" success="True" time="0.380" asserts="0">
     <results>
-      <test-suite name="System" executed="True" success="False" time="6.561" asserts="0">
+      <test-suite name="MongoSharp" executed="True" success="True" time="0.364" asserts="0">
         <results>
-          <test-suite name="Data" executed="True" success="False" time="6.560" asserts="0">
+          <test-suite name="Query" executed="True" success="True" time="0.364" asserts="0">
             <results>
-              <test-suite name="Mongo" executed="True" success="False" time="6.560" asserts="0">
+              <test-suite name="Tests" executed="True" success="True" time="0.362" asserts="0">
                 <results>
-                  <test-suite name="Tests" executed="True" success="False" time="6.559" asserts="0">
+                  <test-suite name="MongoFindTest" executed="True" success="True" time="0.361" asserts="0">
                     <results>
-                      <test-suite name="MongoContextTest" executed="True" success="False" time="3.536" asserts="0">
-                        <results>
-                          <test-case name="System.Data.Mongo.Tests.MongoContextTest.Check_Invalid_Server" executed="True" success="True" time="2.187" asserts="1" />
-                          <test-case name="System.Data.Mongo.Tests.MongoContextTest.Check_Valid_Server" executed="True" success="True" time="0.005" asserts="1" />
-                          <test-case name="System.Data.Mongo.Tests.MongoContextTest.Drop_Database_Returns_True" executed="True" success="False" time="0.220" asserts="1">
-                            <failure>
-                              <message><![CDATA[  Expected: True
-  But was:  False
-]]></message>
-                              <stack-trace><![CDATA[at System.Data.Mongo.Tests.MongoContextTest.Drop_Database_Returns_True() in C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\MongoContextTest.cs:line 43
-]]></stack-trace>
-                            </failure>
-                          </test-case>
-                          <test-case name="System.Data.Mongo.Tests.MongoContextTest.GetAllDatabases_Returns_DBs" executed="True" success="True" time="1.026" asserts="1" />
-                        </results>
-                      </test-suite>
-                      <test-suite name="MongoDatabaseTest" executed="True" success="False" time="2.011" asserts="0">
-                        <results>
-                          <test-case name="System.Data.Mongo.Tests.MongoDatabaseTest.Drop_Collection_Returns_True" executed="True" success="False" time="1.005" asserts="1">
-                            <failure>
-                              <message><![CDATA[  Expected: True
-  But was:  False
-]]></message>
-                              <stack-trace><![CDATA[at System.Data.Mongo.Tests.MongoDatabaseTest.Drop_Collection_Returns_True() in C:\mydata\git\MongoSharp\System.Data.Mongo.Tests\MongoDatabaseTest.cs:line 27
-]]></stack-trace>
-                            </failure>
-                          </test-case>
-                          <test-case name="System.Data.Mongo.Tests.MongoDatabaseTest.GetAllCollections_Returns_Collections" executed="True" success="True" time="1.003" asserts="1" />
-                        </results>
-                      </test-suite>
-                      <test-suite name="MongoFindTest" executed="True" success="True" time="1.006" asserts="0">
-                        <results>
-                          <test-case name="System.Data.Mongo.Tests.MongoFindTest.MongoDatabase_FindOne_Returns" executed="True" success="True" time="1.006" asserts="1" />
-                        </results>
-                      </test-suite>
+                      <test-case name="MongoSharp.Query.Tests.MongoFindTest.Collection_Statistics_Returns" executed="True" success="True" time="0.347" asserts="1" />
                     </results>
                   </test-suite>
                 </results>
