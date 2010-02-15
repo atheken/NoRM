@@ -71,6 +71,7 @@
     <Compile Include="BSON\ExpandoProps.cs" />
     <Compile Include="BSON\IFlyweight.cs" />
     <Compile Include="BSON\Flyweight.cs" />
+    <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\CurrentOperationResponse.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="Protocol\SystemMessages\Responses\PreviousErrorResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfilingInformationResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\SetProfileResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

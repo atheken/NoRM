@@ -32,6 +32,20 @@ namespace MongoSharp.Tests
         }
 
         [Test]
+        public void Set_Profiling_Level()
+        {
+            var db = new MongoServer().GetDatabase("test");
+
+            var response = db.SetProfileLevel(MongoSharp.Protocol.SystemMessages.ProfileLevel.AllOperations);
+
+            Assert.IsTrue((response.Was == 0.0));
+
+            response = db.SetProfileLevel(MongoSharp.Protocol.SystemMessages.ProfileLevel.ProfilingOff);
+
+            Assert.IsTrue((response.Was == 2.0));
+        }
+
+        [Test]
         public void Get_Profiling_Information()
         {
             MongoServer server = new MongoServer();

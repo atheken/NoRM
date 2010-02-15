@@ -5,6 +5,7 @@ using System.Text;
 using MongoSharp.Protocol.Messages;
 using MongoSharp.Protocol.SystemMessages.Requests;
 using MongoSharp.Protocol.SystemMessages.Responses;
+using MongoSharp.Protocol.SystemMessages;
 
 namespace MongoSharp
 {
@@ -83,6 +84,14 @@ namespace MongoSharp
         {
             var response = this.GetCollection<DroppedCollectionResponse>("$cmd")
                 .FindOne<DroppedCollectionResponse>(new DroppedCollectionResponse() { drop = collectionName });
+
+            return response;
+        }
+
+        public SetProfileResponse SetProfileLevel(ProfileLevel level)
+        {
+            var response = this.GetCollection<SetProfileResponse>("$cmd")
+                .FindOne<SetProfileResponse>(new SetProfileResponse() { profile = (int) level});
 
             return response;
         }
