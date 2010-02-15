@@ -47,5 +47,16 @@ namespace MongoSharp.Tests
             Assert.IsTrue((results.Count<ProfilingInformationResponse>() > 0));
         }
 
+        [Test]
+        public void Validate_Collection()
+        {
+            var db = new MongoServer().GetDatabase("test");
+
+            var response = db.ValidateCollection("foo", false);
+
+            Assert.IsTrue((response.Ns == "test.foo"));
+            
+        }
+
     }
 }

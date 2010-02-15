@@ -100,5 +100,13 @@ namespace MongoSharp
             return response;
         }
 
+        public ValidateCollectionResponse ValidateCollection(string collectionName, bool? scanData)
+        {
+            var response = this.GetCollection<ValidateCollectionResponse>("$cmd")
+                .FindOne<ValidateCollectionResponse>(new ValidateCollectionResponse { validate = collectionName, scandata = scanData });
+
+            return response;
+        }
+
     }
 }

@@ -115,6 +115,7 @@
     <Compile Include="Protocol\SystemMessages\Responses\PreviousErrorResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfilingInformationResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
