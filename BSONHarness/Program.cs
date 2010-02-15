@@ -17,8 +17,8 @@ namespace BSONHarness
         {
             var server = new MongoServer();
             server.Connect();
-            //server.GetDatabase("test");
-            server.DropDatabase("test");
+
+            var s = server.ServerStatus();
 
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);

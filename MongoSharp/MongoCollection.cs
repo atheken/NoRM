@@ -39,6 +39,37 @@ namespace MongoSharp
             this.Update(matchDocument, valueDocument, false, false);
         }
 
+        /// <summary>
+        /// Deletes all indices on this collection.
+        /// </summary>
+        /// <param name="numberDeleted"></param>
+        /// <returns></returns>
+        public bool DeleteIndices(out int numberDeleted)
+        {
+            return this.DeleteIndex("*", out numberDeleted);
+        }
+
+        /// <summary>
+        /// Deletes the specified index for the collection.
+        /// </summary>
+        /// <param name="indexName"></param>
+        /// <param name="numberDeleted"></param>
+        /// <returns></returns>
+        public bool DeleteIndex(String indexName, out int numberDeleted)
+        {
+            bool retval = false;
+            var coll = this._db.GetCollection<DeleteIndicesResponse>("$cmd");
+            var result = coll.FindOne(new { deleteIndexes = this._collectionName, index = indexName });
+            numberDeleted = 0;
+            
+            if (result != null && result.OK == 1.0)
+            {
+                retval = true;
+                numberDeleted = result.NIndexesWas.Value;
+            }
+
+            return retval;
+        }
 
         /// <summary>
         /// Overload of Update that updates all matching documents, and doesn't upsert if no matches are found.

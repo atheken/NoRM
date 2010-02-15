@@ -69,16 +69,20 @@
     <Compile Include="BSON\ExpandoProps.cs" />
     <Compile Include="BSON\IFlyweight.cs" />
     <Compile Include="BSON\Flyweight.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\DeleteIndicesResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ProfileLevelResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\CollectionStatisticsRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\DropCollectionRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\DropDatabaseRequest.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\BuildInfoResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\CollectionInfo.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\CollectionStatistics.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DatabaseInfo.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\AuthenticationRequest.cs" />
-    <Compile Include="Protocol\SystemMessages\Requests\GetNonceRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\ListDatabasesRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DroppedDatabaseResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ForceSyncResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\GenericCommandResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\GetNonceResponse.cs" />
     <Compile Include="Commands\Modifiers\IncrementOperation.cs" />
@@ -102,6 +106,8 @@
     <Compile Include="Protocol\Messages\ReplyMessage.cs" />
     <Compile Include="Commands\Qualifiers\Q.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ListDatabasesResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\PreviousErrorResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
