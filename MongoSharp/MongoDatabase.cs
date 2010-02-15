@@ -11,16 +11,16 @@ namespace MongoSharp
     public class MongoDatabase
     {
         private String _dbName;
-        private MongoServer _context;
+        private MongoServer _server;
         /// <summary>
         /// A reference to the database found using the specified context.
         /// </summary>
         /// <param name="dbname"></param>
         /// <param name="context"></param>
-        public MongoDatabase(String dbname, MongoServer context)
+        public MongoDatabase(String dbname, MongoServer server)
         {
             this._dbName = dbname;
-            this._context = context;
+            this._server = server;
             this.SizeOnDisk = 0.0;
         }
 
@@ -65,7 +65,7 @@ namespace MongoSharp
         /// <returns></returns>
         public MongoCollection<T> GetCollection<T>(string collectionName) where T : class, new()
         {
-            return new MongoCollection<T>(collectionName, this, this._context);
+            return new MongoCollection<T>(collectionName, this, this._server);
         }
 
 
@@ -79,5 +79,16 @@ namespace MongoSharp
 
             return results;
         }
+
+        public CollectionStatistics GetCollectionStatistics(string collectionName)
+        {
+            var response = this._server.GetDatabase(this.DatabaseName)
+                .GetCollection<CollectionStatistics>("$cmd")
+                .FindOne<CollectionStatistics>(new CollectionStatistics() { collstats = collectionName });
+
+            return response;
+        }
+
+
     }
 }
