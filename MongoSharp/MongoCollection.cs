@@ -241,13 +241,7 @@ namespace MongoSharp
 
         public CollectionStatistics GetStatistics()
         {
-            var response = this._server.GetDatabase(this._db.DatabaseName)
-                .GetCollection<CollectionStatistics>("$cmd")
-                .FindOne<CollectionStatistics>(new CollectionStatistics() { collstats = this._collectionName });
-
-
-            return response;
-
+            return this._db.GetCollectionStatistics(this._collectionName );
         }
     }
 }

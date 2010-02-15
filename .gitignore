@@ -1,3 +1,5 @@
+TestResult.xml
+Tests.VisualState.xml
 *.dll
 *.exe
 *.pdb
