@@ -17,6 +17,7 @@ namespace MongoSharp
     public class MongoServer
     {
         private static MD5 _md5 = MD5.Create();
+        private String _serverName = "127.0.0.1";
 
         /// <summary>
         /// This indicates if the context should load properties 
@@ -159,8 +160,6 @@ namespace MongoSharp
         /// <summary>
         /// The ip/domain name of the server.
         /// </summary>
-        private String _serverName = "127.0.0.1";
-
         public String ServerName
         {
             get { return _serverName; }
@@ -275,6 +274,11 @@ namespace MongoSharp
 
         }
 
+        /// <summary>
+        /// This simply forces the TcpClient to initialize, and returns the connected status. If the server/port is invalid, a SocketException
+        /// will be thrown.
+        /// </summary>
+        /// <returns></returns>
         public bool Connect()
         {
             return ServerConnection().Connected;
@@ -298,5 +302,33 @@ namespace MongoSharp
             }
             return retval;
         }
+
+        /// <summary>
+        /// Returns a list of all operations currently going on the server.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<CurrentOperationResponse> GetCurrentOperations()
+        {
+            var response = this.GetDatabase("admin")
+                .GetCollection<CurrentOperationResponse>("$cmd.sys.inprog")
+                .Find();
+
+            return response;
+        }
+
+        /// <summary>
+        /// Takes an operation ID and attempts to kill the running operation.
+        /// </summary>
+        /// <param name="operationId"></param>
+        /// <returns></returns>
+        public GenericCommandResponse KillOperation(double operationId)
+        {
+            var response = this.GetDatabase("admin")
+                .GetCollection<GenericCommandResponse>("$cmd.sys.killop")
+                .FindOne(new { op = operationId });
+
+            return response;
+        }
+
     }
 }

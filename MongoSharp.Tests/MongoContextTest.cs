@@ -56,6 +56,22 @@ namespace MongoSharp.Tests
             Assert.IsTrue(this._context.Connect());
         }
 
-        
+        [Test]
+        public void Check_Current_Operations()
+        {
+            // Not sure how to test this yet.
+            MongoServer server = new MongoServer();
+
+            var ops = server.GetCurrentOperations();
+
+        }
+
+        [Test]
+        public void Check_Kill_Operation()
+        {
+            var response = this._context.KillOperation(1234);
+
+            Assert.IsTrue((response.Info == "no op in progress/not locked"));
+        }
     }
 }

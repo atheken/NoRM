@@ -5,8 +5,9 @@ using System.Text;
 
 namespace MongoSharp.Protocol.SystemMessages.Responses
 {
-    internal class GenericCommandResponse
+    public class GenericCommandResponse
     {
         public double? OK { get; set; }
+        public string Info { get; set; }
     }
 }
