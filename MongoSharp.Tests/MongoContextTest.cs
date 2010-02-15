@@ -40,7 +40,7 @@ namespace MongoSharp.Tests
             //the db may not exist until we insert into it.
             db.GetCollection<Object>(dbName).Insert(new {Title=dbName});
 
-            Assert.IsTrue(this._context.DropDatabase(dbName));
+            Assert.IsTrue((this._context.DropDatabase(dbName).OK == 1d));
         }
         [Test]
         public void Check_Invalid_Server()

@@ -197,19 +197,13 @@ namespace MongoSharp
         /// Drop this database from the mongo server (be careful what you wish for!)
         /// </summary>
         /// <returns></returns>
-        public bool DropDatabase(String dbName)
+        public DroppedDatabaseResponse DropDatabase(String dbName)
         {
-            var retval = false;
-
             var result = this.GetDatabase(dbName)
                 .GetCollection<DroppedDatabaseResponse>("$cmd")
                 .FindOne(new DropDatabaseRequest());
 
-            if (result != null && result.OK == 1.0)
-            {
-                retval = true;
-            }
-            return retval;
+            return result;
         }
 
 
