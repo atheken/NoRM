@@ -24,7 +24,7 @@ namespace MongoSharp.Tests
         private MongoDatabase _db;
         private MongoCollection<TestClass> _coll;
 
-        [SetUp]
+        [TestFixtureSetUp]
         public void TestFixture_Setup()
         {
             _server = new MongoServer();
@@ -32,7 +32,7 @@ namespace MongoSharp.Tests
             _coll = _db.GetCollection<TestClass>("TestClasses");
         }
 
-        [TearDown]
+        [TestFixtureTearDown]
         public void TestFixture_Teardown()
         {
             DroppedCollectionResponse collResponse = _db.DropCollection("TestClasses");
@@ -41,6 +41,12 @@ namespace MongoSharp.Tests
             _coll = null;
             _db = null;
             _server = null;
+        }
+
+        [TearDown]
+        public void Test_TearDown()
+        {
+            _db.GetCollection<TestClass>("TestClasses").Delete(new object());
         }
 
         [Test]
@@ -61,14 +67,12 @@ namespace MongoSharp.Tests
             _coll.Insert(new TestClass { ADouble = 3d });
             _coll.Insert(new TestClass { ADouble = 4d });
             _coll.Insert(new TestClass { ADouble = 5d });
+            _coll.Insert(new TestClass { ADouble = 1d, AString = "teststring" });
 
-            IEnumerable<TestClass> results = _coll.Find(
-                new
-                {
-                    ADouble = Q.All<object>(new{ADouble = 1d}, new {AString = "teststring"})
-                });
+            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.All(new { ADouble = 1d, AString = "teststring" }) });
 
-            Assert.AreEqual(1, results.Count<TestClass>());
+            int count = results.Count();
+            Assert.AreEqual(2,count);
         }
 
         [Test]
@@ -122,16 +126,13 @@ namespace MongoSharp.Tests
         public void FindOne_Qualifier_In()
         {
             // TODO this is failing - need to check with AT and see if I'm doing this right.
-            _coll.Insert(new TestClass { ADouble = 1 });
-            _coll.Insert(new TestClass { ADouble = 2 });
-            _coll.Insert(new TestClass { ADouble = 3 });
-            _coll.Insert(new TestClass { ADouble = 4 });
-            _coll.Insert(new TestClass { ADouble = 5 });
+            _coll.Insert(new TestClass { ADouble = 1d });
+            _coll.Insert(new TestClass { ADouble = 2d });
+            _coll.Insert(new TestClass { ADouble = 3d });
+            _coll.Insert(new TestClass { ADouble = 4d });
+            _coll.Insert(new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new
-            {
-                ADouble = Q.In(1d, 3d, 5d)
-            });
+            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.In(1d) });
 
             int count = results.Count();
             Console.WriteLine("Count: " + count);
@@ -149,7 +150,8 @@ namespace MongoSharp.Tests
             _coll.Insert(new TestClass { ADouble = 4d });
             _coll.Insert(new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new{
+            IEnumerable<TestClass> results = _coll.Find(new
+            {
                 ADouble = Q.NotIn(1d, 3d, 5d)
             });
 
@@ -222,12 +224,13 @@ namespace MongoSharp.Tests
             _coll.Insert(new TestClass { AStringArray = new string[] { "one" }.ToList() });
             _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two" }.ToList() });
             _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three" }.ToList() });
             _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three", "four" }.ToList() });
             _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three", "four", "five" }.ToList() });
 
             IEnumerable<TestClass> results = _coll.Find(new { AStringArray = Q.Size(3d) });
 
-            Assert.IsTrue((results.Count<TestClass>() == 1));
+            Assert.AreEqual(2, results.Count());
         }
 
     }

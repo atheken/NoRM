@@ -91,6 +91,18 @@ namespace MongoSharp
         }
 
         /// <summary>
+        /// Passes the value straight back to you, new { Property = "value"} will 
+        /// work just fine as a qualifier. Here for the sake of consistency.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="test"></param>
+        /// <returns></returns>
+        public static T Equals<T>(T test)
+        {
+            return test;
+        }
+
+        /// <summary>
         /// Builds a $size qualifier.
         /// </summary>
         /// <param name="size"></param>

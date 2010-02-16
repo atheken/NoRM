@@ -331,7 +331,7 @@ namespace MongoSharp.BSON
                 (props != null && props.AllProperties.Any(y => y.Value != null &&
                 !BSONSerializer.CanBeSerialized(y.Value.GetType()))))
             {
-                throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
+                throw new NotSupportedException("This type cannot be SERIALIZED using the BSONSerializer");
             }
 
             List<byte[]> retval = new List<byte[]>();
@@ -358,8 +358,9 @@ namespace MongoSharp.BSON
                     modValue.Add(new byte[4]);//allocate size.
                     modValue.Add(BSONSerializer.SerializeMember(name, o.ValueForCommand));//then serialize the member.
                     modValue.Add(new byte[1]);//null terminate this member.
-                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));//add this to the main retval.
+                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));
 
+                    //add this to the main retval.
                     retval.AddRange(modValue);
 
                 }
@@ -420,7 +421,7 @@ namespace MongoSharp.BSON
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        private static byte[] SerializeMember(string key, object value)
+        private static byte[] SerializeMember(String key, object value)
         {
             //type + name + data
             List<byte[]> retval = new List<byte[]>(4);
@@ -431,7 +432,9 @@ namespace MongoSharp.BSON
 
 
             retval[0] = new byte[] { (byte)BSONTypes.Null };
+
             retval[1] = Encoding.UTF8.GetBytes(key); //push the key into the retval;
+
             retval[2] = new byte[1];//allocate a null between the key and the value.
 
             retval[3] = new byte[0];
@@ -545,7 +548,9 @@ namespace MongoSharp.BSON
                     index++;
                     return BSONSerializer.SerializeMember(index.ToString(), y);
                 }).SelectMany(h => h).ToArray();
-                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length).Concat(memberBytes).ToArray();
+
+                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length)
+                    .Concat(memberBytes).ToArray();
             }
             //TODO: implement something for "Symbol"
             //TODO: implement non-scoped code handling.
@@ -609,10 +614,13 @@ namespace MongoSharp.BSON
         /// <returns></returns>
         private static object Deserialize(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps, Type returnType)
         {
+            object retval = null;
             if (!BSONSerializer.CanBeDeserialized(returnType))
             {
-                throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
+                throw new NotSupportedException("This type cannot be DESERIALIZED using the BSONSerializer");
             }
+
+            Flyweight extraProps = new Flyweight();
 
             int length = stream.ReadInt32();
             //get the object length minus the header and the null (5)
@@ -620,7 +628,7 @@ namespace MongoSharp.BSON
             stream.Read(buffer, 0, length - 5);
             //push the position forward past the null terminator.
             stream.Read(new byte[1], 0, 1);
-            var retval = Activator.CreateInstance(returnType);
+            retval = Activator.CreateInstance(returnType);
 
             var setters = BSONSerializer.SettersForType(retval.GetType());
 
@@ -649,6 +657,10 @@ namespace MongoSharp.BSON
                 buffer = buffer.Skip(CODE_LENGTH + keyStringBytes.Length +
                     KEY_TERMINATOR_LENGTH + usedBytes).ToArray();
 
+                if(key == "$err")
+                {
+                    throw new Exception((obj ?? "").ToString());
+                }
                 if (setters.ContainsKey(key))
                 {
                     var prop = setters[key];
@@ -656,11 +668,14 @@ namespace MongoSharp.BSON
                 }
                 else
                 {
-                    //outProps[key] = obj;
+                    extraProps[key] = obj;
                 }
             }
             #endregion
-
+            if (retval == null)
+            {
+                outProps[new WeakReference(retval)] = extraProps;
+            }
             return retval;
         }
 
