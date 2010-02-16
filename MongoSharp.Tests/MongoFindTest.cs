@@ -68,7 +68,9 @@ namespace MongoSharp.Tests
                     ADouble = Q.All<object>(new{ADouble = 1d}, new {AString = "teststring"})
                 });
 
-            Assert.AreEqual(1, results.Count<TestClass>());
+            int count = results.Count();
+
+            Assert.AreEqual(1, count);
         }
 
         [Test]
@@ -82,7 +84,9 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.Exists(true) });
 
-            Assert.AreEqual(5, results.Count<TestClass>());
+            int count = results.Count();
+
+            Assert.AreEqual(5, count);
         }
 
         //[Test]
@@ -114,7 +118,6 @@ namespace MongoSharp.Tests
 
             int count = results.Count();
 
-            Console.WriteLine("Count: " + count);
             Assert.AreEqual(4, count);
         }
 
@@ -134,7 +137,6 @@ namespace MongoSharp.Tests
             });
 
             int count = results.Count();
-            Console.WriteLine("Count: " + count);
 
             Assert.AreEqual(2, count);
         }
@@ -154,7 +156,6 @@ namespace MongoSharp.Tests
             });
 
             int count = results.Count();
-            Console.WriteLine("Count: " + count);
 
             Assert.AreEqual(2, count);
         }
@@ -170,8 +171,9 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.GreaterThan(2d) });
 
+            int count = results.Count();
 
-            Assert.AreEqual(3, results.Count<TestClass>());
+            Assert.AreEqual(3, count);
         }
 
         [Test]
@@ -185,7 +187,9 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.GreaterOrEqual(2d) });
 
-            Assert.AreEqual(4, results.Count<TestClass>());
+            int count = results.Count();
+
+            Assert.AreEqual(4, count);
         }
 
         [Test]
@@ -199,7 +203,9 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.LessThan(2d) });
 
-            Assert.AreEqual(1, results.Count<TestClass>());
+            int count = results.Count();
+
+            Assert.AreEqual(1, count);
         }
 
         [Test]
@@ -213,7 +219,9 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.LessOrEqual(2d) });
 
-            Assert.AreEqual(2, results.Count<TestClass>());
+            int count = results.Count();
+
+            Assert.AreEqual(2, count);
         }
 
         [Test]
@@ -227,7 +235,9 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { AStringArray = Q.Size(3d) });
 
-            Assert.IsTrue((results.Count<TestClass>() == 1));
+            int count = results.Count();
+
+            Assert.AreEqual(1, count);
         }
 
     }
