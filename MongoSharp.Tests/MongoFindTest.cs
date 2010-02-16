@@ -10,11 +10,10 @@ namespace MongoSharp.Tests
 
     public class TestClass
     {
-        public TestClass() { }
         public double? ADouble { get; set; }
         public string AString { get; set; }
         public int? AInteger { get; set; }
-        public string[] AStringArray { get; set; }
+        public List<String> AStringArray { get; set; }
     }
 
     // TODO rename this to MongoCollectionTest
@@ -29,8 +28,8 @@ namespace MongoSharp.Tests
         public void TestFixture_Setup()
         {
             _server = new MongoServer();
-            _db     = _server.GetDatabase("TestSuiteDatabase");
-            _coll   = _db.GetCollection<TestClass>("TestClasses");
+            _db = _server.GetDatabase("TestSuiteDatabase");
+            _coll = _db.GetCollection<TestClass>("TestClasses");
         }
 
         [TearDown]
@@ -47,9 +46,9 @@ namespace MongoSharp.Tests
         [Test]
         public void FindOne_Returns_Something()
         {
-            _coll.Insert(new TestClass { ADouble = 1 });
+            _coll.Insert(new TestClass { ADouble = 1d });
 
-            TestClass found = _coll.FindOne(new { ADouble = 1d } );
+            TestClass found = _coll.FindOne(new { ADouble = 1d });
 
             Assert.IsNotNull(found);
         }
@@ -64,13 +63,12 @@ namespace MongoSharp.Tests
             _coll.Insert(new TestClass { ADouble = 5d });
 
             IEnumerable<TestClass> results = _coll.Find(
-                new { ADouble = Q.All<TestClass>(new [] {
-                    new TestClass {ADouble = 1d}, 
-                    new TestClass {AString = "teststring"}
-                    }) 
-            });
+                new
+                {
+                    ADouble = Q.All<object>(new{ADouble = 1d}, new {AString = "teststring"})
+                });
 
-            Assert.IsTrue((results.Count<TestClass>() == 1));
+            Assert.AreEqual(1, results.Count<TestClass>());
         }
 
         [Test]
@@ -84,7 +82,7 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.Exists(true) });
 
-            Assert.IsTrue((results.Count<TestClass>() == 5));
+            Assert.AreEqual(5, results.Count<TestClass>());
         }
 
         //[Test]
@@ -112,16 +110,12 @@ namespace MongoSharp.Tests
             _coll.Insert(new TestClass { ADouble = 4d });
             _coll.Insert(new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.NotEqual<TestClass>(new TestClass { ADouble = 2d }) });
+            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.NotEqual(2d) });
 
-            Console.WriteLine("Count: " + results.Count<TestClass>());
+            int count = results.Count();
 
-            foreach (TestClass test in results)
-            {
-                Console.WriteLine(test.ADouble);
-            }
-
-            Assert.IsTrue((results.Count<TestClass>() == 4));
+            Console.WriteLine("Count: " + count);
+            Assert.AreEqual(4, count);
         }
 
         [Test]
@@ -134,16 +128,15 @@ namespace MongoSharp.Tests
             _coll.Insert(new TestClass { ADouble = 4 });
             _coll.Insert(new TestClass { ADouble = 5 });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.In<TestClass>(new [] {
-                new TestClass {ADouble = 1},
-                new TestClass {ADouble = 3},
-                new TestClass {ADouble = 5}
-                })
+            IEnumerable<TestClass> results = _coll.Find(new
+            {
+                ADouble = Q.In(1d, 3d, 5d)
             });
 
-            Console.WriteLine("Count: " + results.Count<TestClass>());
+            int count = results.Count();
+            Console.WriteLine("Count: " + count);
 
-            Assert.IsTrue((results.Count<TestClass>() == 3));
+            Assert.AreEqual(2, count);
         }
 
         [Test]
@@ -156,18 +149,14 @@ namespace MongoSharp.Tests
             _coll.Insert(new TestClass { ADouble = 4d });
             _coll.Insert(new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new
-            {
-                ADouble = Q.NotIn<TestClass>(new[] {
-                new TestClass {ADouble = 1d},
-                new TestClass {ADouble = 3d},
-                new TestClass {ADouble = 5d}
-                })
+            IEnumerable<TestClass> results = _coll.Find(new{
+                ADouble = Q.NotIn(1d, 3d, 5d)
             });
 
-            Console.WriteLine("Count: " + results.Count<TestClass>());
+            int count = results.Count();
+            Console.WriteLine("Count: " + count);
 
-            Assert.IsTrue((results.Count<TestClass>() == 2));
+            Assert.AreEqual(2, count);
         }
 
         [Test]
@@ -181,7 +170,8 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.GreaterThan(2d) });
 
-            Assert.IsTrue((results.Count<TestClass>() == 3));
+
+            Assert.AreEqual(3, results.Count<TestClass>());
         }
 
         [Test]
@@ -195,7 +185,7 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.GreaterOrEqual(2d) });
 
-            Assert.IsTrue((results.Count<TestClass>() == 4));
+            Assert.AreEqual(4, results.Count<TestClass>());
         }
 
         [Test]
@@ -209,7 +199,7 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.LessThan(2d) });
 
-            Assert.IsTrue((results.Count<TestClass>() == 1));
+            Assert.AreEqual(1, results.Count<TestClass>());
         }
 
         [Test]
@@ -223,17 +213,17 @@ namespace MongoSharp.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.LessOrEqual(2d) });
 
-            Assert.IsTrue((results.Count<TestClass>() == 2));
+            Assert.AreEqual(2, results.Count<TestClass>());
         }
 
         [Test]
         public void FindOne_Qualifier_Size()
         {
-            _coll.Insert(new TestClass { AStringArray = new string[] {"one"} });
-            _coll.Insert(new TestClass { AStringArray = new string[] {"one", "two"} });
-            _coll.Insert(new TestClass { AStringArray = new string[] {"one", "two", "three"} });
-            _coll.Insert(new TestClass { AStringArray = new string[] {"one", "two", "three", "four"} });
-            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three", "four", "five" } });
+            _coll.Insert(new TestClass { AStringArray = new string[] { "one" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three", "four" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three", "four", "five" }.ToList() });
 
             IEnumerable<TestClass> results = _coll.Find(new { AStringArray = Q.Size(3d) });
 

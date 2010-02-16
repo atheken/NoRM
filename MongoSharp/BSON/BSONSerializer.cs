@@ -327,11 +327,13 @@ namespace MongoSharp.BSON
             {
                 props = ExpandoProps.FlyweightForObject(document);
             }
-            if (!BSONSerializer.CanBeSerialized(typeof(T)) || (props != null && props.AllProperties.Any(y => y.Value != null &&
+            if (!BSONSerializer.CanBeSerialized(typeof(T)) ||
+                (props != null && props.AllProperties.Any(y => y.Value != null &&
                 !BSONSerializer.CanBeSerialized(y.Value.GetType()))))
             {
                 throw new NotSupportedException("This type cannot be serialized using the BSONSerializer");
             }
+
             List<byte[]> retval = new List<byte[]>();
 
             var getters = BSONSerializer.GettersForType(document.GetType());

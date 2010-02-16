@@ -15,6 +15,8 @@ namespace BSONHarness
         
         static void Main(string[] args)
         {
+            BSONSerializer.Serialize(new { ATest = Q.LessThan(5) });
+
             var server = new MongoServer();
             server.Connect();
 
