@@ -1,30 +1,43 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!--This file represents the results of running a test suite-->
-<test-results name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" total="1" errors="1" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-15" time="16:42:10">
+<test-results name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" total="11" errors="0" failures="2" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2010-02-15" time="18:36:56">
   <environment nunit-version="2.5.3.9345" clr-version="2.0.50727.4927" os-version="Microsoft Windows NT 6.1.7600.0" platform="Win32NT" cwd="C:\mydata\NUnit-2.5.3.9345\bin\net-2.0" machine-name="JALEXANDER-WORK" user="jalexander" user-domain="jalexander-work" />
   <culture-info current-culture="en-US" current-uiculture="en-US" />
-  <test-suite name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" executed="True" success="False" time="2.477" asserts="0">
+  <test-suite name="C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" executed="True" success="False" time="32.608" asserts="0">
     <results>
-      <test-suite name="MongoSharp" executed="True" success="False" time="2.466" asserts="0">
+      <test-suite name="MongoSharp" executed="True" success="False" time="32.598" asserts="0">
         <results>
-          <test-suite name="Tests" executed="True" success="False" time="2.464" asserts="0">
+          <test-suite name="Tests" executed="True" success="False" time="32.593" asserts="0">
             <results>
-              <test-suite name="MongoFindTests" executed="True" success="False" time="2.440" asserts="0">
+              <test-suite name="MongoFindTests" executed="True" success="False" time="32.589" asserts="0">
                 <results>
-                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_Size" executed="True" success="False" time="2.424" asserts="0">
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_All" executed="True" success="True" time="2.383" asserts="1" />
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_Exists" executed="True" success="True" time="3.008" asserts="1" />
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_GreaterOrEqual" executed="True" success="True" time="3.007" asserts="1" />
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_GreaterThan" executed="True" success="True" time="3.007" asserts="1" />
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_In" executed="True" success="False" time="3.041" asserts="1">
                     <failure>
-                      <message><![CDATA[System.NotSupportedException : This type cannot be serialized using the BSONSerializer]]></message>
-                      <stack-trace><![CDATA[at MongoSharp.BSON.BSONSerializer.Deserialize(BinaryReader stream, IDictionary`2& outProps, Type returnType) in C:\mydata\git\MongoSharp\MongoSharp\BSON\BSONSerializer.cs:line 615
-at MongoSharp.BSON.BSONSerializer.Deserialize[T](BinaryReader stream, IDictionary`2& outProps) in C:\mydata\git\MongoSharp\MongoSharp\BSON\BSONSerializer.cs:line 572
-at MongoSharp.BSON.BSONSerializer.Deserialize[T](Byte[] objectData, IDictionary`2& outProps) in C:\mydata\git\MongoSharp\MongoSharp\BSON\BSONSerializer.cs:line 586
-at MongoSharp.Protocol.Messages.ReplyMessage`1..ctor(MongoServer context, String fullyQualifiedCollestionName, BinaryReader reply) in C:\mydata\git\MongoSharp\MongoSharp\Protocol\Messages\ReplyMessage.cs:line 49
-at MongoSharp.Protocol.Messages.QueryMessage`2.Execute() in C:\mydata\git\MongoSharp\MongoSharp\Protocol\Messages\QueryMessage.cs:line 145
-at MongoSharp.MongoCollection`1.<Find>d__1`1.MoveNext() in C:\mydata\git\MongoSharp\MongoSharp\MongoCollection.cs:line 215
-at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source)
-at MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_Size() in C:\mydata\git\MongoSharp\MongoSharp.Tests\MongoFindTest.cs:line 240
+                      <message><![CDATA[  Expected: 2
+  But was:  1
+]]></message>
+                      <stack-trace><![CDATA[at MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_In() in C:\mydata\git\MongoSharp\MongoSharp.Tests\MongoFindTest.cs:line 141
 ]]></stack-trace>
                     </failure>
                   </test-case>
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_LessOrEqual" executed="True" success="True" time="3.007" asserts="1" />
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_LessThan" executed="True" success="True" time="3.007" asserts="1" />
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_NotEqual" executed="True" success="True" time="3.008" asserts="1" />
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_NotIn" executed="True" success="False" time="3.018" asserts="1">
+                    <failure>
+                      <message><![CDATA[  Expected: 2
+  But was:  1
+]]></message>
+                      <stack-trace><![CDATA[at MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_NotIn() in C:\mydata\git\MongoSharp\MongoSharp.Tests\MongoFindTest.cs:line 160
+]]></stack-trace>
+                    </failure>
+                  </test-case>
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Qualifier_Size" executed="True" success="True" time="3.016" asserts="1" />
+                  <test-case name="MongoSharp.Tests.MongoFindTests.FindOne_Returns_Something" executed="True" success="True" time="3.015" asserts="1" />
                 </results>
               </test-suite>
             </results>

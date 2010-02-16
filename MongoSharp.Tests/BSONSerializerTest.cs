@@ -6,9 +6,8 @@ using NUnit.Framework;
 using System.Text.RegularExpressions;
 using MongoSharp.BSON;
 
-namespace BSONLib.Tests
+namespace MongoSharp.BSON.Tests
 {
-
     [TestFixture]
     public class BSONSerializerTest
     {

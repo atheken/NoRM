@@ -46,7 +46,7 @@ namespace MongoSharp.Tests
         [TearDown]
         public void Test_TearDown()
         {
-            _db.GetCollection<TestClass>("TestClasses").Delete(new object());
+            _coll.Delete(new object());
         }
 
         [Test]
@@ -72,21 +72,23 @@ namespace MongoSharp.Tests
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.All(new { ADouble = 1d, AString = "teststring" }) });
 
             int count = results.Count();
-            Assert.AreEqual(2,count);
+            Assert.AreEqual(2, count);
         }
 
         [Test]
         public void FindOne_Qualifier_Exists()
         {
-            _coll.Insert(new TestClass { ADouble = 1d });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-            _coll.Insert(new TestClass { ADouble = 5d });
+            _coll.Insert(new TestClass { ADouble = 1d },
+                new TestClass { ADouble = 2d },
+                new TestClass { ADouble = 3d },
+                new TestClass { ADouble = 4d },
+                new TestClass { ADouble = 5d });
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.Exists(true) });
 
-            Assert.AreEqual(5, results.Count<TestClass>());
+            int count = results.Count();
+
+            Assert.AreEqual(5, count);
         }
 
         //[Test]
@@ -108,34 +110,32 @@ namespace MongoSharp.Tests
         public void FindOne_Qualifier_NotEqual()
         {
             // TODO this is failing currently. shouldn't be, I don't think?
-            _coll.Insert(new TestClass { ADouble = 1d });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-            _coll.Insert(new TestClass { ADouble = 5d });
+            _coll.Insert(new TestClass { ADouble = 1d },
+                new TestClass { ADouble = 2d },
+                new TestClass { ADouble = 3d },
+                new TestClass { ADouble = 4d },
+                new TestClass { ADouble = 5d });
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.NotEqual(2d) });
 
             int count = results.Count();
 
-            Console.WriteLine("Count: " + count);
             Assert.AreEqual(4, count);
         }
 
         [Test]
         public void FindOne_Qualifier_In()
         {
-            // TODO this is failing - need to check with AT and see if I'm doing this right.
-            _coll.Insert(new TestClass { ADouble = 1d });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-            _coll.Insert(new TestClass { ADouble = 5d });
+
+            _coll.Insert(new TestClass { ADouble = 1 },
+                new TestClass { ADouble = 2 },
+                new TestClass { ADouble = 3 },
+                new TestClass { ADouble = 4 },
+                new TestClass { ADouble = 5 });
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.In(1d) });
 
             int count = results.Count();
-            Console.WriteLine("Count: " + count);
 
             Assert.AreEqual(2, count);
         }
@@ -144,11 +144,11 @@ namespace MongoSharp.Tests
         public void FindOne_Qualifier_NotIn()
         {
             // TODO this is failing - need to check with AT and see if I'm doing this right.
-            _coll.Insert(new TestClass { ADouble = 1d });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-            _coll.Insert(new TestClass { ADouble = 5d });
+            _coll.Insert(new TestClass { ADouble = 1d },
+                new TestClass { ADouble = 2d },
+                new TestClass { ADouble = 3d },
+                new TestClass { ADouble = 4d },
+                new TestClass { ADouble = 5d });
 
             IEnumerable<TestClass> results = _coll.Find(new
             {
@@ -156,7 +156,6 @@ namespace MongoSharp.Tests
             });
 
             int count = results.Count();
-            Console.WriteLine("Count: " + count);
 
             Assert.AreEqual(2, count);
         }
@@ -164,58 +163,65 @@ namespace MongoSharp.Tests
         [Test]
         public void FindOne_Qualifier_GreaterThan()
         {
-            _coll.Insert(new TestClass { ADouble = 1d });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-            _coll.Insert(new TestClass { ADouble = 5d });
+            _coll.Insert(new TestClass { ADouble = 1d },
+                new TestClass { ADouble = 2d },
+                new TestClass { ADouble = 3d },
+                new TestClass { ADouble = 4d },
+                new TestClass { ADouble = 5d });
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.GreaterThan(2d) });
 
+            int count = results.Count();
 
-            Assert.AreEqual(3, results.Count<TestClass>());
+            Assert.AreEqual(3, count);
         }
 
         [Test]
         public void FindOne_Qualifier_GreaterOrEqual()
         {
-            _coll.Insert(new TestClass { ADouble = 1d });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-            _coll.Insert(new TestClass { ADouble = 5d });
+            _coll.Insert(new TestClass { ADouble = 1d },
+                new TestClass { ADouble = 2d },
+                new TestClass { ADouble = 3d },
+                new TestClass { ADouble = 4d },
+                new TestClass { ADouble = 5d });
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.GreaterOrEqual(2d) });
 
-            Assert.AreEqual(4, results.Count<TestClass>());
+            int count = results.Count();
+
+            Assert.AreEqual(4, count);
         }
 
         [Test]
         public void FindOne_Qualifier_LessThan()
         {
-            _coll.Insert(new TestClass { ADouble = 1d });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-            _coll.Insert(new TestClass { ADouble = 5d });
+            _coll.Insert(new TestClass { ADouble = 1d },
+                new TestClass { ADouble = 2d },
+                new TestClass { ADouble = 3d },
+                new TestClass { ADouble = 4d },
+                new TestClass { ADouble = 5d });
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.LessThan(2d) });
 
-            Assert.AreEqual(1, results.Count<TestClass>());
+            int count = results.Count();
+
+            Assert.AreEqual(1, count);
         }
 
         [Test]
         public void FindOne_Qualifier_LessOrEqual()
         {
-            _coll.Insert(new TestClass { ADouble = 1d });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-            _coll.Insert(new TestClass { ADouble = 5d });
+            _coll.Insert(new TestClass { ADouble = 1d },
+                new TestClass { ADouble = 2d },
+                new TestClass { ADouble = 3d },
+                new TestClass { ADouble = 4d },
+                new TestClass { ADouble = 5d });
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.LessOrEqual(2d) });
 
-            Assert.AreEqual(2, results.Count<TestClass>());
+            int count = results.Count();
+
+            Assert.AreEqual(2, count);
         }
 
         [Test]
@@ -232,6 +238,5 @@ namespace MongoSharp.Tests
 
             Assert.AreEqual(2, results.Count());
         }
-
     }
 }
