@@ -8,9 +8,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Tests.nunit = Tests.nunit
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoSharp", "MongoSharp\MongoSharp.csproj", "{297A83DB-DACE-4264-B28E-769CF165D4E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoRM", "NoRM\NoRM.csproj", "{297A83DB-DACE-4264-B28E-769CF165D4E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoSharp.Tests", "MongoSharp.Tests\MongoSharp.Tests.csproj", "{505E617D-1F40-40AF-BDF0-730EFBC5BA95}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoRM.Tests", "NoRM.Tests\NoRM.Tests.csproj", "{505E617D-1F40-40AF-BDF0-730EFBC5BA95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

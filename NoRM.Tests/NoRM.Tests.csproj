@@ -77,7 +77,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MongoSharp\MongoSharp.csproj">
+    <ProjectReference Include="..\NoRM\NoRM.csproj">
       <Project>{297A83DB-DACE-4264-B28E-769CF165D4E4}</Project>
       <Name>MongoSharp</Name>
     </ProjectReference>
