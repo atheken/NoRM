@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSONHarness", "BSONHarness\BSONHarness.csproj", "{F8E1F3A1-7012-444A-98C0-2C69EF14BC72}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoRM.Harness", "BSONHarness\NoRM.Harness.csproj", "{F8E1F3A1-7012-444A-98C0-2C69EF14BC72}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C706147E-3B10-4328-85B1-467E4199756D}"
 	ProjectSection(SolutionItems) = preProject

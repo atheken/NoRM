@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MongoSharp.Commands.Qualifiers;
+using NoRM.Commands.Qualifiers;
 using System.Text.RegularExpressions;
 
-namespace MongoSharp
+namespace NoRM
 {
     /// <summary>
     /// Qualifier operations.

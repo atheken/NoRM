@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MongoSharp.Protocol.Messages;
-using MongoSharp.Protocol.SystemMessages.Requests;
-using MongoSharp.Protocol.SystemMessages.Responses;
-using MongoSharp.Protocol.SystemMessages;
+using NoRM.Protocol.Messages;
+using NoRM.Protocol.SystemMessages.Requests;
+using NoRM.Protocol.SystemMessages.Responses;
+using NoRM.Protocol.SystemMessages;
 
-namespace MongoSharp
+namespace NoRM
 {
     public class MongoDatabase
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MongoSharp.Protocol
+namespace NoRM.Protocol
 {
     /// <summary>
     /// Provides information about how a particular 

@@ -5,14 +5,14 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
-using MongoSharp.Protocol.Messages;
+using NoRM.Protocol.Messages;
 using System.Security.Cryptography;
-using MongoSharp.Protocol.SystemMessages.Responses;
-using MongoSharp.Protocol.SystemMessages.Requests;
-using MongoSharp.BSON;
-using MongoSharp.Protocol.SystemMessages;
+using NoRM.Protocol.SystemMessages.Responses;
+using NoRM.Protocol.SystemMessages.Requests;
+using NoRM.BSON;
+using NoRM.Protocol.SystemMessages;
 
-namespace MongoSharp
+namespace NoRM
 {
     public class MongoServer
     {

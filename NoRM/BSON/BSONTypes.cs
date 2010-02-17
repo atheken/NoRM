@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MongoSharp.BSON
+namespace NoRM.BSON
 {
     /// <summary>
     /// Represents the various 

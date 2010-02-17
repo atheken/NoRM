@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using MongoSharp.BSON;
+using NoRM.BSON;
 
-namespace MongoSharp.Protocol.Messages
+namespace NoRM.Protocol.Messages
 {
     internal class ReplyMessage<T> : Message where T : class, new()
     {

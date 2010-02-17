@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 
-namespace MongoSharp.BSON
+namespace NoRM.BSON
 {
     /// <summary>
     /// Provides some reflection methods to produce delegates rather than

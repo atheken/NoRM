@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.IO;
 
-namespace MongoSharp.Protocol.Messages
+namespace NoRM.Protocol.Messages
 {
     internal class GetMoreMessage<T> : Message where T : class, new()
     {

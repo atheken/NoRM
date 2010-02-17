@@ -8,8 +8,8 @@
     <ProjectGuid>{297A83DB-DACE-4264-B28E-769CF165D4E4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MongoSharp</RootNamespace>
-    <AssemblyName>MongoSharp</AssemblyName>
+    <RootNamespace>NoRM</RootNamespace>
+    <AssemblyName>NoRM</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

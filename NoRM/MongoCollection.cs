@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MongoSharp.Protocol.Messages;
-using MongoSharp.Protocol.SystemMessages.Requests;
-using MongoSharp.Protocol.SystemMessages.Responses;
+using NoRM.Protocol.Messages;
+using NoRM.Protocol.SystemMessages.Requests;
+using NoRM.Protocol.SystemMessages.Responses;
 
-namespace MongoSharp
+namespace NoRM
 {
     public class MongoCollection<T> where T : class, new()
     {

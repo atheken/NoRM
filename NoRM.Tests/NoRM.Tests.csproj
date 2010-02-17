@@ -8,8 +8,8 @@
     <ProjectGuid>{505E617D-1F40-40AF-BDF0-730EFBC5BA95}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MongoSharp.Tests</RootNamespace>
-    <AssemblyName>MongoSharp.Tests</AssemblyName>
+    <RootNamespace>NoRM.Tests</RootNamespace>
+    <AssemblyName>NoRM.Tests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -73,13 +73,13 @@
     <Compile Include="MongoCollectionTest.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
-    <Compile Include="MongoFindTest.cs" />
+    <Compile Include="MongoSearchQualifierTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NoRM\NoRM.csproj">
       <Project>{297A83DB-DACE-4264-B28E-769CF165D4E4}</Project>
-      <Name>MongoSharp</Name>
+      <Name>NoRM</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

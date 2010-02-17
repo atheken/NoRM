@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using MongoSharp.BSON;
+using NoRM.BSON;
 
-namespace MongoSharp.Tests
+namespace NoRM.Tests
 {
     [TestFixture]
     public class MongoCollectionTest

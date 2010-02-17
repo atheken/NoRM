@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MongoSharp.BSON;
+using NoRM.BSON;
 
-namespace MongoSharp.Commands
+namespace NoRM.Commands
 {
     public class IncrementOperation : ModifierCommand
     {

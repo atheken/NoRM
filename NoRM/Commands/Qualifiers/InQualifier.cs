@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MongoSharp.BSON;
+using NoRM.BSON;
 
-namespace MongoSharp.Commands.Qualifiers
+namespace NoRM.Commands.Qualifiers
 {
     public class InQualifier<T> :QualifierCommand
     {

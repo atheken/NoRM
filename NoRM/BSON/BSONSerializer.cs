@@ -8,7 +8,7 @@ using System.IO;
 using System.Data.Linq;
 using System.Collections;
 
-namespace MongoSharp.BSON
+namespace NoRM.BSON
 {
     /// <summary>
     /// A class that is capable serializing simple .net objects to/from BSON.

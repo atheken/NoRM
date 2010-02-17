@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MongoSharp.BSON;
+using NoRM.BSON;
 
-namespace MongoSharp.Protocol.Messages
+namespace NoRM.Protocol.Messages
 {
     internal class DeleteMessage<U> : Message
     {

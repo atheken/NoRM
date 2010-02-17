@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using MongoSharp.BSON;
-using System.IO;
-using MongoSharp;
 using System.Text.RegularExpressions;
-using MongoSharp.Protocol.SystemMessages.Responses;
+using NoRM;
+using NoRM.BSON;
+using NoRM.Protocol.SystemMessages.Responses;
 
 namespace BSONHarness
 {

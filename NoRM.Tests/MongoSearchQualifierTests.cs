@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using MongoSharp.Protocol.SystemMessages.Responses;
+using NoRM.Protocol.SystemMessages.Responses;
 
-namespace MongoSharp.Tests
+namespace NoRM.Tests
 {
 
     public class TestClass

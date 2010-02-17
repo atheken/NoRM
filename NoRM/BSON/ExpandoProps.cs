@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace MongoSharp.BSON
+namespace NoRM.BSON
 {
     /// <summary>
     /// Provides a mechanism for adding and removing arbitrary properties on objects.

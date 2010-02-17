@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MongoSharp.Protocol.Messages
+namespace NoRM.Protocol.Messages
 {
    
 }

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using MongoSharp.BSON;
+using NoRM.BSON;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace MongoSharp.Protocol.Messages
+namespace NoRM.Protocol.Messages
 {
     /// <summary>
     /// A query to the db.

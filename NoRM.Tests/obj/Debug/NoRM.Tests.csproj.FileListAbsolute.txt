@@ -1,0 +1,9 @@
+C:\Code\NoRM\NoRM.Tests\bin\Debug\nunit.framework.dll
+C:\Code\NoRM\NoRM.Tests\bin\Debug\nunit.framework.xml
+C:\Code\NoRM\NoRM.Tests\obj\Debug\ResolveAssemblyReference.cache
+C:\Code\NoRM\NoRM.Tests\bin\Debug\NoRM.Tests.dll
+C:\Code\NoRM\NoRM.Tests\bin\Debug\NoRM.Tests.pdb
+C:\Code\NoRM\NoRM.Tests\bin\Debug\NoRM.dll
+C:\Code\NoRM\NoRM.Tests\bin\Debug\NoRM.pdb
+C:\Code\NoRM\NoRM.Tests\obj\Debug\NoRM.Tests.dll
+C:\Code\NoRM\NoRM.Tests\obj\Debug\NoRM.Tests.pdb

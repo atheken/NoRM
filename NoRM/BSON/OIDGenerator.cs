@@ -5,7 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Security.Cryptography;
 
-namespace MongoSharp.BSON
+namespace NoRM.BSON
 {
 
     /// <summary>

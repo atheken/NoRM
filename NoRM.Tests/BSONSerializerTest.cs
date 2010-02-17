@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
-using MongoSharp.BSON;
+using NoRM.BSON;
 
-namespace MongoSharp.BSON.Tests
+namespace NoRM.BSON.Tests
 {
     [TestFixture]
     public class BSONSerializerTest

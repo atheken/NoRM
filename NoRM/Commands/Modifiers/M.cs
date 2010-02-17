@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MongoSharp.Commands;
+using NoRM.Commands;
 
-namespace MongoSharp
+namespace NoRM
 {
     /// <summary>
     /// Shorthand to construct modifier operations

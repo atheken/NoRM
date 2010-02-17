@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MongoSharp.Protocol.SystemMessages.Requests
+namespace NoRM.Protocol.SystemMessages.Requests
 {
     /// <summary>
     /// Describes an index to insert into the db.
