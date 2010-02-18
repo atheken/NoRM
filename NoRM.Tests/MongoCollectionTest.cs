@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
 using NoRM.BSON;
 
@@ -18,7 +17,7 @@ namespace NoRM.Tests
             testDB.DropCollection("testObjects");
             var testColl = testDB.GetCollection<Object>("testObjects");
             var cache = new List<Object>();
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 cache.Add(new Object());
             }

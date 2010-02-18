@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
 using NoRM.BSON;
 
-namespace NoRM.BSON.Tests
+namespace NoRM.Tests
 {
     [TestFixture]
     public class BSONSerializerTest
@@ -37,15 +34,15 @@ namespace NoRM.BSON.Tests
         [Test]
         public void Serializing_POCO_Generates_Bytes()
         {
-            var dummy = new GeneralDTO() { Title = "Testing" };
+            var dummy = new GeneralDTO { Title = "Testing" };
             Assert.IsNotEmpty(BSONSerializer.Serialize(dummy));
         }
 
         [Test]
         public void Serialization_Of_Strings_Are_Not_Lossy()
         {
-            var obj1 = new GeneralDTO() { Title = null };
-            var obj2 = new GeneralDTO() { Title = "Hello World" };
+            var obj1 = new GeneralDTO { Title = null };
+            var obj2 = new GeneralDTO { Title = "Hello World" };
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
             var obj2Bytes = BSONSerializer.Serialize(obj2);
@@ -60,7 +57,7 @@ namespace NoRM.BSON.Tests
         [Test]
         public void Serialization_Of_NestedObjects_Is_Not_Lossy()
         {
-            var obj1 = new GeneralDTO() { Title = "Hello World", Nester = new GeneralDTO() { Title = "Bob", AnInt = 42 } };
+            var obj1 = new GeneralDTO { Title = "Hello World", Nester = new GeneralDTO { Title = "Bob", AnInt = 42 } };
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
 
@@ -75,17 +72,17 @@ namespace NoRM.BSON.Tests
         [Test]
         public void Recursive_NestedTypes_Dont_Cause_Infinite_Loop()
         {
-            var obj1 = new GeneralDTO() { Title = "Hello World", Nester = new GeneralDTO() { Title = "Bob", AnInt = 42 } };
+            var obj1 = new GeneralDTO { Title = "Hello World", Nester = new GeneralDTO { Title = "Bob", AnInt = 42 } };
             var obj1Bytes = BSONSerializer.Serialize(obj1);
-            var obj2 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
             
         }
 
         [Test]
         public void Serialization_Of_Doubles_Are_Not_Lossy()
         {
-            var obj1 = new GeneralDTO() { Pi = 3.1415927d };
-            var obj2 = new GeneralDTO() { Pi = null };
+            var obj1 = new GeneralDTO { Pi = 3.1415927d };
+            var obj2 = new GeneralDTO { Pi = null };
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
             var obj2Bytes = BSONSerializer.Serialize(obj2);
@@ -100,8 +97,8 @@ namespace NoRM.BSON.Tests
         [Test]
         public void Serialization_Of_Ints_Are_Not_Lossy()
         {
-            var obj1 = new GeneralDTO() { AnInt = 100 };
-            var obj2 = new GeneralDTO() { AnInt = null };
+            var obj1 = new GeneralDTO { AnInt = 100 };
+            var obj2 = new GeneralDTO { AnInt = null };
 
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
@@ -117,8 +114,8 @@ namespace NoRM.BSON.Tests
         [Test]
         public void Serialization_Of_Booleans_Are_Not_Lossy()
         {
-            var obj1 = new GeneralDTO() { ABoolean = true };
-            var obj2 = new GeneralDTO() { ABoolean = null };
+            var obj1 = new GeneralDTO { ABoolean = true };
+            var obj2 = new GeneralDTO { ABoolean = null };
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
             var obj2Bytes = BSONSerializer.Serialize(obj2);
@@ -133,8 +130,8 @@ namespace NoRM.BSON.Tests
         [Test]
         public void Serialization_Of_Bytes_Is_Not_Lossy()
         {
-            var obj1 = new GeneralDTO() { Bytes = BitConverter.GetBytes(Int32.MaxValue) };
-            var obj2 = new GeneralDTO() { Bytes = null };
+            var obj1 = new GeneralDTO { Bytes = BitConverter.GetBytes(Int32.MaxValue) };
+            var obj2 = new GeneralDTO { Bytes = null };
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
             var obj2Bytes = BSONSerializer.Serialize(obj2);
@@ -149,8 +146,8 @@ namespace NoRM.BSON.Tests
         [Test]
         public void Serialization_Of_Guid_Is_Not_Lossy()
         {
-            var obj1 = new GeneralDTO() { AGuid = Guid.NewGuid() };
-            var obj2 = new GeneralDTO() { AGuid = null };
+            var obj1 = new GeneralDTO { AGuid = Guid.NewGuid() };
+            var obj2 = new GeneralDTO { AGuid = null };
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
             var obj2Bytes = BSONSerializer.Serialize(obj2);
@@ -165,8 +162,8 @@ namespace NoRM.BSON.Tests
         [Test]
         public void Serialization_Of_Regex_Is_Not_Lossy()
         {
-            var obj1 = new GeneralDTO() { ARex = new Regex("[0-9]{5}", RegexOptions.Multiline) };
-            var obj2 = new GeneralDTO() { ARex = null };
+            var obj1 = new GeneralDTO { ARex = new Regex("[0-9]{5}", RegexOptions.Multiline) };
+            var obj2 = new GeneralDTO { ARex = null };
 
             var obj1Bytes = BSONSerializer.Serialize(obj1);
             var obj2Bytes = BSONSerializer.Serialize(obj2);

@@ -69,8 +69,8 @@ namespace NoRM
         /// <returns></returns>
         public CollectionStatistics GetCollectionStatistics(string collectionName)
         {
-            var response = this.GetCollection<CollectionStatistics>("$cmd")
-                .FindOne<CollectionStatistics>(new CollectionStatistics() { collstats = collectionName });
+            var response = GetCollection<CollectionStatistics>("$cmd")
+                .FindOne(new CollectionStatistics() { collstats = collectionName });
 
             return response;
         }
