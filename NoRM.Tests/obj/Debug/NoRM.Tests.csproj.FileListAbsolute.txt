@@ -15,3 +15,11 @@ C:\Users\James Avery\Documents\Projects\NoRM\NoRM.Tests\bin\Debug\NoRM.pdb
 C:\Users\James Avery\Documents\Projects\NoRM\NoRM.Tests\obj\Debug\ResolveAssemblyReference.cache
 C:\Users\James Avery\Documents\Projects\NoRM\NoRM.Tests\obj\Debug\NoRM.Tests.dll
 C:\Users\James Avery\Documents\Projects\NoRM\NoRM.Tests\obj\Debug\NoRM.Tests.pdb
+Z:\norm\NoRM.Tests\obj\Debug\ResolveAssemblyReference.cache
+Z:\norm\NoRM.Tests\bin\Debug\NoRM.Tests.dll
+Z:\norm\NoRM.Tests\bin\Debug\NoRM.Tests.pdb
+Z:\norm\NoRM.Tests\bin\Debug\NoRM.dll
+Z:\norm\NoRM.Tests\bin\Debug\nunit.framework.dll
+Z:\norm\NoRM.Tests\bin\Debug\NoRM.pdb
+Z:\norm\NoRM.Tests\obj\Debug\NoRM.Tests.dll
+Z:\norm\NoRM.Tests\obj\Debug\NoRM.Tests.pdb

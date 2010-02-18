@@ -15,3 +15,8 @@ C:\Users\James Avery\Documents\Projects\NoRM\NoRM\bin\Debug\NoRM.pdb
 C:\Users\James Avery\Documents\Projects\NoRM\NoRM\obj\Debug\ResolveAssemblyReference.cache
 C:\Users\James Avery\Documents\Projects\NoRM\NoRM\obj\Debug\NoRM.dll
 C:\Users\James Avery\Documents\Projects\NoRM\NoRM\obj\Debug\NoRM.pdb
+Z:\norm\NoRM\bin\Debug\NoRM.dll
+Z:\norm\NoRM\bin\Debug\NoRM.pdb
+Z:\norm\NoRM\obj\Debug\ResolveAssemblyReference.cache
+Z:\norm\NoRM\obj\Debug\NoRM.dll
+Z:\norm\NoRM\obj\Debug\NoRM.pdb
