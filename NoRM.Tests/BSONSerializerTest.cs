@@ -37,7 +37,7 @@ namespace NoRM.BSON.Tests
         [Test]
         public void Serializing_POCO_Generates_Bytes()
         {
-            GeneralDTO dummy = new GeneralDTO() { Title = "Testing" };
+            var dummy = new GeneralDTO() { Title = "Testing" };
             Assert.IsNotEmpty(BSONSerializer.Serialize(dummy));
         }
 

@@ -17,7 +17,7 @@ namespace NoRM.Tests
             var testDB = server.GetDatabase("test");
             testDB.DropCollection("testObjects");
             var testColl = testDB.GetCollection<Object>("testObjects");
-            List<Object> cache = new List<Object>();
+            var cache = new List<Object>();
             for (int i = 0; i < 10; i++)
             {
                 cache.Add(new Object());
@@ -30,7 +30,7 @@ namespace NoRM.Tests
         [Test]
         public void Collection_Statistics_Returns()
         {
-            MongoServer server = new MongoServer();
+            var server = new MongoServer();
 
             var db = server.GetDatabase("test");
 

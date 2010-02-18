@@ -35,7 +35,7 @@ namespace NoRM.Tests
         [Test]
         public void Drop_Database_Returns_True()
         {
-            String dbName = "test"+Guid.NewGuid().ToString().Substring(0,5);
+            var dbName = "test"+Guid.NewGuid().ToString().Substring(0,5);
             var db = this._context.GetDatabase(dbName);
             //the db may not exist until we insert into it.
             db.GetCollection<Object>(dbName).Insert(new {Title=dbName});
@@ -45,7 +45,7 @@ namespace NoRM.Tests
         [Test]
         public void Check_Invalid_Server()
         {
-            MongoServer context = new MongoServer("localhost", 11111, false);
+            var context = new MongoServer("localhost", 11111, false);
 
             Assert.Throws(typeof(SocketException), delegate { context.Connect(); });
         }
@@ -60,7 +60,7 @@ namespace NoRM.Tests
         public void Check_Current_Operations()
         {
             // Not sure how to test this yet.
-            MongoServer server = new MongoServer();
+            var server = new MongoServer();
 
             var ops = server.GetCurrentOperations();
 

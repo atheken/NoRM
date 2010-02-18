@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
-using NoRM.Protocol.SystemMessages.Responses;
 
 namespace NoRM.Tests
 {
@@ -35,8 +33,8 @@ namespace NoRM.Tests
         [TestFixtureTearDown]
         public void TestFixture_Teardown()
         {
-            DroppedCollectionResponse collResponse = _db.DropCollection("TestClasses");
-            DroppedDatabaseResponse dbResponse = _server.DropDatabase("TestSuiteDatabase");
+            var collResponse = _db.DropCollection("TestClasses");
+            var dbResponse = _server.DropDatabase("TestSuiteDatabase");
 
             _coll = null;
             _db = null;
@@ -54,7 +52,7 @@ namespace NoRM.Tests
         {
             _coll.Insert(new TestClass { ADouble = 1d });
 
-            TestClass found = _coll.FindOne(new { ADouble = 1d });
+            var found = _coll.FindOne(new { ADouble = 1d });
 
             Assert.IsNotNull(found);
         }
@@ -71,7 +69,7 @@ namespace NoRM.Tests
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.All(new { ADouble = 1d, AString = "teststring" }) });
 
-            int count = results.Count();
+            var count = results.Count();
             Assert.AreEqual(2, count);
         }
 
@@ -84,9 +82,9 @@ namespace NoRM.Tests
                 new TestClass { ADouble = 4d },
                 new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.Exists(true) });
+            var results = _coll.Find(new { ADouble = Q.Exists(true) });
 
-            int count = results.Count();
+            var count = results.Count();
 
             Assert.AreEqual(5, count);
         }
@@ -116,9 +114,9 @@ namespace NoRM.Tests
                 new TestClass { ADouble = 4d },
                 new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.NotEqual(2d) });
+            var results = _coll.Find(new { ADouble = Q.NotEqual(2d) });
 
-            int count = results.Count();
+            var count = results.Count();
 
             Assert.AreEqual(4, count);
         }
@@ -133,9 +131,9 @@ namespace NoRM.Tests
                 new TestClass { ADouble = 4 },
                 new TestClass { ADouble = 5 });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.In(1d) });
+            var results = _coll.Find(new { ADouble = Q.In(1d) });
 
-            int count = results.Count();
+            var count = results.Count();
 
             Assert.AreEqual(2, count);
         }
@@ -150,12 +148,12 @@ namespace NoRM.Tests
                 new TestClass { ADouble = 4d },
                 new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new
+            var results = _coll.Find(new
             {
                 ADouble = Q.NotIn(1d, 3d, 5d)
             });
 
-            int count = results.Count();
+            var count = results.Count();
 
             Assert.AreEqual(2, count);
         }
@@ -169,9 +167,9 @@ namespace NoRM.Tests
                 new TestClass { ADouble = 4d },
                 new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.GreaterThan(2d) });
+            var results = _coll.Find(new { ADouble = Q.GreaterThan(2d) });
 
-            int count = results.Count();
+            var count = results.Count();
 
             Assert.AreEqual(3, count);
         }
@@ -185,9 +183,9 @@ namespace NoRM.Tests
                 new TestClass { ADouble = 4d },
                 new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.GreaterOrEqual(2d) });
+            var results = _coll.Find(new { ADouble = Q.GreaterOrEqual(2d) });
 
-            int count = results.Count();
+            var count = results.Count();
 
             Assert.AreEqual(4, count);
         }
@@ -217,9 +215,9 @@ namespace NoRM.Tests
                 new TestClass { ADouble = 4d },
                 new TestClass { ADouble = 5d });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.LessOrEqual(2d) });
+            var results = _coll.Find(new { ADouble = Q.LessOrEqual(2d) });
 
-            int count = results.Count();
+            var count = results.Count();
 
             Assert.AreEqual(2, count);
         }
@@ -227,14 +225,14 @@ namespace NoRM.Tests
         [Test]
         public void FindOne_Qualifier_Size()
         {
-            _coll.Insert(new TestClass { AStringArray = new string[] { "one" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three", "four" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new string[] { "one", "two", "three", "four", "five" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new [] { "one" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two", "three" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two", "three" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two", "three", "four" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two", "three", "four", "five" }.ToList() });
 
-            IEnumerable<TestClass> results = _coll.Find(new { AStringArray = Q.Size(3d) });
+            var results = _coll.Find(new { AStringArray = Q.Size(3d) });
 
             Assert.AreEqual(2, results.Count());
         }
