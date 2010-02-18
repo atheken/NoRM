@@ -32,3 +32,15 @@ C:\Code\MongoSharp\MongoSharp\bin\Debug\Gallio.xml
 C:\Code\MongoSharp\MongoSharp\bin\Debug\MbUnit.pdb
 C:\Code\MongoSharp\MongoSharp\bin\Debug\MbUnit.xml
 C:\Code\MongoSharp\MongoSharp\bin\Debug\Gallio.XmlSerializers.dll
+C:\mydata\git\NoRM\MongoSharp\bin\Debug\MongoSharp.dll
+C:\mydata\git\NoRM\MongoSharp\bin\Debug\MongoSharp.pdb
+C:\mydata\git\NoRM\MongoSharp\bin\Debug\Gallio.dll
+C:\mydata\git\NoRM\MongoSharp\bin\Debug\MbUnit.dll
+C:\mydata\git\NoRM\MongoSharp\bin\Debug\Gallio.pdb
+C:\mydata\git\NoRM\MongoSharp\bin\Debug\Gallio.xml
+C:\mydata\git\NoRM\MongoSharp\bin\Debug\MbUnit.pdb
+C:\mydata\git\NoRM\MongoSharp\bin\Debug\MbUnit.xml
+C:\mydata\git\NoRM\MongoSharp\bin\Debug\Gallio.XmlSerializers.dll
+C:\mydata\git\NoRM\MongoSharp\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\NoRM\MongoSharp\obj\Debug\MongoSharp.dll
+C:\mydata\git\NoRM\MongoSharp\obj\Debug\MongoSharp.pdb

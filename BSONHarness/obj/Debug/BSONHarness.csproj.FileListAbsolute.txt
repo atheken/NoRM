@@ -35,3 +35,10 @@ C:\Code\MongoSharp\BSONHarness\bin\Debug\MongoSharp.dll
 C:\Code\MongoSharp\BSONHarness\bin\Debug\MongoSharp.pdb
 C:\mydata\git\MongoSharp\BSONHarness\bin\Debug\MongoSharp.dll
 C:\mydata\git\MongoSharp\BSONHarness\bin\Debug\MongoSharp.pdb
+C:\mydata\git\NoRM\BSONHarness\bin\Debug\BSONHarness.exe
+C:\mydata\git\NoRM\BSONHarness\bin\Debug\BSONHarness.pdb
+C:\mydata\git\NoRM\BSONHarness\bin\Debug\MongoSharp.dll
+C:\mydata\git\NoRM\BSONHarness\bin\Debug\MongoSharp.pdb
+C:\mydata\git\NoRM\BSONHarness\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\NoRM\BSONHarness\obj\Debug\BSONHarness.exe
+C:\mydata\git\NoRM\BSONHarness\obj\Debug\BSONHarness.pdb
