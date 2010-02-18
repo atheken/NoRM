@@ -1,6 +1,7 @@
 TestResult.xml
 Tests.VisualState.xml
-*.dll
+bin
+obj
 *.exe
 *.pdb
 *.cache
