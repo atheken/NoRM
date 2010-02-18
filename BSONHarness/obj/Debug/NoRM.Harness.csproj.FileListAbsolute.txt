@@ -5,3 +5,10 @@ C:\Code\NoRM\BSONHarness\bin\Debug\NoRM.pdb
 C:\Code\NoRM\BSONHarness\obj\Debug\ResolveAssemblyReference.cache
 C:\Code\NoRM\BSONHarness\obj\Debug\BSONHarness.exe
 C:\Code\NoRM\BSONHarness\obj\Debug\BSONHarness.pdb
+C:\Users\James Avery\Documents\Projects\NoRM\BSONHarness\bin\Debug\BSONHarness.exe
+C:\Users\James Avery\Documents\Projects\NoRM\BSONHarness\bin\Debug\BSONHarness.pdb
+C:\Users\James Avery\Documents\Projects\NoRM\BSONHarness\bin\Debug\NoRM.dll
+C:\Users\James Avery\Documents\Projects\NoRM\BSONHarness\bin\Debug\NoRM.pdb
+C:\Users\James Avery\Documents\Projects\NoRM\BSONHarness\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\James Avery\Documents\Projects\NoRM\BSONHarness\obj\Debug\BSONHarness.exe
+C:\Users\James Avery\Documents\Projects\NoRM\BSONHarness\obj\Debug\BSONHarness.pdb
