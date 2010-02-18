@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using NoRM;
 using NoRM.BSON;
 using NoRM.Protocol.SystemMessages.Responses;
+using NoRM.BSON.DbTypes;
 
 namespace BSONHarness
 {
@@ -53,7 +54,7 @@ namespace BSONHarness
             var coll = db.GetCollection<GeneralDTO>("test");
             coll.CreateIndex(new { Int = 1d }, false, "testIdx");
 
-            BSONOID oid = BSONOID.EMPTY;
+            OID oid = OID.EMPTY;
             DateTime start = DateTime.Now;
 
             List<GeneralDTO> cache = new List<GeneralDTO>(count);
@@ -61,7 +62,7 @@ namespace BSONHarness
             for (int i = 0; i < count; i++)
             {
                 var into = new GeneralDTO();
-                into._id = BSONOID.NewOID();
+                into._id = OID.NewOID();
                 into.Title = Guid.NewGuid().ToString();
                 into.Int = i;
                 if (i == toUse)
@@ -125,7 +126,7 @@ namespace BSONHarness
         /// </summary>
         public class GeneralDTO
         {
-            public BSONOID _id { get; set; }
+            public OID _id { get; set; }
             public int? Int { get; set; }
             public String Title { get; set; }
             public Regex Rex { get; set; }

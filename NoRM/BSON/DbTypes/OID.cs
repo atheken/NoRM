@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NoRM.BSON
+namespace NoRM.BSON.DbTypes
 {
-    public class BSONOID
+    public class OID
     {
         
         /// <summary>
         /// Provides an empty OID (all zeros).
         /// </summary>
-        public static BSONOID EMPTY
+        public static OID EMPTY
         {
             get
             {
-                return new BSONOID();
+                return new OID();
             }
         }
 
@@ -23,10 +23,10 @@ namespace NoRM.BSON
         /// Generates a new unique oid for use with MongoDB Objects.
         /// </summary>
         /// <returns></returns>
-        public static BSONOID NewOID()
+        public static OID NewOID()
         {
             //TODO: generate random-ish bits.
-            var n = new BSONOID();
+            var n = new OID();
             n.Value = OidGenerator.Generate();
             return n;
         }

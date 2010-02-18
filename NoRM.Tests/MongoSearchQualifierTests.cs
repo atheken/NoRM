@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using NoRM.Protocol.SystemMessages.Responses;
+using NoRM.BSON;
 
 namespace NoRM.Tests
 {
@@ -24,7 +25,7 @@ namespace NoRM.Tests
         private MongoDatabase _db;
         private MongoCollection<TestClass> _coll;
 
-        [TestFixtureSetUp]
+        [SetUp]
         public void TestFixture_Setup()
         {
             _server = new MongoServer();
@@ -32,7 +33,7 @@ namespace NoRM.Tests
             _coll = _db.GetCollection<TestClass>("TestClasses");
         }
 
-        [TestFixtureTearDown]
+        [TearDown]
         public void TestFixture_Teardown()
         {
             DroppedCollectionResponse collResponse = _db.DropCollection("TestClasses");
@@ -41,12 +42,6 @@ namespace NoRM.Tests
             _coll = null;
             _db = null;
             _server = null;
-        }
-
-        [TearDown]
-        public void Test_TearDown()
-        {
-            _coll.Delete(new object());
         }
 
         [Test]
@@ -91,20 +86,18 @@ namespace NoRM.Tests
             Assert.AreEqual(5, count);
         }
 
-        //[Test]
-        //public void FindOne_Qualifier_Equals()
-        //{
-        //    // TODO Uh, I'm getting the object.Equals(objA, objB) method; implementation?
-        //    _coll.Insert(new TestClass { ADouble = 1 });
-        //    _coll.Insert(new TestClass { ADouble = 2 });
-        //    _coll.Insert(new TestClass { ADouble = 3 });
-        //    _coll.Insert(new TestClass { ADouble = 4 });
-        //    _coll.Insert(new TestClass { ADouble = 5 });
+        [Test]
+        public void FindOne_Qualifier_Equals()
+        {
+            _coll.Insert(new TestClass { ADouble = 1 });
+            _coll.Insert(new TestClass { ADouble = 1 });
+            _coll.Insert(new TestClass { ADouble = 3 });
+            _coll.Insert(new TestClass { ADouble = 4 });
+            _coll.Insert(new TestClass { ADouble = 5 });
 
-        //    IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.Equals(1d,1d) });
-
-        //    Assert.IsTrue((results.Count<TestClass>() == 3));
-        //}
+            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.Equals(1d) });
+            Assert.AreEqual(results.Count<TestClass>() , 2);
+        }
 
         [Test]
         public void FindOne_Qualifier_NotEqual()
@@ -133,7 +126,10 @@ namespace NoRM.Tests
                 new TestClass { ADouble = 4 },
                 new TestClass { ADouble = 5 });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.In(1d) });
+            var inFlyweight = new Flyweight();
+            inFlyweight["$in"] = new double[] { 1d };
+
+            IEnumerable<TestClass> results = _coll.Find(new { ADouble = inFlyweight });
 
             int count = results.Count();
 
