@@ -8,4 +8,4 @@ Tests.VisualState.xml
 *.orig
 *.user
 .svn
-_Resharper*
+_ReSharper*
