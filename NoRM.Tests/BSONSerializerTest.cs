@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
 using NoRM.BSON;
@@ -176,5 +177,50 @@ namespace NoRM.Tests
             Assert.AreEqual(null, hydratedObj2.ARex);
             //more tests would be useful for all the options.
         }
+
+        [Test]
+        public void Serialization_Speed_Test()
+        {
+             /*
+             
+             3365
+             4281
+             3310
+             3122
+             3239
+             3416
+             3207
+             3376
+             3364
+             3156             
+             
+             */
+
+            for (var i2 = 0; i2 < 10; i2++)
+            {
+                var stopWatch = new Stopwatch();
+
+                stopWatch.Start();
+
+                for (var i = 0; i < 10000; i++)
+                {
+                    var obj1 = new GeneralDTO
+                                   {
+                                       Title = null,
+                                       ABoolean = true,
+                                       AGuid = Guid.NewGuid(),
+                                       AnInt = 1,
+                                       Pi = 3.14,
+                                       Nester = new GeneralDTO {Title = "Bob", AnInt = 42}
+                                   };
+                    var obj1Bytes = BSONSerializer.Serialize(obj1);
+                    var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+                }
+                stopWatch.Stop();
+
+                Console.WriteLine(stopWatch.ElapsedMilliseconds);
+            }
+        }
+
     }
 }
