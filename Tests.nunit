@@ -1,7 +1,7 @@
 ﻿<NUnitProject>
   <Settings activeconfig="Debug" />
   <Config name="Debug" binpathtype="Auto">
-    <assembly path="MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll" />
+    <assembly path="NoRM.Tests\bin\Debug\NoRM.Tests.dll" />
   </Config>
   <Config name="Release" binpathtype="Auto" />
 </NUnitProject>
