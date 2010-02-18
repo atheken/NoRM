@@ -40,3 +40,10 @@ C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.dll
 C:\mydata\git\MongoSharp\MongoSharp.Tests\bin\Debug\MongoSharp.pdb
 C:\mydata\git\MongoSharp\MongoSharp.Tests\obj\Debug\MongoSharp.Tests.dll
 C:\mydata\git\MongoSharp\MongoSharp.Tests\obj\Debug\MongoSharp.Tests.pdb
+C:\mydata\git\NoRM\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.dll
+C:\mydata\git\NoRM\MongoSharp.Tests\bin\Debug\MongoSharp.Tests.pdb
+C:\mydata\git\NoRM\MongoSharp.Tests\bin\Debug\MongoSharp.dll
+C:\mydata\git\NoRM\MongoSharp.Tests\bin\Debug\MongoSharp.pdb
+C:\mydata\git\NoRM\MongoSharp.Tests\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\NoRM\MongoSharp.Tests\obj\Debug\MongoSharp.Tests.dll
+C:\mydata\git\NoRM\MongoSharp.Tests\obj\Debug\MongoSharp.Tests.pdb
