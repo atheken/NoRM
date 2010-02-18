@@ -71,7 +71,7 @@
     <Compile Include="BSON\ExpandoProps.cs" />
     <Compile Include="BSON\IFlyweight.cs" />
     <Compile Include="BSON\Flyweight.cs" />
-	<Compile Include=" MongoConnection.cs" />
+	<Compile Include="MongoConnection.cs" />
     <Compile Include="MongoFile.cs" />
     <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />

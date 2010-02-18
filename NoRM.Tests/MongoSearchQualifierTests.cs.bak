@@ -127,6 +127,9 @@ namespace NoRM.Tests
                 new TestClass { ADouble = 5 });
 
             var results = _coll.Find(new { ADouble = Q.In(1d) });
+
+            IEnumerable<TestClass> results = _coll.Find(new { ADouble = inFlyweight });
+
             int count = results.Count();
 
             Assert.AreEqual(2, count);

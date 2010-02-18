@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using NoRM.BSON;
+using NoRM.BSON.DbTypes;
 
 namespace NoRM.Tests
 {
@@ -23,7 +24,7 @@ namespace NoRM.Tests
             }
             testColl.Insert(cache);
 
-            Assert.AreEqual(cache.Count, testColl.Distinct<BSONOID>("_id").Count());
+            Assert.AreEqual(cache.Count, testColl.Distinct<OID>("_id").Count());
         }
 
         [Test]

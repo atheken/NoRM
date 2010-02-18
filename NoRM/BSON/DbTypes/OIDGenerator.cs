@@ -5,7 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Security.Cryptography;
 
-namespace NoRM.BSON
+namespace NoRM.BSON.DbTypes
 {
 
     /// <summary>
