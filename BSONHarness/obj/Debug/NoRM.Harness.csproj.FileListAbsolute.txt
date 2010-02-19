@@ -19,3 +19,10 @@ Z:\norm\BSONHarness\bin\Debug\NoRM.pdb
 Z:\norm\BSONHarness\obj\Debug\ResolveAssemblyReference.cache
 Z:\norm\BSONHarness\obj\Debug\BSONHarness.exe
 Z:\norm\BSONHarness\obj\Debug\BSONHarness.pdb
+C:\mydata\git\NoRM\BSONHarness\obj\Debug\ResolveAssemblyReference.cache
+C:\mydata\git\NoRM\BSONHarness\obj\Debug\BSONHarness.exe
+C:\mydata\git\NoRM\BSONHarness\obj\Debug\BSONHarness.pdb
+C:\mydata\git\NoRM\BSONHarness\bin\Debug\BSONHarness.exe
+C:\mydata\git\NoRM\BSONHarness\bin\Debug\BSONHarness.pdb
+C:\mydata\git\NoRM\BSONHarness\bin\Debug\NoRM.dll
+C:\mydata\git\NoRM\BSONHarness\bin\Debug\NoRM.pdb
