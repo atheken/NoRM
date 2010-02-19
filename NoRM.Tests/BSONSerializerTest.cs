@@ -17,25 +17,48 @@ namespace NoRM.Tests
             public byte[] Bytes { get; set; }
             public Guid? AGuid { get; set; }
             public Regex ARex { get; set; }
+            public DateTime? ADateTime { get; set; }
             public GeneralDTO Nester { get; set; }
         }
 
-        protected class NestedGeneralDTO 
+        [Test]
+        public void Serialization_Of_Flyweight_Is_Not_Lossy()
         {
-            public int? AnInt { get; set; }
-            public String Title { get; set; }
+            var testObj = new Flyweight();
+            testObj["astring"]= "stringval";
+            var testBytes = BSONSerializer.Serialize(testObj);
+            var hydrated = BSONSerializer.Deserialize<Flyweight>(testBytes);
+
+            Assert.AreEqual(testObj["astring"], hydrated["astring"]);
         }
 
-        protected class EmptyDTO
-        {
-
-        }
-
+        
         [Test]
         public void Serializing_POCO_Generates_Bytes()
         {
             var dummy = new GeneralDTO { Title = "Testing" };
             Assert.IsNotEmpty(BSONSerializer.Serialize(dummy));
+        }
+
+
+        [Test]
+        public void Serialization_Of_Dates_Has_Millisecond_Precision()
+        {
+            var obj1 = new GeneralDTO() { ADateTime = null };
+            var obj2 = new GeneralDTO() { ADateTime = DateTime.Now };
+
+            var obj1Bytes = BSONSerializer.Serialize(obj1);
+            var obj2Bytes = BSONSerializer.Serialize(obj2);
+
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
+            var hydratedObj2 = BSONSerializer.Deserialize<GeneralDTO>(obj2Bytes);
+
+            Assert.AreEqual(null, hydratedObj1.ADateTime);
+
+            //Mongo stores dates as long, therefore, we have to use double->long rounding.
+            Assert.AreEqual((long)(obj2.ADateTime.Value-DateTime.MinValue).TotalMilliseconds, 
+                (long)(hydratedObj2.ADateTime.Value - DateTime.MinValue).TotalMilliseconds);
+
         }
 
         [Test]

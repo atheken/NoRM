@@ -1,7 +1,10 @@
 TestResult.xml
 Tests.VisualState.xml
-bin
-obj
+[Bb]in
+[Oo]bj
+[Rr]elease
+[Dd]ebug
+*.manifest
 *.exe
 *.pdb
 *.cache
