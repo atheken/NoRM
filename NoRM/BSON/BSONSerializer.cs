@@ -8,6 +8,7 @@ using System.IO;
 using System.Data.Linq;
 using System.Collections;
 using NoRM.BSON.DbTypes;
+using NoRM.Attributes;
 
 namespace NoRM.BSON
 {
@@ -273,7 +274,8 @@ namespace NoRM.BSON
                 if (!typeof(IList).IsAssignableFrom(documentType))
                 {
                     foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                        .Where(y => y.GetIndexParameters().Count() == 0))
+                        .Where(y => y.GetIndexParameters().Count() == 0 && !y.GetCustomAttributes(true)
+                            .Any(f=>f is MongoIgnoreAttribute)))
                     {
                         BSONSerializer._setters[documentType][p.Name] = ReflectionHelpers.SetterMethod(p);
                     }
@@ -297,7 +299,8 @@ namespace NoRM.BSON
                 BSONSerializer._getters[documentType] = new Dictionary<string, Func<object, object>>
                     (StringComparer.InvariantCultureIgnoreCase);
                 foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(y => y.GetIndexParameters().Count() == 0))
+                    .Where(y => y.GetIndexParameters().Count() == 0 && 
+                        !y.GetCustomAttributes(true).Any(f=>f is MongoIgnoreAttribute)))
                 {
                     BSONSerializer._getters[documentType][p.Name] = ReflectionHelpers.GetterMethod(p);
                 }
