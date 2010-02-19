@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
+using System.Linq;
+using System.Text;
 using System.Reflection;
 
 namespace NoRM.BSON
@@ -9,81 +10,74 @@ namespace NoRM.BSON
 	/// Provides some reflection methods to produce delegates rather than
 	/// later-bound method calls on instance properties.
 	/// </summary>
+	/// <remarks>
+	/// Many thanks to Jon Skeet, you rock!!
+	/// http://msmvps.com/blogs/jon_skeet/archive/2008/08/09/making-reflection-fly-and-exploring-delegates.aspx
+	/// </remarks>
 	public class ReflectionHelpers
 	{
-		private static Dictionary<PropertyInfo, Func<object, object>> _getters = new Dictionary<PropertyInfo, Func<object, object>>();
-		private static Dictionary<PropertyInfo, Action<object, object>> _setters = new Dictionary<PropertyInfo, Action<object, object>>();
-
-		public static Func<object, object> GetterMethod(PropertyInfo property)
+		public static Func<object, object> GetterMethod(PropertyInfo method)
 		{
-			if (_getters.ContainsKey(property))
-				return _getters[property];
+			// First fetch the generic form
+			MethodInfo genericHelper = typeof(ReflectionHelpers).GetMethod("GetterMethod",
+					BindingFlags.Static | BindingFlags.NonPublic);
 
-			var dynamicMethod = new DynamicMethod(GetAnonymousMethodName(), typeof(object), new[] { typeof(object) }, property.DeclaringType, true);
-			MethodInfo getMethod = property.GetGetMethod();
+			// Now supply the type arguments
+			MethodInfo constructedHelper = genericHelper.MakeGenericMethod
+					(method.DeclaringType, method.PropertyType);
 
-			ILGenerator il = dynamicMethod.GetILGenerator();
+			// Now call it. The null argument is because it's a static method.
+			object ret = constructedHelper.Invoke(null, new object[] { method });
 
-			il.Emit(OpCodes.Ldarg_0);
-			EmitUnboxOrCast(il, property.DeclaringType);
-
-			EmitMethodCall(il, getMethod);
-			EmitBoxOrCast(il, property.PropertyType);
-
-			il.Emit(OpCodes.Ret);
-
-			var getter = (Func<object, object>)dynamicMethod.CreateDelegate(typeof(Func<object, object>));
-			_getters.Add(property, getter);
-
-			return getter;
+			// Cast the result to the right kind of delegate and return it
+			return (Func<object, object>)ret;
 		}
 
-		public static Action<object, object> SetterMethod(PropertyInfo property)
+		static Func<object, object> GetterMethod<TTarget, TParam>(PropertyInfo method)
+				where TTarget : class
 		{
-			if (_setters.ContainsKey(property))
-				return _setters[property];
+			// Convert the slow MethodInfo into a fast, strongly typed, open delegate
+			Func<TTarget, TParam> func = (Func<TTarget, TParam>)
+					Delegate.CreateDelegate(typeof(Func<TTarget, TParam>), method.GetGetMethod());
 
-			var dynamicMethod = new DynamicMethod(GetAnonymousMethodName(), typeof(void), new[] { typeof(object), typeof(object) }, true);
+			// Now create a more weakly typed delegate which will call the strongly typed one
+			Func<object, object> ret = (object target) => func((TTarget)target);
 
-			ILGenerator il = dynamicMethod.GetILGenerator();
-
-			il.Emit(OpCodes.Ldarg_0);
-			EmitUnboxOrCast(il, property.DeclaringType);
-
-			il.Emit(OpCodes.Ldarg_1);
-			EmitUnboxOrCast(il, property.PropertyType);
-
-			EmitMethodCall(il, property.GetSetMethod());
-
-			il.Emit(OpCodes.Ret);
-
-			var setter = (Action<object, object>)dynamicMethod.CreateDelegate(typeof(Action<object, object>));
-			_setters.Add(property, setter);
-
-			return setter;
+			return ret;
 		}
 
-		private static void EmitMethodCall(ILGenerator il, MethodInfo method)
+
+
+		public static Action<object, object> SetterMethod(PropertyInfo method)
 		{
-			OpCode opCode = method.IsFinal ? OpCodes.Call : OpCodes.Callvirt;
-			il.Emit(opCode, method);
+			// First fetch the generic form
+			MethodInfo genericHelper = typeof(ReflectionHelpers).GetMethod("SetterMethod",
+					BindingFlags.Static | BindingFlags.NonPublic);
+
+			// Now supply the type arguments
+			MethodInfo constructedHelper = genericHelper.MakeGenericMethod
+					(method.DeclaringType, method.PropertyType);
+
+			// Now call it. The null argument is because it's a static method.
+			object ret = constructedHelper.Invoke(null, new object[] { method });
+
+			// Cast the result to the right kind of delegate and return it
+			return (Action<object, object>)ret;
 		}
 
-		private static void EmitUnboxOrCast(ILGenerator il, Type type)
-		{
-			OpCode opCode = type.IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass;
-			il.Emit(opCode, type);
-		}
 
-		private static void EmitBoxOrCast(ILGenerator il, Type type)
-		{
-			OpCode opCode = type.IsValueType ? OpCodes.Box : OpCodes.Castclass;
-			il.Emit(opCode, type);
-		}
 
-		private static string GetAnonymousMethodName()
+		static Action<object, object> SetterMethod<TTarget, TParam>(PropertyInfo method)
+				where TTarget : class
 		{
-			return "DynamicMethod" + Guid.NewGuid().ToString("N");
+			// Convert the slow MethodInfo into a fast, strongly typed, open delegate
+			Action<TTarget, TParam> func = (Action<TTarget, TParam>)
+					Delegate.CreateDelegate(typeof(Action<TTarget, TParam>), method.GetSetMethod());
+
+			// Now create a more weakly typed delegate which will call the strongly typed one
+			Action<object, object> ret = (object target, object param) => func((TTarget)target, (TParam)param);
+
+			return ret;
 		}
 	}
 }
