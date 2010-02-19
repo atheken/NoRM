@@ -12,13 +12,13 @@ namespace NoRM
     public class MongoDatabase
     {
         private String _dbName;
-        private MongoServer _server;
+        private MongoContext _server;
         /// <summary>
         /// A reference to the database found using the specified context.
         /// </summary>
         /// <param name="dbname"></param>
         /// <param name="context"></param>
-        public MongoDatabase(String dbname, MongoServer server)
+        public MongoDatabase(String dbname, MongoContext server)
         {
             this._dbName = dbname;
             this._server = server;

@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.IO;
+using System.Net.Sockets;
 
 namespace NoRM.Protocol.Messages
 {
     internal class GetMoreMessage<T> : Message where T : class, new()
     {
         protected long _cursorID;
-        internal GetMoreMessage(MongoServer context,
+        internal GetMoreMessage(MongoContext context,
             String fullyQualifiedCollectionName, long cursorID) :
             base(context, fullyQualifiedCollectionName)
         {
@@ -37,10 +38,9 @@ namespace NoRM.Protocol.Messages
             int size = requestBytes.Sum(h => h.Length);
             requestBytes[0] = BitConverter.GetBytes(size);
 
-            var sock = this._context.ServerConnection();
-            sock.GetStream().Write(requestBytes.SelectMany(h => h).ToArray(), 0 ,size);
+            this._context.ServerConnection().GetStream().Write(requestBytes.SelectMany(h => h).ToArray(), 0, size);
 
-            var stream = sock.GetStream();
+            var stream = this._context.ServerConnection().GetStream();
 
             // so, the server can accepted the query,
             // now we do the second part.
@@ -50,12 +50,13 @@ namespace NoRM.Protocol.Messages
                 timeout--;
                 Thread.Sleep(1000);
             }
-            if (sock.Available == 0)
+            if (this._context.ServerConnection().Available == 0)
             {
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
             }
 
             return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(new BufferedStream(stream)));
+
         }
     }
 }

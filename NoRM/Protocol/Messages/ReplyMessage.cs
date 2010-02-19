@@ -15,7 +15,7 @@ namespace NoRM.Protocol.Messages
         /// Processes a response stream.
         /// </summary>
         /// <param name="reply"></param>
-        internal ReplyMessage(MongoServer context,
+        internal ReplyMessage(MongoContext context,
             String fullyQualifiedCollestionName, BinaryReader reply) :
             base(context, fullyQualifiedCollestionName)
         {
