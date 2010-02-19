@@ -8,6 +8,7 @@ using System.Net.Sockets;
 namespace NoRM.Tests
 {
     [TestFixture]
+    [Category("Hits MongoDB")]
     public class MongoContextTest
     {
         private MongoServer _context;

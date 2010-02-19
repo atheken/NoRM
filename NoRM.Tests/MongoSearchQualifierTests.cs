@@ -17,9 +17,9 @@ namespace NoRM.Tests
         public List<String> AStringArray { get; set; }
     }
 
-    // TODO rename this to MongoCollectionTest
     [TestFixture]
-    public class MongoFindTests
+    [Category("Hits MongoDB")]
+    public class MongoSearchQualifierTests
     {
         private MongoServer _server;
         private MongoDatabase _db;

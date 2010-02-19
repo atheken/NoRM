@@ -7,6 +7,7 @@ using NoRM.BSON;
 namespace NoRM.Tests
 {
     [TestFixture]
+    [Category("In Memory Only")]
     public class BSONSerializerTest
     {
         protected class GeneralDTO
