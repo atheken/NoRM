@@ -265,7 +265,6 @@ namespace NoRM
         internal TcpClient ServerConnection()
         {
             return new TcpClient(this._serverName, this._serverPort);
-
         }
 
         /// <summary>

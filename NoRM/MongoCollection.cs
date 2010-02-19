@@ -28,6 +28,17 @@ namespace NoRM
         }
 
         /// <summary>
+        /// Get a child collection of the specified type.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="collectionName"></param>
+        /// <returns></returns>
+        public MongoCollection<U> GetChildCollection<U>(String collectionName) where U : class, new()
+        {
+            return new MongoCollection<U>(this._collectionName + "." + collectionName, this._db, this._server);
+        }
+
+        /// <summary>
         /// Overload of Update that updates one document and doesn't upsert if no matches are found.
         /// </summary>
         /// <typeparam name="X"></typeparam>
@@ -241,7 +252,7 @@ namespace NoRM
 
         public CollectionStatistics GetCollectionStatistics()
         {
-            return this._db.GetCollectionStatistics(this._collectionName );
+            return this._db.GetCollectionStatistics(this._collectionName);
         }
     }
 }

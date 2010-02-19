@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Data.Linq;
 using System.Collections;
+using NoRM.BSON.DbTypes;
+using NoRM.Attributes;
 
 namespace NoRM.BSON
 {
@@ -18,6 +20,7 @@ namespace NoRM.BSON
     /// </remarks>
     public static class BSONSerializer
     {
+        private static readonly DateTime EPOCH = new DateTime(1970, 1, 1);
         private const int CODE_LENGTH = 1;
         private const int KEY_TERMINATOR_LENGTH = 1;
 
@@ -72,7 +75,7 @@ namespace NoRM.BSON
                 BSONSerializer._allowedTypes.Add(typeof(Guid?));
                 BSONSerializer._allowedTypes.Add(typeof(DateTime?));
                 BSONSerializer._allowedTypes.Add(typeof(String));
-                BSONSerializer._allowedTypes.Add(typeof(BSONOID));
+                BSONSerializer._allowedTypes.Add(typeof(OID));
                 BSONSerializer._allowedTypes.Add(typeof(Regex));
                 BSONSerializer._allowedTypes.Add(typeof(byte[]));
                 BSONSerializer._allowedTypes.Add(typeof(Regex));
@@ -242,7 +245,8 @@ namespace NoRM.BSON
             if (!BSONSerializer._propertyTypes.TryGetValue(t, out retval))
             {
                 retval = new Dictionary<String, Type>(StringComparer.InvariantCultureIgnoreCase);
-                foreach (var p in t.GetProperties().OfType<PropertyInfo>())
+                foreach (var p in t.GetProperties().OfType<PropertyInfo>()
+                    .Where(y => y.GetIndexParameters().Count() == 0))
                 {
                     if (p.CanRead && p.CanWrite)
                     {
@@ -269,7 +273,9 @@ namespace NoRM.BSON
                 BSONSerializer._setters[documentType] = new Dictionary<string, Action<object, object>>(StringComparer.InvariantCultureIgnoreCase);
                 if (!typeof(IList).IsAssignableFrom(documentType))
                 {
-                    foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                    foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                        .Where(y => y.GetIndexParameters().Count() == 0 && !y.GetCustomAttributes(true)
+                            .Any(f=>f is MongoIgnoreAttribute)))
                     {
                         BSONSerializer._setters[documentType][p.Name] = ReflectionHelpers.SetterMethod(p);
                     }
@@ -292,7 +298,9 @@ namespace NoRM.BSON
             {
                 BSONSerializer._getters[documentType] = new Dictionary<string, Func<object, object>>
                     (StringComparer.InvariantCultureIgnoreCase);
-                foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    .Where(y => y.GetIndexParameters().Count() == 0 && 
+                        !y.GetCustomAttributes(true).Any(f=>f is MongoIgnoreAttribute)))
                 {
                     BSONSerializer._getters[documentType][p.Name] = ReflectionHelpers.GetterMethod(p);
                 }
@@ -316,7 +324,8 @@ namespace NoRM.BSON
         /// <exception cref="NotSupportedException">Throws a not supported exception 
         /// when the T is not a "serializable" type.</exception>
         /// <param name="document"></param>
-        /// <param name="includeExpandoProps">true indicates that Flyweight associated with this object should be included in serialization. 
+        /// <param name="includeExpandoProps">true indicates that Flyweight associated with this object
+        /// should be included in serialization. 
         /// False means that it will be ignored.</param>
         /// <returns></returns>
         public static byte[] Serialize<T>(T document, bool includeExpandoProps)
@@ -328,7 +337,7 @@ namespace NoRM.BSON
                 props = ExpandoProps.FlyweightForObject(document);
             }
             if (!BSONSerializer.CanBeSerialized(typeof(T)) ||
-                (props != null && props.AllProperties.Any(y => y.Value != null &&
+                (props != null && props.AllProperties().Any(y => y.Value != null &&
                 !BSONSerializer.CanBeSerialized(y.Value.GetType()))))
             {
                 throw new NotSupportedException("This type cannot be SERIALIZED using the BSONSerializer");
@@ -336,12 +345,30 @@ namespace NoRM.BSON
 
             List<byte[]> retval = new List<byte[]>();
 
-            var getters = BSONSerializer.GettersForType(document.GetType());
+            Dictionary<String, object> values = null;
+
+            if (document is Flyweight)
+            {
+                var flyweight = (document as Flyweight);
+                values = flyweight.AllProperties().ToDictionary(y => y.PropertyName, k => k.Value);
+            }
+            else
+            {
+                values = BSONSerializer.GettersForType(document.GetType())
+                    .ToDictionary(y => y.Key, h => h.Value.Invoke(document));
+                if (props != null && includeExpandoProps)
+                {
+                    foreach (var p in props.AllProperties())
+                    {
+                        values.Add(p.PropertyName, p.Value);
+                    }
+                }
+            }
             retval.Add(new byte[4]);//allocate size.
-            foreach (var member in getters)
+            foreach (var member in values)
             {
 
-                var obj = member.Value.Invoke(document);
+                var obj = member.Value;
                 var name = member.Key;
 
                 //"special" case.
@@ -388,13 +415,7 @@ namespace NoRM.BSON
                 }
             }
 
-            if (props != null && includeExpandoProps)
-            {
-                foreach (var p in props.AllProperties)
-                {
-                    retval.Add(BSONSerializer.SerializeMember(p.PropertyName, p.Value));
-                }
-            }
+
             retval.Add(new byte[1]);//null terminate the retval;
 
             var size = retval.Sum(y => y.Length);
@@ -459,8 +480,7 @@ namespace NoRM.BSON
                 retval[0] = new byte[] { (byte)BSONTypes.String };
                 //get bytes and append a null to the end.
 
-                var bytes = Encoding.UTF8.GetBytes((String)value)
-                    .Concat(new byte[1]).ToArray();
+                var bytes = ((String)value).CStringBytes();
                 retval[3] = BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray();
             }
             else if (value is Regex)
@@ -511,26 +531,33 @@ namespace NoRM.BSON
                 binary.Add(val.Value.ToByteArray());
                 retval[3] = binary.SelectMany(y => y).ToArray();
             }
-            else if (value is BSONOID)
+            else if (value is OID)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.MongoOID };
-                var oid = (BSONOID)value;
+                var oid = (OID)value;
                 retval[3] = oid.Value;
             }
-            else if (value is BSONReference)
+            else if (value is DBReference)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Reference };
                 //TODO: serialize document reference.
             }
-            else if (value is BSONScopedCode)
+            else if (value is ScopedCode)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.ScopedCode };
-                //TODO: serialize scoped code.
+                ScopedCode code = value as ScopedCode;
+                List<byte[]> scopedCode = new List<byte[]>();
+                scopedCode.Add(new byte[4]);
+                scopedCode.Add(new byte[4]);
+                scopedCode.Add((code.CodeString ?? "").CStringBytes());
+                scopedCode.Add(BSONSerializer.Serialize(code.Scope));
+                scopedCode[0] = BitConverter.GetBytes(scopedCode.Sum(y => y.Length));
+                scopedCode[1] = BitConverter.GetBytes(scopedCode[2].Length);
             }
-            else if (value is DateTime)
+            else if (value is DateTime?)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.DateTime };
-                //TODO: serialize date time
+                retval[3] = BitConverter.GetBytes((long)(((DateTime?)value).Value - EPOCH).TotalMilliseconds);
             }
             else if (value is long?)
             {
@@ -646,7 +673,7 @@ namespace NoRM.BSON
                 Type propType;
                 if (!propTypes.TryGetValue(key, out propType))
                 {
-                    propType = typeof(object);
+                    propType = typeof(Flyweight);
                 }
                 var objectData = buffer.Skip(keyStringBytes.Length + CODE_LENGTH + KEY_TERMINATOR_LENGTH).ToArray();
 
@@ -657,11 +684,15 @@ namespace NoRM.BSON
                 buffer = buffer.Skip(CODE_LENGTH + keyStringBytes.Length +
                     KEY_TERMINATOR_LENGTH + usedBytes).ToArray();
 
-                if(key == "$err")
+                if (key == "$err")
                 {
                     throw new Exception((obj ?? "").ToString());
                 }
-                if (setters.ContainsKey(key))
+                if (retval is Flyweight)
+                {
+                    ((Flyweight)retval).Set(key, obj);
+                }
+                else if (setters.ContainsKey(key))
                 {
                     var prop = setters[key];
                     prop.Invoke(retval, obj);
@@ -672,7 +703,8 @@ namespace NoRM.BSON
                 }
             }
             #endregion
-            if (retval == null)
+
+            if (retval != null)
             {
                 outProps[new WeakReference(retval)] = extraProps;
             }
@@ -762,7 +794,7 @@ namespace NoRM.BSON
             }
             else if (t == BSONTypes.MongoOID)
             {
-                retval = new BSONOID() { Value = objectData.Take(12).ToArray() };
+                retval = new OID() { Value = objectData.Take(12).ToArray() };
                 usedBytes = 12;
             }
             else if (t == BSONTypes.Reference)
@@ -775,7 +807,9 @@ namespace NoRM.BSON
             }
             else if (t == BSONTypes.DateTime)
             {
-                //TODO: deserialize date time
+                var millisSinceEpoch = BitConverter.ToInt64(objectData.ToArray(), 0);
+                retval = BSONSerializer.EPOCH.AddMilliseconds(millisSinceEpoch);
+                usedBytes = 8;
             }
             else if (t == BSONTypes.Int64)
             {

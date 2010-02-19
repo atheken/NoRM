@@ -50,7 +50,6 @@
   <ItemGroup>
     <Compile Include="Attributes\MongoIgnoreAttribute.cs" />
     <Compile Include="Attributes\MongoNameAttribute.cs" />
-    <Compile Include="BSON\DbTypes\GridReadStream.cs" />
     <Compile Include="BSON\DbTypes\OID.cs" />
     <Compile Include="BSON\DbTypes\DBReference.cs" />
     <Compile Include="BSON\DbTypes\ScopedCode.cs" />
@@ -72,8 +71,8 @@
     <Compile Include="BSON\ExpandoProps.cs" />
     <Compile Include="BSON\IFlyweight.cs" />
     <Compile Include="BSON\Flyweight.cs" />
-    <Compile Include=" MongoConnection.cs" />
-    <Compile Include="BSON\DbTypes\GridFile.cs" />
+	<Compile Include="MongoConnection.cs" />
+    <Compile Include="MongoFile.cs" />
     <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />

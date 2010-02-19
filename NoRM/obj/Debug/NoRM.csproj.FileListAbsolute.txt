@@ -1,10 +1,3 @@
-C:\Code\NoRM\NoRM\bin\Debug\Gallio.dll
-C:\Code\NoRM\NoRM\bin\Debug\MbUnit.dll
-C:\Code\NoRM\NoRM\bin\Debug\Gallio.pdb
-C:\Code\NoRM\NoRM\bin\Debug\Gallio.xml
-C:\Code\NoRM\NoRM\bin\Debug\MbUnit.pdb
-C:\Code\NoRM\NoRM\bin\Debug\MbUnit.xml
-C:\Code\NoRM\NoRM\bin\Debug\Gallio.XmlSerializers.dll
 C:\Code\NoRM\NoRM\obj\Debug\ResolveAssemblyReference.cache
 C:\Code\NoRM\NoRM\bin\Debug\NoRM.dll
 C:\Code\NoRM\NoRM\bin\Debug\NoRM.pdb
@@ -12,13 +5,6 @@ C:\Code\NoRM\NoRM\obj\Debug\NoRM.dll
 C:\Code\NoRM\NoRM\obj\Debug\NoRM.pdb
 C:\mydata\git\NoRM\NoRM\bin\Debug\NoRM.dll
 C:\mydata\git\NoRM\NoRM\bin\Debug\NoRM.pdb
-C:\mydata\git\NoRM\NoRM\bin\Debug\Gallio.dll
-C:\mydata\git\NoRM\NoRM\bin\Debug\MbUnit.dll
-C:\mydata\git\NoRM\NoRM\bin\Debug\Gallio.pdb
-C:\mydata\git\NoRM\NoRM\bin\Debug\Gallio.xml
-C:\mydata\git\NoRM\NoRM\bin\Debug\MbUnit.pdb
-C:\mydata\git\NoRM\NoRM\bin\Debug\MbUnit.xml
-C:\mydata\git\NoRM\NoRM\bin\Debug\Gallio.XmlSerializers.dll
 C:\mydata\git\NoRM\NoRM\obj\Debug\ResolveAssemblyReference.cache
 C:\mydata\git\NoRM\NoRM\obj\Debug\NoRM.dll
 C:\mydata\git\NoRM\NoRM\obj\Debug\NoRM.pdb

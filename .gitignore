@@ -1,6 +1,10 @@
 TestResult.xml
 Tests.VisualState.xml
-*.dll
+[Bb]in
+[Oo]bj
+[Rr]elease
+[Dd]ebug
+*.manifest
 *.exe
 *.pdb
 *.cache
@@ -8,3 +12,4 @@ Tests.VisualState.xml
 *.orig
 *.user
 .svn
+_ReSharper*

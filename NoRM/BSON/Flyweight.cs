@@ -9,6 +9,9 @@ namespace NoRM.BSON
     /// Provides a completely blank slate for which to query objects out of the DB.
     /// Arbitrary properties for all!
     /// </summary>
+    /// <remarks>
+    /// Ok, so this is an abuse of the term "flyweight" - sorry.
+    /// </remarks>
     public class Flyweight : IFlyweight
     {
         private Dictionary<String, int?> _intProps = new Dictionary<string, int?>(0, StringComparer.InvariantCultureIgnoreCase);
@@ -22,17 +25,15 @@ namespace NoRM.BSON
         /// <summary>
         /// All the properties of this flyweight
         /// </summary>
-        public IEnumerable<ExpandoProperty> AllProperties
+        public IEnumerable<ExpandoProperty> AllProperties()
         {
-            get
-            {
-                return this._intProps.Select(y => new ExpandoProperty(y.Key, y.Value)).Concat(
-                    this._doubleProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                    this._longProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                    this._booleanProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                    this._stringProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                    this._kitchenSinkProps.Select(y => new ExpandoProperty(y.Key, y.Value)));
-            }
+            return this._intProps.Select(y => new ExpandoProperty(y.Key, y.Value)).Concat(
+                this._doubleProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
+                this._longProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
+                this._booleanProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
+                this._stringProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
+                this._kitchenSinkProps.Select(y => new ExpandoProperty(y.Key, y.Value)));
+
         }
 
         /// <summary>

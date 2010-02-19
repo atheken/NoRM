@@ -57,7 +57,7 @@ namespace NoRM
         /// <returns></returns>
         public IEnumerable<CollectionInfo> GetAllCollections()
         {
-            var results = this.GetCollection<CollectionInfo>("system.namespaces").Find();                
+            var results = this.GetCollection<CollectionInfo>("system.namespaces").Find();
 
             return results;
         }
@@ -69,8 +69,8 @@ namespace NoRM
         /// <returns></returns>
         public CollectionStatistics GetCollectionStatistics(string collectionName)
         {
-            var response = this.GetCollection<CollectionStatistics>("$cmd")
-                .FindOne<CollectionStatistics>(new CollectionStatistics() { collstats = collectionName });
+            var response = GetCollection<CollectionStatistics>("$cmd")
+                .FindOne(new CollectionStatistics() { collstats = collectionName });
 
             return response;
         }
@@ -91,7 +91,7 @@ namespace NoRM
         public SetProfileResponse SetProfileLevel(ProfileLevel level)
         {
             var response = this.GetCollection<SetProfileResponse>("$cmd")
-                .FindOne<SetProfileResponse>(new SetProfileResponse() { profile = (int) level});
+                .FindOne<SetProfileResponse>(new SetProfileResponse() { profile = (int)level });
 
             return response;
         }
@@ -109,10 +109,14 @@ namespace NoRM
             return response;
         }
 
-        public ValidateCollectionResponse ValidateCollection(string collectionName, bool? scanData)
+        public ValidateCollectionResponse ValidateCollection(string collectionName, bool scanData)
         {
             var response = this.GetCollection<ValidateCollectionResponse>("$cmd")
-                .FindOne<ValidateCollectionResponse>(new ValidateCollectionResponse { validate = collectionName, scandata = scanData });
+                .FindOne(new
+                {
+                    validate = collectionName,
+                    scandata = scanData
+                });
 
             return response;
         }

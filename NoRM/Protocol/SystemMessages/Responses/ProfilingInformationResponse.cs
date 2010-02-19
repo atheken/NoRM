@@ -9,7 +9,7 @@ namespace NoRM.Protocol.SystemMessages.Responses
     {
         public ProfilingInformationResponse() { }
 
-        public string Ts { get; set; }
+        public DateTime? Ts { get; set; }
         public string Info { get; set; }
         public double? Millis { get; set; }
     }

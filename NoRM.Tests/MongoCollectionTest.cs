@@ -1,15 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
 using NoRM.BSON;
+using NoRM.BSON.DbTypes;
 
 namespace NoRM.Tests
 {
     [TestFixture]
+    [Category("Hits MongoDB")]
     public class MongoCollectionTest
     {
+        private MongoServer _server;
+        private MongoDatabase _db;
+
+        [TestFixtureSetUp]
+        public void Setup()
+        {
+            this._server = new MongoServer();
+            this._db = this._server.GetDatabase("test" + Guid.NewGuid().ToString().Substring(0, 5));
+            
+        }
+
+        [TestFixtureTearDown]
+        public void Teardown()
+        {
+            this._server.DropDatabase(this._db.DatabaseName);
+        }
+
         [Test]
         public void Distinct_For_Key_Returns_Correct_Set()
         {
@@ -17,26 +35,27 @@ namespace NoRM.Tests
             var testDB = server.GetDatabase("test");
             testDB.DropCollection("testObjects");
             var testColl = testDB.GetCollection<Object>("testObjects");
-            List<Object> cache = new List<Object>();
-            for (int i = 0; i < 10; i++)
+            var cache = new List<Object>();
+            for (var i = 0; i < 10; i++)
             {
                 cache.Add(new Object());
             }
+
             testColl.Insert(cache);
 
-            Assert.AreEqual(cache.Count, testColl.Distinct<BSONOID>("_id").Count());
+            Assert.AreEqual(cache.Count, testColl.Distinct<OID>("_id").Count());
         }
 
         [Test]
         public void Collection_Statistics_Returns()
         {
-            MongoServer server = new MongoServer();
+            var coll = this._db.GetCollection<object>("stats_test");
 
-            var db = server.GetDatabase("test");
+            //collections & dbs are lazily created - force it to happen.
+            coll.Insert(new object());
 
-            var stats = db.GetCollectionStatistics("foo");
-
-            Assert.IsTrue((stats.Ns == "test.foo"));
+            var stats = this._db.GetCollectionStatistics("stats_test");
+            Assert.AreEqual(coll.FullyQualifiedName, stats.Ns);
 
         }
     }

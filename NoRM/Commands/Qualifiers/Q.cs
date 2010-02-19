@@ -12,7 +12,7 @@ namespace NoRM
     /// Provides a way to specify some of the "special" qualifiers that can be used for querying.
     /// </summary>
     /// <remarks>
-    /// This should remain in the System.Data.Mongo namespace so that it's available 
+    /// This should remain in the NoRM namespace so that it's available 
     /// automatically when someone is using a MongoCollection.
     /// </remarks>
     public class Q

@@ -121,7 +121,7 @@ namespace NoRM.BSON
             var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
             if (dict.Key != null && dict.Value != null)
             {
-                retval = dict.Value.AllProperties.ToArray();
+                retval = dict.Value.AllProperties().ToArray();
             }
             ExpandoProps._dictionaryLock.ExitReadLock();
             return retval;
