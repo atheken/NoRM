@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Reflection;
 
@@ -10,8 +11,14 @@ namespace NoRM.BSON
 	/// </summary>
 	public class ReflectionHelpers
 	{
+		private static Dictionary<PropertyInfo, Func<object, object>> _getters = new Dictionary<PropertyInfo, Func<object, object>>();
+		private static Dictionary<PropertyInfo, Action<object, object>> _setters = new Dictionary<PropertyInfo, Action<object, object>>();
+
 		public static Func<object, object> GetterMethod(PropertyInfo property)
 		{
+			if (_getters.ContainsKey(property))
+				return _getters[property];
+
 			var dynamicMethod = new DynamicMethod(GetAnonymousMethodName(), typeof(object), new[] { typeof(object) }, property.DeclaringType, true);
 			MethodInfo getMethod = property.GetGetMethod();
 
@@ -25,11 +32,17 @@ namespace NoRM.BSON
 
 			il.Emit(OpCodes.Ret);
 
-			return (Func<object, object>)dynamicMethod.CreateDelegate(typeof(Func<object, object>));
+			var getter = (Func<object, object>)dynamicMethod.CreateDelegate(typeof(Func<object, object>));
+			_getters.Add(property, getter);
+
+			return getter;
 		}
 
 		public static Action<object, object> SetterMethod(PropertyInfo property)
 		{
+			if (_setters.ContainsKey(property))
+				return _setters[property];
+
 			var dynamicMethod = new DynamicMethod(GetAnonymousMethodName(), typeof(void), new[] { typeof(object), typeof(object) }, true);
 
 			ILGenerator il = dynamicMethod.GetILGenerator();
@@ -44,7 +57,10 @@ namespace NoRM.BSON
 
 			il.Emit(OpCodes.Ret);
 
-			return (Action<object, object>)dynamicMethod.CreateDelegate(typeof(Action<object, object>));
+			var setter = (Action<object, object>)dynamicMethod.CreateDelegate(typeof(Action<object, object>));
+			_setters.Add(property, setter);
+
+			return setter;
 		}
 
 		private static void EmitMethodCall(ILGenerator il, MethodInfo method)
