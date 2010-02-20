@@ -125,11 +125,14 @@ namespace NoRM.Protocol.Messages
             messageBytes[0] = BitConverter.GetBytes(size);
 
 
-            this._context.ServerConnection().GetStream().Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
+            var conn = this._context.ServerConnection();
+            
+            conn.GetStream().Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
+
             //so, the server can accepted the query, now we do the second part.
             int timeout = this._context.QueryTimeout;
 
-            var stream = this._context.ServerConnection().GetStream();
+            var stream = conn.GetStream();
 
             while (!stream.DataAvailable && timeout > 0)
             {
@@ -142,6 +145,7 @@ namespace NoRM.Protocol.Messages
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
             }
 
+            conn.ReturnToPool();
 
             return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(new BufferedStream(stream)));
 

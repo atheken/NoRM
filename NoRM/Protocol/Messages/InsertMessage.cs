@@ -41,7 +41,11 @@ namespace NoRM.Protocol.Messages
 
             var bytes = message.SelectMany(y => y).ToArray();
 
-            this._context.ServerConnection().GetStream().Write(bytes, 0, size);
+            var conn = this._context.ServerConnection();
+            
+            conn.GetStream().Write(bytes, 0, size);
+
+            conn.ReturnToPool();
         }
     }
 }

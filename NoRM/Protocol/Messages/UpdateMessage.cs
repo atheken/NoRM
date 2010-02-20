@@ -37,7 +37,12 @@ namespace NoRM.Protocol.Messages
             message[0] = BitConverter.GetBytes(size);
 
             //write update to server.
-            this._context.ServerConnection().GetStream().Write(message.SelectMany(h => h).ToArray(), 0, size);
+            var conn = this._context.ServerConnection();
+            
+            conn.GetStream().Write(message.SelectMany(h => h).ToArray(), 0, size);
+
+            conn.ReturnToPool();
+
         }
     }
 }

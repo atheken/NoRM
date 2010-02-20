@@ -10,9 +10,10 @@ namespace NoRM
     {
         private static readonly int MAX_POOL_SIZE = 50;
         private static readonly int MIN_POOL_SIZE = 10;
-        private static Queue<MongoConnection> _connectionPool;
+        private static Queue<MongoConnection> _availableConnections;
         private static bool _initialized;
-        private static int _connectionCount = 0;
+        private static int _checkedOut = 0;
+
 
         private MongoConnectionPool()
         {
@@ -23,14 +24,14 @@ namespace NoRM
         public static void Initialize()
         {
             if (_initialized) return;
-            if (_connectionPool == null) _connectionPool = new Queue<MongoConnection>();
+            if (_availableConnections == null) _availableConnections = new Queue<MongoConnection>();
 
 
             for (int i = 0; i < MIN_POOL_SIZE; i++)
             {
                 MongoConnection conn = new MongoConnection();
 
-                PutConnection(conn);
+                AddConnection(conn);
             }
 
             _initialized = true;
@@ -39,14 +40,16 @@ namespace NoRM
 
         public static MongoConnection GetConnection()
         {
-            if (_connectionPool.Count > 0)
+            Interlocked.Increment(ref _checkedOut);
+            if (_availableConnections.Count > 0)
             {
-                lock (_connectionPool)
+                lock (_availableConnections)
                 {
                     MongoConnection conn = null;
-                    while (_connectionPool.Count > 0)
+
+                    while (_availableConnections.Count > 0)
                     {
-                        conn = _connectionPool.Dequeue();
+                        conn = _availableConnections.Dequeue();
 
                         if (conn.Connected)
                         {
@@ -55,25 +58,25 @@ namespace NoRM
                         else
                         {
                             conn.Close();
-                            Interlocked.Decrement(ref _connectionCount);
                         }
                     }
                 }
             }
+
             return MongoConnectionPool.OpenConnection();
         }
 
-        private static void PutConnection(MongoConnection conn)
+        public static void AddConnection(MongoConnection conn)
         {
-            lock (_connectionPool)
+            lock (_availableConnections)
             {
-                if (_connectionPool.Count < MAX_POOL_SIZE)
+                if (_availableConnections.Count < MAX_POOL_SIZE)
                 {
                     if (conn != null)
                     {
                         if (conn.Connected)
                         {
-                            _connectionPool.Enqueue(conn);
+                            _availableConnections.Enqueue(conn);
                         }
                         else
                         {
@@ -90,13 +93,11 @@ namespace NoRM
 
         private static MongoConnection OpenConnection()
         {
-            if (_connectionCount < MAX_POOL_SIZE)
+            if (_checkedOut < MAX_POOL_SIZE)
             {
                 MongoConnection conn = new MongoConnection();
 
-                Interlocked.Increment(ref _connectionCount);
-
-                PutConnection(conn);
+                AddConnection(conn);
 
                 return conn;
             }

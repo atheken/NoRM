@@ -266,7 +266,7 @@ namespace NoRM
         /// Constructs a socket to the server.
         /// </summary>
         /// <returns></returns>
-        internal TcpClient ServerConnection()
+        internal MongoConnection ServerConnection()
         {
             return MongoConnectionPool.GetConnection();
         }
