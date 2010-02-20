@@ -57,17 +57,21 @@ namespace NoRM.Tests
         [Test]
         public void FindOne_Qualifier_All()
         {
-            _coll.Insert(new TestClass { ADouble = 1d, AString = "teststring" });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-            _coll.Insert(new TestClass { ADouble = 5d });
-            _coll.Insert(new TestClass { ADouble = 1d, AString = "teststring" });
+            for (int i = 0; i < 5; i++)
+            {
+                var t = new TestClass();
+                t.AStringArray = new List<string>();
+                t.AStringArray.Add("a");
+                t.AStringArray.Add("b");
+                t.AStringArray.Add("c");
+                this._coll.Insert(t);
+            }
+            IEnumerable<TestClass> results = _coll.Find(new { AStringArray = Q.All("a", "b") });
 
-            IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.All(new { ADouble = 1d, AString = "teststring" }) });
+            Assert.AreEqual(5, results.Count());
 
-            var count = results.Count();
-            Assert.AreEqual(2, count);
+            results = _coll.Find(new { AStringArray = Q.All("d") });
+            Assert.AreEqual(0, results.Count());
         }
 
         [Test]
@@ -96,7 +100,7 @@ namespace NoRM.Tests
             _coll.Insert(new TestClass { ADouble = 5 });
 
             IEnumerable<TestClass> results = _coll.Find(new { ADouble = Q.Equals(1d) });
-            Assert.AreEqual(results.Count<TestClass>() , 2);
+            Assert.AreEqual(results.Count<TestClass>(), 2);
         }
 
         [Test]
@@ -121,6 +125,7 @@ namespace NoRM.Tests
         {
 
             _coll.Insert(new TestClass { ADouble = 1 },
+                new TestClass { ADouble = 1 },
                 new TestClass { ADouble = 2 },
                 new TestClass { ADouble = 3 },
                 new TestClass { ADouble = 4 },
@@ -219,12 +224,12 @@ namespace NoRM.Tests
         [Test]
         public void FindOne_Qualifier_Size()
         {
-            _coll.Insert(new TestClass { AStringArray = new [] { "one" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two", "three" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two", "three" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two", "three", "four" }.ToList() });
-            _coll.Insert(new TestClass { AStringArray = new [] { "one", "two", "three", "four", "five" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new[] { "one" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new[] { "one", "two" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new[] { "one", "two", "three" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new[] { "one", "two", "three" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new[] { "one", "two", "three", "four" }.ToList() });
+            _coll.Insert(new TestClass { AStringArray = new[] { "one", "two", "three", "four", "five" }.ToList() });
 
             var results = _coll.Find(new { AStringArray = Q.Size(3d) });
 

@@ -337,8 +337,8 @@ namespace NoRM.BSON
                 props = ExpandoProps.FlyweightForObject(document);
             }
             if (!BSONSerializer.CanBeSerialized(typeof(T)) ||
-                (props != null && props.AllProperties().Any(y => y.Value != null &&
-                !BSONSerializer.CanBeSerialized(y.Value.GetType()))))
+                (props != null && props.AllProperties()
+                .Any(y => y.Value != null && !BSONSerializer.CanBeSerialized(y.Value.GetType()))))
             {
                 throw new NotSupportedException("This type cannot be SERIALIZED using the BSONSerializer");
             }
@@ -404,6 +404,7 @@ namespace NoRM.BSON
                     var modValue = new List<byte[]>();
                     modValue.Add(new byte[4]);//allocate size.
                     modValue.Add(BSONSerializer.SerializeMember(o.CommandName, o.ValueForCommand));//then serialize the member.
+                    
                     modValue.Add(new byte[1]);//null terminate this member.
                     modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));//add this to the main retval.
 
@@ -576,8 +577,8 @@ namespace NoRM.BSON
                     return BSONSerializer.SerializeMember(index.ToString(), y);
                 }).SelectMany(h => h).ToArray();
 
-                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length)
-                    .Concat(memberBytes).ToArray();
+                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length + 1)
+                    .Concat(memberBytes).Concat(new byte[1]).ToArray();
             }
             //TODO: implement something for "Symbol"
             //TODO: implement non-scoped code handling.

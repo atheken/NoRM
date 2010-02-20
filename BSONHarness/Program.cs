@@ -19,6 +19,11 @@ namespace BSONHarness
 
             var s = server.ServerStatus();
 
+            var db = server.GetDatabase("test2");
+            db.GetCollection<Object>("inserts").Insert(new { f = "a" }, new { f = "b" }, new { f = "c" });
+
+            var f1 = db.GetCollection<Object>("inserts").Find(new { f = Q.In("a") }).ToArray();
+            
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);
             InsertFindDeleteBenchmark(1000);
