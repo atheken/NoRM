@@ -49,7 +49,7 @@ namespace NoRM
 
         public void ReturnToPool()
         {
-            MongoConnectionPool.AddConnection(this);
+            MongoConnectionPool.AddConnection(this, true);
         }
 
     }

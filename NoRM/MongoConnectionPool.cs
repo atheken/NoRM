@@ -68,6 +68,11 @@ namespace NoRM
 
         public static void AddConnection(MongoConnection conn)
         {
+            AddConnection(conn, false);
+        }
+
+        public static void AddConnection(MongoConnection conn, bool updateCount)
+        {
             lock (_availableConnections)
             {
                 if (_availableConnections.Count < MAX_POOL_SIZE)
@@ -89,6 +94,9 @@ namespace NoRM
                     conn.Close();
                 }
             }
+
+            if (updateCount)
+                Interlocked.Decrement(ref _checkedOut);
         }
 
         private static MongoConnection OpenConnection()
@@ -97,7 +105,7 @@ namespace NoRM
             {
                 MongoConnection conn = new MongoConnection();
 
-                AddConnection(conn);
+                AddConnection(conn, true);
 
                 return conn;
             }
