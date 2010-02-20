@@ -74,6 +74,12 @@
     <Compile Include="BSON\Flyweight.cs" />
     <Compile Include=" MongoConnection.cs" />
     <Compile Include="BSON\DbTypes\GridFile.cs" />
+    <Compile Include="Linq\ExpressionVisitor.cs" />
+    <Compile Include="Linq\LinqExtensions.cs" />
+    <Compile Include="Linq\MongoQuery.cs" />
+    <Compile Include="Linq\MongoQueryProvider.cs" />
+    <Compile Include="Linq\MongoQueryTranslator.cs" />
+    <Compile Include="Linq\TypeHelper.cs" />
     <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
