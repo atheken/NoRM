@@ -11,7 +11,7 @@ namespace NoRM.Commands.Qualifiers
         public NotInQualifier(params T[] notInSet)
         {
             this.CommandName = "$nin";
-            this.ValueForCommand = notInSet;
+            this.ValueForCommand = notInSet.ToArray();
         }
     }
 }
