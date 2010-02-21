@@ -8,6 +8,7 @@ using System.IO;
 using System.Data.Linq;
 using System.Collections;
 using NoRM.BSON.DbTypes;
+using NoRM.Attributes;
 
 namespace NoRM.BSON
 {
@@ -19,7 +20,7 @@ namespace NoRM.BSON
     /// </remarks>
     public static class BSONSerializer
     {
-        private static readonly DateTime EPOCH = new DateTime(1970, 1, 1);
+        private static readonly DateTime EPOCH = new DateTime(1970, 1, 1).ToUniversalTime();
         private const int CODE_LENGTH = 1;
         private const int KEY_TERMINATOR_LENGTH = 1;
 
@@ -273,7 +274,8 @@ namespace NoRM.BSON
                 if (!typeof(IList).IsAssignableFrom(documentType))
                 {
                     foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                        .Where(y => y.GetIndexParameters().Count() == 0))
+                        .Where(y => y.GetIndexParameters().Count() == 0 && !y.GetCustomAttributes(true)
+                            .Any(f=>f is MongoIgnoreAttribute)))
                     {
                         BSONSerializer._setters[documentType][p.Name] = ReflectionHelpers.SetterMethod(p);
                     }
@@ -297,7 +299,8 @@ namespace NoRM.BSON
                 BSONSerializer._getters[documentType] = new Dictionary<string, Func<object, object>>
                     (StringComparer.InvariantCultureIgnoreCase);
                 foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(y => y.GetIndexParameters().Count() == 0))
+                    .Where(y => y.GetIndexParameters().Count() == 0 && 
+                        !y.GetCustomAttributes(true).Any(f=>f is MongoIgnoreAttribute)))
                 {
                     BSONSerializer._getters[documentType][p.Name] = ReflectionHelpers.GetterMethod(p);
                 }
@@ -573,8 +576,8 @@ namespace NoRM.BSON
                     return BSONSerializer.SerializeMember(index.ToString(), y);
                 }).SelectMany(h => h).ToArray();
 
-                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length)
-                    .Concat(memberBytes).ToArray();
+                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length + 1)
+                    .Concat(memberBytes).Concat(new byte[1]).ToArray();
             }
             //TODO: implement something for "Symbol"
             //TODO: implement non-scoped code handling.
@@ -598,7 +601,7 @@ namespace NoRM.BSON
         /// <param name="stream"></param>
         /// <param name="outProps"></param>
         /// <returns></returns>
-        public static T Deserialize<T>(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps) where T : class, new()
+        public static T Deserialize<T>(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps) 
         {
             return (T)BSONSerializer.Deserialize(stream, ref outProps, typeof(T));
         }
@@ -609,7 +612,7 @@ namespace NoRM.BSON
         /// <typeparam name="T"></typeparam>
         /// <param name="objectData"></param>
         /// <returns></returns>
-        public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Flyweight> outProps) where T : class, new()
+        public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Flyweight> outProps) 
         {
             var ms = new MemoryStream();
             ms.Write(objectData, 0, objectData.Length);

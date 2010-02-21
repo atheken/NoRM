@@ -39,8 +39,9 @@ namespace NoRM
         }
 
         /// <summary>
-        /// Produces a mongodb collection that will produce and
-        /// manipulate objects of the specified type.
+        /// Produces a mongodb collection that will create and
+        /// manipulate objects of the specified type, 
+        /// overrides the default name with the one you specify.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="collectionName"></param>
@@ -52,12 +53,26 @@ namespace NoRM
 
 
         /// <summary>
+        /// This will return a collection of the specified type, the name of the collection in 
+        /// the database is/will be tha value from typeof(T).Name, so if you change your classnames, be careful...
+        /// </summary>
+        /// <remarks>
+        /// This short-hand was a great idea by Rob, thanks!
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public MongoCollection<T> GetCollection<T>() where T : class, new()
+        {
+            return new MongoCollection<T>(typeof(T).Name, this, this._server);
+        }
+
+        /// <summary>
         /// Produces a list of all collections currently in this database.
         /// </summary>
         /// <returns></returns>
         public IEnumerable<CollectionInfo> GetAllCollections()
         {
-            var results = this.GetCollection<CollectionInfo>("system.namespaces").Find();                
+            var results = this.GetCollection<CollectionInfo>("system.namespaces").Find();
 
             return results;
         }
@@ -91,7 +106,7 @@ namespace NoRM
         public SetProfileResponse SetProfileLevel(ProfileLevel level)
         {
             var response = this.GetCollection<SetProfileResponse>("$cmd")
-                .FindOne<SetProfileResponse>(new SetProfileResponse() { profile = (int) level});
+                .FindOne<SetProfileResponse>(new SetProfileResponse() { profile = (int)level });
 
             return response;
         }
@@ -109,10 +124,14 @@ namespace NoRM
             return response;
         }
 
-        public ValidateCollectionResponse ValidateCollection(string collectionName, bool? scanData)
+        public ValidateCollectionResponse ValidateCollection(string collectionName, bool scanData)
         {
             var response = this.GetCollection<ValidateCollectionResponse>("$cmd")
-                .FindOne<ValidateCollectionResponse>(new ValidateCollectionResponse { validate = collectionName, scandata = scanData });
+                .FindOne(new
+                {
+                    validate = collectionName,
+                    scandata = scanData
+                });
 
             return response;
         }

@@ -4,6 +4,7 @@ Tests.VisualState.xml
 [Oo]bj
 [Rr]elease
 [Dd]ebug
+*.bak
 *.manifest
 *.exe
 *.pdb

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace NoRM.Protocol
 {
-    internal enum MongoOp : int
+    public enum MongoOp : int
     {
         /// <summary>
         /// Reply to a client request. responseTo is set

@@ -7,7 +7,7 @@ using NoRM.BSON;
 
 namespace NoRM.Protocol.Messages
 {
-    internal class ReplyMessage<T> : Message where T : class, new()
+    public class ReplyMessage<T> : Message
     {
         private List<T> _results;
 

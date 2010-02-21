@@ -4,12 +4,30 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using NoRM.Protocol.SystemMessages.Responses;
+using NoRM.BSON;
 
 namespace NoRM.Tests
 {
     [TestFixture]
+    [Category("Hits MongoDB")]
     public class MongoDatabaseTest
     {
+        private MongoDatabase _db;
+        private MongoServer _server;
+
+        [TestFixtureSetUp]
+        public void SetUpDBTests()
+        {
+            var server = new MongoServer();
+            this._server = server;
+            this._db = server.GetDatabase("test" + Guid.NewGuid().ToString().Substring(0, 5));
+        }
+        [TestFixtureTearDown]
+        public void TearDown()
+        {
+            this._server.DropDatabase(this._db.DatabaseName);
+        }
+
         [Test]
         public void GetAllCollections_Returns_Collections()
         {
@@ -25,7 +43,7 @@ namespace NoRM.Tests
             var db = context.GetDatabase("test");
             var collName = "testInsertCollection";
             db.GetCollection<object>(collName).Insert(new { Title = "TestInsert" });
-            
+
             var results = db.DropCollection(collName);
 
             Assert.IsTrue((results.OK == 1.0));
@@ -64,13 +82,17 @@ namespace NoRM.Tests
         [Test]
         public void Validate_Collection()
         {
-            var db = new MongoServer().GetDatabase("test");
+            String collName = "validColl";
+            var testColl = this._db.GetCollection<Object>(collName);
 
-            var response = db.ValidateCollection("foo", false);
+            //must insert something before the collection will exist.
+            testColl.Insert(new Object());
 
-            Assert.IsTrue((response.Ns == "test.foo"));
-            
+            var response = this._db.ValidateCollection(collName, false);
+
+            Assert.AreEqual(testColl.FullyQualifiedName, response.Ns);
         }
+
 
     }
 }

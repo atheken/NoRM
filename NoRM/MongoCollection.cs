@@ -5,11 +5,17 @@ using System.Text;
 using NoRM.Protocol.Messages;
 using NoRM.Protocol.SystemMessages.Requests;
 using NoRM.Protocol.SystemMessages.Responses;
+using System.Linq.Expressions;
+using System.Reflection;
+using NoRM.Attributes;
 
 namespace NoRM
 {
-    public class MongoCollection<T> where T : class, new()
+    public class MongoCollection<T>
     {
+        //this will have a different instance for each concrete version of MongoCollection<T>
+        private static bool? _updateable = null;
+
         private String _collectionName;
         private MongoDatabase _db;
         private MongoServer _server;
@@ -25,6 +31,17 @@ namespace NoRM
             this._db = db;
             this._server = server;
             this._collectionName = collectionName;
+        }
+
+        /// <summary>
+        /// Get a child collection of the specified type.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="collectionName"></param>
+        /// <returns></returns>
+        public MongoCollection<U> GetChildCollection<U>(String collectionName) where U : class, new()
+        {
+            return new MongoCollection<U>(this._collectionName + "." + collectionName, this._db, this._server);
         }
 
         /// <summary>
@@ -58,6 +75,31 @@ namespace NoRM
                 unique = isUnique
             });
 
+        }
+
+        /// <summary>
+        /// True if the type of this collection can be updated 
+        /// (i.e. the Type specifies "_id", "ID", or a property with the attributed "MongoIdentifier").
+        /// </summary>
+        public bool Updateable
+        {
+            get
+            {
+                if (MongoCollection<T>._updateable == null)
+                {
+                    if (typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y =>
+                        y.Name == "_id" || y.Name == "ID" || 
+                        y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute)))
+                    {
+                        MongoCollection<T>._updateable = true;
+                    }
+                    else
+                    {
+                        MongoCollection<T>._updateable = false;
+                    }
+                }
+                return MongoCollection<T>._updateable.Value;
+            }
         }
 
         /// <summary>
@@ -127,8 +169,14 @@ namespace NoRM
         /// <param name="valueDocument">A document that has the values that should be set on matching documents in the db.</param>
         /// <param name="updateMultiple">true if you want to update all documents that match, not just the first</param>
         /// <param name="upsert">true if you want to insert the value document if no matches are found.</param>
+        /// <exception cref="NotSupportedException">This exception will be raised if the collection's type "T" doesn't define an indentifier.</exception>
         public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert)
         {
+            if (!this.Updateable)
+            {
+                throw new NotSupportedException("This collection is not updatable, this is due to the fact that the collection's type " + typeof(T).FullName +
+                    " does not specify an identifier property");
+            }
             UpdateOption ops = UpdateOption.None;
             if (updateMultiple)
             {
@@ -190,6 +238,33 @@ namespace NoRM
             return this.Find(new Object(), Int32.MaxValue, this.FullyQualifiedName);
         }
 
+        /// <summary>
+        /// Find based on a Linq Expression
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <returns></returns>
+        public IEnumerable<T> Find<T>(Expression<Func<T, bool>> expression)
+        {
+
+            //build a template based on T
+            var item = default(T);
+
+
+            return null;
+        }
+
+
+        public bool Any<T>(Expression<Func<T, bool>> expression)
+        {
+
+            //turn that expression into ... something
+
+
+
+            return false;
+        }
+
         public IEnumerable<T> Find<U>(U template)
         {
             return this.Find(template, Int32.MaxValue);
@@ -241,7 +316,7 @@ namespace NoRM
 
         public CollectionStatistics GetCollectionStatistics()
         {
-            return this._db.GetCollectionStatistics(this._collectionName );
+            return this._db.GetCollectionStatistics(this._collectionName);
         }
     }
 }

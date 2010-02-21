@@ -48,8 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\MongoIdentifierAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreAttribute.cs" />
     <Compile Include="Attributes\MongoNameAttribute.cs" />
+    <Compile Include="BSON\DbTypes\GridReadStream.cs" />
     <Compile Include="BSON\DbTypes\OID.cs" />
     <Compile Include="BSON\DbTypes\DBReference.cs" />
     <Compile Include="BSON\DbTypes\ScopedCode.cs" />
@@ -71,8 +73,19 @@
     <Compile Include="BSON\ExpandoProps.cs" />
     <Compile Include="BSON\IFlyweight.cs" />
     <Compile Include="BSON\Flyweight.cs" />
-	<Compile Include=" MongoConnection.cs" />
-    <Compile Include="MongoFile.cs" />
+    <Compile Include="BSON\DbTypes\GridFile.cs" />
+    <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
+    <Compile Include="Linq\ExpressionVisitor.cs" />
+    <Compile Include="Linq\LinqExtensions.cs" />
+    <Compile Include="Linq\MongoQuery.cs" />
+    <Compile Include="Linq\MongoQueryProvider.cs" />
+    <Compile Include="Linq\MongoQueryTranslator.cs" />
+    <Compile Include="Linq\TypeHelper.cs" />
+    <Compile Include="MongoConnection.cs" />
+    <Compile Include="MongoServer.cs" />
+    <Compile Include="Protocol\Messages\UpdateMessage.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
@@ -97,7 +110,6 @@
     <Compile Include="Commands\Modifiers\IncrementOperation.cs" />
     <Compile Include="Commands\Modifiers\M.cs" />
     <Compile Include="MongoCollection.cs" />
-    <Compile Include="MongoServer.cs" />
     <Compile Include="MongoDatabase.cs" />
     <Compile Include="MongoException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -108,7 +120,6 @@
     <Compile Include="Protocol\Messages\Message.cs" />
     <Compile Include="Protocol\MessageHeader.cs" />
     <Compile Include="Protocol\Messages\QueryOptions.cs" />
-    <Compile Include="Protocol\Messages\UpdateMessage.cs" />
     <Compile Include="Protocol\Messages\UpdateOption.cs" />
     <Compile Include="Protocol\MongoOp.cs" />
     <Compile Include="Protocol\Messages\QueryMessage.cs" />

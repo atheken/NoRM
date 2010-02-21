@@ -13,9 +13,9 @@ namespace NoRM.Protocol.Messages
     /// A query to the db.
     /// </summary>
     /// <typeparam name="T">The request document type, and the response document type.</typeparam>
-    internal class QueryMessage<T> : QueryMessage<T, T> where T : class, new()
+    public class QueryMessage<T> : QueryMessage<T, T> where T : class, new()
     {
-        internal QueryMessage(MongoServer context, String fullyQualifiedCollName) :
+        public QueryMessage(MongoServer context, String fullyQualifiedCollName) :
             base(context, fullyQualifiedCollName)
         {
 
@@ -27,7 +27,7 @@ namespace NoRM.Protocol.Messages
     /// </summary>
     /// <typeparam name="T">The response type.</typeparam>
     /// <typeparam name="U">The request type.</typeparam>
-    internal class QueryMessage<T, U> : Message where T : class, new()
+    public class QueryMessage<T, U> : Message 
     {
         /// <summary>
         /// The available options when creating a query against Mongo.
@@ -46,13 +46,13 @@ namespace NoRM.Protocol.Messages
         private int _numberToSkip = 0;
         private int _numberToTake = Int32.MaxValue;
 
-        internal QueryMessage(MongoServer context, String fullyQualifiedCollName) :
+        public QueryMessage(MongoServer context, String fullyQualifiedCollName) :
             base(context, fullyQualifiedCollName)
         {
             this._op = MongoOp.Query;
         }
 
-        private byte[] _query;
+        private U _query;
 
         /// <summary>
         /// A BSON query.
@@ -61,7 +61,7 @@ namespace NoRM.Protocol.Messages
         {
             set
             {
-                this._query = BSONSerializer.Serialize<U>(value);
+                this._query = value;
             }
         }
 
@@ -116,7 +116,7 @@ namespace NoRM.Protocol.Messages
 
             if (this._query != null)
             {
-                messageBytes.Add(this._query);
+                messageBytes.Add(BSONSerializer.Serialize(this._query));
             }
             #endregion
 
@@ -124,18 +124,20 @@ namespace NoRM.Protocol.Messages
             var size = messageBytes.Sum(y => y.Length);
             messageBytes[0] = BitConverter.GetBytes(size);
 
-            var sock = this._context.ServerConnection();
 
-            sock.GetStream().Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
+            var conn = this._context.ServerConnection();
+            
+            conn.GetStream().Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
+
             //so, the server can accepted the query, now we do the second part.
-            int timeout = this._context.QueryTimeout;
+            int timeout = this._context.QueryTimeout * 1000;
 
-            var stream = sock.GetStream();
+            var stream = conn.GetStream();
 
             while (!stream.DataAvailable && timeout > 0)
             {
                 timeout--;
-                Thread.Sleep(1000);
+                Thread.Sleep(1);
             }
 
             if (!stream.DataAvailable)
@@ -143,6 +145,7 @@ namespace NoRM.Protocol.Messages
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
             }
             return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(new BufferedStream(stream)));
+
         }
 
     }

@@ -3,10 +3,13 @@ using System.Diagnostics;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
 using NoRM.BSON;
+using NoRM.Attributes;
+using NoRM.BSON.DbTypes;
 
 namespace NoRM.Tests
 {
     [TestFixture]
+    [Category("In Memory Only")]
     public class BSONSerializerTest
     {
         protected class GeneralDTO
@@ -20,20 +23,33 @@ namespace NoRM.Tests
             public Regex ARex { get; set; }
             public DateTime? ADateTime { get; set; }
             public GeneralDTO Nester { get; set; }
+            public ScopedCode Code {get;set;}
+
+            [MongoIgnore]
+            public int IgnoredProperty { get; set; }
         }
 
         [Test]
         public void Serialization_Of_Flyweight_Is_Not_Lossy()
         {
             var testObj = new Flyweight();
-            testObj["astring"]= "stringval";
+            testObj["astring"] = "stringval";
             var testBytes = BSONSerializer.Serialize(testObj);
             var hydrated = BSONSerializer.Deserialize<Flyweight>(testBytes);
 
             Assert.AreEqual(testObj["astring"], hydrated["astring"]);
         }
 
-        
+        [Test]
+        public void MongoIgnored_Properties_Are_Ignored()
+        {
+            var test = new GeneralDTO();
+            test.IgnoredProperty = 42;
+            var hydrated = BSONSerializer.Deserialize<GeneralDTO>(BSONSerializer.Serialize(test));
+
+            Assert.AreEqual(0, hydrated.IgnoredProperty);
+        }
+
         [Test]
         public void Serializing_POCO_Generates_Bytes()
         {
@@ -57,7 +73,7 @@ namespace NoRM.Tests
             Assert.AreEqual(null, hydratedObj1.ADateTime);
 
             //Mongo stores dates as long, therefore, we have to use double->long rounding.
-            Assert.AreEqual((long)(obj2.ADateTime.Value-DateTime.MinValue).TotalMilliseconds, 
+            Assert.AreEqual((long)(obj2.ADateTime.Value - DateTime.MinValue).TotalMilliseconds,
                 (long)(hydratedObj2.ADateTime.Value - DateTime.MinValue).TotalMilliseconds);
 
         }
@@ -99,7 +115,7 @@ namespace NoRM.Tests
             var obj1 = new GeneralDTO { Title = "Hello World", Nester = new GeneralDTO { Title = "Bob", AnInt = 42 } };
             var obj1Bytes = BSONSerializer.Serialize(obj1);
             BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
-            
+
         }
 
         [Test]
@@ -202,22 +218,39 @@ namespace NoRM.Tests
         }
 
         [Test]
+        public void Serialization_Of_Scoped_Code_Is_Not_Lossy()
+        {
+            var obj1 = new GeneralDTO();
+            obj1.Code = new ScopedCode();
+            obj1.Code.CodeString = "function(){return 'hello world!'}";
+            var scope = new Flyweight();
+            scope["$ns"] = "root";
+            obj1.Code.Scope = scope;
+
+            var obj2 = BSONSerializer.Deserialize<GeneralDTO>(BSONSerializer.Serialize(obj1));
+
+            Assert.AreEqual(obj1.Code.CodeString, obj2.Code.CodeString);
+            Assert.AreEqual(((Flyweight)obj1.Code.Scope)["$ns"],((Flyweight)obj2.Code.Scope)["$ns"]);
+        }
+
+        [Test]
+        [Category("Benchmark")]
         public void Serialization_Speed_Test()
         {
-             /*
+            /*
              
-             3365
-             4281
-             3310
-             3122
-             3239
-             3416
-             3207
-             3376
-             3364
-             3156             
+            3365
+            4281
+            3310
+            3122
+            3239
+            3416
+            3207
+            3376
+            3364
+            3156             
              
-             */
+            */
 
             for (var i2 = 0; i2 < 10; i2++)
             {
@@ -234,7 +267,7 @@ namespace NoRM.Tests
                                        AGuid = Guid.NewGuid(),
                                        AnInt = 1,
                                        Pi = 3.14,
-                                       Nester = new GeneralDTO {Title = "Bob", AnInt = 42}
+                                       Nester = new GeneralDTO { Title = "Bob", AnInt = 42 }
                                    };
                     var obj1Bytes = BSONSerializer.Serialize(obj1);
                     var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
