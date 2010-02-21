@@ -97,10 +97,48 @@ namespace NoRM.Linq {
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m) {
+            
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where") {
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
                 return m;
+            } else {
+                switch (m.Method.Name) {
+                    case "StartsWith":
+                        sb.Append("(");
+                        this.Visit(m.Object);
+                        sb.Append(".indexOf(");
+                        this.Visit(m.Arguments[0]);
+                        sb.Append(")===0)");
+                        return m;
+
+                    case "Contains":
+                        sb.Append("(");
+                        this.Visit(m.Object);
+                        sb.Append(".indexOf(");
+                        this.Visit(m.Arguments[0]);
+                        sb.Append(")>0)");
+                        return m;
+
+                    case "EndsWith":
+                        sb.Append("(");
+                        this.Visit(m.Object);
+                        sb.Append(".match(");
+                        this.Visit(m.Arguments[0]);
+                        sb.Append("+'$')==");
+                        this.Visit(m.Arguments[0]);
+                        sb.Append(")");
+                        return m;
+
+                    case "IsNullOrEmpty":
+                        sb.Append("(");
+                        this.Visit(m.Arguments[0]);
+                        sb.Append(" == '' ||  ");
+                        this.Visit(m.Arguments[0]);
+                        sb.Append(" == null  )");
+                        return m;
+
+                }
             }
 
             //for now...

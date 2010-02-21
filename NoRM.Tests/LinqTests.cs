@@ -129,5 +129,120 @@ namespace NoRM.Tests {
 
         }
 
+        [Test]
+        public void Two_Products_Should_Be_Returned_When_StartsWith_X() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "XTest3", Price = 10 });
+            session.Add(new Product() { Name = "XTest4", Price = 22 });
+            session.Add(new Product() { Name = "Test5", Price = 33 });
+
+            var products = session.Products.Where(x => x.Name.StartsWith("X")).ToList();
+
+            Assert.AreEqual(2, products.Count);
+
+        }
+        [Test]
+        public void Two_Products_Should_Be_Returned_When_EndsWith_X() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10 });
+            session.Add(new Product() { Name = "Test4X", Price = 22 });
+            session.Add(new Product() { Name = "Test5", Price = 33 });
+
+            var products = session.Products.Where(x => x.Name.EndsWith("X")).ToList();
+
+            Assert.AreEqual(2, products.Count);
+
+        }
+        [Test]
+        public void Two_Products_Should_Be_Returned_When_Contains_X() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "TestX3", Price = 10 });
+            session.Add(new Product() { Name = "TestX4", Price = 22 });
+            session.Add(new Product() { Name = "Test5", Price = 33 });
+
+            var products = session.Products.Where(x => x.Name.Contains("X")).ToList();
+
+            Assert.AreEqual(2, products.Count);
+
+        }
+
+        [Test]
+        public void Four_Products_Should_Be_Returned_When_Starts_Or_EndsWith_X() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10 });
+            session.Add(new Product() { Name = "Test4X", Price = 22 });
+            session.Add(new Product() { Name = "Test5", Price = 33 });
+            session.Add(new Product() { Name = "XTest3", Price = 10 });
+            session.Add(new Product() { Name = "XTest4", Price = 22 });
+
+            var products = session.Products.Where(x => x.Name.StartsWith("X") || x.Name.EndsWith("X")).ToList();
+
+            Assert.AreEqual(4, products.Count);
+
+        }
+        [Test]
+        public void One_Products_Should_Be_Returned_When_Starts_And_EndsWith_X() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10 });
+            session.Add(new Product() { Name = "Test4X", Price = 22 });
+            session.Add(new Product() { Name = "XTest5X", Price = 33 });
+            session.Add(new Product() { Name = "XTest3", Price = 10 });
+            session.Add(new Product() { Name = "XTest4", Price = 22 });
+
+            var products = session.Products.Where(x => x.Name.StartsWith("X") && x.Name.EndsWith("X")).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
+        [Test]
+        public void One_Products_Should_Be_Returned_When_IsNullOrEmpty_With_EmptyString() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10 });
+            session.Add(new Product() { Name = "Test4X", Price = 22 });
+            session.Add(new Product() { Name = "", Price = 33 });
+            session.Add(new Product() { Name = "XTest3", Price = 10 });
+            session.Add(new Product() { Name = "XTest4", Price = 22 });
+
+            var products = session.Products.Where(x => string.IsNullOrEmpty(x.Name)).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
+
+        [Test]
+        public void One_Products_Should_Be_Returned_When_IsNullOrEmpty_With_Null() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10 });
+            session.Add(new Product() { Name = "Test4X", Price = 22 });
+            session.Add(new Product() { Price = 33 });
+            session.Add(new Product() { Name = "XTest3", Price = 10 });
+            session.Add(new Product() { Name = "XTest4", Price = 22 });
+
+            var products = session.Products.Where(x => string.IsNullOrEmpty(x.Name)).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
     }
 }
