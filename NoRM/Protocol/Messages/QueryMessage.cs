@@ -128,14 +128,14 @@ namespace NoRM.Protocol.Messages
 
             sock.GetStream().Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
             //so, the server can accepted the query, now we do the second part.
-            int timeout = this._context.QueryTimeout;
+            int timeout = this._context.QueryTimeout * 1000;
 
             var stream = sock.GetStream();
 
             while (!stream.DataAvailable && timeout > 0)
             {
                 timeout--;
-                Thread.Sleep(1000);
+                Thread.Sleep(1);
             }
 
             if (!stream.DataAvailable)
