@@ -38,8 +38,20 @@ namespace NoRM.Tests {
         }
     }
 
+    class Address {
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Zip { get; set; }
+    }
     class Supplier {
         public string Name { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public Address Address { get; set; }
+        public Supplier() {
+            Address = new Address();
+            CreatedOn = DateTime.Now;
+        }
     }
     class Product {
         public object ID { get; set; }
@@ -114,21 +126,6 @@ namespace NoRM.Tests {
 
         }
 
-        [Test]
-        public void One_Product_Should_Be_Returned_When_Nested_Supplier_Queried() {
-
-            var session = new Session();
-            session.Drop<Product>();
-
-            session.Add(new Product() { Name = "Test3", Price = 10, Supplier = new Supplier() { Name = "Steve" } });
-            session.Add(new Product() { Name = "Test4", Price = 22 });
-            session.Add(new Product() { Name = "Test5", Price = 33 });
-
-            var products = session.Products.Where(x=>x.Supplier.Name=="Steve").ToList();
-
-            Assert.AreEqual(1, products.Count);
-
-        }
 
         [Test]
         public void Two_Products_Should_Be_Returned_When_StartsWith_X() {
