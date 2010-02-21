@@ -14,7 +14,7 @@ namespace BSONHarness
         
         static void Main(string[] args)
         {
-            var server = new MongoContext();
+            var server = new MongoServer();
             //server.Connect();
 
             var s = server.ServerStatus();
@@ -39,7 +39,7 @@ namespace BSONHarness
 
         private static void AuthenticateAConnection()
         {
-            var auth = new MongoContext().Authenticate("testing", "testing");
+            var auth = new MongoServer().Authenticate("testing", "testing");
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace BSONHarness
         /// <param name="count"></param>
         private static void InsertFindDeleteBenchmark(int count)
         {
-            MongoContext context = new MongoContext();
+            MongoServer context = new MongoServer();
             var db = context.GetDatabase("benchmark");
             db.DropCollection("test");
             var coll = db.GetCollection<GeneralDTO>("test");

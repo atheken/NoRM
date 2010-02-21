@@ -11,13 +11,13 @@ namespace NoRM.Tests
     [Category("Hits MongoDB")]
     public class MongoCollectionTest
     {
-        private MongoContext _server;
+        private MongoServer _server;
         private MongoDatabase _db;
 
         [TestFixtureSetUp]
         public void Setup()
         {
-            this._server = new MongoContext();
+            this._server = new MongoServer();
             this._db = this._server.GetDatabase("test" + Guid.NewGuid().ToString().Substring(0, 5));
             
         }
@@ -31,7 +31,7 @@ namespace NoRM.Tests
         [Test]
         public void Distinct_For_Key_Returns_Correct_Set()
         {
-            var server = new MongoContext();
+            var server = new MongoServer();
             var testDB = server.GetDatabase("test");
             testDB.DropCollection("testObjects");
             var testColl = testDB.GetCollection<Object>("testObjects");

@@ -17,6 +17,10 @@ namespace NoRM
     /// </remarks>
     public class Q
     {
+        public static WhereQualifier Where(string expression) {
+            return new WhereQualifier(expression);
+        }
+        
         /// <summary>
         /// Builds a $lt qualifier for the search.
         /// </summary>

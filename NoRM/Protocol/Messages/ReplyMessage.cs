@@ -7,7 +7,7 @@ using NoRM.BSON;
 
 namespace NoRM.Protocol.Messages
 {
-    internal class ReplyMessage<T> : Message where T : class, new()
+    public class ReplyMessage<T> : Message
     {
         private List<T> _results;
 
@@ -15,7 +15,7 @@ namespace NoRM.Protocol.Messages
         /// Processes a response stream.
         /// </summary>
         /// <param name="reply"></param>
-        internal ReplyMessage(MongoContext context,
+        internal ReplyMessage(MongoServer context,
             String fullyQualifiedCollestionName, BinaryReader reply) :
             base(context, fullyQualifiedCollestionName)
         {

@@ -8,7 +8,7 @@ namespace NoRM.Protocol.Messages
     internal class KillCursorsMessage : Message
     {
         private long[] _killCursors;
-        internal KillCursorsMessage(MongoContext context, String fullyQualifiedCollName, params long[] cursorsToKill)
+        internal KillCursorsMessage(MongoServer context, String fullyQualifiedCollName, params long[] cursorsToKill)
             : base(context, fullyQualifiedCollName)
         {
             this._killCursors = cursorsToKill;

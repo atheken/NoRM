@@ -21,14 +21,14 @@ namespace NoRM.Tests
     [Category("Hits MongoDB")]
     public class MongoSearchQualifierTests
     {
-        private MongoContext _server;
+        private MongoServer _server;
         private MongoDatabase _db;
         private MongoCollection<TestClass> _coll;
 
         [SetUp]
         public void TestFixture_Setup()
         {
-            _server = new MongoContext();
+            _server = new MongoServer();
             _db = _server.GetDatabase("TestSuiteDatabase");
             _coll = _db.GetCollection<TestClass>("TestClasses");
         }

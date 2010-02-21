@@ -6,10 +6,10 @@ using NoRM.BSON;
 
 namespace NoRM.Protocol.Messages
 {
-    internal class InsertMessage<T> : Message where T : class, new()
+    internal class InsertMessage<T> : Message 
     {
         protected T[] _elementsToInsert;
-        public InsertMessage(MongoContext context, String collectionName, IEnumerable<T> itemsToInsert) :
+        public InsertMessage(MongoServer context, String collectionName, IEnumerable<T> itemsToInsert) :
             base(context, collectionName)
         {
             this._elementsToInsert = itemsToInsert.ToArray();
@@ -45,7 +45,6 @@ namespace NoRM.Protocol.Messages
             
             conn.GetStream().Write(bytes, 0, size);
 
-            conn.ReturnToPool();
         }
     }
 }

@@ -11,7 +11,7 @@ namespace NoRM.Protocol.Messages
     internal class GetMoreMessage<T> : Message where T : class, new()
     {
         protected long _cursorID;
-        internal GetMoreMessage(MongoContext context,
+        internal GetMoreMessage(MongoServer context,
             String fullyQualifiedCollectionName, long cursorID) :
             base(context, fullyQualifiedCollectionName)
         {
@@ -57,8 +57,6 @@ namespace NoRM.Protocol.Messages
             {
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
             }
-
-            conn.ReturnToPool();
 
             return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(new BufferedStream(stream)));
 

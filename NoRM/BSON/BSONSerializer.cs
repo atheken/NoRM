@@ -601,7 +601,7 @@ namespace NoRM.BSON
         /// <param name="stream"></param>
         /// <param name="outProps"></param>
         /// <returns></returns>
-        public static T Deserialize<T>(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps) where T : class, new()
+        public static T Deserialize<T>(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps) 
         {
             return (T)BSONSerializer.Deserialize(stream, ref outProps, typeof(T));
         }
@@ -612,7 +612,7 @@ namespace NoRM.BSON
         /// <typeparam name="T"></typeparam>
         /// <param name="objectData"></param>
         /// <returns></returns>
-        public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Flyweight> outProps) where T : class, new()
+        public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Flyweight> outProps) 
         {
             var ms = new MemoryStream();
             ms.Write(objectData, 0, objectData.Length);

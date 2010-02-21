@@ -47,10 +47,5 @@ namespace NoRM
         public int RightPort { get; set; }
         public bool SlaveOk { get; set; }
 
-        public void ReturnToPool()
-        {
-            MongoConnectionPool.AddConnection(this, true);
-        }
-
     }
 }

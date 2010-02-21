@@ -5,14 +5,15 @@ using System.Text;
 using NoRM.Protocol.Messages;
 using NoRM.Protocol.SystemMessages.Requests;
 using NoRM.Protocol.SystemMessages.Responses;
+using System.Linq.Expressions;
 
 namespace NoRM
 {
-    public class MongoCollection<T> where T : class, new()
+    public class MongoCollection<T>
     {
         private String _collectionName;
         private MongoDatabase _db;
-        private MongoContext _server;
+        private MongoServer _server;
 
         /// <summary>
         /// Represents a strongly-typed set of documents in the db.
@@ -20,7 +21,7 @@ namespace NoRM
         /// <param name="collectionName"></param>
         /// <param name="db"></param>
         /// <param name="context"></param>
-        public MongoCollection(String collectionName, MongoDatabase db, MongoContext server)
+        public MongoCollection(String collectionName, MongoDatabase db, MongoServer server)
         {
             this._db = db;
             this._server = server;
@@ -199,6 +200,31 @@ namespace NoRM
         {
             //this is a hack to get a value that will test for null into the serializer.
             return this.Find(new Object(), Int32.MaxValue, this.FullyQualifiedName);
+        }
+
+        /// <summary>
+        /// Find based on a Linq Expression
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <returns></returns>
+        public IEnumerable<T> Find<T>(Expression<Func<T,bool>> expression) {
+            
+            //build a template based on T
+            var item = default(T);
+
+
+            return null;
+        }
+
+
+        public bool Any<T>(Expression<Func<T, bool>> expression) {
+
+            //turn that expression into ... something
+
+
+
+            return false;
         }
 
         public IEnumerable<T> Find<U>(U template)

@@ -14,7 +14,7 @@ namespace NoRM.Protocol.Messages
         /// </summary>
         /// <param name="context"></param>
         /// <param name="collection"></param>
-        internal DeleteMessage(MongoContext context, String collection, U templateDocument)
+        internal DeleteMessage(MongoServer context, String collection, U templateDocument)
             : base(context, collection)
         {
             this._templateDocument = templateDocument;
@@ -40,8 +40,6 @@ namespace NoRM.Protocol.Messages
             var conn = this._context.ServerConnection();
             
             conn.GetStream().Write(bytes.SelectMany(y => y).ToArray(), 0, size);
-
-            conn.ReturnToPool();
             
         }
     }
