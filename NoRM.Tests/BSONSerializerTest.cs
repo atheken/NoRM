@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System.Text.RegularExpressions;
 using NoRM.BSON;
 using NoRM.Attributes;
+using NoRM.BSON.DbTypes;
 
 namespace NoRM.Tests
 {
@@ -22,6 +23,7 @@ namespace NoRM.Tests
             public Regex ARex { get; set; }
             public DateTime? ADateTime { get; set; }
             public GeneralDTO Nester { get; set; }
+            public ScopedCode Code {get;set;}
 
             [MongoIgnore]
             public int IgnoredProperty { get; set; }
@@ -213,6 +215,22 @@ namespace NoRM.Tests
             Assert.AreEqual(obj1.ARex.Options, hydratedObj1.ARex.Options);
             Assert.AreEqual(null, hydratedObj2.ARex);
             //more tests would be useful for all the options.
+        }
+
+        [Test]
+        public void Serialization_Of_Scoped_Code_Is_Not_Lossy()
+        {
+            var obj1 = new GeneralDTO();
+            obj1.Code = new ScopedCode();
+            obj1.Code.CodeString = "function(){return 'hello world!'}";
+            var scope = new Flyweight();
+            scope["$ns"] = "root";
+            obj1.Code.Scope = scope;
+
+            var obj2 = BSONSerializer.Deserialize<GeneralDTO>(BSONSerializer.Serialize(obj1));
+
+            Assert.AreEqual(obj1.Code.CodeString, obj2.Code.CodeString);
+            Assert.AreEqual(((Flyweight)obj1.Code.Scope)["$ns"],((Flyweight)obj2.Code.Scope)["$ns"]);
         }
 
         [Test]

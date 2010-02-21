@@ -20,14 +20,14 @@ namespace NoRM.Tests {
         }
 
         public void Add<T>(T item) where T:class, new() {
-            var coll = _provider.DB.GetCollection<T>(typeof(T).Name);
+            var coll = _provider.DB.GetCollection<T>();
             
             //see if the item exists
             coll.Insert(item);
             
         }
         public void Update<T>(T item) where T : class, new() {
-            var coll = _provider.DB.GetCollection<T>(typeof(T).Name);
+            var coll = _provider.DB.GetCollection<T>();
 
             //see if the item exists
             coll.UpdateOne(item,item);

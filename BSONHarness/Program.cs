@@ -6,6 +6,7 @@ using NoRM;
 using NoRM.BSON;
 using NoRM.Protocol.SystemMessages.Responses;
 using NoRM.BSON.DbTypes;
+using NoRM.Linq;
 
 namespace BSONHarness
 {
@@ -16,6 +17,8 @@ namespace BSONHarness
         {
             var server = new MongoServer();
             //server.Connect();
+
+            //server.GetDatabase("test").GetCollection<GeneralDTO>(
 
             var s = server.ServerStatus();
 

@@ -52,7 +52,7 @@ namespace NoRM.Protocol.Messages
             this._op = MongoOp.Query;
         }
 
-        private byte[] _query;
+        private U _query;
 
         /// <summary>
         /// A BSON query.
@@ -61,12 +61,7 @@ namespace NoRM.Protocol.Messages
         {
             set
             {
-                
-                //TODO: This is magical right here - better to be explicit
-                //that the value on this object is NOT what's being set
-                //rather, call a method "SerializeTemplate()" which returns
-                //the value required, then pass that in somewhere. 
-                this._query = BSONSerializer.Serialize<U>(value);
+                this._query = value;
             }
         }
 
@@ -121,7 +116,7 @@ namespace NoRM.Protocol.Messages
 
             if (this._query != null)
             {
-                messageBytes.Add(this._query);
+                messageBytes.Add(BSONSerializer.Serialize(this._query));
             }
             #endregion
 

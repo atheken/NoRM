@@ -20,7 +20,7 @@ namespace NoRM.BSON
     /// </remarks>
     public static class BSONSerializer
     {
-        private static readonly DateTime EPOCH = new DateTime(1970, 1, 1);
+        private static readonly DateTime EPOCH = new DateTime(1970, 1, 1).ToUniversalTime();
         private const int CODE_LENGTH = 1;
         private const int KEY_TERMINATOR_LENGTH = 1;
 
