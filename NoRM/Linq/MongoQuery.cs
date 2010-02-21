@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using System.Collections;
+using NoRM.BSON;
 
 namespace NoRM.Linq {
     /// <summary>
@@ -12,6 +13,8 @@ namespace NoRM.Linq {
     public class MongoQuery<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable {
         MongoQueryProvider provider;
         Expression expression;
+        MongoCollection<T> _collection;
+        Flyweight _query;
 
         public MongoQuery(MongoQueryProvider provider) {
             if (provider == null) {
@@ -19,6 +22,8 @@ namespace NoRM.Linq {
             }
             this.provider = provider;
             this.expression = Expression.Constant(this);
+            _collection = new MongoCollection<T>(typeof(T).Name, provider.DB, provider.Server);
+            _query = new Flyweight();
         }
 
         public MongoQuery(MongoQueryProvider provider, Expression expression) {
@@ -33,6 +38,7 @@ namespace NoRM.Linq {
             }
             this.provider = provider;
             this.expression = expression;
+            _collection = new MongoCollection<T>(typeof(T).Name, provider.DB, provider.Server);
         }
 
         Expression IQueryable.Expression {
@@ -49,11 +55,7 @@ namespace NoRM.Linq {
 
         public virtual IEnumerator<T> GetEnumerator() {
             //var docs= (ICursor)this.provider.Execute(this.expression);
-
-            //IEnumerable<T> result = docs.TranslateDocs<T>();
-
-            //return result.GetEnumerator();
-            return null;
+            return  provider.Execute<T>(this.expression).GetEnumerator();
 
         }
 

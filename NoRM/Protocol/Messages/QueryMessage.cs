@@ -13,9 +13,9 @@ namespace NoRM.Protocol.Messages
     /// A query to the db.
     /// </summary>
     /// <typeparam name="T">The request document type, and the response document type.</typeparam>
-    internal class QueryMessage<T> : QueryMessage<T, T> where T : class, new()
+    public class QueryMessage<T> : QueryMessage<T, T> where T : class, new()
     {
-        internal QueryMessage(MongoServer context, String fullyQualifiedCollName) :
+        public QueryMessage(MongoServer context, String fullyQualifiedCollName) :
             base(context, fullyQualifiedCollName)
         {
 
@@ -27,7 +27,7 @@ namespace NoRM.Protocol.Messages
     /// </summary>
     /// <typeparam name="T">The response type.</typeparam>
     /// <typeparam name="U">The request type.</typeparam>
-    internal class QueryMessage<T, U> : Message where T : class, new()
+    public class QueryMessage<T, U> : Message 
     {
         /// <summary>
         /// The available options when creating a query against Mongo.
@@ -46,7 +46,7 @@ namespace NoRM.Protocol.Messages
         private int _numberToSkip = 0;
         private int _numberToTake = Int32.MaxValue;
 
-        internal QueryMessage(MongoServer context, String fullyQualifiedCollName) :
+        public QueryMessage(MongoServer context, String fullyQualifiedCollName) :
             base(context, fullyQualifiedCollName)
         {
             this._op = MongoOp.Query;
@@ -57,10 +57,16 @@ namespace NoRM.Protocol.Messages
         /// <summary>
         /// A BSON query.
         /// </summary>
+
         public U Query
         {
             set
             {
+                
+                //TODO: This is magical right here - better to be explicit
+                //that the value on this object is NOT what's being set
+                //rather, call a method "SerializeTemplate()" which returns
+                //the value required, then pass that in somewhere. 
                 this._query = BSONSerializer.Serialize<U>(value);
             }
         }

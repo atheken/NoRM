@@ -5,9 +5,31 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using NoRM.BSON;
 
 namespace NoRM.Linq {
     public class MongoQueryProvider : IQueryProvider {
+        private MongoDatabase _db;
+        private MongoServer _server;
+        
+        public MongoQueryProvider(string dbName) : this(dbName, "127.0.0.1", 27017, false) { }
+        public MongoQueryProvider(string dbName, string server, int port, bool enableExpandoProps) {
+
+            _server = new MongoServer(server,port,enableExpandoProps);
+            _db = _server.GetDatabase(dbName);
+
+        }
+        public MongoDatabase DB {
+            get {
+                return _db;
+            }
+        }
+
+        public MongoServer Server {
+            get {
+                return _server;
+            }
+        }
 
         IQueryable<S> IQueryProvider.CreateQuery<S>(Expression expression) {
             var query= new MongoQuery<S>(this, expression);
@@ -24,16 +46,36 @@ namespace NoRM.Linq {
         }
 
         S IQueryProvider.Execute<S>(Expression expression) {
-            return (S)this.Execute(expression);
+            return (S)this.Execute<S>(expression);
         }
 
         object IQueryProvider.Execute(Expression expression) {
             return this.Execute(expression);
         }
 
+        public IEnumerable<T> Execute<T>(Expression expression) {
+
+            //create the collection
+            MongoCollection<T> collection = new MongoCollection<T>(typeof(T).Name, this.DB, this.Server);
+
+            //pass off the to the translator, which will set the query stuff
+            var tranny = new MongoQueryTranslator<T>();
+            var qry = tranny.Translate(expression);
+
+            //execute
+            if (!String.IsNullOrEmpty(qry)) {
+                var fly = new Flyweight();
+                fly["$where"] = qry;
+                return collection.Find(fly);
+            }
+
+            return collection.Find();
+
+        }
+
         public object Execute(Expression expression) {
 
-           // var spec = MongoQueryTranslator.Translate(expression);
+            // var spec = MongoQueryTranslator.Translate(expression);
 
             //get the goods from the DB..
             //ICursor cursor;

@@ -6,7 +6,7 @@ using NoRM.BSON;
 
 namespace NoRM.Protocol.Messages
 {
-    internal class InsertMessage<T> : Message where T : class, new()
+    internal class InsertMessage<T> : Message 
     {
         protected T[] _elementsToInsert;
         public InsertMessage(MongoServer context, String collectionName, IEnumerable<T> itemsToInsert) :

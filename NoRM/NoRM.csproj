@@ -74,6 +74,7 @@
     <Compile Include="BSON\Flyweight.cs" />
     <Compile Include=" MongoConnection.cs" />
     <Compile Include="BSON\DbTypes\GridFile.cs" />
+    <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
     <Compile Include="Linq\MongoQuery.cs" />

@@ -7,7 +7,7 @@ using NoRM.BSON;
 
 namespace NoRM.Protocol
 {
-    internal class Message
+    public class Message
     {
         protected MongoOp _op = MongoOp.Message;
         protected MongoServer _context;

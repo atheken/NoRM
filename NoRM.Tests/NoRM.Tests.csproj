@@ -50,11 +50,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BSONSerializerTest.cs" />
+    <Compile Include="LinqTests.cs" />
     <Compile Include="MongoCollectionTest.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
     <Compile Include="MongoSearchQualifierTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WhereQualifierTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NoRM\NoRM.csproj">
