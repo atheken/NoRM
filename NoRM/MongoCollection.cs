@@ -11,7 +11,7 @@ using NoRM.Attributes;
 
 namespace NoRM
 {
-    public class MongoCollection<T>
+    public partial class MongoCollection<T>
     {
         //this will have a different instance for each concrete version of MongoCollection<T>
         private static bool? _updateable = null;
