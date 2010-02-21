@@ -576,8 +576,8 @@ namespace NoRM.BSON
                     return BSONSerializer.SerializeMember(index.ToString(), y);
                 }).SelectMany(h => h).ToArray();
 
-                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length)
-                    .Concat(memberBytes).ToArray();
+                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length + 1)
+                    .Concat(memberBytes).Concat(new byte[1]).ToArray();
             }
             //TODO: implement something for "Symbol"
             //TODO: implement non-scoped code handling.
