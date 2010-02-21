@@ -50,7 +50,7 @@ namespace NoRM.Protocol.Messages
             while (!stream.DataAvailable && timeout > 0)
             {
                 timeout--;
-                Thread.Sleep(1000);
+                Thread.Sleep(1);
             }
 
             if (conn.Available == 0)
@@ -58,9 +58,12 @@ namespace NoRM.Protocol.Messages
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
             }
 
+            
+            var reply = new ReplyMessage<T>(this._context, this._collection, new BinaryReader(new BufferedStream(stream)));                
+
             conn.ReturnToPool();
 
-            return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(new BufferedStream(stream)));
+            return reply;
 
         }
     }
