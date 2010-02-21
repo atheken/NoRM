@@ -1,7 +1,0 @@
-C:\@Projects\MongoSharp\System.Data.Mongo\obj\Debug\ResolveAssemblyReference.cache
-C:\@Projects\MongoSharp\System.Data.Mongo\bin\Debug\MongoSharp.Query.dll
-C:\@Projects\MongoSharp\System.Data.Mongo\bin\Debug\MongoSharp.Query.pdb
-C:\@Projects\MongoSharp\System.Data.Mongo\bin\Debug\BSONLib.dll
-C:\@Projects\MongoSharp\System.Data.Mongo\bin\Debug\BSONLib.pdb
-C:\@Projects\MongoSharp\System.Data.Mongo\obj\Debug\MongoSharp.Query.dll
-C:\@Projects\MongoSharp\System.Data.Mongo\obj\Debug\MongoSharp.Query.pdb
