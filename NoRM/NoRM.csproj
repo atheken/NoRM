@@ -74,6 +74,7 @@
     <Compile Include="BSON\Flyweight.cs" />
     <Compile Include=" MongoConnection.cs" />
     <Compile Include="BSON\DbTypes\GridFile.cs" />
+    <Compile Include="MongoConnectionPool.cs" />
     <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
@@ -98,7 +99,7 @@
     <Compile Include="Commands\Modifiers\IncrementOperation.cs" />
     <Compile Include="Commands\Modifiers\M.cs" />
     <Compile Include="MongoCollection.cs" />
-    <Compile Include="MongoServer.cs" />
+    <Compile Include="MongoContext.cs" />
     <Compile Include="MongoDatabase.cs" />
     <Compile Include="MongoException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

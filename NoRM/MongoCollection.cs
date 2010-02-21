@@ -12,7 +12,7 @@ namespace NoRM
     {
         private String _collectionName;
         private MongoDatabase _db;
-        private MongoServer _server;
+        private MongoContext _server;
 
         /// <summary>
         /// Represents a strongly-typed set of documents in the db.
@@ -20,7 +20,7 @@ namespace NoRM
         /// <param name="collectionName"></param>
         /// <param name="db"></param>
         /// <param name="context"></param>
-        public MongoCollection(String collectionName, MongoDatabase db, MongoServer server)
+        public MongoCollection(String collectionName, MongoDatabase db, MongoContext server)
         {
             this._db = db;
             this._server = server;

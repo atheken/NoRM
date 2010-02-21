@@ -14,7 +14,7 @@ using NoRM.Protocol.SystemMessages;
 
 namespace NoRM
 {
-    public class MongoServer
+    public class MongoContext
     {
         private static MD5 _md5 = MD5.Create();
         private String _serverName = "127.0.0.1";
@@ -179,19 +179,7 @@ namespace NoRM
 
         protected IPEndPoint _endPoint;
 
-        /// <summary>
-        /// Specify the host and the port to connect to for the mongo db.
-        /// </summary>
-        /// <param name="server">The server IP or hostname (127.0.0.1 is the default)</param>
-        /// <param name="port">The port on which mongo is running (27017 is the default)</param>
-        /// <param name="enableExpandoProps">Should requests to this database push/pull props from the DB that are not part of the specified object?</param>
-        public MongoServer(String server, int port, bool enableExpandoProps)
-        {
-            this.QueryTimeout = 30;
-            this._serverName = server;
-            this._serverPort = port;
-            this.EnableExpandoProperties = enableExpandoProps;
-        }
+
 
         /// <summary>
         /// Drop this database from the mongo server (be careful what you wish for!)
@@ -236,10 +224,26 @@ namespace NoRM
         /// <remarks>
         /// This also disabled Expando props for documents.
         /// </remarks>
-        public MongoServer()
-            : this("127.0.0.1", 27017, false)
+        public MongoContext()
+            : this(MongoConnection.DEFAULT_SERVER, MongoConnection.DEFAULT_PORT, false)
         {
 
+        }
+
+        /// <summary>
+        /// Specify the host and the port to connect to for the mongo db.
+        /// </summary>
+        /// <param name="server">The server IP or hostname (127.0.0.1 is the default)</param>
+        /// <param name="port">The port on which mongo is running (27017 is the default)</param>
+        /// <param name="enableExpandoProps">Should requests to this database push/pull props from the DB that are not part of the specified object?</param>
+        public MongoContext(String server, int port, bool enableExpandoProps)
+        {
+            this.QueryTimeout = 30;
+            this._serverName = server;
+            this._serverPort = port;
+            this.EnableExpandoProperties = enableExpandoProps;
+
+            MongoConnectionPool.Initialize();
         }
 
         /// <summary>
@@ -262,9 +266,9 @@ namespace NoRM
         /// Constructs a socket to the server.
         /// </summary>
         /// <returns></returns>
-        internal TcpClient ServerConnection()
+        internal MongoConnection ServerConnection()
         {
-            return new TcpClient(this._serverName, this._serverPort);
+            return MongoConnectionPool.GetConnection();
         }
 
         /// <summary>
@@ -272,10 +276,10 @@ namespace NoRM
         /// will be thrown.
         /// </summary>
         /// <returns></returns>
-        public bool Connect()
-        {
-            return ServerConnection().Connected;
-        }
+        //public bool Connect()
+        //{
+        //    return ServerConnection().Connected;
+        //}
 
         /// <summary>
         /// Returns a list of databases that already exist on this context.

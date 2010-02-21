@@ -14,16 +14,11 @@ namespace BSONHarness
         
         static void Main(string[] args)
         {
-            var server = new MongoServer();
-            server.Connect();
+            var server = new MongoContext();
+            //server.Connect();
 
             var s = server.ServerStatus();
 
-            var db = server.GetDatabase("test2");
-            db.GetCollection<Object>("inserts").Insert(new { f = "a" }, new { f = "b" }, new { f = "c" });
-
-            var f1 = db.GetCollection<Object>("inserts").Find(new { f = Q.In("a") }).ToArray();
-            
             InsertFindDeleteBenchmark(1);
             InsertFindDeleteBenchmark(100);
             InsertFindDeleteBenchmark(1000);
@@ -44,7 +39,7 @@ namespace BSONHarness
 
         private static void AuthenticateAConnection()
         {
-            var auth = new MongoServer().Authenticate("testing", "testing");
+            var auth = new MongoContext().Authenticate("testing", "testing");
         }
 
         /// <summary>
@@ -53,7 +48,7 @@ namespace BSONHarness
         /// <param name="count"></param>
         private static void InsertFindDeleteBenchmark(int count)
         {
-            MongoServer context = new MongoServer();
+            MongoContext context = new MongoContext();
             var db = context.GetDatabase("benchmark");
             db.DropCollection("test");
             var coll = db.GetCollection<GeneralDTO>("test");
