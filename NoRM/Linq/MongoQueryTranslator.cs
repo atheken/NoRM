@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Collections;
 
 namespace NoRM.Linq {
     public class MongoQueryTranslator<T>:ExpressionVisitor {
@@ -20,6 +22,11 @@ namespace NoRM.Linq {
 
         public string Translate(Expression exp) {
             this.sb = new StringBuilder();
+
+            //partial evaluator will help with converting system level calls
+            //to constant expressions
+            exp = PartialEvaluator.Eval(exp);
+
             this.Visit(exp);
             return sb.ToString();
         }
@@ -81,6 +88,11 @@ namespace NoRM.Linq {
                     case TypeCode.Boolean:
                         sb.Append(((bool)c.Value) ? 1 : 0);
                         break;
+                    case TypeCode.DateTime:
+                        sb.Append("new Date('");
+                        sb.Append(c.Value);
+                        sb.Append("')");
+                        break;
                     case TypeCode.String:
                         sb.Append("'");
                         sb.Append(c.Value);
@@ -102,7 +114,8 @@ namespace NoRM.Linq {
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
                 return m;
-            } else {
+            } else if (m.Method.DeclaringType == typeof(string)){
+
                 switch (m.Method.Name) {
                     case "StartsWith":
                         sb.Append("(");
@@ -119,7 +132,12 @@ namespace NoRM.Linq {
                         this.Visit(m.Arguments[0]);
                         sb.Append(")>0)");
                         return m;
-
+                    case "IndexOf":
+                        this.Visit(m.Object);
+                        sb.Append(".indexOf(");
+                        this.Visit(m.Arguments[0]);
+                        sb.Append(")");
+                        return m;
                     case "EndsWith":
                         sb.Append("(");
                         this.Visit(m.Object);
@@ -139,6 +157,11 @@ namespace NoRM.Linq {
                         return m;
 
                 }
+            } else if (m.Method.DeclaringType == typeof(DateTime)) {
+
+                switch (m.Method.Name) {
+
+                }
             }
 
             //for now...
@@ -146,13 +169,58 @@ namespace NoRM.Linq {
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m) {
+
+            var fullName = m.ToString().Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter) {
                 sb.Append("this." + m.Member.Name);
                 return m;
+            }else if (m.Member.DeclaringType == typeof(string)) {
+                switch (m.Member.Name) {
+                    case "Length":
+                        sb.Append("LEN(");
+                        this.Visit(m.Expression);
+                        sb.Append(")");
+                        return m;
+                }
+            } else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset)) {
+                
+                //this is a DateProperty hanging off the property - clip the last 2 elements
+                var fixedName = fullName.Skip(1).Take(fullName.Length - 2).ToArray();
+                var propName = String.Join(".", fixedName);
+
+                //now we get to do some tricky fun with javascript
+                switch (m.Member.Name) {
+                    case "Day":
+                        this.Visit(m.Expression);
+                        sb.Append(".getDate()");
+                        return m;
+                    case "Month":
+                        this.Visit(m.Expression);
+                        sb.Append(".getMonth()");
+                        return m;
+                    case "Year":
+                        this.Visit(m.Expression);
+                        sb.Append(".getYear()");
+                        return m;
+                    case "Hour":
+                        this.Visit(m.Expression);
+                        sb.Append(".getHours()");
+                        return m;
+                    case "Minute":
+                        this.Visit(m.Expression);
+                        sb.Append(".getMinutes()");
+                        return m;
+                    case "Second":
+                        this.Visit(m.Expression);
+                        sb.Append(".getSeconds()");
+                        return m;
+                    case "DayOfWeek":
+                        this.Visit(m.Expression);
+                        sb.Append(".getDay()");
+                        return m;
+                }
             } else {
-                //nested expression
-                //reference from the top level down
-                var fullName = m.ToString().Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
                 //don't want the first - that's the lambda thing
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
 
@@ -160,7 +228,12 @@ namespace NoRM.Linq {
                 sb.Append("this." + result);
 
                 return m;
+
             }
+            //if this is a property NOT on the object...
+            throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
+
         }
     }
+
 }

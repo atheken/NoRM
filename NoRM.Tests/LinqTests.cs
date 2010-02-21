@@ -46,6 +46,7 @@ namespace NoRM.Tests {
         public string Name { get; set; }
         public double Price { get; set; }
         public Supplier Supplier { get; set; }
+        public DateTime Available { get; set; }
         public Product() {
             Supplier = new Supplier();
         }
@@ -209,6 +210,25 @@ namespace NoRM.Tests {
             Assert.AreEqual(1, products.Count);
 
         }
+
+        [Test]
+        public void One_Products_Should_Be_Returned_When_IndexOf_X_Equal_2() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10 });
+            session.Add(new Product() { Name = "TestX4", Price = 22 });
+            session.Add(new Product() { Name = "TesXt5", Price = 33 });
+            session.Add(new Product() { Name = "TeXst3", Price = 10 });
+            session.Add(new Product() { Name = "TXest4", Price = 22 });
+
+            var products = session.Products.Where(x => x.Name.IndexOf("X") == 2).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
+
         [Test]
         public void One_Products_Should_Be_Returned_When_IsNullOrEmpty_With_EmptyString() {
 
@@ -244,5 +264,121 @@ namespace NoRM.Tests {
             Assert.AreEqual(1, products.Count);
 
         }
+
+        [Test]
+        public void One_Products_Should_Be_Returned_When_Available_GreaterThan_Today() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10, Available=DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1) });
+
+            var products = session.Products.Where(x => x.Available >DateTime.Now).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
+
+        [Test]
+        public void Three_Products_Should_Be_Returned_When_Available_LessThan_Today() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1) });
+
+            var products = session.Products.Where(x => x.Available < DateTime.Now).ToList();
+
+            Assert.AreEqual(3, products.Count);
+
+        }
+
+        [Test]
+        public void One_Products_Should_Be_Returned_When_Available_LessThan_Today_Plus1() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2) });
+
+            var products = session.Products.Where(x => x.Available > DateTime.Now.AddDays(1)).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
+
+        [Test]
+        public void One_Products_Should_Be_Returned_When_Available_Day_Is_Monday() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10, Available = DateTime.Now });
+            session.Add(new Product() { Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(1) });
+            session.Add(new Product() { Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(2) });
+            session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(3) });
+            session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(4) });
+            session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(5) });
+            session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(6) });
+
+            var products = session.Products.Where(x => x.Available.DayOfWeek==DayOfWeek.Monday).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
+        [Test]
+        public void One_Products_Should_Be_Returned_When_Available_Day_Is_Fifth() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10, Available = new DateTime(2000,2,5) });
+            session.Add(new Product() { Name = "Test4X", Price = 22, Available = new DateTime(2000,2, 6) });
+
+            var products = session.Products.Where(x => x.Available.Day==5).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
+
+        [Test]
+        public void One_Products_Should_Be_Returned_When_Available_Year_Is_2000() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5) });
+            session.Add(new Product() { Name = "Test4X", Price = 22, Available = new DateTime(2001, 2, 6) });
+
+            var products = session.Products.Where(x => x.Available.Year == 2000).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
+
+        [Test]
+        public void One_Products_Should_Be_Returned_When_Available_Month_Is_2() {
+
+            var session = new Session();
+            session.Drop<Product>();
+
+            session.Add(new Product() { Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5) });
+            session.Add(new Product() { Name = "Test4X", Price = 22, Available = new DateTime(2001, 3, 6) });
+
+            var products = session.Products.Where(x => x.Available.Month == 2).ToList();
+
+            Assert.AreEqual(1, products.Count);
+
+        }
+
     }
 }
