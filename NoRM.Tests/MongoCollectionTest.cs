@@ -11,6 +11,11 @@ namespace NoRM.Tests
     [Category("Hits MongoDB")]
     public class MongoCollectionTest
     {
+        public class MiniObject
+        {
+            public OID _id { get; set; }
+        }
+
         private MongoServer _server;
         private MongoDatabase _db;
 
@@ -34,11 +39,11 @@ namespace NoRM.Tests
             var server = new MongoServer();
             var testDB = server.GetDatabase("test");
             testDB.DropCollection("testObjects");
-            var testColl = testDB.GetCollection<Object>("testObjects");
-            var cache = new List<Object>();
+            var testColl = testDB.GetCollection<MiniObject>("testObjects");
+            var cache = new List<MiniObject>();
             for (var i = 0; i < 10; i++)
             {
-                cache.Add(new Object());
+                cache.Add(new MiniObject { _id = OID.NewOID() });
             }
 
             testColl.Insert(cache);
@@ -49,10 +54,10 @@ namespace NoRM.Tests
         [Test]
         public void Collection_Statistics_Returns()
         {
-            var coll = this._db.GetCollection<object>("stats_test");
+            var coll = this._db.GetCollection<MiniObject>("stats_test");
 
             //collections & dbs are lazily created - force it to happen.
-            coll.Insert(new object());
+            coll.Insert(new MiniObject());
 
             var stats = this._db.GetCollectionStatistics("stats_test");
             Assert.AreEqual(coll.FullyQualifiedName, stats.Ns);

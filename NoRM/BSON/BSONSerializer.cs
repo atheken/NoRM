@@ -43,7 +43,20 @@ namespace NoRM.BSON
         /// <summary>
         /// A list of the known properties for a type, and their types.
         /// </summary>
-        private static Dictionary<Type, Dictionary<String, Type>> _propertyTypes = new Dictionary<Type, Dictionary<string, Type>>();
+        private static Dictionary<Type, Dictionary<String, Type>> _propertyTypes =
+            new Dictionary<Type, Dictionary<string, Type>>();
+
+        /// <summary>
+        /// The names that map from CLR to Mongo. (key is CLR, value is Mongo)
+        /// </summary>
+        private static Dictionary<Type, Dictionary<String, String>> _mapTo =
+            new Dictionary<Type, Dictionary<string, string>>();
+
+        /// <summary>
+        /// The names that map from Mongo to CLR. (key is Mongo, value is CLR)
+        /// </summary>
+        private static Dictionary<Type, Dictionary<String, String>> _mapFrom =
+            new Dictionary<Type, Dictionary<string, string>>();
 
         /// <summary>
         /// delegates to setters for specific types.
@@ -86,6 +99,7 @@ namespace NoRM.BSON
                 }
 
                 //these can be serialized, but not deserialized.
+                BSONSerializer._allowedTypes.Add(typeof(Enum));
                 BSONSerializer._allowedTypes.Add(typeof(int));
                 BSONSerializer._allowedTypes.Add(typeof(double));
                 BSONSerializer._allowedTypes.Add(typeof(long));
@@ -118,6 +132,28 @@ namespace NoRM.BSON
         }
 
         /// <summary>
+        /// This gets the name for the property on the mongo document.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="CLRName"></param>
+        /// <returns></returns>
+        public static String GetMongoNameForPropertyName(this String CLRName, Type className)
+        {
+            return CLRName;
+        }
+
+        /// <summary>
+        /// This gets the name for the property on the object.
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="MongoName"></param>
+        /// <returns></returns>
+        public static String GetCLRNameForMongoName(this String MongoName, Type className)
+        {
+            return MongoName;
+        }
+
+        /// <summary>
         /// This is a helper method for the public CanBeSerialized that avoids infinite 
         /// recursion by tracking which types are already being checked and not checking them.
         /// </summary>
@@ -128,22 +164,30 @@ namespace NoRM.BSON
         {
             bool retval = true;
             //we want to check to see if this type can be serialized.
+
             if (!BSONSerializer._prohibittedTypes.Contains(t) &&
                 !BSONSerializer._allowedTypes.Contains(t))
             {
-                ///we only care about public properties on instances, not statics.
-                foreach (var pi in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                if (typeof(Enum).IsAssignableFrom(t))
                 {
-                    retval &= pi.CanRead;
-                    var propType = pi.PropertyType;
-
-                    //only do a check on a particular type once.
-                    if (!checkStack.Contains(propType))
+                    retval = true;
+                }
+                else
+                {
+                    ///we only care about public properties on instances, not statics.
+                    foreach (var pi in t.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                     {
-                        checkStack.Add(propType);
-                        if (!propType.IsValueType)
+                        retval &= pi.CanRead;
+                        var propType = pi.PropertyType;
+
+                        //only do a check on a particular type once.
+                        if (!checkStack.Contains(propType))
                         {
-                            retval &= BSONSerializer.CanBeSerialized(propType, checkStack);
+                            checkStack.Add(propType);
+                            if (!propType.IsValueType)
+                            {
+                                retval &= BSONSerializer.CanBeSerialized(propType, checkStack);
+                            }
                         }
                     }
                 }
@@ -275,7 +319,7 @@ namespace NoRM.BSON
                 {
                     foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                         .Where(y => y.GetIndexParameters().Count() == 0 && !y.GetCustomAttributes(true)
-                            .Any(f=>f is MongoIgnoreAttribute)))
+                            .Any(f => f is MongoIgnoreAttribute)))
                     {
                         BSONSerializer._setters[documentType][p.Name] = ReflectionHelpers.SetterMethod(p);
                     }
@@ -298,9 +342,12 @@ namespace NoRM.BSON
             {
                 BSONSerializer._getters[documentType] = new Dictionary<string, Func<object, object>>
                     (StringComparer.InvariantCultureIgnoreCase);
+
                 foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(y => y.GetIndexParameters().Count() == 0 && 
-                        !y.GetCustomAttributes(true).Any(f=>f is MongoIgnoreAttribute)))
+                    .Where(y => y.GetIndexParameters().Count() == 0 &&
+                        !y.GetCustomAttributes(true).Any(f => f is MongoIgnoreAttribute))
+                        .OrderBy(y => y.GetCustomAttributes(true)
+                            .Any(x => x is MongoIdentifierAttribute) ? 3 : y.Name == "_id" ? 2 : y.Name == "ID" ? 1 : 0))
                 {
                     BSONSerializer._getters[documentType][p.Name] = ReflectionHelpers.GetterMethod(p);
                 }
@@ -444,6 +491,13 @@ namespace NoRM.BSON
         /// <returns></returns>
         private static byte[] SerializeMember(String key, object value)
         {
+            var isEnum = (value is Enum);
+            Type enumType = null;
+            if (isEnum)
+            {
+                enumType = Enum.GetUnderlyingType(value.GetType());
+            }
+
             //type + name + data
             List<byte[]> retval = new List<byte[]>(4);
             retval.Add(new byte[0]);
@@ -453,27 +507,24 @@ namespace NoRM.BSON
 
 
             retval[0] = new byte[] { (byte)BSONTypes.Null };
-
-            retval[1] = Encoding.UTF8.GetBytes(key); //push the key into the retval;
-
-            retval[2] = new byte[1];//allocate a null between the key and the value.
-
-            retval[3] = new byte[0];
-            //this is where the magic occurs.
+            retval[1] = key.CStringBytes();
+            retval[2] = new byte[0];
+            //this is where the magic occurs
+            //HEED MY WARNING! ALWAYS test for NULL first, as other things below ASSUME that if it gets past here, it's NOT NULL!
             if (value == null)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Null };
-                retval[3] = new byte[0];
+                retval[2] = new byte[0];
             }
-            else if (value is int?)
+            else if (value is int || (isEnum && typeof(int).IsAssignableFrom(enumType)))
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Int32 };
-                retval[3] = BitConverter.GetBytes(((int?)value).Value);
+                retval[2] = BitConverter.GetBytes((int)value);
             }
-            else if (value is double?)
+            else if (value is double || (isEnum && typeof(double).IsAssignableFrom(enumType)))
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Double };
-                retval[3] = BitConverter.GetBytes((double)value);
+                retval[2] = BitConverter.GetBytes((double)value);
             }
             else if (value is String)
             {
@@ -481,7 +532,7 @@ namespace NoRM.BSON
                 //get bytes and append a null to the end.
 
                 var bytes = ((String)value).CStringBytes();
-                retval[3] = BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray();
+                retval[2] = BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray();
             }
             else if (value is Regex)
             {
@@ -500,13 +551,13 @@ namespace NoRM.BSON
                 if (rex.Options == RegexOptions.IgnorePatternWhitespace) options += "w";
                 if (rex.Options == RegexOptions.ExplicitCapture) options += "x";
 
-                retval[3] = Encoding.UTF8.GetBytes(pattern).Concat(new byte[1])
+                retval[2] = Encoding.UTF8.GetBytes(pattern).Concat(new byte[1])
                     .Concat(Encoding.UTF8.GetBytes(options)).Concat(new byte[1]).ToArray();
             }
-            else if (value is bool?)
+            else if (value is bool)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Boolean };
-                retval[3] = BitConverter.GetBytes((bool)value);
+                retval[2] = BitConverter.GetBytes((bool)value);
             }
             else if (value is byte[])
             {
@@ -519,9 +570,9 @@ namespace NoRM.BSON
                 binary.Add(theBytes);//add the bytes
                 binary[0] = BitConverter.GetBytes(binary.Sum(y => y.Length) - 1);//set the total binary size (after the subtype.. weird)
                 //not sure if this is correct.
-                retval[3] = binary.SelectMany(h => h).ToArray();
+                retval[2] = binary.SelectMany(h => h).ToArray();
             }
-            else if (value is Guid?)
+            else if (value is Guid)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Binary };
                 var binary = new List<byte[]>();
@@ -529,13 +580,13 @@ namespace NoRM.BSON
                 Guid? val = (Guid?)value;
                 binary.Add(new byte[] { (byte)3 });
                 binary.Add(val.Value.ToByteArray());
-                retval[3] = binary.SelectMany(y => y).ToArray();
+                retval[2] = binary.SelectMany(y => y).ToArray();
             }
             else if (value is OID)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.MongoOID };
                 var oid = (OID)value;
-                retval[3] = oid.Value;
+                retval[2] = oid.Value;
             }
             else if (value is DBReference)
             {
@@ -551,18 +602,20 @@ namespace NoRM.BSON
                 scopedCode.Add(new byte[4]);
                 scopedCode.Add((code.CodeString ?? "").CStringBytes());
                 scopedCode.Add(BSONSerializer.Serialize(code.Scope));
+                scopedCode.Add(new byte[1]);
                 scopedCode[0] = BitConverter.GetBytes(scopedCode.Sum(y => y.Length));
                 scopedCode[1] = BitConverter.GetBytes(scopedCode[2].Length);
+                retval[2] = scopedCode.SelectMany(y => y).ToArray();
             }
             else if (value is DateTime?)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.DateTime };
-                retval[3] = BitConverter.GetBytes((long)(((DateTime?)value).Value - EPOCH).TotalMilliseconds);
+                retval[2] = BitConverter.GetBytes((long)(((DateTime?)value).Value - EPOCH).TotalMilliseconds);
             }
-            else if (value is long?)
+            else if (value is long || (isEnum && typeof(long).IsAssignableFrom(enumType)))
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Int64 };
-                retval[3] = BitConverter.GetBytes((long)value);
+                retval[2] = BitConverter.GetBytes((long)value);
             }
             //handle arrays and the like.
             else if (value is IEnumerable)
@@ -576,7 +629,7 @@ namespace NoRM.BSON
                     return BSONSerializer.SerializeMember(index.ToString(), y);
                 }).SelectMany(h => h).ToArray();
 
-                retval[3] = BitConverter.GetBytes(4 + memberBytes.Length + 1)
+                retval[2] = BitConverter.GetBytes(4 + memberBytes.Length + 1)
                     .Concat(memberBytes).Concat(new byte[1]).ToArray();
             }
             //TODO: implement something for "Symbol"
@@ -584,7 +637,7 @@ namespace NoRM.BSON
             else
             {
                 retval[0] = new byte[] { (byte)BSONTypes.Object };
-                retval[3] = BSONSerializer.Serialize(value);
+                retval[2] = BSONSerializer.Serialize(value);
             }
 
             return retval.SelectMany(h => h).ToArray();
@@ -601,7 +654,7 @@ namespace NoRM.BSON
         /// <param name="stream"></param>
         /// <param name="outProps"></param>
         /// <returns></returns>
-        public static T Deserialize<T>(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps) 
+        public static T Deserialize<T>(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps)
         {
             return (T)BSONSerializer.Deserialize(stream, ref outProps, typeof(T));
         }
@@ -612,7 +665,7 @@ namespace NoRM.BSON
         /// <typeparam name="T"></typeparam>
         /// <param name="objectData"></param>
         /// <returns></returns>
-        public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Flyweight> outProps) 
+        public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Flyweight> outProps)
         {
             var ms = new MemoryStream();
             ms.Write(objectData, 0, objectData.Length);
@@ -644,7 +697,7 @@ namespace NoRM.BSON
             object retval = null;
             if (!BSONSerializer.CanBeDeserialized(returnType))
             {
-                throw new NotSupportedException("This type cannot be DESERIALIZED using the BSONSerializer");
+                throw new NotSupportedException("The type " + returnType.FullName + " cannot be DESERIALIZED using the BSONSerializer");
             }
 
             Flyweight extraProps = new Flyweight();
@@ -668,6 +721,7 @@ namespace NoRM.BSON
 
                 Object obj = null;
                 String key = Encoding.UTF8.GetString(keyStringBytes);
+                key = key.GetCLRNameForMongoName(returnType);
                 var propTypes = BSONSerializer.GetPropertyTypes(returnType);
 
                 Type propType;
@@ -731,14 +785,14 @@ namespace NoRM.BSON
             }
             if (t == BSONTypes.Int32)
             {
-                retval = BitConverter.ToInt32(objectData, 0);
+                retval = CastIntoEnumValueIfNeccessary(proptype, BitConverter.ToInt32(objectData, 0));
                 usedBytes = 4;
             }
             else if (t == BSONTypes.Double)
             {
                 retval = BitConverter.ToDouble(objectData, 0);
                 usedBytes = 8;
-                //handle FLOAT.
+                //TODO: handle FLOAT.
 
             }
             else if (t == BSONTypes.String)
@@ -803,7 +857,19 @@ namespace NoRM.BSON
             }
             else if (t == BSONTypes.ScopedCode)
             {
-                //TODO: deserialize scoped code.
+                int length = BitConverter.ToInt32(objectData, 0);
+                int codelength = BitConverter.ToInt32(objectData, 4);
+                var code = new ScopedCode();
+                if (codelength > 0)
+                {
+                    var stringBytes = objectData.Skip(8).Take(codelength - 1).ToArray();
+                    code.CodeString = Encoding.UTF8.GetString(stringBytes);
+                    code.Scope = BSONSerializer.Deserialize<Flyweight>(objectData.Skip(8 + codelength)
+                        .Take(length - (codelength + 9)).ToArray());
+                }
+
+                usedBytes = length;
+                retval = code;
             }
             else if (t == BSONTypes.DateTime)
             {
@@ -813,7 +879,7 @@ namespace NoRM.BSON
             }
             else if (t == BSONTypes.Int64)
             {
-                retval = BitConverter.ToInt64(objectData, 0);
+                retval = CastIntoEnumValueIfNeccessary(proptype, BitConverter.ToInt64(objectData, 0));
                 usedBytes = 8;
             }
             else if (t == BSONTypes.Array)
@@ -852,6 +918,23 @@ namespace NoRM.BSON
                 retval = outObj;
             }
 
+            return retval;
+        }
+
+        /// <summary>
+        /// It's possible that the integral type is an enum, if so, we want to make sure we cast it.
+        /// </summary>
+        /// <param name="proptype"></param>
+        /// <param name="retval"></param>
+        /// <returns></returns>
+        private static object CastIntoEnumValueIfNeccessary(Type proptype, object retval)
+        {
+            //this is definitely a nullable type, therefore:
+            var innerparam = proptype.GetGenericArguments().First();
+            if (innerparam.IsEnum)
+            {
+                retval = Enum.ToObject(innerparam, retval);
+            }
             return retval;
         }
         #endregion
