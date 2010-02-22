@@ -81,7 +81,6 @@
     <Compile Include="Linq\MongoQueryProvider.cs" />
     <Compile Include="Linq\MongoQueryTranslator.cs" />
     <Compile Include="Linq\TypeHelper.cs" />
-    <Compile Include="MongoCollectionLinq.cs" />
     <Compile Include="MongoConnection.cs" />
     <Compile Include="MongoServer.cs" />
     <Compile Include="Protocol\Messages\UpdateMessage.cs">
