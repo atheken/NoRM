@@ -46,7 +46,7 @@ namespace NoRM.Tests
         [Test]
         public void Check_Invalid_Server()
         {
-            var context = new MongoServer("localhost", 11111, false);
+            var context = new MongoServer("mongodb://localhost:11111");
 
            // Assert.Throws(typeof(SocketException), delegate { context.Connect(); });
         }

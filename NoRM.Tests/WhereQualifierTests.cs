@@ -18,8 +18,8 @@ namespace NoRM.Tests {
 
         [SetUp]
         public void TestFixture_Setup() {
-            _server = new MongoServer();
-            _db = _server.GetDatabase("TestSuiteDatabase");
+            _server = new MongoServer("mongodb://127.0.0.1/TestSuiteDatabase");
+            _db = _server.Database;
             DroppedCollectionResponse collResponse = _db.DropCollection("TestClasses");
             _coll = _db.GetCollection<TestClass>("TestClasses");
         }

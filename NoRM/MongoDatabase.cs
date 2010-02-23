@@ -12,16 +12,16 @@ namespace NoRM
     public class MongoDatabase
     {
         private String _dbName;
-        private MongoServer _server;
+        private IConnection _connection;
         /// <summary>
         /// A reference to the database found using the specified context.
         /// </summary>
         /// <param name="dbname"></param>
         /// <param name="context"></param>
-        public MongoDatabase(String dbname, MongoServer server)
+        public MongoDatabase(String dbname, IConnection connection)
         {
             this._dbName = dbname;
-            this._server = server;
+            _connection = connection;
             this.SizeOnDisk = 0.0;
         }
 
@@ -48,7 +48,7 @@ namespace NoRM
         /// <returns></returns>
         public MongoCollection<T> GetCollection<T>(string collectionName) where T : class, new()
         {
-            return new MongoCollection<T>(collectionName, this, this._server);
+            return new MongoCollection<T>(collectionName, this, _connection);
         }
 
 
@@ -63,7 +63,7 @@ namespace NoRM
         /// <returns></returns>
         public MongoCollection<T> GetCollection<T>() where T : class, new()
         {
-            return new MongoCollection<T>(typeof(T).Name, this, this._server);
+            return new MongoCollection<T>(typeof(T).Name, this, _connection);
         }
 
         /// <summary>

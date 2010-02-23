@@ -75,6 +75,11 @@
     <Compile Include="BSON\Flyweight.cs" />
     <Compile Include="BSON\DbTypes\GridFile.cs" />
     <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
+    <Compile Include="Connections\ConnectionProviderFactory.cs" />
+    <Compile Include="Connections\ConnectionStringBuilder.cs" />
+    <Compile Include="Connections\IConnection.cs" />
+    <Compile Include="Connections\IConnectionProvider.cs" />
+    <Compile Include="Connections\PooledConnectionProvider.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
     <Compile Include="Linq\MongoQuery.cs" />
@@ -82,6 +87,7 @@
     <Compile Include="Linq\MongoQueryTranslator.cs" />
     <Compile Include="Linq\PartialEvaluator.cs" />
     <Compile Include="Linq\TypeHelper.cs" />
+    <Compile Include="MongoAdmin.cs" />
     <Compile Include="MongoConnection.cs" />
     <Compile Include="MongoServer.cs" />
     <Compile Include="Protocol\Messages\UpdateMessage.cs">

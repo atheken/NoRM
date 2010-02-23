@@ -15,10 +15,7 @@ namespace NoRM.Protocol.Messages
         /// Processes a response stream.
         /// </summary>
         /// <param name="reply"></param>
-        internal ReplyMessage(MongoServer context,
-            String fullyQualifiedCollestionName, BinaryReader reply) :
-            base(context, fullyQualifiedCollestionName)
-        {
+        internal ReplyMessage(IConnection connection, String fullyQualifiedCollestionName, BinaryReader reply) : base(connection, fullyQualifiedCollestionName){
             this._messageLength = reply.ReadInt32();
             this._requestID = reply.ReadInt32();
             this._responseID = reply.ReadInt32();
@@ -48,7 +45,7 @@ namespace NoRM.Protocol.Messages
                         IDictionary<WeakReference, Flyweight> outProps = new Dictionary<WeakReference, Flyweight>(0);
                         var obj = BSONSerializer.Deserialize<T>(bin, ref outProps);
                         this._results.Add(obj);
-                        if (this._context.EnableExpandoProperties)
+                        if (this._connection.EnableExpandoProperties)
                         {
                             ExpandoProps.SetFlyWeightObjects(outProps);
                         }

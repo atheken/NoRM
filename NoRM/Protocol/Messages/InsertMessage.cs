@@ -9,8 +9,7 @@ namespace NoRM.Protocol.Messages
     internal class InsertMessage<T> : Message 
     {
         protected T[] _elementsToInsert;
-        public InsertMessage(MongoServer context, String collectionName, IEnumerable<T> itemsToInsert) :
-            base(context, collectionName)
+        public InsertMessage(IConnection connection, String collectionName, IEnumerable<T> itemsToInsert) : base(connection, collectionName)
         {
             this._elementsToInsert = itemsToInsert.ToArray();
             this._op = MongoOp.Insert;
@@ -41,9 +40,7 @@ namespace NoRM.Protocol.Messages
 
             var bytes = message.SelectMany(y => y).ToArray();
 
-            var conn = this._context.ServerConnection();
-            
-            conn.GetStream().Write(bytes, 0, size);
+            _connection.GetStream().Write(bytes, 0, size);
 
         }
     }

@@ -18,7 +18,7 @@ namespace NoRM
 
         private String _collectionName;
         private MongoDatabase _db;
-        private MongoServer _server;
+        private IConnection _connection;
 
         /// <summary>
         /// Represents a strongly-typed set of documents in the db.
@@ -26,10 +26,10 @@ namespace NoRM
         /// <param name="collectionName"></param>
         /// <param name="db"></param>
         /// <param name="context"></param>
-        public MongoCollection(String collectionName, MongoDatabase db, MongoServer server)
+        public MongoCollection(String collectionName, MongoDatabase db, IConnection connection)
         {
             this._db = db;
-            this._server = server;
+            _connection = connection;
             this._collectionName = collectionName;
         }
 
@@ -41,7 +41,7 @@ namespace NoRM
         /// <returns></returns>
         public MongoCollection<U> GetChildCollection<U>(String collectionName) where U : class, new()
         {
-            return new MongoCollection<U>(this._collectionName + "." + collectionName, this._db, this._server);
+            return new MongoCollection<U>(this._collectionName + "." + collectionName, this._db, _connection);
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace NoRM
                 ops |= UpdateOption.Upsert;
             }
 
-            var um = new UpdateMessage<X, U>(this._server, this.FullyQualifiedName, ops, matchDocument, valueDocument);
+            var um = new UpdateMessage<X, U>(_connection, this.FullyQualifiedName, ops, matchDocument, valueDocument);
             um.Execute();
         }
 
@@ -210,7 +210,7 @@ namespace NoRM
         /// <param name="template"></param>
         public void Delete<U>(U template)
         {
-            var dm = new DeleteMessage<U>(this._server, this.FullyQualifiedName, template);
+            var dm = new DeleteMessage<U>(_connection, this.FullyQualifiedName, template);
             dm.Execute();
         }
 
@@ -284,7 +284,7 @@ namespace NoRM
 
         public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName)
         {
-            var qm = new QueryMessage<T, U>(this._server, fullyQualifiedName);
+            var qm = new QueryMessage<T, U>(_connection, fullyQualifiedName);
             qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
@@ -314,8 +314,7 @@ namespace NoRM
                 throw new NotSupportedException("This collection does not accept insertions, this is due to the fact that the collection's type " + typeof(T).FullName +
                     " does not specify an identifier property");
             }
-            var insertMessage = new InsertMessage<T>
-                (this._server, this.FullyQualifiedName, documentsToInsert);
+            var insertMessage = new InsertMessage<T>(_connection, this.FullyQualifiedName, documentsToInsert);
             insertMessage.Execute();
         }
 

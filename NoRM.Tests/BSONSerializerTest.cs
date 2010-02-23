@@ -268,6 +268,7 @@ namespace NoRM.Tests
 
         [Test]
         [Category("Benchmark")]
+        [Ignore]
         public void Serialization_Speed_Test()
         {
             /*

@@ -10,7 +10,7 @@ namespace NoRM.Protocol
     public class Message
     {
         protected MongoOp _op = MongoOp.Message;
-        protected MongoServer _context;
+        protected IConnection _connection;
         protected String _collection;
         protected int _requestID;
         protected int _responseID;
@@ -21,9 +21,9 @@ namespace NoRM.Protocol
         /// </summary>
         /// <param name="context"></param>
         /// <param name="fullyQualifiedConnection"></param>
-        internal Message(MongoServer context, String fullyQualifiedCollName)
+        internal Message(IConnection connection, String fullyQualifiedCollName)
         {
-            this._context = context;
+            this._connection = connection;
             this._collection = fullyQualifiedCollName;
         }
     }

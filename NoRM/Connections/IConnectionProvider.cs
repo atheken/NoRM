@@ -23,8 +23,15 @@ namespace NoRM
                 return true;
             }
 
-            return new MongoCollection<GetNonceResponse>("$cmd", new MongoDatabase("admin", connection), connection)
-                       .FindOne(new {getnonce = true}).OK == 1;            
+            var nonce = new MongoCollection<GetNonceResponse>("$cmd", new MongoDatabase("admin", connection), connection)
+                .FindOne(new {getnonce = true});
+
+            if (nonce.OK == 1)
+            {
+                //todo 
+            }
+
+            return false;
         }    
     }
 }

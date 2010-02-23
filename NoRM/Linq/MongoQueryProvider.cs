@@ -9,15 +9,14 @@ using NoRM.BSON;
 
 namespace NoRM.Linq {
     public class MongoQueryProvider : IQueryProvider {
-        private MongoDatabase _db;
-        private MongoServer _server;
-        
-        public MongoQueryProvider(string dbName) : this(dbName, "127.0.0.1", 27017, false) { }
-        public MongoQueryProvider(string dbName, string server, int port, bool enableExpandoProps) {
-
-            _server = new MongoServer(server,port,enableExpandoProps);
-            _db = _server.GetDatabase(dbName);
-
+        private readonly MongoDatabase _db;
+        private readonly MongoServer _server;
+        private readonly IConnection _connection;
+                
+        public MongoQueryProvider(string connectionString) {
+            _server = new MongoServer(connectionString); //todo when is it safe to dispose of this?
+            _db = _server.Database;
+            _connection = _server.ServerConnection();
         }
         public MongoDatabase DB {
             get {
@@ -29,6 +28,10 @@ namespace NoRM.Linq {
             get {
                 return _server;
             }
+        }
+        public IConnection Connection
+        {
+            get { return _connection; }
         }
 
         IQueryable<S> IQueryProvider.CreateQuery<S>(Expression expression) {
@@ -56,7 +59,7 @@ namespace NoRM.Linq {
         public IEnumerable<T> Execute<T>(Expression expression) {
 
             //create the collection
-            MongoCollection<T> collection = new MongoCollection<T>(typeof(T).Name, this.DB, this.Server);
+            MongoCollection<T> collection = new MongoCollection<T>(typeof(T).Name, this.DB, _connection);
 
             //pass off the to the translator, which will set the query stuff
             var tranny = new MongoQueryTranslator<T>();

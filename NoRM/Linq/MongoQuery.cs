@@ -22,7 +22,7 @@ namespace NoRM.Linq {
             }
             this.provider = provider;
             this.expression = Expression.Constant(this);
-            _collection = new MongoCollection<T>(typeof(T).Name, provider.DB, provider.Server);
+            _collection = new MongoCollection<T>(typeof(T).Name, provider.DB, provider.Connection);
             _query = new Flyweight();
         }
 
@@ -38,7 +38,7 @@ namespace NoRM.Linq {
             }
             this.provider = provider;
             this.expression = expression;
-            _collection = new MongoCollection<T>(typeof(T).Name, provider.DB, provider.Server);
+            _collection = new MongoCollection<T>(typeof(T).Name, provider.DB, provider.Connection);
         }
 
         Expression IQueryable.Expression {
