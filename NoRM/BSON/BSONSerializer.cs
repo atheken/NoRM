@@ -472,115 +472,6 @@ namespace NoRM.BSON
         }
 
         /// <summary>
-        /// Converts a document into its BSON byte-form.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <exception cref="NotSupportedException">Throws a not supported exception 
-        /// when the T is not a "serializable" type.</exception>
-        /// <param name="document"></param>
-        /// <param name="includeExpandoProps">true indicates that Flyweight associated with this object
-        /// should be included in serialization. 
-        /// False means that it will be ignored.</param>
-        /// <returns></returns>
-        public static byte[] SerializeFast<T>(T document, bool includeExpandoProps)
-        {
-
-            Flyweight props = null;
-            if (includeExpandoProps)
-            {
-                props = ExpandoProps.FlyweightForObject(document);
-            }
-            if (!BSONSerializer.CanBeSerialized(typeof(T)) ||
-                (props != null && props.AllProperties().Any(y => y.Value != null &&
-                !BSONSerializer.CanBeSerialized(y.Value.GetType()))))
-            {
-                throw new NotSupportedException("This type cannot be SERIALIZED using the BSONSerializer");
-            }
-
-            var memoryStream = new MemoryStream();
-            var binaryWriter = new BinaryWriter(memoryStream);
-            
-            Dictionary<String, object> values = null;
-
-            if (document is Flyweight)
-            {
-                var flyweight = (document as Flyweight);
-                values = flyweight.AllProperties().ToDictionary(y => y.PropertyName, k => k.Value);
-            }
-            else
-            {
-                values = BSONSerializer.GettersForType(document.GetType())
-                    .ToDictionary(y => y.Key, h => h.Value.Invoke(document));
-                if (props != null && includeExpandoProps)
-                {
-                    foreach (var p in props.AllProperties())
-                    {
-                        values.Add(p.PropertyName, p.Value);
-                    }
-                }
-            }
-            foreach (var member in values)
-            {
-
-                var obj = member.Value;
-                var name = member.Key;
-
-                //"special" case.
-                if (obj is ModifierCommand)
-                {
-                    var o = obj as ModifierCommand;
-                    //set type of member.
-                    binaryWriter.Write((byte)BSONTypes.Object);
-                    //set name of member
-                    binaryWriter.Write(o.CommandName.CStringBytes());
-
-                    //construct member bytes
-                    var modValue = new List<byte[]>();
-                    modValue.Add(new byte[4]);//allocate size.
-                    modValue.Add(BSONSerializer.SerializeMemberFast(name, o.ValueForCommand));//then serialize the member.
-                    modValue.Add(new byte[1]);//null terminate this member.
-                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));
-
-                    //add this to the main retval.
-                    binaryWriter.Write(modValue.SelectMany(y => y).ToArray());
-
-                }
-                else if (obj is QualifierCommand)
-                {
-                    //wow, this is insane, the idiom for "query" commands is exactly opposite of that for "update" commands.
-                    var o = obj as QualifierCommand;
-                    //set type of member.
-                    binaryWriter.Write((byte)BSONTypes.Object);
-                    //set name of member
-                    binaryWriter.Write(name.CStringBytes());
-
-                    //construct member bytes
-                    var modValue = new List<byte[]>();
-                    modValue.Add(new byte[4]);//allocate size.
-                    modValue.Add(BSONSerializer.SerializeMemberFast(o.CommandName, o.ValueForCommand));//then serialize the member.
-                    modValue.Add(new byte[1]);//null terminate this member.
-                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));//add this to the main retval.
-
-                    binaryWriter.Write(modValue.SelectMany(y => y).ToArray());
-                    
-                }
-                else
-                {
-                    SerializeMemberFast(name, obj, binaryWriter);
-                }
-            }
-
-            binaryWriter.Write(new byte[1]);//null terminate the retval;
-            var retval = memoryStream.ToArray();
-            var returnBytes = new List<Byte>();
-            returnBytes.AddRange(BitConverter.GetBytes(retval.Length + 4));
-            returnBytes.AddRange(retval);
-
-            return returnBytes.ToArray();
-        }
-
-
-        /// <summary>
         /// Serialize an object to bytes, ignoring the expando properties.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -589,17 +480,6 @@ namespace NoRM.BSON
         public static byte[] Serialize<T>(T objectToSerialize)
         {
             return BSONSerializer.Serialize<T>(objectToSerialize, false);
-        }
-
-        /// <summary>
-        /// Serialize an object to bytes, ignoring the expando properties.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="objectToSerialize"></param>
-        /// <returns></returns>
-        public static byte[] SerializeFast<T>(T objectToSerialize)
-        {
-            return BSONSerializer.SerializeFast<T>(objectToSerialize, false);
         }
 
         /// <summary>

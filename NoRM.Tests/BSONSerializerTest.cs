@@ -293,7 +293,7 @@ namespace NoRM.Tests
                                        Pi = 3.14,
                                        Nester = new GeneralDTO { Title = "Bob", AnInt = 42 }
                                    };
-                    var obj1Bytes = BSONSerializer.SerializeFast(obj1, false);
+                    var obj1Bytes = BSONSerializer.Serialize(obj1, false);
                     var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
                 }
                 stopWatch.Stop();

@@ -116,7 +116,7 @@ namespace NoRM.Protocol.Messages
 
             if (this._query != null)
             {
-                messageBytes.Add(BSONSerializer.SerializeFast(this._query));
+                messageBytes.Add(BSONSerializer.Serialize(this._query));
             }
             #endregion
 
