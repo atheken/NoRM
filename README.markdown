@@ -1,10 +1,12 @@
-h3. NoRM is a .Net library for connecting to the document-oriented database, MongoDB.
+_NoRM is a .Net library for connecting to the document-oriented database, MongoDB._
 
-NoRM will provide:
+_NoRM will provide:_
+
 * Strongly-typed interaction when querying and updating collections.
 * Improved interface to send common Mongo commands (creating indices, getting all the existing dbs and collections, etc.).
 * Ultra-fast de/serialization of BSON to .Net CLR types and back.
 * LINQ-to-Mongo
+* more?
 
 NoRM works in Mono & .Net
 
