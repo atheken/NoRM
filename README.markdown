@@ -12,7 +12,7 @@ _NoRM will provide:_
 * NoRM will under both Mono & .Net
 * more?
 
-If you have any questions or ideas, please use the [Google Group](http://groups.google.com/group/norm-mongodb) to convey them.
+If you have any questions or ideas, please use the [Google Group](http://groups.google.com/group/norm-mongodb) to convey them (Hint: this will also be a good way to be notified when we get close to a release)
 
 It would also be useful to read what we have on the [wiki](http://wiki.github.com/atheken/NoRM/) (we know it's sparse, workin' on that, too)
 
@@ -20,22 +20,3 @@ It would also be useful to read what we have on the [wiki](http://wiki.github.co
 * The NoRM.dll can connect to MongoDB using a trusted connection, this is the workhorse of NoRM, and all you really need to get started.
 * The NoRM.Tests.dll are nunit tests for NoRM, We are much more likely to accept patches that have corresponding tests.
 * BSONHarness is just a nice entry point to see how the NoRM library is functioning, this will probably go away soon, since you can do most of this via tests.
-
-<table border=0 style="background-color: #fff; padding: 5px;" cellspacing=0>
-  <tr><td>
-  <img src="http://groups.google.com/intl/en/images/logos/groups_logo_sm.gif"
-         height=30 width=140 alt="Google Groups">
-  </td></tr>
-  <tr><td style="padding-left: 5px">
-  <b>Subscribe to NoRM mongodb</b>
-  </td></tr>
-  <form action="http://groups.google.com/group/norm-mongodb/boxsubscribe">
-  <tr><td style="padding-left: 5px;">
-  Email: <input type=text name=email>
-  <input type=submit name="sub" value="Subscribe">
-  </td></tr>
-</form>
-<tr><td align=right>
-  <a href="http://groups.google.com/group/norm-mongodb">Visit this group</a>
-</td></tr>
-</table>
