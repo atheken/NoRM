@@ -239,16 +239,7 @@ namespace NoRM.Tests
         {
             /*
              
-            3365
-            4281
-            3310
-            3122
-            3239
-            3416
-            3207
-            3376
-            3364
-            3156             
+            5832 - 4598 - 4653 - 4879 - 4516 - 4657 - 4346 - 4601 - 4349 - 4498            
              
             */
 
@@ -269,7 +260,7 @@ namespace NoRM.Tests
                                        Pi = 3.14,
                                        Nester = new GeneralDTO { Title = "Bob", AnInt = 42 }
                                    };
-                    var obj1Bytes = BSONSerializer.Serialize(obj1);
+                    var obj1Bytes = BSONSerializer.SerializeFast(obj1, false);
                     var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(obj1Bytes);
                 }
                 stopWatch.Stop();
@@ -278,5 +269,6 @@ namespace NoRM.Tests
             }
         }
 
+        
     }
 }

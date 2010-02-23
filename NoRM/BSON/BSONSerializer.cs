@@ -425,6 +425,115 @@ namespace NoRM.BSON
         }
 
         /// <summary>
+        /// Converts a document into its BSON byte-form.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <exception cref="NotSupportedException">Throws a not supported exception 
+        /// when the T is not a "serializable" type.</exception>
+        /// <param name="document"></param>
+        /// <param name="includeExpandoProps">true indicates that Flyweight associated with this object
+        /// should be included in serialization. 
+        /// False means that it will be ignored.</param>
+        /// <returns></returns>
+        public static byte[] SerializeFast<T>(T document, bool includeExpandoProps)
+        {
+
+            Flyweight props = null;
+            if (includeExpandoProps)
+            {
+                props = ExpandoProps.FlyweightForObject(document);
+            }
+            if (!BSONSerializer.CanBeSerialized(typeof(T)) ||
+                (props != null && props.AllProperties().Any(y => y.Value != null &&
+                !BSONSerializer.CanBeSerialized(y.Value.GetType()))))
+            {
+                throw new NotSupportedException("This type cannot be SERIALIZED using the BSONSerializer");
+            }
+
+            var memoryStream = new MemoryStream();
+            var binaryWriter = new BinaryWriter(memoryStream);
+            
+            Dictionary<String, object> values = null;
+
+            if (document is Flyweight)
+            {
+                var flyweight = (document as Flyweight);
+                values = flyweight.AllProperties().ToDictionary(y => y.PropertyName, k => k.Value);
+            }
+            else
+            {
+                values = BSONSerializer.GettersForType(document.GetType())
+                    .ToDictionary(y => y.Key, h => h.Value.Invoke(document));
+                if (props != null && includeExpandoProps)
+                {
+                    foreach (var p in props.AllProperties())
+                    {
+                        values.Add(p.PropertyName, p.Value);
+                    }
+                }
+            }
+            foreach (var member in values)
+            {
+
+                var obj = member.Value;
+                var name = member.Key;
+
+                //"special" case.
+                if (obj is ModifierCommand)
+                {
+                    var o = obj as ModifierCommand;
+                    //set type of member.
+                    binaryWriter.Write((byte)BSONTypes.Object);
+                    //set name of member
+                    binaryWriter.Write(o.CommandName.CStringBytes());
+
+                    //construct member bytes
+                    var modValue = new List<byte[]>();
+                    modValue.Add(new byte[4]);//allocate size.
+                    modValue.Add(BSONSerializer.SerializeMemberFast(name, o.ValueForCommand));//then serialize the member.
+                    modValue.Add(new byte[1]);//null terminate this member.
+                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));
+
+                    //add this to the main retval.
+                    binaryWriter.Write(modValue.SelectMany(y => y).ToArray());
+
+                }
+                else if (obj is QualifierCommand)
+                {
+                    //wow, this is insane, the idiom for "query" commands is exactly opposite of that for "update" commands.
+                    var o = obj as QualifierCommand;
+                    //set type of member.
+                    binaryWriter.Write((byte)BSONTypes.Object);
+                    //set name of member
+                    binaryWriter.Write(name.CStringBytes());
+
+                    //construct member bytes
+                    var modValue = new List<byte[]>();
+                    modValue.Add(new byte[4]);//allocate size.
+                    modValue.Add(BSONSerializer.SerializeMemberFast(o.CommandName, o.ValueForCommand));//then serialize the member.
+                    modValue.Add(new byte[1]);//null terminate this member.
+                    modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));//add this to the main retval.
+
+                    binaryWriter.Write(modValue.SelectMany(y => y).ToArray());
+                    
+                }
+                else
+                {
+                    SerializeMemberFast(name, obj, binaryWriter);
+                }
+            }
+
+            binaryWriter.Write(new byte[1]);//null terminate the retval;
+            var retval = memoryStream.ToArray();
+            var returnBytes = new List<Byte>();
+            returnBytes.AddRange(BitConverter.GetBytes(retval.Length + 4));
+            returnBytes.AddRange(retval);
+
+            return returnBytes.ToArray();
+        }
+
+
+        /// <summary>
         /// Serialize an object to bytes, ignoring the expando properties.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -433,6 +542,17 @@ namespace NoRM.BSON
         public static byte[] Serialize<T>(T objectToSerialize)
         {
             return BSONSerializer.Serialize<T>(objectToSerialize, false);
+        }
+
+        /// <summary>
+        /// Serialize an object to bytes, ignoring the expando properties.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectToSerialize"></param>
+        /// <returns></returns>
+        public static byte[] SerializeFast<T>(T objectToSerialize)
+        {
+            return BSONSerializer.SerializeFast<T>(objectToSerialize, false);
         }
 
         /// <summary>
@@ -589,6 +709,250 @@ namespace NoRM.BSON
 
             return retval.SelectMany(h => h).ToArray();
         }
+
+        /// <summary>
+        /// Convert an object to a byte array, this should really be broken out into
+        /// separate methods so that we don't have to do so much casting.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static byte[] SerializeMemberFast(String key, object value)
+        {
+            var memoryStream = new MemoryStream();
+            var binaryWriter = new BinaryWriter(memoryStream);
+
+            WriteBSONType(value, binaryWriter);
+            binaryWriter.Write(Encoding.UTF8.GetBytes(key));
+            binaryWriter.Write(new byte[1]);
+            WriteBSONValue(value, binaryWriter);
+           
+            return memoryStream.ToArray();
+        }
+
+        /// <summary>
+        /// Convert an object to a byte array, this should really be broken out into
+        /// separate methods so that we don't have to do so much casting.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static void SerializeMemberFast(String key, object value, BinaryWriter binaryWriter)
+        {
+            WriteBSONType(value, binaryWriter);
+            binaryWriter.Write(key);
+            binaryWriter.Write(new byte[1]);
+            WriteBSONValue(value, binaryWriter);
+        }
+
+        private static void WriteBSONType<T>(T value, BinaryWriter writer)
+        {
+            //this is where the magic occurs.
+            if (value == null)
+            {
+                writer.Write((byte) BSONTypes.Null);
+                return;
+            }
+            else if (value is int?)
+            {
+                writer.Write((byte)BSONTypes.Int32);
+                return;
+            }
+            else if (value is double?)
+            {
+                writer.Write((byte)BSONTypes.Double);
+                return;
+            }
+            else if (value is String)
+            {
+               writer.Write((byte)BSONTypes.String);
+               return;
+            }
+            else if (value is Regex)
+            {
+                writer.Write((byte) BSONTypes.Regex);
+                return;
+            }
+            else if (value is bool?)
+            {
+                writer.Write((byte) BSONTypes.Boolean);
+                return;
+            }
+            else if (value is byte[])
+            {
+                writer.Write((byte)BSONTypes.Binary);
+                return;
+            }
+            else if (value is Guid?)
+            {
+                writer.Write((byte)BSONTypes.Binary);
+                return;
+            }
+            else if (value is OID)
+            {
+               writer.Write((byte)BSONTypes.MongoOID);
+               return;
+            }
+            else if (value is DBReference)
+            {
+                writer.Write((byte) BSONTypes.Reference);
+                return;
+            }
+            else if (value is ScopedCode)
+            {
+                writer.Write((byte) BSONTypes.ScopedCode);
+                return;
+            }
+            else if (value is DateTime?)
+            {
+                writer.Write((byte) BSONTypes.DateTime);
+                return;
+            }
+            else if (value is long?)
+            {
+                writer.Write((byte) BSONTypes.Int64);
+                return;
+            }
+            //handle arrays and the like.
+            else if (value is IEnumerable)
+            {
+                writer.Write((byte) BSONTypes.Array);
+                return;
+            }
+            //TODO: implement something for "Symbol"
+            //TODO: implement non-scoped code handling.
+
+            writer.Write((byte)BSONTypes.Object);
+        }
+
+        private static void WriteBSONValue(object value, BinaryWriter writer)
+        {
+            //this is where the magic occurs.
+            if (value == null)
+            {
+                writer.Write( new byte[0]);
+                return;
+            }
+            else if (value is int?)
+            {
+                writer.Write( ((int?)value).Value);
+                return;
+            }
+            else if (value is double?)
+            {
+
+                writer.Write((double)value);
+                return;
+            }
+            else if (value is String)
+            {
+                ((String)value).CStringBytes(writer);
+                return;
+            }
+            else if (value is Regex)
+            {
+                var rex = (Regex)value;
+                var pattern = rex.ToString();
+                var options = "";
+                //compiled option can't be set on deserialized regex, therefore - no good can come of this.
+                if (rex.Options == RegexOptions.ECMAScript) options += "e";
+                if (rex.Options == RegexOptions.IgnoreCase) options += "i";
+                if (rex.Options == RegexOptions.CultureInvariant) options += "l";
+                if (rex.Options == RegexOptions.Multiline) options += "m";
+                if (rex.Options == RegexOptions.Singleline) options += "s";
+                //all .net regex are unicode regex, therefore:
+                options += "u";
+                if (rex.Options == RegexOptions.IgnorePatternWhitespace) options += "w";
+                if (rex.Options == RegexOptions.ExplicitCapture) options += "x";
+
+                writer.Write(Encoding.UTF8.GetBytes(pattern).Concat(new byte[1]).ToArray());
+                writer.Write(Encoding.UTF8.GetBytes(options).Concat(new byte[1]).ToArray());
+                return;
+            }
+            else if (value is bool?)
+            {
+                writer.Write((bool)value);
+                return;
+            }
+            else if (value is byte[])
+            {
+                //change to write directly to weiter
+                var binary = new List<byte[]>();
+                binary.Add(new byte[0]);//do NOT allocate space for the size -- this is different than most BSON cases.
+                binary.Add(new byte[] { (byte)2 });//describe the binary
+                var theBytes = (byte[])value;
+                binary.Add(BitConverter.GetBytes(theBytes.Length));//describe the number of bytes.
+                binary.Add(theBytes);//add the bytes
+                binary[0] = BitConverter.GetBytes(binary.Sum(y => y.Length) - 1);//set the total binary size (after the subtype.. weird)
+                //not sure if this is correct.
+                writer.Write( binary.SelectMany(h => h).ToArray());
+                return;
+            }
+            else if (value is Guid?)
+            {
+                var binary = new List<byte[]>();
+                binary.Add(BitConverter.GetBytes(16));
+                Guid? val = (Guid?)value;
+                binary.Add(new byte[] { (byte)3 });
+                binary.Add(val.Value.ToByteArray());
+                writer.Write( binary.SelectMany(y => y).ToArray());
+                return;
+            }
+            else if (value is OID)
+            {
+                writer.Write( ((OID) value).Value);
+                return;
+            }
+            else if (value is DBReference)
+            {
+                //TODO: serialize document reference.
+                return;
+            }
+            else if (value is ScopedCode)
+            {
+                var code = value as ScopedCode;
+                var scopedCode = new List<byte[]>();
+                scopedCode.Add(new byte[4]);
+                scopedCode.Add(new byte[4]);
+                scopedCode.Add((code.CodeString ?? "").CStringBytes());
+                scopedCode.Add(BSONSerializer.Serialize(code.Scope));
+                scopedCode[0] = BitConverter.GetBytes(scopedCode.Sum(y => y.Length));
+                scopedCode[1] = BitConverter.GetBytes(scopedCode[2].Length);
+
+                writer.Write( scopedCode.SelectMany(h => h).ToArray());
+                return;
+            }
+            else if (value is DateTime?)
+            {
+                writer.Write( BitConverter.GetBytes((long)(((DateTime?)value).Value - EPOCH).TotalMilliseconds));
+                return;
+            }
+            else if (value is long?)
+            {
+                writer.Write( BitConverter.GetBytes((long)value));
+                return;
+            }
+            //handle arrays and the like.
+            else if (value is IEnumerable)
+            {
+                int index = -1;
+                var o = value as IEnumerable;
+                var memberBytes = o.OfType<Object>().Select(y =>
+                {
+                    index++;
+                    return BSONSerializer.SerializeMember(index.ToString(), y);
+                }).SelectMany(h => h).ToArray();
+
+                writer.Write( BitConverter.GetBytes(4 + memberBytes.Length + 1)
+                    .Concat(memberBytes).Concat(new byte[1]).ToArray());
+                return;
+            }
+            //TODO: implement something for "Symbol"
+            //TODO: implement non-scoped code handling.
+            
+            writer.Write( BSONSerializer.Serialize(value));
+        }
+
 
         #endregion
 
@@ -864,6 +1228,19 @@ namespace NoRM.BSON
         public static byte[] CStringBytes(this String stringToEncode)
         {
             return Encoding.UTF8.GetBytes(stringToEncode).Concat(new byte[1]).ToArray();
+        }
+
+        /// <summary>
+        /// Encodes a string to UTF-8 bytes and adds a null byte to the end.
+        /// </summary>
+        /// <param name="stringToEncode"></param>
+        /// <returns></returns>
+        public static void CStringBytes(this String stringToEncode, BinaryWriter binaryWriter)
+        {
+            var bytes = Encoding.UTF8.GetBytes(stringToEncode);
+            binaryWriter.Write(bytes.Length+ 1);
+            binaryWriter.Write(bytes);
+            binaryWriter.Write(new byte[1]);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace NoRM.Protocol.Messages
             message.Add(Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray());
             foreach (var obj in this._elementsToInsert)
             {
-                message.Add(BSONSerializer.Serialize(obj));
+                message.Add(BSONSerializer.SerializeFast(obj));
             }
 
             var size = message.Sum(y => y.Length);
