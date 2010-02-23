@@ -12,9 +12,9 @@ _NoRM will provide:_
 * NoRM will under both Mono & .Net
 * more?
 
-If you have any questions or ideas, please use the [Google Group]http://groups.google.com/group/norm-mongodb to convey them.
+If you have any questions or ideas, please use the [Google Group](http://groups.google.com/group/norm-mongodb) to convey them.
 
-It would also be useful to read what we have on the [wiki]http://wiki.github.com/atheken/NoRM/ (we know it's sparse, workin' on that, too)
+It would also be useful to read what we have on the [wiki](http://wiki.github.com/atheken/NoRM/) (we know it's sparse, workin' on that, too)
 
 
 * The NoRM.dll can connect to MongoDB using a trusted connection, this is the workhorse of NoRM, and all you really need to get started.
