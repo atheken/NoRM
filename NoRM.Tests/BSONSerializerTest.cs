@@ -12,6 +12,21 @@ namespace NoRM.Tests
     [Category("In Memory Only")]
     public class BSONSerializerTest
     {
+        
+        protected enum Flags32
+        {
+            FlagNone = 0,
+            FlagOn = 1,
+            FlagOff = 2
+        }
+
+        protected enum Flags64 : long
+        {
+            FlagNone = 0,
+            FlagOn = 1,
+            FlagOff = 2
+        }
+
         protected class GeneralDTO
         {
             public double? Pi { get; set; }
@@ -24,9 +39,27 @@ namespace NoRM.Tests
             public DateTime? ADateTime { get; set; }
             public GeneralDTO Nester { get; set; }
             public ScopedCode Code {get;set;}
+            public Flags32? Flags32 { get; set; }
+            public Flags64? Flags64 { get; set; }
 
             [MongoIgnore]
             public int IgnoredProperty { get; set; }
+        }
+
+        [Test]
+        public void Serialization_Of_Enum_Is_Not_Lossy()
+        {
+            var obj1 = new GeneralDTO{ Flags32 = Flags32.FlagOn, Flags64 = Flags64.FlagOff };
+            var obj2 = new GeneralDTO();
+
+            var hydratedObj1 = BSONSerializer.Deserialize<GeneralDTO>(BSONSerializer.Serialize(obj1));
+            var hydratedObj2 = BSONSerializer.Deserialize<GeneralDTO>(BSONSerializer.Serialize(obj2));
+
+            Assert.AreEqual(obj1.Flags32, hydratedObj1.Flags32);
+            Assert.AreEqual(null, hydratedObj2.Flags32);
+
+            Assert.AreEqual(obj1.Flags64, hydratedObj1.Flags64);
+            Assert.AreEqual(null, hydratedObj2.Flags64);
         }
 
         [Test]

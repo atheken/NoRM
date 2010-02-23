@@ -39,7 +39,7 @@ namespace NoRM.Tests
             var dbName = "test"+Guid.NewGuid().ToString().Substring(0,5);
             var db = this._context.GetDatabase(dbName);
             //the db may not exist until we insert into it.
-            db.GetCollection<Object>(dbName).Insert(new {Title=dbName});
+            db.GetCollection<MiniObject>(dbName).Insert(new MiniObject());
 
             Assert.IsTrue((this._context.DropDatabase(dbName).OK == 1d));
         }

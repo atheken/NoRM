@@ -5,9 +5,15 @@ using System.Text;
 using NUnit.Framework;
 using NoRM.Protocol.SystemMessages.Responses;
 using NoRM.BSON;
+using NoRM.BSON.DbTypes;
 
 namespace NoRM.Tests
 {
+    public class MiniObject
+    {
+        public OID ID { get; set; }
+    }
+
     [TestFixture]
     [Category("Hits MongoDB")]
     public class MongoDatabaseTest
@@ -42,7 +48,7 @@ namespace NoRM.Tests
             var context = new MongoServer();
             var db = context.GetDatabase("test");
             var collName = "testInsertCollection";
-            db.GetCollection<object>(collName).Insert(new { Title = "TestInsert" });
+            db.GetCollection<MiniObject>(collName).Insert(new MiniObject());
 
             var results = db.DropCollection(collName);
 
@@ -83,10 +89,10 @@ namespace NoRM.Tests
         public void Validate_Collection()
         {
             String collName = "validColl";
-            var testColl = this._db.GetCollection<Object>(collName);
+            var testColl = this._db.GetCollection<MiniObject>(collName);
 
             //must insert something before the collection will exist.
-            testColl.Insert(new Object());
+            testColl.Insert(new MiniObject());
 
             var response = this._db.ValidateCollection(collName, false);
 

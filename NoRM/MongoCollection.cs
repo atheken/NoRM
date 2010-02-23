@@ -11,7 +11,7 @@ using NoRM.Attributes;
 
 namespace NoRM
 {
-    public class MongoCollection<T>
+    public partial class MongoCollection<T>
     {
         //this will have a different instance for each concrete version of MongoCollection<T>
         private static bool? _updateable = null;
@@ -309,6 +309,11 @@ namespace NoRM
         /// <param name="documentsToUpsert"></param>
         public void Insert(IEnumerable<T> documentsToInsert)
         {
+            if (!this.Updateable)
+            {
+                throw new NotSupportedException("This collection does not accept insertions, this is due to the fact that the collection's type " + typeof(T).FullName +
+                    " does not specify an identifier property");
+            }
             var insertMessage = new InsertMessage<T>
                 (this._server, this.FullyQualifiedName, documentsToInsert);
             insertMessage.Execute();

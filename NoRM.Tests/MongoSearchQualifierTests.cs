@@ -5,12 +5,18 @@ using System.Text;
 using NUnit.Framework;
 using NoRM.Protocol.SystemMessages.Responses;
 using NoRM.BSON;
+using NoRM.Attributes;
 
 namespace NoRM.Tests
 {
 
     public class TestClass
     {
+        public TestClass(){
+            this.TestClassID = Guid.NewGuid();
+        }
+        [MongoIdentifier]
+        public Guid? TestClassID {get;set;}
         public double? ADouble { get; set; }
         public string AString { get; set; }
         public int? AInteger { get; set; }

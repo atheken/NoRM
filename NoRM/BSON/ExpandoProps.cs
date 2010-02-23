@@ -12,20 +12,20 @@ namespace NoRM.BSON
     public static class ExpandoProps
     {
         private static Dictionary<WeakReference, Flyweight> _expandoProps = new Dictionary<WeakReference, Flyweight>(0);
-        private static ReaderWriterLockSlim _dictionaryLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+        private static ReaderWriterLock _dictionaryLock = new ReaderWriterLock();
         private static String _lockToken = "LOCK_THREAD";
         private static Thread _scrubExpandos;
 
         public static Flyweight FlyweightForObject<T>(T document)
         {
             Flyweight retval = null;
-            ExpandoProps._dictionaryLock.EnterReadLock();
+            ExpandoProps._dictionaryLock.AcquireReaderLock(30000);
             var p = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)document);
             if (p.Value != null)
             {
                 retval = p.Value;
             }
-            ExpandoProps._dictionaryLock.ExitReadLock();
+            ExpandoProps._dictionaryLock.ReleaseReaderLock();
             return retval;
         }
 
@@ -48,12 +48,12 @@ namespace NoRM.BSON
                         {
                             while (true)
                             {
-                                ExpandoProps._dictionaryLock.EnterWriteLock();
+                                ExpandoProps._dictionaryLock.AcquireWriterLock(30000);
                                 //trim the dictionary of anything where the object has been collected.
                                 ExpandoProps._expandoProps = new Dictionary<WeakReference, Flyweight>(
                                                         ExpandoProps._expandoProps.Where(y => y.Key.IsAlive)
                                     .ToDictionary(j => j.Key, k => k.Value));
-                                ExpandoProps._dictionaryLock.ExitWriteLock();
+                                ExpandoProps._dictionaryLock.ReleaseWriterLock();
 
                                 //wait 15 seconds before attempting to clear again.
                                 Thread.Sleep(15000);
@@ -68,12 +68,12 @@ namespace NoRM.BSON
             }
             #endregion
             
-            ExpandoProps._dictionaryLock.EnterWriteLock();
+            ExpandoProps._dictionaryLock.AcquireWriterLock(30000);
             foreach (var a in props)
             {
                 ExpandoProps._expandoProps[a.Key] = a.Value;
             }
-            ExpandoProps._dictionaryLock.ExitWriteLock();
+            ExpandoProps._dictionaryLock.ReleaseWriterLock();
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace NoRM.BSON
         /// <param name="property"></param>
         public static void Set<T>(this IFlyweight obj, String propertyName, T property)
         {
-            ExpandoProps._dictionaryLock.EnterWriteLock();
+            ExpandoProps._dictionaryLock.AcquireWriterLock(30000);
             var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
 
             if (dict.Key == null)
@@ -94,7 +94,7 @@ namespace NoRM.BSON
                 ExpandoProps._expandoProps[reference] = new Flyweight();
             }
             ExpandoProps._expandoProps[dict.Key][propertyName] = property;
-            ExpandoProps._dictionaryLock.ExitWriteLock();
+            ExpandoProps._dictionaryLock.ReleaseLock();
         }
 
         /// <summary>
@@ -106,10 +106,10 @@ namespace NoRM.BSON
         public static bool DeleteProperty(this IFlyweight obj, String propertyName)
         {
             bool retval = false;
-            ExpandoProps._dictionaryLock.EnterWriteLock();
+            ExpandoProps._dictionaryLock.AcquireWriterLock(30000);
             var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
             dict.Value.DeleteProperty(propertyName);
-            ExpandoProps._dictionaryLock.ExitWriteLock();
+            ExpandoProps._dictionaryLock.ReleaseWriterLock();
             return retval;
         }
 
@@ -117,13 +117,13 @@ namespace NoRM.BSON
         {
             var retval = Enumerable.Empty<ExpandoProperty>();
             
-            ExpandoProps._dictionaryLock.EnterReadLock();
+            ExpandoProps._dictionaryLock.AcquireReaderLock(30000);
             var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
             if (dict.Key != null && dict.Value != null)
             {
                 retval = dict.Value.AllProperties().ToArray();
             }
-            ExpandoProps._dictionaryLock.ExitReadLock();
+            ExpandoProps._dictionaryLock.ReleaseReaderLock();
             return retval;
         }
 
@@ -138,14 +138,14 @@ namespace NoRM.BSON
         {
             T retval = null;
 
-            ExpandoProps._dictionaryLock.EnterReadLock();
+            ExpandoProps._dictionaryLock.AcquireReaderLock(30000);
             var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
             if (dict.Key != null && dict.Value != null)
             {
                 var value = dict.Value.Get<T>(propertyName);
             }
 
-            ExpandoProps._dictionaryLock.ExitReadLock();
+            ExpandoProps._dictionaryLock.ReleaseReaderLock();
             return retval;
         }
 

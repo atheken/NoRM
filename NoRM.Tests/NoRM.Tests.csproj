@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BSONSerializerTest.cs" />
+    <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />
     <Compile Include="MongoCollectionTest.cs" />
     <Compile Include="MongoContextTest.cs" />
