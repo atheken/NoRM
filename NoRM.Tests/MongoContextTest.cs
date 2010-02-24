@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using System.Net.Sockets;
-
+/*
 namespace NoRM.Tests
 {
     [TestFixture]
@@ -76,3 +76,4 @@ namespace NoRM.Tests
         }
     }
 }
+*/

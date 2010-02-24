@@ -4,7 +4,7 @@ using System.Linq;
 using NUnit.Framework;
 using NoRM.BSON;
 using NoRM.BSON.DbTypes;
-
+/*
 namespace NoRM.Tests
 {
     [TestFixture]
@@ -65,3 +65,4 @@ namespace NoRM.Tests
         }
     }
 }
+*/

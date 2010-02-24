@@ -6,7 +6,7 @@ using NUnit.Framework;
 using NoRM.Protocol.SystemMessages.Responses;
 using NoRM.BSON;
 using NoRM.BSON.DbTypes;
-
+/*
 namespace NoRM.Tests
 {
     public class MiniObject
@@ -24,14 +24,19 @@ namespace NoRM.Tests
         [TestFixtureSetUp]
         public void SetUpDBTests()
         {
-            var server = new Mongo();
+            var database = "test" + Guid.NewGuid().ToString().Substring(0, 5);
+            var server = new Mongo("mongodb://localhost/" + database);
             this._server = server;
-            this._db = server.GetDatabase("test" + Guid.NewGuid().ToString().Substring(0, 5));
+            this._db = server.Database;
         }
         [TestFixtureTearDown]
         public void TearDown()
         {
-            this._server.DropDatabase(this._db.DatabaseName);
+            using (var admin = new MongoAdmin("mongodb://localhost/" + _db.DatabaseName))
+            {
+                admin.DropDatabase();
+            }                        
+            _server.Dispose();
         }
 
         [Test]
@@ -102,3 +107,4 @@ namespace NoRM.Tests
 
     }
 }
+*/
