@@ -25,20 +25,17 @@ namespace NoRM.Tests
     public class MongoSearchQualifierTests : IDisposable
     {
         private readonly MongoCollection<TestClass> _coll;
-        private readonly MongoDatabase _db;
         private readonly Mongo _server;
 
         public MongoSearchQualifierTests()
         {
-            _server = new Mongo("mongodb://localhost/TestSuiteDatabase?pooling=false");
-            _db = _server.Database;
-            _coll = _db.GetCollection<TestClass>("TestClasses");
+            _server = new Mongo("mongodb://localhost/TestSuiteDatabase?pooling=false");            
+            _coll = _server.GetCollection<TestClass>("TestClasses");
         }
-
 
         public void Dispose()
         {
-            _db.DropCollection("TestClasses");
+            _server.Database.DropCollection("TestClasses");
             using (var admin = new MongoAdmin("mongodb://localhost/TestSuiteDatabase?pooling=false"))
             {
                 admin.DropDatabase();
