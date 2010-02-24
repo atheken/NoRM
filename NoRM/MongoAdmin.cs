@@ -13,6 +13,7 @@ namespace NoRM
         private readonly MongoDatabase _database;
         private readonly IConnection _connection;
         
+        
         public MongoAdmin() : this("mongodb://127.0.0.1:27017") { }        
         public MongoAdmin(string connectionString)
         {            
@@ -62,7 +63,8 @@ namespace NoRM
                 .FindOne(new {repairDatabase = 1d, preserveClonedFilesOnFailure, backupOriginalFiles});
             return result != null && result.OK == 1.0;
         }
-
+        
+                
         public GenericCommandResponse KillOperation(double operationId)
         {
             AssertConnectedToAdmin();

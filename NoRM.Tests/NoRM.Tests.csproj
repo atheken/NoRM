@@ -55,11 +55,14 @@
   <ItemGroup>
     <Compile Include="BSONSerializerTest.cs" />
     <Compile Include="ConnectionStringBuilderTests.cs" />
+    <Compile Include="FakeObject.cs" />
     <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />
+    <Compile Include="MongoAdminTests.cs" />
     <Compile Include="MongoCollectionTest.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
+    <Compile Include="MongoFixture.cs" />
     <Compile Include="MongoSearchQualifierTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WhereQualifierTests.cs" />

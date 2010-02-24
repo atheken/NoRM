@@ -139,8 +139,7 @@ namespace NoRM
             {
                 sb.AppendFormat("{0}/{1}/", server.Host, server.Port);
             }
-            sb.Append(Pooled);
-            sb.Append(PoolSize);
+            sb.AppendFormat("/{0}/{1}/{2}", Database, Pooled, PoolSize);
             return sb.ToString();
         }
         
@@ -170,6 +169,7 @@ namespace NoRM
             Pooled = pooled;
         }
 
+        //todo this and BuildCoreConnectionString really need test coverage
         public override bool Equals(object obj)
         {
             var left = obj as ConnectionStringBuilder;
