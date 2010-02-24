@@ -25,7 +25,7 @@
             new QueryMessage<GenericCommandResponse, object>(_connection, _collection)
                          {
                              NumberToTake = 1,
-                             Query = new {reseterror = 1d},
+                             Query = new { getlasterror = 1d },
                          }.Execute();
         }
     }

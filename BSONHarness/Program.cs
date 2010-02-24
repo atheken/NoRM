@@ -16,7 +16,7 @@ namespace BSONHarness
         {
             using (var mongo = new Mongo("mongodb://localhost/test?pooling=false"))
             {
-                var collection = mongo.Database.GetCollection<User>();
+                var collection = mongo.GetCollection<User>();
                 collection.Insert(new User
                 {
                     Name = "goku2",

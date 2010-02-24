@@ -2,6 +2,8 @@
 
 namespace NoRM
 {
+    using Protocol.SystemMessages.Responses;
+
     public class Mongo : IDisposable
     {
         private readonly IConnectionProvider _connectionProvider;
@@ -41,6 +43,12 @@ namespace NoRM
         public MongoCollection<T> GetCollection<T>(string collectionName) where T : class, new()
         {
             return _database.GetCollection<T>(collectionName);
+        }
+       
+        public LastErrorResponse LastError()
+        {
+            return _database.GetCollection<LastErrorResponse>("$cmd")
+                    .FindOne(new { getlasterror = 1d });
         }
 
         public void Dispose()
