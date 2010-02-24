@@ -7,7 +7,7 @@ namespace NoRM
 
     public interface IConnectionProvider
     {
-        IConnection Open();
+        IConnection Open(string options);
         void Close(IConnection connection);
         ConnectionStringBuilder ConnectionString{ get;}
     }
@@ -15,7 +15,7 @@ namespace NoRM
     //this base class will eventually serve a purpose
     public abstract class ConnectionProvider : IConnectionProvider
     {
-        public abstract IConnection Open();
+        public abstract IConnection Open(string options);
         public abstract void Close(IConnection connection);
         public abstract ConnectionStringBuilder ConnectionString{ get;}    
                 

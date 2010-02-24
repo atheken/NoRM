@@ -30,13 +30,18 @@ namespace NoRM
             }            
         }
 
-        public override IConnection Open()
+        public override IConnection Open(string options)
         {
             if (!_tracker.WaitOne(TIMEOUT))
             {
                 throw new TimeoutException();
             }
-            return _idlePool.Dequeue();
+            var connection = _idlePool.Dequeue();
+            if (!string.IsNullOrEmpty(options))
+            {
+                connection.LoadOptions(options);
+            }
+            return connection;
         }
 
         public override void Close(IConnection connection)
@@ -56,6 +61,7 @@ namespace NoRM
         }
         private void EnqueueIdle(IConnection connection)
         {
+            connection.ResetOptions();
             _idlePool.Enqueue(connection);
             _tracker.Release();
         }

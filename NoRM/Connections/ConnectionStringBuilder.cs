@@ -4,18 +4,20 @@ namespace NoRM
     using System.Collections.Generic;
     using System.Text;
 
-    public class ConnectionStringBuilder
+    public class ConnectionStringBuilder : IOptionsContainer
     {
-        private readonly IDictionary<string, Action<string, ConnectionStringBuilder>> _optionsHandler = new Dictionary<string, Action<string, ConnectionStringBuilder>>
+        private static readonly IDictionary<string, Action<string, IOptionsContainer>> _optionsHandler = new Dictionary<string, Action<string, IOptionsContainer>>
               {
-                  {"strict", (v, b) => b.StrictMode = bool.Parse(v)},
-                  {"querytimeout", (v, b) => b.QueryTimeout = int.Parse(v)},
-                  {"expando", (v, b) => b.EnableExpandoProperties = bool.Parse(v)},
-              };
+                  {"strict", (v, b) => b.SetStrictMode(bool.Parse(v))},
+                  {"querytimeout", (v, b) => b.SetQueryTimeout(int.Parse(v))},
+                  {"expando", (v, b) => b.SetEnableExpandoProperties(bool.Parse(v))},
+                  {"pooling", (v, b) => b.SetPooled(bool.Parse(v))},
+                  {"poolsize", (v, b) => b.SetPoolSize(int.Parse(v))},
+              };            
         private const int DEFAULT_PORT = 27017;
         private const string DEFAULT_DATABASE = "admin";
         private const string PROTOCOL = "mongodb://";
-
+        
         private IList<Server> _servers;
         public IList<Server> Servers
         {
@@ -26,7 +28,11 @@ namespace NoRM
         public string Database{ get; private set; }
         public int QueryTimeout { get; private set; }
         public bool EnableExpandoProperties { get; private set; }
-        public bool StrictMode{ get; private set; }
+        public bool StrictMode{ get; private set; }    
+        public bool Pooled{ get; private set;}   
+        public int PoolSize{ get; private set;}
+        
+        private string _coreConnectionString;
         
         private ConnectionStringBuilder(){}
         
@@ -45,14 +51,18 @@ namespace NoRM
                                   EnableExpandoProperties = false,
                                   StrictMode = true,
                               };
-            builder.BuildAuthentication(sb)
+            var coreBuilder = new StringBuilder();
+            builder.BuildAuthentication(sb, coreBuilder)
                 .BuildDatabase(sb)
-                .BuildServerList(sb)
-                .BuildOptions(options);
+                .BuildServerList(sb);
+
+            BuildOptions(builder, options);
+
+            builder._coreConnectionString = builder.BuildCoreConnectionString();                         
             return builder;            
         }
 
-        private ConnectionStringBuilder BuildAuthentication(StringBuilder sb)
+        private ConnectionStringBuilder BuildAuthentication(StringBuilder sb, StringBuilder coreBuilder)
         {
             var connectionString = sb.ToString();
             var separator = connectionString.IndexOf('@');
@@ -63,7 +73,7 @@ namespace NoRM
                 throw new MongoException("Invalid connection string: authentication should be in the form of username:password");
             }
             UserName = parts[0];
-            Password = parts[1];
+            Password = parts[1];            
             sb.Remove(0, separator+1);
             return this;           
         }
@@ -82,7 +92,7 @@ namespace NoRM
             }
             return this;
         }
-        private ConnectionStringBuilder BuildServerList(StringBuilder sb)
+        private void BuildServerList(StringBuilder sb)
         {
             var connectionString = sb.ToString();
             var servers = connectionString.Split(new[]{','}, StringSplitOptions.RemoveEmptyEntries);
@@ -101,10 +111,12 @@ namespace NoRM
                              });
             }
             _servers = list.AsReadOnly();
-            return this;
+            return;
         }
-        private void BuildOptions(string options)
+        
+        internal static void BuildOptions(IOptionsContainer container, string options)
         {
+            if (string.IsNullOrEmpty(options)) { return; }
             //don't like how I did this
             var parts = options.Split(new[] {'&'}, StringSplitOptions.RemoveEmptyEntries);
             foreach(var part in parts)
@@ -114,15 +126,57 @@ namespace NoRM
                 {
                     throw new MongoException("Invalid connection option: " + part);
                 }
-
-                _optionsHandler[kvp[0].ToLower()](kvp[1], this);
+                _optionsHandler[kvp[0].ToLower()](kvp[1], container);
             }
+        }
+        private string BuildCoreConnectionString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendFormat("{0}/{1}/", UserName ?? " ", Password ?? " ");
+            foreach(var server in Servers)
+            {
+                sb.AppendFormat("{0}/{1}/", server.Host, server.Port);
+            }
+            sb.Append(Pooled);
+            sb.Append(PoolSize);
+            return sb.ToString();
         }
         
         public class Server
         {
             public string Host{get; set;}
             public int Port{get; set;}
+        }
+        public void SetQueryTimeout(int timeout)
+        {
+            QueryTimeout = timeout;
+        }
+        public void SetEnableExpandoProperties(bool enabled)
+        {
+            EnableExpandoProperties = enabled;
+        }
+        public void SetStrictMode(bool strict)
+        {
+            StrictMode = strict;
+        }
+        public void SetPoolSize(int size)
+        {
+            PoolSize = size;
+        }
+        public void SetPooled(bool pooled)
+        {
+            Pooled = pooled;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var left = obj as ConnectionStringBuilder;
+            if (left == null) { return false; }
+            return string.Compare(left._coreConnectionString, _coreConnectionString, true) == 0;
+        }
+        public override int GetHashCode()
+        {
+            return _coreConnectionString.GetHashCode();
         }
     }
 }
