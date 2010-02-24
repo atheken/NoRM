@@ -50,6 +50,8 @@ namespace NoRM
                                   QueryTimeout = 30,
                                   EnableExpandoProperties = false,
                                   StrictMode = true,
+                                  Pooled =  true,
+                                  PoolSize = 25,
                               };
             var coreBuilder = new StringBuilder();
             builder.BuildAuthentication(sb, coreBuilder)
