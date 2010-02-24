@@ -6,22 +6,28 @@ namespace NoRM
 
     public class ConnectionStringBuilder
     {
+        private readonly IDictionary<string, Action<string, ConnectionStringBuilder>> _optionsHandler = new Dictionary<string, Action<string, ConnectionStringBuilder>>
+              {
+                  {"strict", (v, b) => b.StrictMode = bool.Parse(v)},
+                  {"querytimeout", (v, b) => b.QueryTimeout = int.Parse(v)},
+                  {"expando", (v, b) => b.EnableExpandoProperties = bool.Parse(v)},
+              };
         private const int DEFAULT_PORT = 27017;
         private const string DEFAULT_DATABASE = "admin";
         private const string PROTOCOL = "mongodb://";
 
-        private IList<Server> _servers;        
+        private IList<Server> _servers;
         public IList<Server> Servers
         {
             get { return _servers; }
-        }
-        
+        }        
         public string UserName{ get; private set;}        
         public string Password{ get; private set; }        
         public string Database{ get; private set; }
-        public int QueryTimeout { get { return 30; } }//todo make configurable
-        public bool EnableExpandoProperties { get { return false; } }//todo make configurable
-
+        public int QueryTimeout { get; private set; }
+        public bool EnableExpandoProperties { get; private set; }
+        public bool StrictMode{ get; private set; }
+        
         private ConnectionStringBuilder(){}
         
         public static ConnectionStringBuilder Create(string connectionString)
@@ -30,11 +36,19 @@ namespace NoRM
             {
                 throw new MongoException("Invalid connection string: the protocol must be mongodb://");
             }
-            var sb = new StringBuilder(connectionString.Substring(PROTOCOL.Length));
-            var builder = new ConnectionStringBuilder();
+            var parts = connectionString.Split(new[]{'?'}, StringSplitOptions.RemoveEmptyEntries);
+            var options = parts.Length == 2 ? parts[1] : null;
+            var sb = new StringBuilder(parts[0].Substring(PROTOCOL.Length));
+            var builder = new ConnectionStringBuilder
+                              {
+                                  QueryTimeout = 30,
+                                  EnableExpandoProperties = false,
+                                  StrictMode = true,
+                              };
             builder.BuildAuthentication(sb)
-                   .BuildDatabase(sb)
-                   .BuildServerList(sb);
+                .BuildDatabase(sb)
+                .BuildServerList(sb)
+                .BuildOptions(options);
             return builder;            
         }
 
@@ -68,7 +82,7 @@ namespace NoRM
             }
             return this;
         }
-        private void BuildServerList(StringBuilder sb)
+        private ConnectionStringBuilder BuildServerList(StringBuilder sb)
         {
             var connectionString = sb.ToString();
             var servers = connectionString.Split(new[]{','}, StringSplitOptions.RemoveEmptyEntries);
@@ -87,6 +101,22 @@ namespace NoRM
                              });
             }
             _servers = list.AsReadOnly();
+            return this;
+        }
+        private void BuildOptions(string options)
+        {
+            //don't like how I did this
+            var parts = options.Split(new[] {'&'}, StringSplitOptions.RemoveEmptyEntries);
+            foreach(var part in parts)
+            {
+                var kvp = part.Split(new[] {'='}, StringSplitOptions.RemoveEmptyEntries);
+                if (kvp.Length != 2)
+                {
+                    throw new MongoException("Invalid connection option: " + part);
+                }
+
+                _optionsHandler[kvp[0].ToLower()](kvp[1], this);
+            }
         }
         
         public class Server

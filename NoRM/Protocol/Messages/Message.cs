@@ -1,30 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net.Sockets;
-using NoRM.BSON;
-
-namespace NoRM.Protocol
+﻿namespace NoRM.Protocol
 {
+    using SystemMessages.Responses;
+    using Messages;
+
     public class Message
     {
         protected MongoOp _op = MongoOp.Message;
         protected IConnection _connection;
-        protected String _collection;
+        protected string _collection;
         protected int _requestID;
         protected int _responseID;
         protected int _messageLength;
 
-        /// <summary>
-        /// provides of messages
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="fullyQualifiedConnection"></param>
-        internal Message(IConnection connection, String fullyQualifiedCollName)
+
+        protected Message(IConnection connection, string fullyQualifiedCollName)
         {
-            this._connection = connection;
-            this._collection = fullyQualifiedCollName;
+            _connection = connection;
+            _collection = fullyQualifiedCollName;
+        }
+
+        protected void AssertHasNotError()
+        {
+            new QueryMessage<GenericCommandResponse, object>(_connection, _collection)
+                         {
+                             NumberToTake = 1,
+                             Query = new {reseterror = 1d},
+                         }.Execute();
         }
     }
 }

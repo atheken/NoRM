@@ -18,7 +18,6 @@ namespace NoRM
         /// Creates a context that will connect to 127.0.0.1:27017 (MongoDB on the default port).
         /// </summary>        
         public MongoServer() : this("mongodb://127.0.0.1:27017"){}
-
         /// <summary>
         /// Specify the host and the port to connect to for the mongo db.
         /// </summary>

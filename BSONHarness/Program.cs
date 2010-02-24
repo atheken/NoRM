@@ -14,14 +14,14 @@
     {
         private static void Main(string[] args)
         {
-            using (var mongo = new MongoServer("mongodb://karl:pass@localhost/test"))
+            using (var mongo = new MongoServer("mongodb://usr:8e156e298e19afdc3a104ddd172a2bee@localhost/test?strict=true"))
             {
                 var collection = mongo.Database.GetCollection<User>();
                 collection.Insert(new User
                                       {
                                           _id = OID.NewOID(),
-                                          Name = "goku", 
-                                          Email = "goku@dbz.com"
+                                          Name = "goku2", 
+                                          Email = "goku2@dbz.com"
                                       });
             }
         }
