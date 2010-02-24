@@ -48,17 +48,6 @@ namespace NoRM
         {
             EnqueueIdle(connection);
         }
-
-        private IConnection CreateNewConnection()
-        {
-            var connection = new Connection(_builder);
-            if (!Authenticate(connection))
-            {
-                throw new MongoException("Authentication Failed");
-            }
-            return connection;
-
-        }
         private void EnqueueIdle(IConnection connection)
         {
             connection.ResetOptions();

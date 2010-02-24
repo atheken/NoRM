@@ -80,6 +80,7 @@
     <Compile Include="Connections\IConnection.cs" />
     <Compile Include="Connections\IConnectionProvider.cs" />
     <Compile Include="Connections\IOptionsContainer.cs" />
+    <Compile Include="Connections\NormalConnectionProvider.cs" />
     <Compile Include="Connections\PooledConnectionProvider.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />

@@ -1,6 +1,5 @@
 namespace BSONHarness
-{
-    using System;
+{    
     using NoRM;
     using NoRM.BSON.DbTypes;
 
@@ -15,41 +14,15 @@ namespace BSONHarness
     {
         private static void Main(string[] args)
         {
-            using (var mongo = new Mongo("mongodb://localhost/test?strict=true"))
+            using (var mongo = new Mongo("mongodb://localhost/test?pooling=false"))
             {
                 var collection = mongo.Database.GetCollection<User>();
-                try
+                collection.Insert(new User
                 {
-                    collection.Insert(new User
-                    {
-                        _id = null,
-                        Name = "goku2",
-                        Email = "goku2@dbz.com"
-                    });
-                }
-                catch (Exception ex)
-                {
-                    var x = ex;
-                }                
-            }
-
-            using (var mongo = new Mongo("mongodb://localhost/test", "strict=false"))
-            {
-                var collection = mongo.Database.GetCollection<User>();
-                try
-                {
-                    collection.Insert(new User
-                    {
-                        _id = null,
-                        Name = "goku2",
-                        Email = "goku2@dbz.com"
-                    });
-                }
-                catch (Exception ex)
-                {
-                    var x = ex;
-                }  
-            }
+                    Name = "goku2",
+                    Email = "goku2@dbz.com"
+                });             
+            }            
         }
     }
 }

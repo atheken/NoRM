@@ -17,8 +17,19 @@ namespace NoRM
     {
         public abstract IConnection Open(string options);
         public abstract void Close(IConnection connection);
-        public abstract ConnectionStringBuilder ConnectionString{ get;}    
-                
+        public abstract ConnectionStringBuilder ConnectionString{ get;}
+
+        protected IConnection CreateNewConnection()
+        {
+            var connection = new Connection(ConnectionString);
+            if (!Authenticate(connection))
+            {
+                throw new MongoException("Authentication Failed");
+            }
+            return connection;
+
+        }
+          
         protected bool Authenticate(IConnection connection)
         {            
             if (string.IsNullOrEmpty(ConnectionString.UserName))

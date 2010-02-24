@@ -21,8 +21,11 @@ namespace NoRM
 
         private static IConnectionProvider CreateNewProvider(ConnectionStringBuilder builder)
         {
-            //currently only support pooledconnections
-            return new PooledConnectionProvider(builder);
+            if (builder.Pooled)
+            {
+                return new PooledConnectionProvider(builder);
+            }
+            return new NormalConnectionProvider(builder);
         }
     }
 }
