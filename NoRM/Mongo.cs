@@ -8,7 +8,7 @@ namespace NoRM
         private readonly MongoDatabase _database;
         private bool _disposed;
         private IConnection _connection;
-        private string _options;
+        private readonly string _options;
         
         public MongoDatabase Database
         {
@@ -31,7 +31,17 @@ namespace NoRM
                 _connection = _connectionProvider.Open(_options);
             }
             return _connection;
-        }   
+        }
+
+        public MongoCollection<T> GetCollection<T>() where T : class, new()
+        {
+            return _database.GetCollection<T>();
+        }
+
+        public MongoCollection<T> GetCollection<T>(string collectionName) where T : class, new()
+        {
+            return _database.GetCollection<T>(collectionName);
+        }
 
         public void Dispose()
         {
