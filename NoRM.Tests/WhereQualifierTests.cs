@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,13 +12,13 @@ namespace NoRM.Tests {
     [TestFixture]
     public class WhereQualifierTests {
 
-        private MongoServer _server;
+        private Mongo _server;
         private MongoDatabase _db;
         private MongoCollection<TestClass> _coll;
 
         [SetUp]
         public void TestFixture_Setup() {
-            _server = new MongoServer("mongodb://127.0.0.1/TestSuiteDatabase");
+            _server = new Mongo("mongodb://127.0.0.1/TestSuiteDatabase");
             _db = _server.Database;
             DroppedCollectionResponse collResponse = _db.DropCollection("TestClasses");
             _coll = _db.GetCollection<TestClass>("TestClasses");

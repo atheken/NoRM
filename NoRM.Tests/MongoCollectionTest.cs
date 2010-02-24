@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
@@ -16,13 +16,13 @@ namespace NoRM.Tests
             public OID _id { get; set; }
         }
 
-        private MongoServer _server;
+        private Mongo _server;
         private MongoDatabase _db;
 
         [TestFixtureSetUp]
         public void Setup()
         {
-            this._server = new MongoServer();
+            this._server = new Mongo();
             this._db = this._server.GetDatabase("test" + Guid.NewGuid().ToString().Substring(0, 5));
             
         }
@@ -36,7 +36,7 @@ namespace NoRM.Tests
         [Test]
         public void Distinct_For_Key_Returns_Correct_Set()
         {
-            var server = new MongoServer();
+            var server = new Mongo();
             var testDB = server.GetDatabase("test");
             testDB.DropCollection("testObjects");
             var testColl = testDB.GetCollection<MiniObject>("testObjects");

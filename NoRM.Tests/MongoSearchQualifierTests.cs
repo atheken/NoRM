@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,14 +27,14 @@ namespace NoRM.Tests
     [Category("Hits MongoDB")]
     public class MongoSearchQualifierTests
     {
-        private MongoServer _server;
+        private Mongo _server;
         private MongoDatabase _db;
         private MongoCollection<TestClass> _coll;
 
         [SetUp]
         public void TestFixture_Setup()
         {
-            _server = new MongoServer();
+            _server = new Mongo();
             _db = _server.GetDatabase("TestSuiteDatabase");
             _coll = _db.GetCollection<TestClass>("TestClasses");
         }

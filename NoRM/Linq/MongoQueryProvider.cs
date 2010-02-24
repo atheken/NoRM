@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +10,11 @@ using NoRM.BSON;
 namespace NoRM.Linq {
     public class MongoQueryProvider : IQueryProvider {
         private readonly MongoDatabase _db;
-        private readonly MongoServer _server;
+        private readonly Mongo _server;
         private readonly IConnection _connection;
                 
         public MongoQueryProvider(string connectionString) {
-            _server = new MongoServer(connectionString); //todo when is it safe to dispose of this?
+            _server = new Mongo(connectionString); //todo when is it safe to dispose of this?
             _db = _server.Database;
             _connection = _server.ServerConnection();
         }
@@ -24,7 +24,7 @@ namespace NoRM.Linq {
             }
         }
 
-        public MongoServer Server {
+        public Mongo Server {
             get {
                 return _server;
             }

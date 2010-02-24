@@ -1,4 +1,4 @@
-﻿namespace BSONHarness
+namespace BSONHarness
 {
     using NoRM;
     using NoRM.BSON.DbTypes;
@@ -14,7 +14,7 @@
     {
         private static void Main(string[] args)
         {
-            using (var mongo = new MongoServer("mongodb://usr:8e156e298e19afdc3a104ddd172a2bee@localhost/test?strict=true"))
+            using (var mongo = new Mongo("mongodb://usr:8e156e298e19afdc3a104ddd172a2bee@localhost/test?strict=true"))
             {
                 var collection = mongo.Database.GetCollection<User>();
                 collection.Insert(new User

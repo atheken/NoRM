@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,12 +19,12 @@ namespace NoRM.Tests
     public class MongoDatabaseTest
     {
         private MongoDatabase _db;
-        private MongoServer _server;
+        private Mongo _server;
 
         [TestFixtureSetUp]
         public void SetUpDBTests()
         {
-            var server = new MongoServer();
+            var server = new Mongo();
             this._server = server;
             this._db = server.GetDatabase("test" + Guid.NewGuid().ToString().Substring(0, 5));
         }
@@ -37,7 +37,7 @@ namespace NoRM.Tests
         [Test]
         public void GetAllCollections_Returns_Collections()
         {
-            var context = new MongoServer();
+            var context = new Mongo();
             var db = context.GetDatabase("test");
             Assert.IsNotEmpty(db.GetAllCollections().ToList());
         }
@@ -45,7 +45,7 @@ namespace NoRM.Tests
         [Test]
         public void Drop_Collection_Returns_True()
         {
-            var context = new MongoServer();
+            var context = new Mongo();
             var db = context.GetDatabase("test");
             var collName = "testInsertCollection";
             db.GetCollection<MiniObject>(collName).Insert(new MiniObject());
@@ -58,7 +58,7 @@ namespace NoRM.Tests
         [Test]
         public void Set_Profiling_Level()
         {
-            var db = new MongoServer().GetDatabase("test");
+            var db = new Mongo().GetDatabase("test");
 
             var response = db.SetProfileLevel(NoRM.Protocol.SystemMessages.ProfileLevel.AllOperations);
 
@@ -72,7 +72,7 @@ namespace NoRM.Tests
         [Test]
         public void Get_Profiling_Information()
         {
-            var server = new MongoServer();
+            var server = new Mongo();
 
             var db = server.GetDatabase("test");
 
