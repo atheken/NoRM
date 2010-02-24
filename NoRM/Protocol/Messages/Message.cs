@@ -19,6 +19,7 @@
             _collection = fullyQualifiedCollName;
         }
 
+        //todo: not crazy about having this here, think I'm going to move this to MongoCollection        
         protected void AssertHasNotError()
         {
             new QueryMessage<GenericCommandResponse, object>(_connection, _collection)
