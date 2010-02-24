@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Collections;
+using NoRM.BSON;
 
 namespace NoRM.Linq {
     public class MongoQueryTranslator<T>:ExpressionVisitor {
@@ -12,8 +13,13 @@ namespace NoRM.Linq {
         Expression _expression;
         bool collectionSet = false;
         StringBuilder sb;
+        Flyweight fly;
 
-
+        public object FlyWeight {
+            get {
+                return fly;
+            }
+        }
         public string WhereExpression {
             get {
                 return sb.ToString();
@@ -22,10 +28,9 @@ namespace NoRM.Linq {
 
         public string Translate(Expression exp) {
             this.sb = new StringBuilder();
-
+            fly = new Flyweight();
             //partial evaluator will help with converting system level calls
             //to constant expressions
-            exp = PartialEvaluator.Eval(exp);
 
             this.Visit(exp);
             return sb.ToString();
@@ -162,8 +167,30 @@ namespace NoRM.Linq {
                 switch (m.Method.Name) {
 
                 }
-            }
+            } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("First")) {
 
+                //just need the first item in the collection. The collection should be a constant on 
+                //the first arg
+                fly.Limit = 1;
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                if (lambda != null) {
+                    this.Visit(lambda.Body);
+                } else {
+                    this.Visit(m.Arguments[0]);
+                }
+                return m;
+
+            } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("SingleOrDefault")) {
+                fly.Limit = 1;
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                if (lambda != null) {
+                    this.Visit(lambda.Body);
+                } else {
+                    this.Visit(m.Arguments[0]);
+                }
+                return m;
+            
+            }
             //for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }

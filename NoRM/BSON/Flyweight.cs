@@ -22,6 +22,9 @@ namespace NoRM.BSON
         private Dictionary<String, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
 
 
+        public int Limit { get; set; }
+        public int Skip { get; set; }
+
         /// <summary>
         /// All the properties of this flyweight
         /// </summary>

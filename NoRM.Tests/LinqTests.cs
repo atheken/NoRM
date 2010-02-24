@@ -83,6 +83,33 @@ namespace NoRM.Tests {
         }
 
         [Test]
+        public void One_Product_Should_Be_Returned_When_3_In_DB_With_First() {
+            var session = new Session();
+            session.Drop<Product>();
+            session.Add(new Product() { Name = "Test1", Price = 10 });
+            session.Add(new Product() { Name = "Test2", Price = 22 });
+            session.Add(new Product() { Name = "Test3", Price = 33 });
+
+            var result = session.Products.First();
+
+            Assert.NotNull(result);
+        }
+
+        [Test]
+        public void One_Product_Should_Be_Returned_When_3_In_DB_With_Single() {
+            var session = new Session();
+            session.Drop<Product>();
+            session.Add(new Product() { Name = "Test1", Price = 10 });
+            session.Add(new Product() { Name = "Test2", Price = 22 });
+            session.Add(new Product() { Name = "Test3", Price = 33 });
+
+            var result = session.Products.SingleOrDefault(x => x.Price == 22);
+
+            Assert.AreEqual(22, result.Price);
+        }
+
+
+        [Test]
         public void Two_Products_Should_Be_Returned_When_3_In_Db_With_Price_GreaterThan_10() {
 
             var session = new Session();

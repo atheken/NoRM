@@ -46,7 +46,21 @@ namespace NoRM.Linq {
         }
 
         S IQueryProvider.Execute<S>(Expression expression) {
-            return (S)this.Execute<S>(expression);
+
+            //this is called from things OTHER than Enumerable() - like ToList() etc
+            //create the collection
+            MongoCollection<S> collection = new MongoCollection<S>(typeof(S).Name, this.DB, this.Server);
+            var tranny = new MongoQueryTranslator<S>();
+            var qry = tranny.Translate(expression);
+            Flyweight fly = (Flyweight)tranny.FlyWeight;
+
+            if (!String.IsNullOrEmpty(qry)) {
+                fly["$where"] = " function(){return " + qry + "; }";
+            }
+
+            //this has a method call associated with it - which one?
+            return collection.FindOne(fly);
+
         }
 
         object IQueryProvider.Execute(Expression expression) {
@@ -57,6 +71,7 @@ namespace NoRM.Linq {
 
             //create the collection
             MongoCollection<T> collection = new MongoCollection<T>(typeof(T).Name, this.DB, this.Server);
+            expression = PartialEvaluator.Eval(expression);
 
             //pass off the to the translator, which will set the query stuff
             var tranny = new MongoQueryTranslator<T>();
