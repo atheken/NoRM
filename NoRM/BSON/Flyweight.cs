@@ -40,7 +40,7 @@ namespace NoRM.BSON
         }
 
         /// <summary>
-        /// Pulls the property of the specified type "T". You better know it's in there or you're going to get an excetion.. just sayin'
+        /// Pulls the property of the specified type "T". You better know it's in there or you're going to get an exception.. just sayin'
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="propertyName"></param>

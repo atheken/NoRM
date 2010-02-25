@@ -302,15 +302,51 @@ namespace NoRM
             this.Insert(documentsToInsert.AsEnumerable());
         }
 
+        public interface IMongoGrouping<K, V>
+        {
+            K Key { get; set; }
+            V Value { get; set; }
+        }
+
+        /// <summary>
+        /// Constructs and returns a grouping of values based on initial values
+        /// </summary>
+        /// <typeparam name="X"></typeparam>
+        /// <typeparam name="Y"></typeparam>
+        /// <typeparam name="Z"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="filter"></param>
+        /// <param name="initialValue"></param>
+        /// <param name="reduce"></param>
+        /// <returns></returns>
+        public object GroupBy<X,Y,Z>(X key, Y filter, Z initialValue, 
+            String reduce)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// A count on this collection without any filter.
+        /// </summary>
+        /// <returns></returns>
         public long Count()
         {
             return this.Count(new { });
         }
 
+        /// <summary>
+        /// A count using the specified filter.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public long Count<U>(U query)
         {
             var f = this._db.GetCollection<Flyweight>("$cmd")
-                .FindOne(new { count = this._collectionName, query = query });
+                .FindOne(new { 
+                    count = this._collectionName, 
+                    query = query 
+                });
             long retval = (long)f.Get<double>("n");
             return retval;
         }
