@@ -1,3 +1,49 @@
+namespace NoRM.Tests
+{
+    using System.Linq;
+    using Xunit;
+
+    public class MongoDatabaseTest
+    {
+        [Fact]
+        public void CreateCollectionCreatesACappedCollection()
+        {
+            using (var mongo = new Mongo("mongodb://localhost/NoRMTests?pooling=false"))
+            {
+                mongo.Database.DropCollection("capped");
+                Assert.Equal(true, mongo.Database.CreateCollection(new CreateCollectionOptions("capped") { Max = 3 }));
+                var collection = mongo.GetCollection<FakeObject>("capped");
+                collection.Insert(new FakeObject());
+                collection.Insert(new FakeObject());
+                collection.Insert(new FakeObject());
+                collection.Insert(new FakeObject());
+                Assert.Equal(3, collection.Find().Count());
+            }
+        }
+        [Fact]
+        public void CreateCollectionThrowsExceptionIfAlreadyExistsWithStrictMode()
+        {
+            using (var mongo = new Mongo("mongodb://localhost/NoRMTests?pooling=false"))
+            {
+                mongo.Database.DropCollection("capped");
+                mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
+                var ex = Assert.Throws<MongoException>(() => mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));
+                Assert.Equal("Creation failed, the collection may already exist", ex.Message);
+            }
+        }
+        [Fact]
+        public void CreateCollectionReturnsFalseIfAlreadyExistsWithoutStrictMode()
+        {
+            using (var mongo = new Mongo("mongodb://localhost/NoRMTests?pooling=false&strict=false"))
+            {
+                mongo.Database.DropCollection("capped");
+                mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
+                Assert.Equal(false, mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));                
+            }
+        }      
+    }
+}
+
 /*
 namespace NoRM.Tests
 {

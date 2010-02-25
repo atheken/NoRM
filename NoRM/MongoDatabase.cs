@@ -2,7 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using Protocol.Messages;
     using Protocol.SystemMessages;
+    using Protocol.SystemMessages.Request;
     using Protocol.SystemMessages.Responses;
 
     public class MongoDatabase
@@ -51,6 +53,18 @@
                 .FindOne(new DroppedCollectionResponse {drop = collectionName});            
         }
 
+        public bool CreateCollection(CreateCollectionOptions options)
+        {
+            var success = GetCollection<GenericCommandResponse>("$cmd")
+                       .FindOne(new CreateCollectionRequest(options)).OK == 1d;
+                       
+            if (!success && _connection.StrictMode)
+            {
+                throw new MongoException("Creation failed, the collection may already exist");
+            }
+            return success;
+            
+        }
         public SetProfileResponse SetProfileLevel(ProfileLevel level)
         {
             return GetCollection<SetProfileResponse>("$cmd")

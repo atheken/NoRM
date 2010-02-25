@@ -82,6 +82,7 @@
     <Compile Include="Connections\IOptionsContainer.cs" />
     <Compile Include="Connections\NormalConnectionProvider.cs" />
     <Compile Include="Connections\PooledConnectionProvider.cs" />
+    <Compile Include="CreateCollectionOptions.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
     <Compile Include="Linq\MongoQuery.cs" />
@@ -96,6 +97,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\CreateCollectionRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\CurrentOperationResponse.cs" />
@@ -105,7 +107,6 @@
     <Compile Include="Protocol\SystemMessages\Responses\LastErrorResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfileLevelResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\CollectionStatisticsRequest.cs" />
-    <Compile Include="Protocol\SystemMessages\Requests\DropCollectionRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\DropDatabaseRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\BuildInfoResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\CollectionInfo.cs" />
