@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("NoRM")]
@@ -13,3 +14,5 @@ using System.Runtime.InteropServices;
 [assembly: Guid("2f767b68-9d93-4f67-a9d8-7f14774ec63f")]
 [assembly: AssemblyVersion("1.0")]
 [assembly: AssemblyFileVersion("1.0")]
+
+[assembly: InternalsVisibleTo("NoRM.Tests")] //suck it!
