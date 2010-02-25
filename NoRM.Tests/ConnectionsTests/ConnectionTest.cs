@@ -77,6 +77,15 @@ namespace NoRM.Tests
             }
         }
         
+        [Fact]
+        public void CreatesDigestFromNonce()
+        {
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://ussrr:ppaassss@localhost/?querytimeout=30&strict=false&expando=false")))
+            {
+                Assert.Equal("08f11f775e2a8cf4248f0ae6126164f0", connection.Digest("1234abc"));
+            }
+        }
+        
         private class DisposableConnection : Connection, IDisposable
         {
             private bool _disposed;
