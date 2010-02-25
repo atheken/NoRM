@@ -54,6 +54,15 @@ namespace NoRM.Linq {
             var qry = tranny.Translate(expression);
             Flyweight fly = (Flyweight)tranny.FlyWeight;
 
+            switch (fly.MethodCall) {
+                case "Count":
+                    fly["count"] = typeof(S).Name;
+                    break;
+                default:
+                    break;
+            }
+
+
             if (!String.IsNullOrEmpty(qry)) {
                 fly["$where"] = " function(){return " + qry + "; }";
             }

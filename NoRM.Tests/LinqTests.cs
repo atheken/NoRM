@@ -108,7 +108,18 @@ namespace NoRM.Tests {
             Assert.AreEqual(22, result.Price);
         }
 
+        [Test]
+        public void Three_Should_Be_Returned_For_Count_When_3_Products_In_DB() {
+            var session = new Session();
+            session.Drop<Product>();
+            session.Add(new Product() { Name = "Test1", Price = 10 });
+            session.Add(new Product() { Name = "Test2", Price = 22 });
+            session.Add(new Product() { Name = "Test3", Price = 33 });
 
+            var result = session.Products.Count();
+
+            Assert.AreEqual(3, result);
+        }
         [Test]
         public void Two_Products_Should_Be_Returned_When_3_In_Db_With_Price_GreaterThan_10() {
 

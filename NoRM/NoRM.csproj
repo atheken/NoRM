@@ -94,6 +94,7 @@
     <Compile Include="Protocol\SystemMessages\Responses\DeleteIndicesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DistinctValuesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DroppedCollectionResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\IntegerResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfileLevelResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\CollectionStatisticsRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\DropCollectionRequest.cs" />

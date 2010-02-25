@@ -114,6 +114,7 @@ namespace NoRM.Linq {
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m) {
+            fly.MethodCall = m.Method.Name;
             
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where") {
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
@@ -168,13 +169,14 @@ namespace NoRM.Linq {
 
                 }
             } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("First")) {
-
-                //just need the first item in the collection. The collection should be a constant on 
-                //the first arg
                 fly.Limit = 1;
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                if (lambda != null) {
-                    this.Visit(lambda.Body);
+                if (m.Arguments.Count > 1) {
+                    LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                    if (lambda != null) {
+                        this.Visit(lambda.Body);
+                    } else {
+                        this.Visit(m.Arguments[0]);
+                    }
                 } else {
                     this.Visit(m.Arguments[0]);
                 }
@@ -182,14 +184,30 @@ namespace NoRM.Linq {
 
             } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("SingleOrDefault")) {
                 fly.Limit = 1;
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                if (lambda != null) {
-                    this.Visit(lambda.Body);
+                if (m.Arguments.Count > 1) {
+                    LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                    if (lambda != null) {
+                        this.Visit(lambda.Body);
+                    } else {
+                        this.Visit(m.Arguments[0]);
+                    }
                 } else {
                     this.Visit(m.Arguments[0]);
                 }
                 return m;
-            
+
+            } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("Count")) {
+                if (m.Arguments.Count > 1) {
+                    LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                    if (lambda != null) {
+                        this.Visit(lambda.Body);
+                    } else {
+                        this.Visit(m.Arguments[0]);
+                    }
+                } else {
+                    this.Visit(m.Arguments[0]);
+                }
+                return m;
             }
             //for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));

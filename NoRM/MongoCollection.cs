@@ -238,32 +238,6 @@ namespace NoRM
             return this.Find(new Object(), Int32.MaxValue, this.FullyQualifiedName);
         }
 
-        /// <summary>
-        /// Find based on a Linq Expression
-        /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="template"></param>
-        /// <returns></returns>
-        public IEnumerable<T> Find<T>(Expression<Func<T, bool>> expression)
-        {
-
-            //build a template based on T
-            var item = default(T);
-
-
-            return null;
-        }
-
-
-        public bool Any<T>(Expression<Func<T, bool>> expression)
-        {
-
-            //turn that expression into ... something
-
-
-
-            return false;
-        }
 
         public IEnumerable<T> Find<U>(U template)
         {
@@ -288,13 +262,14 @@ namespace NoRM
             qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
-
+            
             foreach (var r in reply.Results)
             {
                 yield return r;
             }
             yield break;
         }
+
 
         public void Insert(params T[] documentsToInsert)
         {

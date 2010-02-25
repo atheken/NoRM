@@ -24,7 +24,7 @@ namespace NoRM.BSON
 
         public int Limit { get; set; }
         public int Skip { get; set; }
-
+        public string MethodCall { get; set; }
         /// <summary>
         /// All the properties of this flyweight
         /// </summary>
