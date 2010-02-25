@@ -2,7 +2,7 @@ namespace NoRM.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.Linq;    
     using Xunit;
 
     public class MongoDatabaseTest : IDisposable
@@ -20,8 +20,7 @@ namespace NoRM.Tests
         public void CreateCollectionCreatesACappedCollection()
         {
             using (var mongo = new Mongo(_connectionString))
-            {
-                mongo.Database.DropCollection("capped");
+            {                
                 Assert.Equal(true, mongo.Database.CreateCollection(new CreateCollectionOptions("capped") { Max = 3 }));
                 var collection = mongo.GetCollection<FakeObject>("capped");
                 collection.Insert(new FakeObject());
@@ -35,8 +34,7 @@ namespace NoRM.Tests
         public void CreateCollectionThrowsExceptionIfAlreadyExistsWithStrictMode()
         {
             using (var mongo = new Mongo(_connectionString))
-            {
-                mongo.Database.DropCollection("capped");
+            {                
                 mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));
                 Assert.Equal("Creation failed, the collection may already exist", ex.Message);
@@ -72,114 +70,120 @@ namespace NoRM.Tests
         }
         [Fact]
         public void GetCollectionsReturnsNothingIfEmpty()
+        {
+            using (var mongo = new Mongo(_connectionString))
+            {
+                Assert.Equal(0, mongo.Database.GetAllCollections().Count());
+            }
+        }
+
+        [Fact]
+        public void DropsACollection()
+        {
+            using (var mongo = new Mongo(_connectionString))
+            {
+                var database = mongo.Database;
+                database.CreateCollection(new CreateCollectionOptions("temp"));
+                Assert.Equal(1d, database.DropCollection("temp").OK);
+                Assert.Equal(0, mongo.Database.GetAllCollections().Count());                           
+            }
+        }
+        [Fact]
+        public void ThrowsExceptionIfDropConnectionFailsWithStrictModeOn()
+        {
+            using (var mongo = new Mongo(_connectionString))
+            {
+                var ex = Assert.Throws<MongoException>(() => mongo.Database.DropCollection("temp"));
+                Assert.Equal("Drop failed, are you sure the collection exists", ex.Message);
+            }
+        }
+        [Fact]
+        public void DropCollectionFailsSilentlyWithStrictModeOff()
+        {
+            using (var mongo = new Mongo(_connectionString + "&strict=false"))
+            {
+                Assert.Equal(0d, mongo.Database.DropCollection("temp").OK);
+            }
+        }
+        
+        [Fact]
+        public void ReturnsTheDatabasesName()
+        {
+            using (var mongo = new Mongo(_connectionString))
+            {
+                Assert.Equal("NoRMTests", mongo.Database.DatabaseName);
+            }
+        }
+
+        [Fact]
+        public void GetsACollectionsStatistics()
+        {
+            using (var mongo = new Mongo(_connectionString))
+            {   
+                mongo.Database.CreateCollection(new CreateCollectionOptions("temp"));
+                var statistic = mongo.Database.GetCollectionStatistics("temp");
+                
+                //todo: failing to deserialized, this appears to return a more complex object than what we are ready to handle
+            }
+        }
+        [Fact]
+        public void ThrowsExceptionIfGettingStatisticsFailsWithStrictModeOn()
+        {
+            using (var mongo = new Mongo(_connectionString))
+            {
+                var ex = Assert.Throws<MongoException>(() => mongo.Database.GetCollectionStatistics("temp"));
+                Assert.Equal("Could not get statistics, are you sure the collection exists", ex.Message);
+            }
+        }
+        [Fact]
+        public void GettingStatisticsFailsSilentlyWithStrictModeOff()
+        {
+            using (var mongo = new Mongo(_connectionString + "&strict=false"))
+            {
+                Assert.Equal(0d, mongo.Database.GetCollectionStatistics("temp").OK);
+            }
+        }
+
+        [Fact]
+        public void SetProfilingLevel()
+        {
+            using (var mongo = new Mongo(_connectionString))
+            {
+                var response = mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.AllOperations);
+                Assert.True((response.Was == 0.0));
+
+                response = mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.ProfilingOff);
+                Assert.True((response.Was == 2.0));
+            }
+        }
+        [Fact]
+        public void GetProfilingInformation()
+        {
+            using (var mongo = new Mongo(_connectionString))
+            {
+                mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.AllOperations);
+                mongo.GetCollection<FakeObject>().Insert(new FakeObject());
+                mongo.GetCollection<FakeObject>().Find();
+                mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.ProfilingOff);
+
+                var results = mongo.Database.GetProfilingInformation();                
+                Assert.Equal("insert NoRMTests.FakeObject", results.ElementAt(0).Info);
+                Assert.Equal("query query NoRMTests.FakeObject ntoreturn:1 reslen:36 nscanned:1  \nquery: { getlasterror: 1.0 }  nreturned:0 bytes:20", results.ElementAt(1).Info);
+                Assert.Equal("query query NoRMTests.$cmd ntoreturn:1 reslen:66 nscanned:0  \nquery: { profile: 0, Was: null, OK: null }  nreturned:1 bytes:50", results.ElementAt(2).Info);                
+                Assert.Equal(3, results.Count());
+            }
+        }
+
+        [Fact]
+        public void ValidateCollection()
         {            
             using (var mongo = new Mongo(_connectionString))
-            {                
-                Assert.Equal(0, mongo.Database.GetAllCollections().Count());                
-            }            
-        }
-    }
-}
-
-/*
-namespace NoRM.Tests
-{
-    public class MiniObject
-    {
-        public OID ID { get; set; }
-    }
-
-    [TestFixture]
-    [Category("Hits MongoDB")]
-    public class MongoDatabaseTest
-    {
-        private MongoDatabase _db;
-        private Mongo _server;
-
-        [TestFixtureSetUp]
-        public void SetUpDBTests()
-        {
-            var database = "test" + Guid.NewGuid().ToString().Substring(0, 5);
-            var server = new Mongo("mongodb://localhost/" + database);
-            this._server = server;
-            this._db = server.Database;
-        }
-        [TestFixtureTearDown]
-        public void TearDown()
-        {
-            using (var admin = new MongoAdmin("mongodb://localhost/" + _db.DatabaseName))
             {
-                admin.DropDatabase();
-            }                        
-            _server.Dispose();
-        }
-
-        [Test]
-        public void GetAllCollections_Returns_Collections()
-        {
-            var context = new Mongo();
-            var db = context.GetDatabase("test");
-            Assert.IsNotEmpty(db.GetAllCollections().ToList());
-        }
-
-        [Test]
-        public void Drop_Collection_Returns_True()
-        {
-            var context = new Mongo();
-            var db = context.GetDatabase("test");
-            var collName = "testInsertCollection";
-            db.GetCollection<MiniObject>(collName).Insert(new MiniObject());
-
-            var results = db.DropCollection(collName);
-
-            Assert.IsTrue((results.OK == 1.0));
-        }
-
-        [Test]
-        public void Set_Profiling_Level()
-        {
-            var db = new Mongo().GetDatabase("test");
-
-            var response = db.SetProfileLevel(NoRM.Protocol.SystemMessages.ProfileLevel.AllOperations);
-
-            Assert.IsTrue((response.Was == 0.0));
-
-            response = db.SetProfileLevel(NoRM.Protocol.SystemMessages.ProfileLevel.ProfilingOff);
-
-            Assert.IsTrue((response.Was == 2.0));
-        }
-
-        [Test]
-        public void Get_Profiling_Information()
-        {
-            var server = new Mongo();
-
-            var db = server.GetDatabase("test");
-
-            var results = db.GetProfilingInformation();
-
-            foreach (var profile in results)
-            {
-                Console.WriteLine(profile.Info);
+                var collection = mongo.Database.GetCollection<FakeObject>("validCollection");
+                collection.Insert(new FakeObject());
+                var response = mongo.Database.ValidateCollection("validCollection", false);
+                Assert.Equal(collection.FullyQualifiedName, response.Ns);
             }
-            Assert.IsTrue((results.Count<ProfilingInformationResponse>() > 0));
         }
-
-        [Test]
-        public void Validate_Collection()
-        {
-            String collName = "validColl";
-            var testColl = this._db.GetCollection<MiniObject>(collName);
-
-            //must insert something before the collection will exist.
-            testColl.Insert(new MiniObject());
-
-            var response = this._db.ValidateCollection(collName, false);
-
-            Assert.AreEqual(testColl.FullyQualifiedName, response.Ns);
-        }
-
-
     }
 }
-*/

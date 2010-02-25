@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace NoRM.Protocol.SystemMessages.Responses
+﻿namespace NoRM.Protocol.SystemMessages.Responses
 {
     public class CollectionStatistics
     {
-        public CollectionStatistics() { }
-
         public string collstats { get; set; }
         public string Ns { get; set; }
         public long? Count { get; set; }

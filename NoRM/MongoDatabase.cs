@@ -38,14 +38,26 @@
 
         public CollectionStatistics GetCollectionStatistics(string collectionName)
         {
-            return GetCollection<CollectionStatistics>("$cmd")
-                .FindOne(new CollectionStatistics {collstats = collectionName});            
+            var result = GetCollection<CollectionStatistics>("$cmd")
+                .FindOne(new CollectionStatistics {collstats = collectionName});
+
+            if (result.OK != 1d && _connection.StrictMode)
+            {
+                throw new MongoException("Could not get statistics, are you sure the collection exists");
+            }
+            return result;          
         }
 
         public DroppedCollectionResponse DropCollection(string collectionName)
         {
-            return GetCollection<DroppedCollectionResponse>("$cmd")
+            var result = GetCollection<DroppedCollectionResponse>("$cmd")
                 .FindOne(new DroppedCollectionResponse {drop = collectionName});            
+                
+            if (result.OK != 1d && _connection.StrictMode)
+            {
+                throw new MongoException("Drop failed, are you sure the collection exists");                
+            }
+            return result;
         }
 
         public bool CreateCollection(CreateCollectionOptions options)
