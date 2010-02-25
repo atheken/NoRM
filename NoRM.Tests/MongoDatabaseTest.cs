@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using NoRM.Protocol.SystemMessages.Responses;
-using NoRM.BSON;
-using NoRM.BSON.DbTypes;
 /*
 namespace NoRM.Tests
 {

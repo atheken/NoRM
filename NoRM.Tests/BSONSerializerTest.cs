@@ -1,14 +1,12 @@
-using System;
-using System.Diagnostics;
-using NUnit.Framework;
-using System.Text.RegularExpressions;
-using NoRM.BSON;
-using NoRM.Attributes;
-using NoRM.BSON.DbTypes;
-
 namespace NoRM.Tests
 {
+    using System.Text.RegularExpressions;
+    using BSON;
+    using Attributes;
+    using BSON.DbTypes;
     using Xunit;
+    using System;
+    using System.Diagnostics;
     
     public class BSONSerializerTest
     {
@@ -263,9 +261,7 @@ namespace NoRM.Tests
             Assert.Equal(((Flyweight)obj1.Code.Scope)["$ns"],((Flyweight)obj2.Code.Scope)["$ns"]);
         }
 
-        [Fact]
-        [Category("Benchmark")]
-        [Ignore]
+        [Fact(Skip="")]
         public void SerializationSpeedTest()
         {
             /*

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using NUnit.Framework;
-using NoRM.BSON;
-using NoRM.BSON.DbTypes;
 /*
 namespace NoRM.Tests
 {

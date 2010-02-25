@@ -33,13 +33,11 @@ namespace NoRM.Tests
                 options = "pooling=false";
                 
             }
-            connectionString = string.Concat(connectionString, '?', options);
-            
-            return connectionString;
+            return string.Concat(connectionString, '?', options);
         }
         
         public MongoFixture()
-        {
+        {            
             Directory.CreateDirectory(_dataPath);            
             _process = new Process 
             {
