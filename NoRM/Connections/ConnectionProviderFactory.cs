@@ -4,7 +4,7 @@ namespace NoRM
 
     internal static class ConnectionProviderFactory
     {
-        private static readonly IDictionary<ConnectionStringBuilder, IConnectionProvider> _providers = new Dictionary<ConnectionStringBuilder, IConnectionProvider>();
+        private static readonly IDictionary<string, IConnectionProvider> _providers = new Dictionary<string, IConnectionProvider>();
         private static readonly IDictionary<string, ConnectionStringBuilder> _cachedBuilders = new Dictionary<string, ConnectionStringBuilder>();
 
         public static IConnectionProvider Create(string connectionString)
@@ -15,13 +15,13 @@ namespace NoRM
                 builder = ConnectionStringBuilder.Create(connectionString);
                 _cachedBuilders.Add(connectionString, builder);
             }
-
+            
             IConnectionProvider provider;            
-            if (!_providers.TryGetValue(builder, out provider))
+            if (!_providers.TryGetValue(connectionString, out provider))
             {
                 //todo: consider thread safety
                 provider = CreateNewProvider(builder);
-                _providers[builder] = provider;
+                _providers[connectionString] = provider;
             }
             return provider;
         }

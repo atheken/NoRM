@@ -32,8 +32,6 @@ namespace NoRM
         public bool Pooled{ get; private set;}   
         public int PoolSize{ get; private set;}
         
-        private string _coreConnectionString;
-        
         private ConnectionStringBuilder(){}
         
         public static ConnectionStringBuilder Create(string connectionString)
@@ -58,9 +56,7 @@ namespace NoRM
                 .BuildDatabase(sb)
                 .BuildServerList(sb);
 
-            BuildOptions(builder, options);
-
-            builder._coreConnectionString = builder.BuildCoreConnectionString();                         
+            BuildOptions(builder, options);            
             return builder;            
         }
 
@@ -131,17 +127,6 @@ namespace NoRM
                 _optionsHandler[kvp[0].ToLower()](kvp[1], container);
             }
         }
-        private string BuildCoreConnectionString()
-        {
-            var sb = new StringBuilder();
-            sb.AppendFormat("{0}/{1}/", UserName ?? " ", Password ?? " ");
-            foreach(var server in Servers)
-            {
-                sb.AppendFormat("{0}/{1}/", server.Host, server.Port);
-            }
-            sb.AppendFormat("/{0}/{1}/{2}", Database, Pooled, PoolSize);
-            return sb.ToString();
-        }
         
         public class Server
         {
@@ -167,18 +152,6 @@ namespace NoRM
         public void SetPooled(bool pooled)
         {
             Pooled = pooled;
-        }
-
-        //todo this and BuildCoreConnectionString really need test coverage
-        public override bool Equals(object obj)
-        {
-            var left = obj as ConnectionStringBuilder;
-            if (left == null) { return false; }
-            return string.Compare(left._coreConnectionString, _coreConnectionString, true) == 0;
-        }
-        public override int GetHashCode()
-        {
-            return _coreConnectionString.GetHashCode();
         }
     }
 }
