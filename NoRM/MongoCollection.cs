@@ -246,11 +246,8 @@ namespace NoRM
         /// <returns></returns>
         public IEnumerable<T> Find<T>(Expression<Func<T, bool>> expression)
         {
-
             //build a template based on T
             var item = default(T);
-
-
             return null;
         }
 
@@ -259,9 +256,6 @@ namespace NoRM
         {
 
             //turn that expression into ... something
-
-
-
             return false;
         }
 
