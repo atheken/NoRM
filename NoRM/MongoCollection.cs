@@ -9,19 +9,21 @@ using System.Linq.Expressions;
 using System.Reflection;
 using NoRM.Attributes;
 using NoRM.BSON;
+using System.Collections;
 
 namespace NoRM
 {
-    public partial class MongoCollection<T>
-    {
+
+    public class MongoCollection : IMongoCollection {
+
         //this will have a different instance for each concrete version of MongoCollection<T>
-        private static bool? _updateable = null;
+        protected static bool? _updateable = null;
 
-        private String _collectionName;
-        private MongoDatabase _db;
-        private MongoServer _server;
+        protected String _collectionName;
+        protected MongoDatabase _db;
+        protected MongoServer _server;
 
-        /// <summary>
+                /// <summary>
         /// Represents a strongly-typed set of documents in the db.
         /// </summary>
         /// <param name="collectionName"></param>
@@ -34,6 +36,115 @@ namespace NoRM
             this._collectionName = collectionName;
         }
 
+
+        public long Count() {
+            return this.Count(new { });
+        }
+
+
+        public long Count(object query) {
+            long retval = 0;
+
+            var f = this._db.GetCollection<Flyweight>("$cmd")
+                .FindOne(new { count = this._collectionName, query = query });
+
+            if (f != null) {
+                retval = (long)f.Get<double>("n");
+            }
+            return retval;
+        }
+
+        /// <summary>
+        /// Deletes all indices on this collection.
+        /// </summary>
+        /// <param name="numberDeleted"></param>
+        /// <returns></returns>
+        public bool DeleteIndices(out int numberDeleted) {
+            return this.DeleteIndex("*", out numberDeleted);
+        }
+
+        /// <summary>
+        /// Deletes the specified index for the collection.
+        /// </summary>
+        /// <param name="indexName"></param>
+        /// <param name="numberDeleted"></param>
+        /// <returns></returns>
+        public bool DeleteIndex(String indexName, out int numberDeleted) {
+            bool retval = false;
+            var coll = this._db.GetCollection<DeleteIndicesResponse>("$cmd");
+            var result = coll.FindOne(new { deleteIndexes = this._collectionName, index = indexName });
+            numberDeleted = 0;
+
+            if (result != null && result.OK == 1.0) {
+                retval = true;
+                numberDeleted = result.NIndexesWas.Value;
+            }
+
+            return retval;
+        }
+
+        /// <summary>
+        /// The name of this collection, including the database prefix.
+        /// </summary>
+        public String FullyQualifiedName {
+            get {
+                return String.Format("{0}.{1}", this._db.DatabaseName, this._collectionName);
+            }
+        }
+
+        public CollectionStatistics GetCollectionStatistics() {
+            return this._db.GetCollectionStatistics(this._collectionName);
+        }
+
+        public object FindOne(object template) {
+            return this.Find(template, 1);
+        }
+
+        /// <summary>
+        /// Find objects in the collection without any qualifiers.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable Find() {
+            //this is a hack to get a value that will test for null into the serializer.
+            return this.Find(new Object(), Int32.MaxValue, this.FullyQualifiedName);
+        }
+
+
+        public IEnumerable Find(object template) {
+            return this.Find(template, Int32.MaxValue);
+        }
+
+        /// <summary>
+        /// Get the documents that match the specified template.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <param name="limit">The number to return from this command.</param>
+        /// <returns></returns>
+        public IEnumerable Find(object template, int limit) {
+            return Find(template, limit, this.FullyQualifiedName);
+        }
+
+        public IEnumerable Find(object template, int limit, string fullyQualifiedName) {
+            var qm = new QueryMessage<object, object>(this._server, fullyQualifiedName);
+            qm.NumberToTake = limit;
+            qm.Query = template;
+            var reply = qm.Execute();
+
+            foreach (var r in reply.Results) {
+                yield return r;
+            }
+            yield break;
+        }
+
+
+    }
+    
+    public partial class MongoCollection<T> :MongoCollection, IMongoCollection<T>
+    {
+
+        public MongoCollection(string collectionName, MongoDatabase db, MongoServer server) : base(typeof(T).Name, db, server) { }
+
         /// <summary>
         /// Get a child collection of the specified type.
         /// </summary>
@@ -44,6 +155,26 @@ namespace NoRM
         {
             return new MongoCollection<U>(this._collectionName + "." + collectionName, this._db, this._server);
         }
+
+        /// <summary>
+        /// True if the type of this collection can be updated 
+        /// (i.e. the Type specifies "_id", "ID", or a property with the attributed "MongoIdentifier").
+        /// </summary>
+        public bool Updateable {
+            get {
+                if (MongoCollection<T>._updateable == null) {
+                    if (typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y =>
+                        y.Name == "_id" || y.Name == "ID" ||
+                        y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute))) {
+                        MongoCollection<T>._updateable = true;
+                    } else {
+                        MongoCollection<T>._updateable = false;
+                    }
+                }
+                return MongoCollection<T>._updateable.Value;
+            }
+        }
+
 
         /// <summary>
         /// Overload of Update that updates one document and doesn't upsert if no matches are found.
@@ -78,30 +209,7 @@ namespace NoRM
 
         }
 
-        /// <summary>
-        /// True if the type of this collection can be updated 
-        /// (i.e. the Type specifies "_id", "ID", or a property with the attributed "MongoIdentifier").
-        /// </summary>
-        public bool Updateable
-        {
-            get
-            {
-                if (MongoCollection<T>._updateable == null)
-                {
-                    if (typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y =>
-                        y.Name == "_id" || y.Name == "ID" || 
-                        y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute)))
-                    {
-                        MongoCollection<T>._updateable = true;
-                    }
-                    else
-                    {
-                        MongoCollection<T>._updateable = false;
-                    }
-                }
-                return MongoCollection<T>._updateable.Value;
-            }
-        }
+
 
         /// <summary>
         /// Gets the distinct values for the specified key.
@@ -116,37 +224,7 @@ namespace NoRM
                 .FindOne(new { distinct = this._collectionName, key = keyName }).Values;
         }
 
-        /// <summary>
-        /// Deletes all indices on this collection.
-        /// </summary>
-        /// <param name="numberDeleted"></param>
-        /// <returns></returns>
-        public bool DeleteIndices(out int numberDeleted)
-        {
-            return this.DeleteIndex("*", out numberDeleted);
-        }
 
-        /// <summary>
-        /// Deletes the specified index for the collection.
-        /// </summary>
-        /// <param name="indexName"></param>
-        /// <param name="numberDeleted"></param>
-        /// <returns></returns>
-        public bool DeleteIndex(String indexName, out int numberDeleted)
-        {
-            bool retval = false;
-            var coll = this._db.GetCollection<DeleteIndicesResponse>("$cmd");
-            var result = coll.FindOne(new { deleteIndexes = this._collectionName, index = indexName });
-            numberDeleted = 0;
-
-            if (result != null && result.OK == 1.0)
-            {
-                retval = true;
-                numberDeleted = result.NIndexesWas.Value;
-            }
-
-            return retval;
-        }
 
         /// <summary>
         /// Overload of Update that updates all matching documents, and doesn't upsert if no matches are found.
@@ -192,16 +270,7 @@ namespace NoRM
             um.Execute();
         }
 
-        /// <summary>
-        /// The name of this collection, including the database prefix.
-        /// </summary>
-        public String FullyQualifiedName
-        {
-            get
-            {
-                return String.Format("{0}.{1}", this._db.DatabaseName, this._collectionName);
-            }
-        }
+
 
         /// <summary>
         /// Delete the documents that mact the specified template.
@@ -229,6 +298,8 @@ namespace NoRM
             return this.Find(template, 1).FirstOrDefault();
         }
 
+
+        
         /// <summary>
         /// Find objects in the collection without any qualifiers.
         /// </summary>
@@ -277,18 +348,7 @@ namespace NoRM
             this.Insert(documentsToInsert.AsEnumerable());
         }
 
-        public long Count()
-        {
-            return this.Count(new { });
-        }
 
-        public long Count<U>(U query)
-        {
-            var f = this._db.GetCollection<Flyweight>("$cmd")
-                .FindOne(new { count = this._collectionName, query = query });
-            long retval = (long)f.Get<double>("n");
-            return retval;
-        }
 
         /// <summary>
         /// Insert these documents into the database.
@@ -307,9 +367,5 @@ namespace NoRM
             insertMessage.Execute();
         }
 
-        public CollectionStatistics GetCollectionStatistics()
-        {
-            return this._db.GetCollectionStatistics(this._collectionName);
-        }
     }
 }

@@ -11,7 +11,7 @@ namespace NoRM.Linq {
     public class MongoQueryProvider : IQueryProvider {
         private MongoDatabase _db;
         private MongoServer _server;
-        
+
         public MongoQueryProvider(string dbName) : this(dbName, "127.0.0.1", 27017, false) { }
         public MongoQueryProvider(string dbName, string server, int port, bool enableExpandoProps) {
 
@@ -46,33 +46,12 @@ namespace NoRM.Linq {
         }
 
         S IQueryProvider.Execute<S>(Expression expression) {
-
-            //this is called from things OTHER than Enumerable() - like ToList() etc
-            //create the collection
-            MongoCollection<S> collection = new MongoCollection<S>(typeof(S).Name, this.DB, this.Server);
-            var tranny = new MongoQueryTranslator<S>();
-            var qry = tranny.Translate(expression);
-            Flyweight fly = (Flyweight)tranny.FlyWeight;
-
-            switch (fly.MethodCall) {
-                case "Count":
-                    fly["count"] = typeof(S).Name;
-                    break;
-                default:
-                    break;
-            }
-
-
-            if (!String.IsNullOrEmpty(qry)) {
-                fly["$where"] = " function(){return " + qry + "; }";
-            }
-
-            //this has a method call associated with it - which one?
-            return collection.FindOne(fly);
+            return (S)this.Execute(expression);
 
         }
 
         object IQueryProvider.Execute(Expression expression) {
+            
             return this.Execute(expression);
         }
 
@@ -83,7 +62,7 @@ namespace NoRM.Linq {
             expression = PartialEvaluator.Eval(expression);
 
             //pass off the to the translator, which will set the query stuff
-            var tranny = new MongoQueryTranslator<T>();
+            var tranny = new MongoQueryTranslator();
             var qry = tranny.Translate(expression);
 
             //execute
@@ -99,17 +78,31 @@ namespace NoRM.Linq {
 
         public object Execute(Expression expression) {
 
-            // var spec = MongoQueryTranslator.Translate(expression);
+            //this is called from things OTHER than Enumerable() - like ToList() etc
+            //create the collection
+            var tranny = new MongoQueryTranslator();
+            var qry = tranny.Translate(expression);
 
-            //get the goods from the DB..
-            //ICursor cursor;
-            //if (spec.Keys.Count==0) {
-            //    cursor = _collection.FindAll();
-            //} else {
-            //    cursor = _collection.Find(spec);
-            //}
-            //return cursor;
-            return null;
+            Flyweight fly = (Flyweight)tranny.FlyWeight;
+            var collection = new MongoCollection(fly.CollectionName,this.DB,this.Server);
+
+            if (!String.IsNullOrEmpty(qry)) {
+                fly["$where"] = " function(){return " + qry + "; }";
+            }
+
+            object result = null;
+            //what's the method call?
+            switch(fly.MethodCall){
+                case "Count":
+                    result = collection.Count(fly);
+                    break;
+                default:
+                    break;
+
+            }
+            return result;
+            //this has a method call associated with it - which one?
         }
+
     }
 }

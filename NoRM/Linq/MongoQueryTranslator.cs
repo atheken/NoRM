@@ -8,7 +8,7 @@ using System.Collections;
 using NoRM.BSON;
 
 namespace NoRM.Linq {
-    public class MongoQueryTranslator<T>:ExpressionVisitor {
+    public class MongoQueryTranslator:ExpressionVisitor {
         
         Expression _expression;
         bool collectionSet = false;
@@ -74,6 +74,7 @@ namespace NoRM.Linq {
             sb.Append(")");
             return b;
         }
+        
         private static Expression StripQuotes(Expression e) {
             while (e.NodeType == ExpressionType.Quote) {
                 e = ((UnaryExpression)e).Operand;
@@ -83,9 +84,8 @@ namespace NoRM.Linq {
         protected override Expression VisitConstant(ConstantExpression c) {
             IQueryable q = c.Value as IQueryable;
             if (q != null) {
-                // assume constant nodes w/ IQueryables are table references
-                //sb.Append("SELECT * FROM ");
-                //sb.Append(q.ElementType.Name);
+                //set the collection name
+                fly.CollectionName = q.ElementType.Name;
             } else if (c.Value == null) {
                 sb.Append("NULL");
             } else {
