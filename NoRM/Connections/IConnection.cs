@@ -98,7 +98,7 @@ namespace NoRM
         }
         public void SetPoolSize(int size)
         {
-            throw new MongoException("The PoolSize cannot be provided as an override option");
+            throw new MongoException("PoolSize cannot be provided as an override option");
         }
         public void SetPooled(bool pooled)
         {

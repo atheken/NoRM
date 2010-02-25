@@ -50,8 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BSONSerializerTest.cs" />
-    <Compile Include="ConnectionTests\ConnectionProviderFactoryTests.cs" />
-    <Compile Include="ConnectionTests\ConnectionStringBuilderTests.cs" />
+    <Compile Include="ConnectionsTests\ConnectionProviderFactoryTests.cs" />
+    <Compile Include="ConnectionsTests\ConnectionStringBuilderTests.cs" />
+    <Compile Include="ConnectionsTests\ConnectionTest.cs" />
     <Compile Include="FakeObject.cs" />
     <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />
