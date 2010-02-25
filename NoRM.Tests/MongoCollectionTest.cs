@@ -24,7 +24,7 @@ namespace NoRM.Tests
         {
             this._server = new MongoServer();
             this._db = this._server.GetDatabase("test" + Guid.NewGuid().ToString().Substring(0, 5));
-            
+
         }
 
         [TestFixtureTearDown]
@@ -63,5 +63,43 @@ namespace NoRM.Tests
             Assert.AreEqual(coll.FullyQualifiedName, stats.Ns);
 
         }
+
+        [Test]
+        public void No_Filter_Count_Returns_Correct_Count()
+        {
+         
+            var coll = this._db.GetCollection<MiniObject>("testing");
+            coll.Delete(new { });
+            for (int i = 0; i < 10; i++)
+            {
+                coll.Insert(new MiniObject() { _id=OID.NewOID()});
+            }
+
+            Assert.AreEqual(10, coll.Count());
+
+        }
+
+        [Test]
+        public void Filtered_Count_Returns_Correct_Count()
+        {
+            var o = OID.NewOID();
+
+            var coll = this._db.GetCollection<MiniObject>("testing");
+            coll.Delete(new { });
+            for (int i = 0; i < 10; i++)
+            {
+                if (i == 0)
+                {
+                    coll.Insert(new MiniObject() { _id =o });
+                }
+                else
+                {
+                    coll.Insert(new MiniObject() { _id = OID.NewOID() });
+                }
+            }
+
+            Assert.AreEqual(1, coll.Count(new { _id = o }));
+        }
+
     }
 }

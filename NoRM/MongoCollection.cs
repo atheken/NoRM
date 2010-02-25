@@ -8,6 +8,7 @@ using NoRM.Protocol.SystemMessages.Responses;
 using System.Linq.Expressions;
 using System.Reflection;
 using NoRM.Attributes;
+using NoRM.BSON;
 
 namespace NoRM
 {
@@ -276,6 +277,18 @@ namespace NoRM
             this.Insert(documentsToInsert.AsEnumerable());
         }
 
+        public long Count()
+        {
+            return this.Count(new { });
+        }
+
+        public long Count<U>(U query)
+        {
+            var f = this._db.GetCollection<Flyweight>("$cmd")
+                .FindOne(new { count = this._collectionName, query = query });
+            long retval = (long)f.Get<double>("n");
+            return retval;
+        }
 
         /// <summary>
         /// Insert these documents into the database.
