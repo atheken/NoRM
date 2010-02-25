@@ -11,7 +11,7 @@ namespace NoRM.Protocol.SystemMessages.Request
         {
             get { return _options.Size; }
         }
-        public int max
+        public long? max
         {
             get { return _options.Max; }
         }

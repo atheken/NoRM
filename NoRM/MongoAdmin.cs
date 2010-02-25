@@ -13,6 +13,10 @@ namespace NoRM
         private readonly MongoDatabase _database;
         private readonly IConnection _connection;
         
+        public MongoDatabase Database
+        {
+            get { return _database;}
+        }
         
         public MongoAdmin() : this("mongodb://127.0.0.1:27017") { }        
         public MongoAdmin(string connectionString)
