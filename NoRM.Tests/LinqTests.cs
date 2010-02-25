@@ -29,6 +29,11 @@
         {
             Provider.Mongo.Database.DropCollection(typeof(T).Name);            
         }
+        
+        public void CreateCappedCollection(string name)
+        {
+            Provider.Mongo.Database.CreateCollection(new CreateCollectionOptions(name));
+        }
     }
 
     internal class Address
@@ -280,6 +285,35 @@
             }
         }
 
+        [Fact]
+        public void OneProductShouldBeReturnedWhen3InDbWithFirst()
+        {
+            using(var session = new Session())
+            {
+                session.Drop<Product>();
+                session.CreateCappedCollection("Product"); //only capped collections return in insertion order
+                session.Add(new Product {Name = "Test1", Price = 10});
+                session.Add(new Product {Name = "Test2", Price = 22});
+                session.Add(new Product {Name = "Test3", Price = 33});
+                var result = session.Products.First();
+                Assert.Equal("Test1", result.Name);
+            }
+        }
+        
+        [Fact]
+        public void OneProductShouldBeReturnedWhen3InDbWithSingle()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+                session.Add(new Product {Name = "Test1", Price = 10});
+                session.Add(new Product {Name = "Test2", Price = 22});
+                session.Add(new Product {Name = "Test3", Price = 33});
+                var result = session.Products.SingleOrDefault(x => x.Price == 22);
+                Assert.Equal(22, result.Price);
+            }
+        }
+        
         [Fact]
         public void TwoProductsShouldBeReturnedWhen3InDbWithPriceGreaterThan10()
         {

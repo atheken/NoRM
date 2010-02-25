@@ -64,7 +64,6 @@ namespace NoRM
             return result != null && result.OK == 1.0;
         }
         
-                
         public GenericCommandResponse KillOperation(double operationId)
         {
             AssertConnectedToAdmin();

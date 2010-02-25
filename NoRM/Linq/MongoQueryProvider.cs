@@ -43,7 +43,15 @@ namespace NoRM.Linq
 
         S IQueryProvider.Execute<S>(Expression expression)
         {
-            return (S) Execute<S>(expression);
+            var collection = new MongoCollection<S>(typeof(S).Name, _mongo.Database, _mongo.ServerConnection());
+            var tranny = new MongoQueryTranslator<S>();
+            var qry = tranny.Translate(expression);
+            var fly = tranny.Flyweight;
+            if (!string.IsNullOrEmpty(qry))
+            {
+                fly["$where"] = qry;
+            }
+            return collection.FindOne(fly);
         }
 
         object IQueryProvider.Execute(Expression expression)
@@ -54,13 +62,14 @@ namespace NoRM.Linq
         public IEnumerable<T> Execute<T>(Expression expression)
         {
             var collection = new MongoCollection<T>(typeof(T).Name, _mongo.Database, _mongo.ServerConnection());
-
+            expression = PartialEvaluator.Eval(expression);
+            
             //pass off the to the translator, which will set the query stuff
             var tranny = new MongoQueryTranslator<T>();
             var qry = tranny.Translate(expression);
 
             //execute
-            if (!String.IsNullOrEmpty(qry))
+            if (!string.IsNullOrEmpty(qry))
             {
                 var fly = new Flyweight();
                 fly["$where"] = qry;
