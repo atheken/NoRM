@@ -49,10 +49,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConnectionsTests\AuthenticatedFixture.cs" />
     <Compile Include="BSONSerializerTest.cs" />
     <Compile Include="ConnectionsTests\ConnectionProviderFactoryTests.cs" />
     <Compile Include="ConnectionsTests\ConnectionStringBuilderTests.cs" />
     <Compile Include="ConnectionsTests\ConnectionTest.cs" />
+    <Compile Include="ConnectionsTests\NormalConnectionProviderAuthenticationTests.cs" />
+    <Compile Include="ConnectionsTests\NormalConnectionProviderTests.cs" />
     <Compile Include="FakeObject.cs" />
     <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />

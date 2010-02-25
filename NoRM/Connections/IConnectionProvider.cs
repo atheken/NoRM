@@ -21,9 +21,10 @@ namespace NoRM
 
         protected IConnection CreateNewConnection()
         {
-            var connection = new Connection(ConnectionString);
+            var connection = new Connection(ConnectionString);            
             if (!Authenticate(connection))
             {
+                Close(connection);
                 throw new MongoException("Authentication Failed");
             }
             return connection;
@@ -37,8 +38,7 @@ namespace NoRM
                 return true;
             }
 
-            var nonce = new MongoCollection<GetNonceResponse>("$cmd", new MongoDatabase("admin", connection), connection)
-                .FindOne(new {getnonce = true});
+            var nonce = new MongoCollection<GetNonceResponse>("$cmd", new MongoDatabase("admin", connection), connection).FindOne(new {getnonce = 1});
 
             if (nonce.OK == 1)
             {
