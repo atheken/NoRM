@@ -1,14 +1,25 @@
 namespace NoRM.Tests
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Xunit;
 
-    public class MongoDatabaseTest
+    public class MongoDatabaseTest : IDisposable
     {
+        private const string _connectionString = "mongodb://localhost/NoRMTests?pooling=false";
+        public void Dispose()
+        {
+            using (var admin = new MongoAdmin(_connectionString))
+            {
+                admin.DropDatabase();
+            }      
+        }
+        
         [Fact]
         public void CreateCollectionCreatesACappedCollection()
         {
-            using (var mongo = new Mongo("mongodb://localhost/NoRMTests?pooling=false"))
+            using (var mongo = new Mongo(_connectionString))
             {
                 mongo.Database.DropCollection("capped");
                 Assert.Equal(true, mongo.Database.CreateCollection(new CreateCollectionOptions("capped") { Max = 3 }));
@@ -23,7 +34,7 @@ namespace NoRM.Tests
         [Fact]
         public void CreateCollectionThrowsExceptionIfAlreadyExistsWithStrictMode()
         {
-            using (var mongo = new Mongo("mongodb://localhost/NoRMTests?pooling=false"))
+            using (var mongo = new Mongo(_connectionString))
             {
                 mongo.Database.DropCollection("capped");
                 mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
@@ -34,13 +45,39 @@ namespace NoRM.Tests
         [Fact]
         public void CreateCollectionReturnsFalseIfAlreadyExistsWithoutStrictMode()
         {
-            using (var mongo = new Mongo("mongodb://localhost/NoRMTests?pooling=false&strict=false"))
+            using (var mongo = new Mongo(_connectionString + "&strict=false"))
             {
                 mongo.Database.DropCollection("capped");
                 mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
                 Assert.Equal(false, mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));                
             }
         }      
+        
+        [Fact]
+        public void GetsAllCollections()
+        {
+            var expected = new List<string> { "NoRMTests.temp", "NoRMTests.temp2" };
+            using (var mongo = new Mongo(_connectionString))
+            {
+                var database = mongo.Database;
+                database.CreateCollection(new CreateCollectionOptions("temp"));
+                database.CreateCollection(new CreateCollectionOptions("temp2"));
+                foreach (var collection in database.GetAllCollections())
+                {
+                    Assert.Contains(collection.Name, expected);
+                    expected.Remove(collection.Name);
+                }
+            }
+            Assert.Equal(0, expected.Count);
+        }
+        [Fact]
+        public void GetCollectionsReturnsNothingIfEmpty()
+        {            
+            using (var mongo = new Mongo(_connectionString))
+            {                
+                Assert.Equal(0, mongo.Database.GetAllCollections().Count());                
+            }            
+        }
     }
 }
 

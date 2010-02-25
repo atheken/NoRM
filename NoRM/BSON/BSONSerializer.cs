@@ -1174,7 +1174,10 @@ namespace NoRM.BSON
         private static object CastIntoEnumValueIfNeccessary(Type proptype, object retval)
         {
             //this is definitely a nullable type, therefore:
-            var innerparam = proptype.GetGenericArguments().First();
+            var genericArgument = proptype.GetGenericArguments();
+            if (genericArgument.Length == 0) { return retval; }
+
+            var innerparam = genericArgument.First();
             if (innerparam.IsEnum)
             {
                 retval = Enum.ToObject(innerparam, retval);

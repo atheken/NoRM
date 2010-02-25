@@ -1,8 +1,6 @@
 ﻿namespace NoRM
 {
-    using System;
-    using System.Collections.Generic;
-    using Protocol.Messages;
+    using System.Collections.Generic;   
     using Protocol.SystemMessages;
     using Protocol.SystemMessages.Request;
     using Protocol.SystemMessages.Responses;
@@ -15,12 +13,9 @@
         public MongoDatabase(string databaseName, IConnection connection)
         {
             _databaseName = databaseName;
-            _connection = connection;
-            SizeOnDisk = 0.0;
+            _connection = connection;         
         }
-
-        public Double SizeOnDisk { get; set; }
-
+        
         public string DatabaseName
         {
             get { return _databaseName; }
