@@ -63,7 +63,7 @@ namespace NoRM.Linq
             if (!String.IsNullOrEmpty(qry))
             {
                 var fly = new Flyweight();
-                fly["$where"] = " function(){return " + qry + "; }";
+                fly["$where"] = qry;
                 return collection.Find(fly);
             }
 
