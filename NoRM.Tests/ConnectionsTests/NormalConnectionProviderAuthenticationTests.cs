@@ -13,8 +13,7 @@ namespace NoRM.Tests
         }
 
 
-        //this test is not passing against 1.3.2. Appears to be a server bug. Openend an issue at:
-        //http://jira.mongodb.org/browse/SERVER-678
+        //won't pass on some 1.3.x builds of the server, but will pass against newest, or stable (1.2.3).
         [Fact]
         public void AuthenticatesWithProperCredentials()
         {

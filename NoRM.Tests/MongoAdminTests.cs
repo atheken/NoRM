@@ -51,7 +51,7 @@ namespace NoRM.Tests
                 {                    
                     var data = stream.ReadToEnd();
                     gitVersion = Regex.Match(data, "git version: ([a-f0-9]+)\r\n").Groups[1].Value;
-                    version = Regex.Match(data, "db version v([\\d\\.]+),").Groups[1].Value;
+                    version = Regex.Match(data, "db version v([^,]+),").Groups[1].Value;
                 }
             }
             
