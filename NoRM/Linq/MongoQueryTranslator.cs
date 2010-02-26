@@ -7,26 +7,33 @@ using System.Reflection;
 using System.Collections;
 using NoRM.BSON;
 
-namespace NoRM.Linq {
-    public class MongoQueryTranslator<T>:ExpressionVisitor {
-        
+namespace NoRM.Linq
+{
+    public class MongoQueryTranslator<T> : ExpressionVisitor
+    {
+
         Expression _expression;
         bool collectionSet = false;
         StringBuilder sb;
         Flyweight fly;
 
-        public object FlyWeight {
-            get {
+        public object FlyWeight
+        {
+            get
+            {
                 return fly;
             }
         }
-        public string WhereExpression {
-            get {
+        public string WhereExpression
+        {
+            get
+            {
                 return sb.ToString();
             }
         }
 
-        public string Translate(Expression exp) {
+        public string Translate(Expression exp)
+        {
             this.sb = new StringBuilder();
             fly = new Flyweight();
             //partial evaluator will help with converting system level calls
@@ -36,10 +43,12 @@ namespace NoRM.Linq {
             return sb.ToString();
         }
 
-        protected override Expression VisitBinary(BinaryExpression b) {
+        protected override Expression VisitBinary(BinaryExpression b)
+        {
             sb.Append("(");
             this.Visit(b.Left);
-            switch (b.NodeType) {
+            switch (b.NodeType)
+            {
                 case ExpressionType.And:
                 case ExpressionType.AndAlso:
                     sb.Append(" && ");
@@ -74,22 +83,31 @@ namespace NoRM.Linq {
             sb.Append(")");
             return b;
         }
-        private static Expression StripQuotes(Expression e) {
-            while (e.NodeType == ExpressionType.Quote) {
+        private static Expression StripQuotes(Expression e)
+        {
+            while (e.NodeType == ExpressionType.Quote)
+            {
                 e = ((UnaryExpression)e).Operand;
             }
             return e;
         }
-        protected override Expression VisitConstant(ConstantExpression c) {
+        protected override Expression VisitConstant(ConstantExpression c)
+        {
             IQueryable q = c.Value as IQueryable;
-            if (q != null) {
+            if (q != null)
+            {
                 // assume constant nodes w/ IQueryables are table references
                 //sb.Append("SELECT * FROM ");
                 //sb.Append(q.ElementType.Name);
-            } else if (c.Value == null) {
+            }
+            else if (c.Value == null)
+            {
                 sb.Append("NULL");
-            } else {
-                switch (Type.GetTypeCode(c.Value.GetType())) {
+            }
+            else
+            {
+                switch (Type.GetTypeCode(c.Value.GetType()))
+                {
                     case TypeCode.Boolean:
                         sb.Append(((bool)c.Value) ? 1 : 0);
                         break;
@@ -113,15 +131,20 @@ namespace NoRM.Linq {
             return c;
         }
 
-        protected override Expression VisitMethodCall(MethodCallExpression m) {
-            
-            if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where") {
+        protected override Expression VisitMethodCall(MethodCallExpression m)
+        {
+
+            if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
+            {
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
                 return m;
-            } else if (m.Method.DeclaringType == typeof(string)){
+            }
+            else if (m.Method.DeclaringType == typeof(string))
+            {
 
-                switch (m.Method.Name) {
+                switch (m.Method.Name)
+                {
                     case "StartsWith":
                         sb.Append("(");
                         this.Visit(m.Object);
@@ -162,62 +185,82 @@ namespace NoRM.Linq {
                         return m;
 
                 }
-            } else if (m.Method.DeclaringType == typeof(DateTime)) {
+            }
+            else if (m.Method.DeclaringType == typeof(DateTime))
+            {
 
-                switch (m.Method.Name) {
+                switch (m.Method.Name)
+                {
 
                 }
-            } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("First")) {
-
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("First"))
+            {
                 //just need the first item in the collection. The collection should be a constant on 
                 //the first arg
-                fly.Limit = 1;
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                if (lambda != null) {
+                fly["$limit"] = 1;
+
+                var lambda = StripQuotes(m.Arguments[1]) as LambdaExpression;
+                if (lambda != null)
+                {
                     this.Visit(lambda.Body);
-                } else {
+                }
+                else
+                {
                     this.Visit(m.Arguments[0]);
                 }
                 return m;
 
-            } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("SingleOrDefault")) {
-                fly.Limit = 1;
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                if (lambda != null) {
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("SingleOrDefault"))
+            {
+                fly["$limit"] = 1;
+                var lambda = StripQuotes(m.Arguments[1]) as LambdaExpression;
+                if (lambda != null)
+                {
                     this.Visit(lambda.Body);
-                } else {
+                }
+                else
+                {
                     this.Visit(m.Arguments[0]);
                 }
                 return m;
-            
             }
             //for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
 
-        protected override Expression VisitMemberAccess(MemberExpression m) {
+        protected override Expression VisitMemberAccess(MemberExpression m)
+        {
 
             var fullName = m.ToString().Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter) {
+            if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
+            {
                 sb.Append("this." + m.Member.Name);
                 return m;
-            }else if (m.Member.DeclaringType == typeof(string)) {
-                switch (m.Member.Name) {
+            }
+            else if (m.Member.DeclaringType == typeof(string))
+            {
+                switch (m.Member.Name)
+                {
                     case "Length":
                         sb.Append("LEN(");
                         this.Visit(m.Expression);
                         sb.Append(")");
                         return m;
                 }
-            } else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset)) {
-                
+            }
+            else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset))
+            {
+
                 //this is a DateProperty hanging off the property - clip the last 2 elements
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 2).ToArray();
                 var propName = String.Join(".", fixedName);
 
                 //now we get to do some tricky fun with javascript
-                switch (m.Member.Name) {
+                switch (m.Member.Name)
+                {
                     case "Day":
                         this.Visit(m.Expression);
                         sb.Append(".getDate()");
@@ -247,7 +290,9 @@ namespace NoRM.Linq {
                         sb.Append(".getDay()");
                         return m;
                 }
-            } else {
+            }
+            else
+            {
                 //don't want the first - that's the lambda thing
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
 

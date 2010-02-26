@@ -73,7 +73,6 @@ namespace NoRM.Tests {
             Assert.AreEqual(1, products.Count);
 
         }
-
         [Test]
         public void Supplier_Should_Be_Queryble_By_Address_And_Work_With_Or_Expression() {
 

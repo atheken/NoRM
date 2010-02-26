@@ -11,11 +11,6 @@ namespace NoRM.Tests
     [Category("Hits MongoDB")]
     public class MongoCollectionTest
     {
-        public class MiniObject
-        {
-            public OID _id { get; set; }
-        }
-
         private MongoServer _server;
         private MongoDatabase _db;
 

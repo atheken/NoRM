@@ -9,11 +9,7 @@ using NoRM.BSON.DbTypes;
 
 namespace NoRM.Tests
 {
-    public class MiniObject
-    {
-        public OID ID { get; set; }
-    }
-
+    
     [TestFixture]
     [Category("Hits MongoDB")]
     public class MongoDatabaseTest

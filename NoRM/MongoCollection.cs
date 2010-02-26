@@ -89,7 +89,7 @@ namespace NoRM
                 if (MongoCollection<T>._updateable == null)
                 {
                     if (typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y =>
-                        y.Name == "_id" || y.Name == "ID" || 
+                        y.Name == "_id" || y.Name == "ID" ||
                         y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute)))
                     {
                         MongoCollection<T>._updateable = true;
@@ -266,9 +266,37 @@ namespace NoRM
             return false;
         }
 
+        /// <summary>
+        /// Return all documents matching the template
+        /// </summary>
+        /// <remarks>
+        /// Ok, not all documents, just all documents up to Int32.MaxValue - if you bring that many back, you've crashed. Sorry.
+        /// </remarks>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <returns></returns>
         public IEnumerable<T> Find<U>(U template)
         {
             return this.Find(template, Int32.MaxValue);
+        }
+
+        public IEnumerable<T> Find(Flyweight template)
+        {
+            int limit = 0;
+            int skip = 0;
+
+            var hasLimit = template.TryGet<int>("$limit", out limit);
+            var hasSkip = template.TryGet<int>("$skip", out skip);
+
+            if (!hasLimit)
+            {
+                limit = Int32.MaxValue;
+            }
+
+            template.Delete("$limit");
+            template.Delete("$skip");
+
+            return this.Find(template, limit, skip, this.FullyQualifiedName);
         }
 
         /// <summary>
@@ -280,10 +308,15 @@ namespace NoRM
         /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit)
         {
-            return Find(template, limit, this.FullyQualifiedName);
+            return Find(template, limit, 0, this.FullyQualifiedName);
         }
 
         public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName)
+        {
+            return this.Find(template, limit, 0, fullyQualifiedName);
+        }
+
+        public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
         {
             var qm = new QueryMessage<T, U>(this._server, fullyQualifiedName);
             qm.NumberToTake = limit;
@@ -319,7 +352,7 @@ namespace NoRM
         /// <param name="initialValue"></param>
         /// <param name="reduce"></param>
         /// <returns></returns>
-        public object GroupBy<X,Y,Z>(X key, Y filter, Z initialValue, 
+        public object GroupBy<X, Y, Z>(X key, Y filter, Z initialValue,
             String reduce)
         {
             return null;
@@ -343,9 +376,10 @@ namespace NoRM
         public long Count<U>(U query)
         {
             var f = this._db.GetCollection<Flyweight>("$cmd")
-                .FindOne(new { 
-                    count = this._collectionName, 
-                    query = query 
+                .FindOne(new
+                {
+                    count = this._collectionName,
+                    query = query
                 });
             long retval = (long)f.Get<double>("n");
             return retval;

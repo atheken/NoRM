@@ -12,40 +12,6 @@ namespace NoRM.Tests
     [Category("In Memory Only")]
     public class BSONSerializerTest
     {
-        
-        protected enum Flags32
-        {
-            FlagNone = 0,
-            FlagOn = 1,
-            FlagOff = 2
-        }
-
-        protected enum Flags64 : long
-        {
-            FlagNone = 0,
-            FlagOn = 1,
-            FlagOff = 2
-        }
-
-        protected class GeneralDTO
-        {
-            public double? Pi { get; set; }
-            public int? AnInt { get; set; }
-            public String Title { get; set; }
-            public bool? ABoolean { get; set; }
-            public byte[] Bytes { get; set; }
-            public Guid? AGuid { get; set; }
-            public Regex ARex { get; set; }
-            public DateTime? ADateTime { get; set; }
-            public GeneralDTO Nester { get; set; }
-            public ScopedCode Code {get;set;}
-            public Flags32? Flags32 { get; set; }
-            public Flags64? Flags64 { get; set; }
-
-            [MongoIgnore]
-            public int IgnoredProperty { get; set; }
-        }
-
         [Test]
         public void Serialization_Of_Enum_Is_Not_Lossy()
         {
@@ -89,7 +55,6 @@ namespace NoRM.Tests
             var dummy = new GeneralDTO { Title = "Testing" };
             Assert.IsNotEmpty(BSONSerializer.Serialize(dummy));
         }
-
 
         [Test]
         public void Serialization_Of_Dates_Has_Millisecond_Precision()
@@ -302,6 +267,5 @@ namespace NoRM.Tests
             }
         }
 
-        
     }
 }

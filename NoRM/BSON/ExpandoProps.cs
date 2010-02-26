@@ -134,9 +134,9 @@ namespace NoRM.BSON
         /// <param name="obj"></param>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        public static T Get<T>(this IFlyweight obj, String propertyName) where T : class
+        public static T Get<T>(this IFlyweight obj, String propertyName)
         {
-            T retval = null;
+            T retval = default(T);
 
             ExpandoProps._dictionaryLock.AcquireReaderLock(30000);
             var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
@@ -144,7 +144,35 @@ namespace NoRM.BSON
             {
                 var value = dict.Value.Get<T>(propertyName);
             }
+            ExpandoProps._dictionaryLock.ReleaseReaderLock();
+            return retval;
+        }
 
+        /// <summary>
+        /// Attempt to read a property of the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static bool TryGet<T>(this IFlyweight obj, String propertyName, out T value)
+        {
+            var retval = false;
+            value = default(T);
+
+            ExpandoProps._dictionaryLock.AcquireReaderLock(30000);
+            try
+            {
+                var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
+                if (dict.Key != null && dict.Value != null)
+                {
+                    value = (T)dict.Value.Get<T>(propertyName);
+                }
+                retval = true;
+            }
+            catch { 
+                //no worries.
+            }
             ExpandoProps._dictionaryLock.ReleaseReaderLock();
             return retval;
         }
