@@ -127,6 +127,11 @@ namespace NoRM.Tests
             Assert.Throws<FormatException>(() => ConnectionStringBuilder.Create("mongodb://localhost?poolsize=fifteen"));
         }
         [Fact]
+        public void ThrowsExceptionForInvalidTimeoutValue()
+        {
+            Assert.Throws<FormatException>(() => ConnectionStringBuilder.Create("mongodb://localhost?timeout=infinite"));
+        }
+        [Fact]
         public void StrictModeIsOnByDefault()
         {
             Assert.Equal(true, ConnectionStringBuilder.Create("mongodb://localhost").StrictMode);
@@ -177,7 +182,17 @@ namespace NoRM.Tests
         [Fact]
         public void ParsesPoolSizeOption()
         {
-            Assert.Equal(24, ConnectionStringBuilder.Create("mongodb://localhost?poolsize=24").PoolSize);            
+            Assert.Equal(24, ConnectionStringBuilder.Create("mongodb://localhost?poolsize=24").PoolSize);
+        }
+        [Fact]
+        public void TimeoutIs30ByDefault()
+        {
+            Assert.Equal(30, ConnectionStringBuilder.Create("mongodb://localhost").Timeout);
+        }
+        [Fact]
+        public void ParsesTimeoutOption()
+        {
+            Assert.Equal(14, ConnectionStringBuilder.Create("mongodb://localhost?timeout=14").Timeout);
         }
                 
         [Fact]

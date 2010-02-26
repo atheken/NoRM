@@ -30,6 +30,15 @@ namespace NoRM.Tests
             }
         }
         [Fact]
+        public void ThrowsExceptionWhenTryingToOverrideTimeout()
+        {
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://localhost/")))
+            {
+                var ex = Assert.Throws<MongoException>(() => connection.LoadOptions("timeout=23"));
+                Assert.Equal("Timeout cannot be provided as an override option", ex.Message);
+            }
+        }
+        [Fact]
         public void OverridesStrictMode()
         {
             using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://localhost/?strict=true")))

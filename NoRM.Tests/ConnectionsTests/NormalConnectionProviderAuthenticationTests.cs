@@ -13,9 +13,8 @@ namespace NoRM.Tests
         }
 
 
-        //this test is not passing, getnounce fails
-        //if you set a breakpoint before trying to getnounce, connect to the db from a shell, and issue any command like show users (which will fail due to authentication) then let the code through, this will pass
-        //this may be a mongo bug, because its reproducible on their shell
+        //this test is not passing against 1.3.2. Appears to be a server bug. Openend an issue at:
+        //http://jira.mongodb.org/browse/SERVER-678
         [Fact]
         public void AuthenticatesWithProperCredentials()
         {

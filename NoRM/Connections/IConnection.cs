@@ -104,5 +104,9 @@ namespace NoRM
         {
             throw new MongoException("Connection pooling cannot be provided as an override option");
         }
+        public void SetTimeout(int timeout)
+        {
+            throw new MongoException("Timeout cannot be provided as an override option");
+        }
     }
 }

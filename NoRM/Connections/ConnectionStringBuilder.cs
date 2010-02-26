@@ -13,6 +13,7 @@ namespace NoRM
                   {"expando", (v, b) => b.SetEnableExpandoProperties(bool.Parse(v))},
                   {"pooling", (v, b) => b.SetPooled(bool.Parse(v))},
                   {"poolsize", (v, b) => b.SetPoolSize(int.Parse(v))},
+                  {"timeout", (v, b) => b.SetTimeout(int.Parse(v))},
               };            
         private const int DEFAULT_PORT = 27017;
         private const string DEFAULT_DATABASE = "admin";
@@ -31,6 +32,7 @@ namespace NoRM
         public bool StrictMode{ get; private set; }    
         public bool Pooled{ get; private set;}   
         public int PoolSize{ get; private set;}
+        public int Timeout { get; private set; }
         
         private ConnectionStringBuilder(){}
         
@@ -46,10 +48,11 @@ namespace NoRM
             var builder = new ConnectionStringBuilder
                               {
                                   QueryTimeout = 30,
+                                  Timeout = 30,
                                   EnableExpandoProperties = false,
                                   StrictMode = true,
                                   Pooled =  true,
-                                  PoolSize = 25,
+                                  PoolSize = 25,                                  
                               };
             var coreBuilder = new StringBuilder();
             builder.BuildAuthentication(sb, coreBuilder)
@@ -152,6 +155,10 @@ namespace NoRM
         public void SetPooled(bool pooled)
         {
             Pooled = pooled;
+        }
+        public void SetTimeout(int timeout)
+        {
+            Timeout = timeout;
         }
     }
 }

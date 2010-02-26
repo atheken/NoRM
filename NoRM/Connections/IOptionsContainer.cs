@@ -7,5 +7,6 @@ namespace NoRM
         void SetStrictMode(bool strict);
         void SetPoolSize(int size);
         void SetPooled(bool pooled);
+        void SetTimeout(int timeout);
     }
 }
