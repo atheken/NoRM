@@ -39,7 +39,7 @@
             {
                 if (_updateable == null)
                 {
-                    _updateable = typeof (T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y => y.Name == "_id" || y.Name == "ID" || y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute));
+                    _updateable = typeof (T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y => y.Name == "_id" || string.Compare(y.Name, "id", true) == 0 || y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute));
                 }
                 return _updateable.Value;
             }
