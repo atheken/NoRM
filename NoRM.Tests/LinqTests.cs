@@ -5,77 +5,69 @@ using System.Text;
 using NoRM.Linq;
 using NUnit.Framework;
 
-namespace NoRM.Tests {
+namespace NoRM.Tests
+{
 
-    class Session {
-        MongoQueryProvider _provider;
-        public Session() {
-            _provider = new MongoQueryProvider("Northwind");
+    class NorthwindSession : Session
+    {
+        public NorthwindSession()
+            : base("Northwind")
+        {
         }
-
-        public IQueryable<Product> Products {
-            get {
-                return new MongoQuery<Product>(_provider);
+        public IQueryable<Product> Products
+        {
+            get
+            {
+                return this.GetCollection<Product>();
             }
-        }
-
-        public void Add<T>(T item) where T:class, new() {
-            var coll = _provider.DB.GetCollection<T>();
-            
-            //see if the item exists
-            coll.Insert(item);
-            
-        }
-        public void Update<T>(T item) where T : class, new() {
-            var coll = _provider.DB.GetCollection<T>();
-
-            //see if the item exists
-            coll.UpdateOne(item,item);
-
-        }
-        public void Drop<T>() {
-            _provider.DB.DropCollection(typeof(T).Name);
         }
     }
 
-    class Address {
+    class Address
+    {
         public string Street { get; set; }
         public string City { get; set; }
         public string State { get; set; }
         public string Zip { get; set; }
     }
-    class Supplier {
+    class Supplier
+    {
         public string Name { get; set; }
         public DateTime CreatedOn { get; set; }
         public Address Address { get; set; }
-        public Supplier() {
+        public Supplier()
+        {
             Address = new Address();
             CreatedOn = DateTime.Now;
         }
     }
-    class Product {
+    class Product
+    {
         public object ID { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
         public Supplier Supplier { get; set; }
         public DateTime Available { get; set; }
-        public Product() {
+        public Product()
+        {
             Supplier = new Supplier();
         }
     }
-    
+
     [TestFixture]
-    public class LinqTests {
+    public class LinqTests
+    {
 
         [Test]
-        public void Three_Products_Should_Be_Returned_When_3_In_Db_With_No_Expression() {
+        public void Three_Products_Should_Be_Returned_When_3_In_Db_With_No_Expression()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
-            session.Add(new Product(){Name="Test1",Price=10});
-            session.Add(new Product(){Name="Test2",Price=22});
-            session.Add(new Product(){Name="Test3",Price=33});
-            
+            session.Add(new Product() { Name = "Test1", Price = 10 });
+            session.Add(new Product() { Name = "Test2", Price = 22 });
+            session.Add(new Product() { Name = "Test3", Price = 33 });
+
             var products = session.Products.ToList();
 
             Assert.AreEqual(3, products.Count);
@@ -83,8 +75,9 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void One_Product_Should_Be_Returned_When_3_In_DB_With_First() {
-            var session = new Session();
+        public void One_Product_Should_Be_Returned_When_3_In_DB_With_First()
+        {
+            var session = new NorthwindSession();
             session.Drop<Product>();
             session.Add(new Product() { Name = "Test1", Price = 10 });
             session.Add(new Product() { Name = "Test2", Price = 22 });
@@ -96,8 +89,9 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void One_Product_Should_Be_Returned_When_3_In_DB_With_Single() {
-            var session = new Session();
+        public void One_Product_Should_Be_Returned_When_3_In_DB_With_Single()
+        {
+            var session = new NorthwindSession();
             session.Drop<Product>();
             session.Add(new Product() { Name = "Test1", Price = 10 });
             session.Add(new Product() { Name = "Test2", Price = 22 });
@@ -110,9 +104,10 @@ namespace NoRM.Tests {
 
 
         [Test]
-        public void Two_Products_Should_Be_Returned_When_3_In_Db_With_Price_GreaterThan_10() {
+        public void Two_Products_Should_Be_Returned_When_3_In_Db_With_Price_GreaterThan_10()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
             session.Add(new Product() { Name = "Test3", Price = 10 });
             session.Add(new Product() { Name = "Test4", Price = 22 });
@@ -124,24 +119,26 @@ namespace NoRM.Tests {
 
         }
         [Test]
-        public void One_Products_Should_Be_Returned_When_3_In_Db_With_Price_GreaterThan_10_Less_Than_30() {
+        public void One_Products_Should_Be_Returned_When_3_In_Db_With_Price_GreaterThan_10_Less_Than_30()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
             session.Add(new Product() { Name = "Test3", Price = 10 });
             session.Add(new Product() { Name = "Test4", Price = 22 });
             session.Add(new Product() { Name = "Test5", Price = 33 });
 
-            var products = session.Products.Where(x => x.Price > 10 && x.Price <30).ToList();
+            var products = session.Products.Where(x => x.Price > 10 && x.Price < 30).ToList();
 
             Assert.AreEqual(1, products.Count);
 
         }
 
         [Test]
-        public void Two_Products_Should_Be_Returned_When_3_In_Db_With_Price_LessThan_10_Or_GreaterThan_30() {
+        public void Two_Products_Should_Be_Returned_When_3_In_Db_With_Price_LessThan_10_Or_GreaterThan_30()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
             session.Add(new Product() { Name = "Test3", Price = 10 });
             session.Add(new Product() { Name = "Test4", Price = 22 });
@@ -155,9 +152,10 @@ namespace NoRM.Tests {
 
 
         [Test]
-        public void Two_Products_Should_Be_Returned_When_StartsWith_X() {
+        public void Two_Products_Should_Be_Returned_When_StartsWith_X()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "XTest3", Price = 10 });
@@ -170,9 +168,10 @@ namespace NoRM.Tests {
 
         }
         [Test]
-        public void Two_Products_Should_Be_Returned_When_EndsWith_X() {
+        public void Two_Products_Should_Be_Returned_When_EndsWith_X()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10 });
@@ -185,9 +184,10 @@ namespace NoRM.Tests {
 
         }
         [Test]
-        public void Two_Products_Should_Be_Returned_When_Contains_X() {
+        public void Two_Products_Should_Be_Returned_When_Contains_X()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "TestX3", Price = 10 });
@@ -201,9 +201,10 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void Four_Products_Should_Be_Returned_When_Starts_Or_EndsWith_X() {
+        public void Four_Products_Should_Be_Returned_When_Starts_Or_EndsWith_X()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10 });
@@ -218,9 +219,10 @@ namespace NoRM.Tests {
 
         }
         [Test]
-        public void One_Products_Should_Be_Returned_When_Starts_And_EndsWith_X() {
+        public void One_Products_Should_Be_Returned_When_Starts_And_EndsWith_X()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10 });
@@ -236,9 +238,10 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void One_Products_Should_Be_Returned_When_IndexOf_X_Equal_2() {
+        public void One_Products_Should_Be_Returned_When_IndexOf_X_Equal_2()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10 });
@@ -254,9 +257,10 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void One_Products_Should_Be_Returned_When_IsNullOrEmpty_With_EmptyString() {
+        public void One_Products_Should_Be_Returned_When_IsNullOrEmpty_With_EmptyString()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10 });
@@ -272,9 +276,10 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void One_Products_Should_Be_Returned_When_IsNullOrEmpty_With_Null() {
+        public void One_Products_Should_Be_Returned_When_IsNullOrEmpty_With_Null()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10 });
@@ -290,26 +295,28 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void One_Products_Should_Be_Returned_When_Available_GreaterThan_Today() {
+        public void One_Products_Should_Be_Returned_When_Available_GreaterThan_Today()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
-            session.Add(new Product() { Name = "Test3X", Price = 10, Available=DateTime.Now.AddDays(-1) });
+            session.Add(new Product() { Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1) });
             session.Add(new Product() { Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1) });
             session.Add(new Product() { Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1) });
             session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1) });
 
-            var products = session.Products.Where(x => x.Available >DateTime.Now).ToList();
+            var products = session.Products.Where(x => x.Available > DateTime.Now).ToList();
 
             Assert.AreEqual(1, products.Count);
 
         }
 
         [Test]
-        public void Three_Products_Should_Be_Returned_When_Available_LessThan_Today() {
+        public void Three_Products_Should_Be_Returned_When_Available_LessThan_Today()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1) });
@@ -324,9 +331,10 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void One_Products_Should_Be_Returned_When_Available_LessThan_Today_Plus1() {
+        public void One_Products_Should_Be_Returned_When_Available_LessThan_Today_Plus1()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1) });
@@ -341,9 +349,10 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void One_Products_Should_Be_Returned_When_Available_Day_Is_Monday() {
+        public void One_Products_Should_Be_Returned_When_Available_Day_Is_Monday()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10, Available = DateTime.Now });
@@ -354,30 +363,32 @@ namespace NoRM.Tests {
             session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(5) });
             session.Add(new Product() { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(6) });
 
-            var products = session.Products.Where(x => x.Available.DayOfWeek==DayOfWeek.Monday).ToList();
+            var products = session.Products.Where(x => x.Available.DayOfWeek == DayOfWeek.Monday).ToList();
 
             Assert.AreEqual(1, products.Count);
 
         }
         [Test]
-        public void One_Products_Should_Be_Returned_When_Available_Day_Is_Fifth() {
+        public void One_Products_Should_Be_Returned_When_Available_Day_Is_Fifth()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
-            session.Add(new Product() { Name = "Test3X", Price = 10, Available = new DateTime(2000,2,5) });
-            session.Add(new Product() { Name = "Test4X", Price = 22, Available = new DateTime(2000,2, 6) });
+            session.Add(new Product() { Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5) });
+            session.Add(new Product() { Name = "Test4X", Price = 22, Available = new DateTime(2000, 2, 6) });
 
-            var products = session.Products.Where(x => x.Available.Day==5).ToList();
+            var products = session.Products.Where(x => x.Available.Day == 5).ToList();
 
             Assert.AreEqual(1, products.Count);
 
         }
 
         [Test]
-        public void One_Products_Should_Be_Returned_When_Available_Year_Is_2000() {
+        public void One_Products_Should_Be_Returned_When_Available_Year_Is_2000()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5) });
@@ -390,9 +401,10 @@ namespace NoRM.Tests {
         }
 
         [Test]
-        public void One_Products_Should_Be_Returned_When_Available_Month_Is_2() {
+        public void One_Products_Should_Be_Returned_When_Available_Month_Is_2()
+        {
 
-            var session = new Session();
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5) });
