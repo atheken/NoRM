@@ -1,5 +1,6 @@
 ﻿namespace NoRM
 {
+    using System;
     using System.Collections.Generic;   
     using Protocol.SystemMessages;
     using Protocol.SystemMessages.Request;
@@ -38,39 +39,51 @@
 
         public CollectionStatistics GetCollectionStatistics(string collectionName)
         {
-            var result = GetCollection<CollectionStatistics>("$cmd")
-                .FindOne(new CollectionStatistics {collstats = collectionName});
-
-            if (result.OK != 1d && _connection.StrictMode)
+            try
             {
-                throw new MongoException("Could not get statistics, are you sure the collection exists");
+                return GetCollection<CollectionStatistics>("$cmd").FindOne(new CollectionStatistics {collstats = collectionName});                
             }
-            return result;          
+            catch (MongoException exception)
+            {
+                if (_connection.StrictMode || exception.Message != "ns not found")
+                {
+                    throw;
+                }
+                return null;
+            }            
         }
 
-        public DroppedCollectionResponse DropCollection(string collectionName)
+        public bool DropCollection(string collectionName)
         {
-            var result = GetCollection<DroppedCollectionResponse>("$cmd")
-                .FindOne(new DroppedCollectionResponse {drop = collectionName});            
-                
-            if (result.OK != 1d && _connection.StrictMode)
+            try
             {
-                throw new MongoException("Drop failed, are you sure the collection exists");                
+                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new DroppedCollectionResponse {drop = collectionName}).OK == 1;                
             }
-            return result;
+            catch (MongoException exception)
+            {
+                if (_connection.StrictMode || exception.Message != "ns not found")
+                {
+                    throw;
+                }
+                return false;
+            }
         }
 
         public bool CreateCollection(CreateCollectionOptions options)
         {
-            var success = GetCollection<GenericCommandResponse>("$cmd")
-                       .FindOne(new CreateCollectionRequest(options)).OK == 1d;
-                       
-            if (!success && _connection.StrictMode)
+
+            try
             {
-                throw new MongoException("Creation failed, the collection may already exist");
+                return GetCollection<GenericCommandResponse>("$cmd").FindOne(new CreateCollectionRequest(options)).OK == 1;                
             }
-            return success;
-            
+            catch (MongoException exception)
+            {
+                if (_connection.StrictMode || exception.Message != "collection already exists")
+                {
+                    throw;
+                }
+                return false;
+            }                      
         }
         public SetProfileResponse SetProfileLevel(ProfileLevel level)
         {

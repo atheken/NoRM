@@ -37,9 +37,19 @@ namespace NoRM.Tests
             {                
                 mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));
-                Assert.Equal("reply from server: collection already exists", ex.Message);
+                Assert.Equal("collection already exists", ex.Message);
             }
         }
+        [Fact]
+        public void CreateCollectionFailsSilentlyWithStrictModeOff()
+        {
+            using (var mongo = new Mongo(_connectionString + "&strict=false"))
+            {
+                mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
+                Assert.Equal(false, mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));
+            }
+        }
+
     
         [Fact]
         public void GetsAllCollections()
@@ -74,17 +84,25 @@ namespace NoRM.Tests
             {
                 var database = mongo.Database;
                 database.CreateCollection(new CreateCollectionOptions("temp"));
-                Assert.Equal(1d, database.DropCollection("temp").OK);
+                Assert.Equal(true, database.DropCollection("temp"));
                 Assert.Equal(0, mongo.Database.GetAllCollections().Count());                           
             }
         }
         [Fact]
-        public void ThrowsExceptionIfDropConnectionFailsWithStrictModeOn()
+        public void ThrowsExceptionIfDropCollectionFailsWithStrictModeOn()
         {
             using (var mongo = new Mongo(_connectionString))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.DropCollection("temp"));
-                Assert.Equal("reply from server: ns not found", ex.Message);
+                Assert.Equal("ns not found", ex.Message);
+            }
+        }
+        [Fact]
+        public void DropCollectionFailsSilentlyWithStrictModeOff()
+        {
+            using (var mongo = new Mongo(_connectionString + "&strict=false"))
+            {
+                Assert.Equal(false, mongo.Database.DropCollection("temp"));
             }
         }
         
@@ -112,7 +130,15 @@ namespace NoRM.Tests
             using (var mongo = new Mongo(_connectionString))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.GetCollectionStatistics("temp"));
-                Assert.Equal("reply from server: ns not found", ex.Message);
+                Assert.Equal("ns not found", ex.Message);
+            }
+        }
+        [Fact]
+        public void GettingStatisticsFailsSilentlyWithStrictModeOff()
+        {
+            using (var mongo = new Mongo(_connectionString + "&strict=false"))
+            {
+                Assert.Equal(null, mongo.Database.GetCollectionStatistics("temp"));
             }
         }
 

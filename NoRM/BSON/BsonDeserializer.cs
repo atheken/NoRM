@@ -4,12 +4,9 @@ namespace NoRM.BSON
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
-    using Attributes;
-    using DbTypes;
 
     public class BsonDeserializer
     {
@@ -148,23 +145,22 @@ namespace NoRM.BSON
                 var name = ReadName();
                 if (name == "$err" || name == "errmsg")
                 {
-                    var message = DeserializeValue(typeof(string), BSONTypes.String);
-                    throw new MongoException("reply from server: " + message);
+                    HandleError((string)DeserializeValue(typeof (string), BSONTypes.String));                    
                 }
-                var property = (name == "_id") ? typeHelper.IdProperty : typeHelper.FindProperty(name);                
+                var property = (name == "_id") ? typeHelper.FindIdSetter() : typeHelper.FindSetter(name);                
                 if (storageType == BSONTypes.Object)
                 {
                     NewDocument(_reader.ReadInt32());
                 }
-                var value = DeserializeValue(property.PropertyType, storageType);
-                property.SetValue(instance, value, null);
+                var value = DeserializeValue(property.Property.PropertyType, storageType);
+                property.Setter(instance, value);                                       
                 if (IsDone())
                 {
                     break;
                 }
             }
             return instance;
-        }
+        }        
         private object ReadList(Type listType)
         {
             NewDocument(_reader.ReadInt32());
@@ -290,6 +286,11 @@ namespace NoRM.BSON
         {
             Read(1);
             return (BSONTypes)_reader.ReadByte();
+        }
+
+        private static void HandleError(string message)
+        {
+            throw new MongoException(message);
         }
 
 

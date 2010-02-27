@@ -2,14 +2,15 @@
 {
     using System;
     using System.Linq;
-    using BSON.DbTypes;
     using Linq;
     using Xunit;
-    
+
     internal class Session : MongoSession
     {
-        public Session() : base("mongodb://localhost/Northwind?pooling=false"){}
-        
+        public Session() : base("mongodb://localhost/Northwind?pooling=false&strict=false")
+        {
+        }
+
         public IQueryable<Product> Products
         {
             get { return new MongoQuery<Product>(Provider); }
@@ -17,19 +18,19 @@
 
         public void Add<T>(T item) where T : class, new()
         {
-            Provider.Mongo.GetCollection<T>().Insert(item);         
+            Provider.Mongo.GetCollection<T>().Insert(item);
         }
 
         public void Update<T>(T item) where T : class, new()
         {
-            Provider.Mongo.GetCollection<T>().UpdateOne(item, item);         
+            Provider.Mongo.GetCollection<T>().UpdateOne(item, item);
         }
 
         public void Drop<T>()
         {
-            Provider.Mongo.Database.DropCollection(typeof(T).Name);            
+            Provider.Mongo.Database.DropCollection(typeof (T).Name);
         }
-        
+
         public void CreateCappedCollection(string name)
         {
             Provider.Mongo.Database.CreateCollection(new CreateCollectionOptions(name));
@@ -65,7 +66,7 @@
             Id = ObjectId.NewOID();
         }
 
-        
+
         public ObjectId Id { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
@@ -75,12 +76,18 @@
 
     public class LinqTests
     {
+        public LinqTests()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+            }
+        }
         [Fact]
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10});
                 session.Add(new Product {Name = "Test4X", Price = 22});
                 session.Add(new Product {Name = "Test5", Price = 33});
@@ -96,7 +103,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3", Price = 10});
                 session.Add(new Product {Name = "Test4", Price = 22});
                 session.Add(new Product {Name = "Test5", Price = 33});
@@ -110,7 +116,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5)});
                 session.Add(new Product {Name = "Test4X", Price = 22, Available = new DateTime(2000, 2, 6)});
                 var products = session.Products.Where(x => x.Available.Day == 5).ToList();
@@ -123,7 +128,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now});
                 session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(1)});
                 session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(2)});
@@ -141,7 +145,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
                 session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
                 session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
@@ -156,7 +159,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
                 session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
                 session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
@@ -171,7 +173,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5)});
                 session.Add(new Product {Name = "Test4X", Price = 22, Available = new DateTime(2001, 3, 6)});
                 var products = session.Products.Where(x => x.Available.Month == 2).ToList();
@@ -184,7 +185,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5)});
                 session.Add(new Product {Name = "Test4X", Price = 22, Available = new DateTime(2001, 2, 6)});
                 var products = session.Products.Where(x => x.Available.Year == 2000).ToList();
@@ -197,7 +197,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10});
                 session.Add(new Product {Name = "TestX4", Price = 22});
                 session.Add(new Product {Name = "TesXt5", Price = 33});
@@ -213,7 +212,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10});
                 session.Add(new Product {Name = "Test4X", Price = 22});
                 session.Add(new Product {Name = "", Price = 33});
@@ -229,7 +227,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10});
                 session.Add(new Product {Name = "Test4X", Price = 22});
                 session.Add(new Product {Price = 33});
@@ -245,7 +242,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10});
                 session.Add(new Product {Name = "Test4X", Price = 22});
                 session.Add(new Product {Name = "XTest5X", Price = 33});
@@ -261,7 +257,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test1", Price = 10});
                 session.Add(new Product {Name = "Test2", Price = 22});
                 session.Add(new Product {Name = "Test3", Price = 33});
@@ -275,7 +270,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
                 session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
                 session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
@@ -288,9 +282,8 @@
         [Fact]
         public void OneProductShouldBeReturnedWhen3InDbWithFirst()
         {
-            using(var session = new Session())
+            using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.CreateCappedCollection("Product"); //only capped collections return in insertion order
                 session.Add(new Product {Name = "Test1", Price = 10});
                 session.Add(new Product {Name = "Test2", Price = 22});
@@ -299,13 +292,12 @@
                 Assert.Equal("Test1", result.Name);
             }
         }
-        
+
         [Fact]
         public void OneProductShouldBeReturnedWhen3InDbWithSingle()
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test1", Price = 10});
                 session.Add(new Product {Name = "Test2", Price = 22});
                 session.Add(new Product {Name = "Test3", Price = 33});
@@ -313,13 +305,12 @@
                 Assert.Equal(22, result.Price);
             }
         }
-        
+
         [Fact]
         public void TwoProductsShouldBeReturnedWhen3InDbWithPriceGreaterThan10()
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3", Price = 10});
                 session.Add(new Product {Name = "Test4", Price = 22});
                 session.Add(new Product {Name = "Test5", Price = 33});
@@ -333,7 +324,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3", Price = 10});
                 session.Add(new Product {Name = "Test4", Price = 22});
                 session.Add(new Product {Name = "Test5", Price = 33});
@@ -347,7 +337,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "TestX3", Price = 10});
                 session.Add(new Product {Name = "TestX4", Price = 22});
                 session.Add(new Product {Name = "Test5", Price = 33});
@@ -361,7 +350,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "Test3X", Price = 10});
                 session.Add(new Product {Name = "Test4X", Price = 22});
                 session.Add(new Product {Name = "Test5", Price = 33});
@@ -375,7 +363,6 @@
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
                 session.Add(new Product {Name = "XTest3", Price = 10});
                 session.Add(new Product {Name = "XTest4", Price = 22});
                 session.Add(new Product {Name = "Test5", Price = 33});
