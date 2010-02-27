@@ -141,17 +141,17 @@ namespace NoRM.BSON
         private object ReadObject(Type type)
         {
             var instance = Activator.CreateInstance(type);
+            var typeHelper = ReflectionHelpers.PropertiesOf(type);
             while (true)
             {
                 var storageType = ReadType();                
                 var name = ReadName();
-                if (name == "$err")
+                if (name == "$err" || name == "errmsg")
                 {
                     var message = DeserializeValue(typeof(string), BSONTypes.String);
-                    //todo: something
+                    throw new MongoException("reply from server: " + message);
                 }
-                if (name == "_id"){ name = "Id";  }
-                var property = ReflectionHelpers.FindProperty(type, name);
+                var property = (name == "_id") ? typeHelper.IdProperty : typeHelper.FindProperty(name);                
                 if (storageType == BSONTypes.Object)
                 {
                     NewDocument(_reader.ReadInt32());
@@ -173,9 +173,13 @@ namespace NoRM.BSON
             var container = ListHelper.CreateContainer(listType, itemType, out isReadonly);            
             while (true)
             {
-                var type = ReadType();
-                ReadName();            
-                var value = DeserializeValue(itemType, type);
+                var storageType = ReadType();
+                ReadName();
+                if (storageType == BSONTypes.Object)
+                {
+                    NewDocument(_reader.ReadInt32());
+                }
+                var value = DeserializeValue(itemType, storageType);
                 container.Add(value);  
                 if (IsDone()) { break; }
             }
@@ -238,13 +242,16 @@ namespace NoRM.BSON
                     Read(8);
                     return (int)_reader.ReadDouble();    
                 default:
-                    throw new MongoException("todo:");                 //todo
+                    throw new MongoException("Could not create an int from " + storedType);
             }
         }
         private long ReadLong(BSONTypes storedType)
         {
             switch (storedType)
             {
+                case BSONTypes.Int32:
+                    Read(4);
+                    return _reader.ReadInt32();
                 case BSONTypes.Int64:
                     Read(8);
                     return _reader.ReadInt64();
@@ -252,7 +259,7 @@ namespace NoRM.BSON
                     Read(8);
                     return (long)_reader.ReadDouble();
                 default:
-                    throw new MongoException("todo:");                 //todo                    
+                    throw new MongoException("Could not create an int64 from " + storedType);
             }
         }
         private object ReadEnum(Type type, BSONTypes storedType)

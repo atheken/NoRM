@@ -63,6 +63,7 @@
     <Compile Include="BSON\DbTypes\ObjectIdGenerator.cs" />
     <Compile Include="BSON\ListHelper.cs" />
     <Compile Include="BSON\ReflectionHelpers.cs" />
+    <Compile Include="BSON\TypeHelper.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />

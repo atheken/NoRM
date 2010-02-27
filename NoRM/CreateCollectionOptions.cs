@@ -6,7 +6,8 @@ namespace NoRM
         public bool Capped{ get; set;}
         public int Size{ get; set;}
         public long? Max { get; set; }
-        public bool AutoIndex{ get; set;}
+        public bool AutoIndexId{ get; set;}
+        public string Create { get; set; }
 
         public CreateCollectionOptions(){}
         public CreateCollectionOptions(string name)
@@ -14,7 +15,7 @@ namespace NoRM
             Name = name;
             Capped = true;
             Size = 100000;
-            AutoIndex = false;
+            AutoIndexId = false;
         }
     }
 }

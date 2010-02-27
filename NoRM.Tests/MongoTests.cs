@@ -30,8 +30,8 @@ namespace NoRM.Tests
         {
             using (var mongo = new Mongo("mongodb://localhost/NoRMTests?strict=false&pooling=false"))
             {
-                mongo.GetCollection<FakeObject>().Insert(new FakeObject { _id = null });
-                mongo.GetCollection<FakeObject>().Insert(new FakeObject { _id = null });
+                mongo.GetCollection<FakeObject>().Insert(new FakeObject { Id = null });
+                mongo.GetCollection<FakeObject>().Insert(new FakeObject { Id = null });
                 var error = mongo.LastError();
                 Assert.Equal(1d, error.Ok);
                 Assert.Equal("E11000 duplicate key error index: NoRMTests.FakeObject.$_id_  dup key: { : null }", error.Err);

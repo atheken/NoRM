@@ -1,5 +1,6 @@
 namespace NoRM
 {
+    using System;
     using Protocol.Messages;
     using Protocol.SystemMessages.Requests;
     using Protocol.SystemMessages.Responses;
@@ -21,11 +22,18 @@ namespace NoRM
 
         protected IConnection CreateNewConnection()
         {
-            var connection = new Connection(ConnectionString);            
-            if (!Authenticate(connection))
+            var connection = new Connection(ConnectionString);
+            try
+            {
+                if (!Authenticate(connection))
+                {
+                    Close(connection);
+                }
+            }
+            catch (Exception)
             {
                 Close(connection);
-                throw new MongoException("Authentication Failed");
+                throw;
             }
             return connection;
 

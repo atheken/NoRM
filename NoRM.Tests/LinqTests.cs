@@ -62,11 +62,11 @@
         public Product()
         {
             Supplier = new Supplier();
-            _id = ObjectId.NewOID();
+            Id = ObjectId.NewOID();
         }
 
         
-        public object _id { get; set; }
+        public ObjectId Id { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
         public Supplier Supplier { get; set; }

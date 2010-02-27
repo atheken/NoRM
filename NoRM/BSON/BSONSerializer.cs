@@ -178,11 +178,7 @@ namespace NoRM.BSON
                 BSONSerializer._getters[documentType] = new Dictionary<string, Func<object, object>>
                     (StringComparer.InvariantCultureIgnoreCase);
 
-                foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(y => y.GetIndexParameters().Count() == 0 &&
-                        !y.GetCustomAttributes(true).Any(f => f is MongoIgnoreAttribute))
-                        .OrderBy(y => y.GetCustomAttributes(true)
-                            .Any(x => x is MongoIdentifierAttribute) ? 3 : y.Name == "_id" ? 2 : y.Name == "ID" ? 1 : 0))
+                foreach (var p in documentType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(y => y.GetIndexParameters().Count() == 0 &&!y.GetCustomAttributes(true).Any(f => f is MongoIgnoreAttribute)).OrderBy(y => y.GetCustomAttributes(true).Any(x => x is MongoIdentifierAttribute) ? 3 : y.Name == "_id" ? 2 : string.Compare(y.Name, "ID", true) == 0 ? 1 : 0))
                 {
                     BSONSerializer._getters[documentType][p.Name] = ReflectionHelpers.GetterMethod(p);
                 }
@@ -342,7 +338,7 @@ namespace NoRM.BSON
 
 
             retval[0] = new byte[] { (byte)BSONTypes.Null };
-            retval[1] = key.CStringBytes();
+            retval[1] = string.Compare(key, "id", true) == 0 ? "_id".CStringBytes() : key.CStringBytes(); //todo: fix
             retval[2] = new byte[0];
             //this is where the magic occurs
             //HEED MY WARNING! ALWAYS test for NULL first, as other things below ASSUME that if it gets past here, it's NOT NULL!

@@ -47,8 +47,7 @@ namespace NoRM
        
         public LastErrorResponse LastError()
         {
-            return _database.GetCollection<LastErrorResponse>("$cmd")
-                    .FindOne(new { getlasterror = 1d });
+            return _database.GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });
         }
 
         public void Dispose()

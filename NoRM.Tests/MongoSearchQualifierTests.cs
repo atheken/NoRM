@@ -3,18 +3,17 @@ namespace NoRM.Tests
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Attributes;
     using Xunit;
     
     public class TestClass
     {
         public TestClass()
         {
-            TestClassID = Guid.NewGuid();
+            Id = Guid.NewGuid();
         }
 
         [MongoIdentifier]
-        public Guid? TestClassID { get; set; }
+        public Guid? Id { get; set; }
 
         public double? ADouble { get; set; }
         public string AString { get; set; }
@@ -29,14 +28,14 @@ namespace NoRM.Tests
 
         public MongoSearchQualifierTests()
         {
-            _server = new Mongo("mongodb://localhost/TestSuiteDatabase?pooling=false");            
+            _server = new Mongo("mongodb://localhost/NoRMTests?pooling=false");            
             _coll = _server.GetCollection<TestClass>("TestClasses");
         }
 
         public void Dispose()
         {
             _server.Database.DropCollection("TestClasses");
-            using (var admin = new MongoAdmin("mongodb://localhost/TestSuiteDatabase?pooling=false"))
+            using (var admin = new MongoAdmin("mongodb://localhost/NoRMTests?pooling=false"))
             {
                 admin.DropDatabase();
             }

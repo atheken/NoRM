@@ -21,7 +21,7 @@ namespace NoRM.Protocol.SystemMessages.Request
         }
         public bool autoIndexId
         {
-            get { return _options.AutoIndex;}
+            get { return _options.AutoIndexId;}
         }
 
         public CreateCollectionRequest(CreateCollectionOptions options)

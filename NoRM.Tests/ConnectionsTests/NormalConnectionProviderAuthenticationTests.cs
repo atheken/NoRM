@@ -9,7 +9,7 @@ namespace NoRM.Tests
         {
             var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create(AuthenticatedConnectionString("bad", "boy")));
             var ex = Assert.Throws<MongoException>(() => provider.Open(null));
-            Assert.Equal("Authentication Failed", ex.Message);
+            Assert.Equal("reply from server: auth fails", ex.Message);
         }
 
 

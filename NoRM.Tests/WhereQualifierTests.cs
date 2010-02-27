@@ -11,13 +11,13 @@ namespace NoRM.Tests
         private readonly MongoCollection<TestClass> _collection;
         public WhereQualifierTests()
         {
-            _server = new Mongo("mongodb://localhost/TestSuiteDatabase?pooling=false");            
+            _server = new Mongo("mongodb://localhost/NoRMTests?pooling=false");            
             _collection = _server.GetCollection<TestClass>("TestClasses");
         }
         public void Dispose()
         {
             _server.Database.DropCollection("TestClasses");
-            using (var admin = new MongoAdmin("mongodb://localhost/TestSuiteDatabase?pooling=false"))
+            using (var admin = new MongoAdmin("mongodb://localhost/NoRMTests?pooling=false"))
             {
                 admin.DropDatabase();
             }

@@ -1,14 +1,12 @@
 namespace NoRM.Tests
 {
-    using BSON.DbTypes;
-
     public class FakeObject
     {
-        public ObjectId _id{ get; set;}
+        public ObjectId Id{ get; set;}
         
         public FakeObject()
         {
-            _id = ObjectId.NewOID();
+            Id = ObjectId.NewOID();
         }
     }
 }
