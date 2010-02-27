@@ -49,7 +49,7 @@ namespace NoRM.BSON
                 _allowedTypes.Add(typeof(Guid?));
                 _allowedTypes.Add(typeof(DateTime?));
                 _allowedTypes.Add(typeof(String));
-                _allowedTypes.Add(typeof(OID));
+                _allowedTypes.Add(typeof(ObjectId));
                 _allowedTypes.Add(typeof(Regex));
                 _allowedTypes.Add(typeof(byte[]));
                 _allowedTypes.Add(typeof(Regex));
@@ -417,10 +417,10 @@ namespace NoRM.BSON
                 binary.Add(val.Value.ToByteArray());
                 retval[2] = binary.SelectMany(y => y).ToArray();
             }
-            else if (value is OID)
+            else if (value is ObjectId)
             {
                 retval[0] = new byte[] { (byte)BSONTypes.MongoOID };
-                var oid = (OID)value;
+                var oid = (ObjectId)value;
                 retval[2] = oid.Value;
             }
             else if (value is DBReference)
@@ -556,7 +556,7 @@ namespace NoRM.BSON
                 writer.Write((byte)BSONTypes.Binary);
                 return;
             }
-            else if (value is OID)
+            else if (value is ObjectId)
             {
                writer.Write((byte)BSONTypes.MongoOID);
                return;
@@ -666,9 +666,9 @@ namespace NoRM.BSON
                 writer.Write( binary.SelectMany(y => y).ToArray());
                 return;
             }
-            else if (value is OID)
+            else if (value is ObjectId)
             {
-                writer.Write( ((OID) value).Value);
+                writer.Write( ((ObjectId) value).Value);
                 return;
             }
             else if (value is DBReference)

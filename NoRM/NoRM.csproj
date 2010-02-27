@@ -54,13 +54,13 @@
     <Compile Include="BSON\BsonDeserializer.cs" />
     <Compile Include="BSON\BsonHelper.cs" />
     <Compile Include="BSON\DbTypes\GridReadStream.cs" />
-    <Compile Include="BSON\DbTypes\OID.cs" />
+    <Compile Include="BSON\DbTypes\ObjectId.cs" />
     <Compile Include="BSON\DbTypes\DBReference.cs" />
     <Compile Include="BSON\DbTypes\ScopedCode.cs" />
     <Compile Include="BSON\BSONSerializer.cs" />
     <Compile Include="BSON\BSONTypes.cs" />
     <Compile Include="BSON\Commands.cs" />
-    <Compile Include="BSON\DbTypes\OIDGenerator.cs" />
+    <Compile Include="BSON\DbTypes\ObjectIdGenerator.cs" />
     <Compile Include="BSON\ListHelper.cs" />
     <Compile Include="BSON\ReflectionHelpers.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />

@@ -62,7 +62,7 @@
         public Product()
         {
             Supplier = new Supplier();
-            _id = OID.NewOID();
+            _id = ObjectId.NewOID();
         }
 
         

@@ -3,27 +3,27 @@
     using System;
     using BSON.DbTypes;
 
-    public class OID
+    public class ObjectId
     {
-        public OID()
+        public ObjectId()
         {
         }
 
-        public OID(string value)
+        public ObjectId(string value)
         {
             Value = DecodeHex(value);
         }
-        internal OID(byte[] value)
+        internal ObjectId(byte[] value)
         {
             Value = value;
         }
 
         /// <summary>
-        /// Provides an empty OID (all zeros).
+        /// Provides an empty ObjectId (all zeros).
         /// </summary>
-        public static OID EMPTY
+        public static ObjectId EMPTY
         {
-            get { return new OID(); }
+            get { return new ObjectId(); }
         }
 
         /// <summary>
@@ -35,13 +35,13 @@
         /// Generates a new unique oid for use with MongoDB Objects.
         /// </summary>
         /// <returns></returns>
-        public static OID NewOID()
+        public static ObjectId NewOID()
         {
             //TODO: generate random-ish bits.
-            return new OID {Value = OidGenerator.Generate()};            
+            return new ObjectId {Value = ObjectIdGenerator.Generate()};            
         }
 
-        public static bool TryParse(string value, out OID id)
+        public static bool TryParse(string value, out ObjectId id)
         {
             id = EMPTY;
             if (value == null || value.Length != 24)
@@ -50,7 +50,7 @@
             }
             try
             {
-                id = new OID(value);
+                id = new ObjectId(value);
                 return true;
             }
             catch (FormatException)

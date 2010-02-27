@@ -7,7 +7,7 @@ namespace NoRM.Tests
     {
         public class MiniObject
         {
-            public OID _id { get; set; }
+            public ObjectId _id { get; set; }
         }
 
         private Mongo _server;
@@ -37,12 +37,12 @@ namespace NoRM.Tests
             var cache = new List<MiniObject>();
             for (var i = 0; i < 10; i++)
             {
-                cache.Add(new MiniObject { _id = OID.NewOID() });
+                cache.Add(new MiniObject { _id = ObjectId.NewOID() });
             }
 
             testColl.Insert(cache);
 
-            Assert.AreEqual(cache.Count, testColl.Distinct<OID>("_id").Count());
+            Assert.AreEqual(cache.Count, testColl.Distinct<ObjectId>("_id").Count());
         }
 
         [Test]

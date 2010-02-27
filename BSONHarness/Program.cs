@@ -5,7 +5,7 @@ namespace BSONHarness
 
     public class User
     {
-        public OID _id { get; set;}
+        public ObjectId _id { get; set;}
         public string Name { get; set; }
         public string Email { get; set; }
     }

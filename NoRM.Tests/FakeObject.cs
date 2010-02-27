@@ -4,11 +4,11 @@ namespace NoRM.Tests
 
     public class FakeObject
     {
-        public OID _id{ get; set;}
+        public ObjectId _id{ get; set;}
         
         public FakeObject()
         {
-            _id = OID.NewOID();
+            _id = ObjectId.NewOID();
         }
     }
 }

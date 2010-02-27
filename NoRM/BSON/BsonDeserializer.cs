@@ -110,10 +110,10 @@ namespace NoRM.BSON
             {
                 return BsonHelper.EPOCH.AddMilliseconds(ReadLong(BSONTypes.Int64));
             }
-            if (type == typeof(OID))
+            if (type == typeof(ObjectId))
             {
                 Read(12);
-                return new OID(_reader.ReadBytes(12));
+                return new ObjectId(_reader.ReadBytes(12));
             }                       
   
             if (type == typeof(long))
