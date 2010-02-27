@@ -51,6 +51,8 @@
     <Compile Include="Attributes\MongoIdentifierAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreAttribute.cs" />
     <Compile Include="Attributes\MongoNameAttribute.cs" />
+    <Compile Include="BSON\BsonDeserializer.cs" />
+    <Compile Include="BSON\BsonHelper.cs" />
     <Compile Include="BSON\DbTypes\GridReadStream.cs" />
     <Compile Include="BSON\DbTypes\OID.cs" />
     <Compile Include="BSON\DbTypes\DBReference.cs" />
@@ -59,6 +61,7 @@
     <Compile Include="BSON\BSONTypes.cs" />
     <Compile Include="BSON\Commands.cs" />
     <Compile Include="BSON\DbTypes\OIDGenerator.cs" />
+    <Compile Include="BSON\ListHelper.cs" />
     <Compile Include="BSON\ReflectionHelpers.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />

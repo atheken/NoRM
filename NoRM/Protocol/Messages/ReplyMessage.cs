@@ -43,7 +43,7 @@ namespace NoRM.Protocol.Messages
                         reply.ReadBytes(length - 4)).ToArray();
 
                         IDictionary<WeakReference, Flyweight> outProps = new Dictionary<WeakReference, Flyweight>(0);
-                        var obj = BSONSerializer.Deserialize<T>(bin, ref outProps);
+                        var obj = BsonDeserializer.Deserialize<T>(bin, ref outProps);
                         this._results.Add(obj);
                         if (this._connection.EnableExpandoProperties)
                         {

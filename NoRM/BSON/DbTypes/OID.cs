@@ -13,6 +13,10 @@
         {
             Value = DecodeHex(value);
         }
+        internal OID(byte[] value)
+        {
+            Value = value;
+        }
 
         /// <summary>
         /// Provides an empty OID (all zeros).

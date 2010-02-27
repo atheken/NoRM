@@ -115,7 +115,7 @@ namespace NoRM.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip="todo")]
         public void GetsServerStatus()
         {                        
             using (var admin = new MongoAdmin(ConnectionString()))
