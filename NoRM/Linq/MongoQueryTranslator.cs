@@ -1,130 +1,118 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Collections;
-using NoRM.BSON;
-
-namespace NoRM.Linq
+﻿namespace NoRM.Linq
 {
+    using System;
+    using System.Linq;
+    using System.Linq.Expressions;
+    using System.Text;
+    using BSON;
+
     public class MongoQueryTranslator<T> : ExpressionVisitor
     {
+        private Flyweight _fly;
+        private StringBuilder _sb;
 
-        Expression _expression;
-        bool collectionSet = false;
-        StringBuilder sb;
-        Flyweight fly;
-
-        public object FlyWeight
+        public Flyweight Flyweight
         {
-            get
-            {
-                return fly;
-            }
+            get { return _fly; }
         }
+
         public string WhereExpression
         {
-            get
-            {
-                return sb.ToString();
-            }
+            get { return _sb.ToString(); }
         }
 
         public string Translate(Expression exp)
         {
-            this.sb = new StringBuilder();
-            fly = new Flyweight();
-            //partial evaluator will help with converting system level calls
-            //to constant expressions
-
-            this.Visit(exp);
-            return sb.ToString();
+            _sb = new StringBuilder();
+            _fly = new Flyweight();            
+            Visit(exp);
+            return _sb.ToString();
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
-            sb.Append("(");
-            this.Visit(b.Left);
+            _sb.Append("(");
+            Visit(b.Left);
             switch (b.NodeType)
             {
                 case ExpressionType.And:
                 case ExpressionType.AndAlso:
-                    sb.Append(" && ");
+                    _sb.Append(" && ");
                     break;
 
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
-                    sb.Append(" || ");
+                    _sb.Append(" || ");
                     break;
                 case ExpressionType.Equal:
-                    sb.Append(" == ");
+                    _sb.Append(" == ");
                     break;
                 case ExpressionType.NotEqual:
-                    sb.Append(" <> ");
+                    _sb.Append(" <> ");
                     break;
                 case ExpressionType.LessThan:
-                    sb.Append(" < ");
+                    _sb.Append(" < ");
                     break;
                 case ExpressionType.LessThanOrEqual:
-                    sb.Append(" <= ");
+                    _sb.Append(" <= ");
                     break;
                 case ExpressionType.GreaterThan:
-                    sb.Append(" > ");
+                    _sb.Append(" > ");
                     break;
                 case ExpressionType.GreaterThanOrEqual:
-                    sb.Append(" >= ");
+                    _sb.Append(" >= ");
                     break;
                 default:
                     throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
             }
-            this.Visit(b.Right);
-            sb.Append(")");
+            Visit(b.Right);
+            _sb.Append(")");
             return b;
         }
+
         private static Expression StripQuotes(Expression e)
         {
             while (e.NodeType == ExpressionType.Quote)
             {
-                e = ((UnaryExpression)e).Operand;
+                e = ((UnaryExpression) e).Operand;
             }
             return e;
         }
+
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            IQueryable q = c.Value as IQueryable;
+            var q = c.Value as IQueryable;
             if (q != null)
             {
                 // assume constant nodes w/ IQueryables are table references
-                //sb.Append("SELECT * FROM ");
-                //sb.Append(q.ElementType.Name);
+                //_sb.Append("SELECT * FROM ");
+                //_sb.Append(q.ElementType.Name);
             }
             else if (c.Value == null)
             {
-                sb.Append("NULL");
+                _sb.Append("NULL");
             }
             else
             {
                 switch (Type.GetTypeCode(c.Value.GetType()))
                 {
                     case TypeCode.Boolean:
-                        sb.Append(((bool)c.Value) ? 1 : 0);
+                        _sb.Append(((bool) c.Value) ? 1 : 0);
                         break;
                     case TypeCode.DateTime:
-                        sb.Append("new Date('");
-                        sb.Append(c.Value);
-                        sb.Append("')");
+                        _sb.Append("new Date('");
+                        _sb.Append(c.Value);
+                        _sb.Append("')");
                         break;
                     case TypeCode.String:
-                        sb.Append("'");
-                        sb.Append(c.Value);
-                        sb.Append("'");
+                        _sb.Append("'");
+                        _sb.Append(c.Value);
+                        _sb.Append("'");
                         break;
                     case TypeCode.Object:
                         throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
                     default:
-                        sb.Append(c.Value);
+                        _sb.Append(c.Value);
                         break;
                 }
             }
@@ -133,161 +121,136 @@ namespace NoRM.Linq
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-
-            if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
+            if (m.Method.DeclaringType == typeof (Queryable) && m.Method.Name == "Where")
             {
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                this.Visit(lambda.Body);
+                var lambda = (LambdaExpression) StripQuotes(m.Arguments[1]);
+                Visit(lambda.Body);
                 return m;
             }
-            else if (m.Method.DeclaringType == typeof(string))
+            if (m.Method.DeclaringType == typeof (string))
             {
-
                 switch (m.Method.Name)
                 {
                     case "StartsWith":
-                        sb.Append("(");
-                        this.Visit(m.Object);
-                        sb.Append(".indexOf(");
-                        this.Visit(m.Arguments[0]);
-                        sb.Append(")===0)");
+                        _sb.Append("(");
+                        Visit(m.Object);
+                        _sb.Append(".indexOf(");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(")===0)");
                         return m;
 
                     case "Contains":
-                        sb.Append("(");
-                        this.Visit(m.Object);
-                        sb.Append(".indexOf(");
-                        this.Visit(m.Arguments[0]);
-                        sb.Append(")>0)");
+                        _sb.Append("(");
+                        Visit(m.Object);
+                        _sb.Append(".indexOf(");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(")>0)");
                         return m;
                     case "IndexOf":
-                        this.Visit(m.Object);
-                        sb.Append(".indexOf(");
-                        this.Visit(m.Arguments[0]);
-                        sb.Append(")");
+                        Visit(m.Object);
+                        _sb.Append(".indexOf(");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(")");
                         return m;
                     case "EndsWith":
-                        sb.Append("(");
-                        this.Visit(m.Object);
-                        sb.Append(".match(");
-                        this.Visit(m.Arguments[0]);
-                        sb.Append("+'$')==");
-                        this.Visit(m.Arguments[0]);
-                        sb.Append(")");
+                        _sb.Append("(");
+                        Visit(m.Object);
+                        _sb.Append(".match(");
+                        Visit(m.Arguments[0]);
+                        _sb.Append("+'$')==");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(")");
                         return m;
 
                     case "IsNullOrEmpty":
-                        sb.Append("(");
-                        this.Visit(m.Arguments[0]);
-                        sb.Append(" == '' ||  ");
-                        this.Visit(m.Arguments[0]);
-                        sb.Append(" == null  )");
+                        _sb.Append("(");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(" == '' ||  ");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(" == null  )");
                         return m;
-
                 }
             }
-            else if (m.Method.DeclaringType == typeof(DateTime))
+            else if (m.Method.DeclaringType == typeof (DateTime))
             {
-
-                switch (m.Method.Name)
-                {
-
-                }
+                //switch (m.Method.Name){}
             }
-            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("First"))
+            else if (m.Method.DeclaringType == typeof (Queryable) && m.Method.Name.StartsWith("First"))
             {
-                //just need the first item in the collection. The collection should be a constant on 
-                //the first arg
-                fly["$limit"] = 1;
-
-                var lambda = StripQuotes(m.Arguments[1]) as LambdaExpression;
+                _fly["$limit"] = 1;                
+                Visit(m.Arguments[0]);
+                return m;
+            }
+            else if (m.Method.DeclaringType == typeof (Queryable) && m.Method.Name.StartsWith("SingleOrDefault"))
+            {
+                _fly["$limit"] = 1;
+                var lambda = (LambdaExpression) StripQuotes(m.Arguments[1]);
                 if (lambda != null)
                 {
-                    this.Visit(lambda.Body);
+                    Visit(lambda.Body);
                 }
                 else
                 {
-                    this.Visit(m.Arguments[0]);
+                    Visit(m.Arguments[0]);
                 }
                 return m;
+            }
 
-            }
-            else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("SingleOrDefault"))
-            {
-                fly["$limit"] = 1;
-                var lambda = StripQuotes(m.Arguments[1]) as LambdaExpression;
-                if (lambda != null)
-                {
-                    this.Visit(lambda.Body);
-                }
-                else
-                {
-                    this.Visit(m.Arguments[0]);
-                }
-                return m;
-            }
             //for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-
-            var fullName = m.ToString().Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            var fullName = m.ToString().Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
 
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                sb.Append("this." + m.Member.Name);
+                _sb.Append("this." + m.Member.Name);
                 return m;
             }
-            else if (m.Member.DeclaringType == typeof(string))
+            if (m.Member.DeclaringType == typeof (string))
             {
                 switch (m.Member.Name)
                 {
                     case "Length":
-                        sb.Append("LEN(");
-                        this.Visit(m.Expression);
-                        sb.Append(")");
+                        _sb.Append("LEN(");
+                        Visit(m.Expression);
+                        _sb.Append(")");
                         return m;
                 }
             }
-            else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset))
-            {
-
-                //this is a DateProperty hanging off the property - clip the last 2 elements
-                var fixedName = fullName.Skip(1).Take(fullName.Length - 2).ToArray();
-                var propName = String.Join(".", fixedName);
-
-                //now we get to do some tricky fun with javascript
+            else if (m.Member.DeclaringType == typeof (DateTime) || m.Member.DeclaringType == typeof (DateTimeOffset))
+            {                
                 switch (m.Member.Name)
                 {
                     case "Day":
-                        this.Visit(m.Expression);
-                        sb.Append(".getDate()");
+                        Visit(m.Expression);
+                        _sb.Append(".getDate()");
                         return m;
                     case "Month":
-                        this.Visit(m.Expression);
-                        sb.Append(".getMonth()");
+                        Visit(m.Expression);
+                        _sb.Append(".getMonth()");
                         return m;
                     case "Year":
-                        this.Visit(m.Expression);
-                        sb.Append(".getYear()");
+                        Visit(m.Expression);
+                        _sb.Append(".getFullYear()");
                         return m;
                     case "Hour":
-                        this.Visit(m.Expression);
-                        sb.Append(".getHours()");
+                        Visit(m.Expression);
+                        _sb.Append(".getHours()");
                         return m;
                     case "Minute":
-                        this.Visit(m.Expression);
-                        sb.Append(".getMinutes()");
+                        Visit(m.Expression);
+                        _sb.Append(".getMinutes()");
                         return m;
                     case "Second":
-                        this.Visit(m.Expression);
-                        sb.Append(".getSeconds()");
+                        Visit(m.Expression);
+                        _sb.Append(".getSeconds()");
                         return m;
                     case "DayOfWeek":
-                        this.Visit(m.Expression);
-                        sb.Append(".getDay()");
+                        Visit(m.Expression);
+                        _sb.Append(".getDay()");
                         return m;
                 }
             }
@@ -295,17 +258,12 @@ namespace NoRM.Linq
             {
                 //don't want the first - that's the lambda thing
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
-
                 var result = String.Join(".", fixedName);
-                sb.Append("this." + result);
-
+                _sb.Append("this." + result);
                 return m;
-
             }
             //if this is a property NOT on the object...
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
-
         }
     }
-
 }

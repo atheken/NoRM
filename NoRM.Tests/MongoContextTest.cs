@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using System.Net.Sockets;
-
+/*
 namespace NoRM.Tests
 {
     [TestFixture]
     [Category("Hits MongoDB")]
     public class MongoContextTest
     {
-        private MongoServer _context;
+        private Mongo _context;
         private MongoDatabase _db1;
         private MongoDatabase _db2;
 
@@ -19,7 +13,7 @@ namespace NoRM.Tests
         public void ConfigureContext()
         {
             //creates connection to the local mongo Db install on the default port.
-            this._context = new MongoServer();
+            this._context = new Mongo();
 
             //create two databases.
             this._db1 = this._context.GetDatabase("Test1");
@@ -46,7 +40,7 @@ namespace NoRM.Tests
         [Test]
         public void Check_Invalid_Server()
         {
-            var context = new MongoServer("localhost", 11111, false);
+            var context = new Mongo("mongodb://localhost:11111");
 
            // Assert.Throws(typeof(SocketException), delegate { context.Connect(); });
         }
@@ -61,7 +55,7 @@ namespace NoRM.Tests
         public void Check_Current_Operations()
         {
             // Not sure how to test this yet.
-            var server = new MongoServer();
+            var server = new Mongo();
 
             var ops = server.GetCurrentOperations();
 
@@ -76,3 +70,4 @@ namespace NoRM.Tests
         }
     }
 }
+*/

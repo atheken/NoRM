@@ -13,8 +13,8 @@ namespace NoRM.Linq
     /// </summary>
     public class MongoQuery<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable
     {
-        MongoQueryProvider provider;
-        Expression expression;
+        MongoQueryProvider _provider;
+        Expression _expression;
         MongoCollection<T> _collection;
         Flyweight _query;
 
@@ -24,10 +24,10 @@ namespace NoRM.Linq
             {
                 throw new ArgumentNullException("provider");
             }
-            this.provider = provider;
-            this.expression = Expression.Constant(this);
-            _collection = new MongoCollection<T>(collectionName, provider.DB, provider.Server);
-            _query = new Flyweight();
+            this._provider = provider;
+            this._expression = Expression.Constant(this);
+            this._collection = new MongoCollection<T>(collectionName, provider.Mongo.Database, provider.Mongo.ServerConnection());
+            this._query = new Flyweight();
         }
 
         public MongoQuery(MongoQueryProvider provider)
@@ -46,54 +46,47 @@ namespace NoRM.Linq
             {
                 throw new ArgumentNullException("expression");
             }
-            if (!typeof(IQueryable<T>).IsAssignableFrom(expression.Type))
+            if (!typeof (IQueryable<T>).IsAssignableFrom(expression.Type))
             {
                 throw new ArgumentOutOfRangeException("expression");
             }
-            this.provider = provider;
-            this.expression = expression;
-            _collection = new MongoCollection<T>(typeof(T).Name, provider.DB, provider.Server);
+            this._provider = provider;
+            this._expression = expression;            
         }
 
         Expression IQueryable.Expression
         {
-            get { return this.expression; }
+            get { return _expression; }
         }
-
+        
         Type IQueryable.ElementType
         {
-            get { return typeof(T); }
+            get { return typeof (T); }
         }
-
         IQueryProvider IQueryable.Provider
         {
-            get { return this.provider; }
+            get { return _provider; }
         }
 
         public virtual IEnumerator<T> GetEnumerator()
         {
             //var docs= (ICursor)this.provider.Execute(this.expression);
-            return provider.Execute<T>(this.expression).GetEnumerator();
+            return this._provider.Execute<T>(this._expression).GetEnumerator();
 
         }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)this.provider.Execute(this.expression)).GetEnumerator();
+            return ((IEnumerable) _provider.Execute(_expression)).GetEnumerator();
         }
 
+        
         public override string ToString()
         {
-            if (this.expression.NodeType == ExpressionType.Constant &&
-                ((ConstantExpression)this.expression).Value == this)
+            if (_expression.NodeType == ExpressionType.Constant && ((ConstantExpression) _expression).Value == this)
             {
-                return "Query(" + typeof(T) + ")";
+                return "Query(" + typeof (T) + ")";
             }
-            else
-            {
-                return this.expression.ToString();
-            }
+            return _expression.ToString();
         }
-
     }
 }

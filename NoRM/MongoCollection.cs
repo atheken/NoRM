@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using NoRM.Protocol.Messages;
-using NoRM.Protocol.SystemMessages.Requests;
-using NoRM.Protocol.SystemMessages.Responses;
 using System.Linq.Expressions;
 using System.Reflection;
 using NoRM.Attributes;
+using NoRM.Protocol.Messages;
+using NoRM.Protocol.SystemMessages.Requests;
+using NoRM.Protocol.SystemMessages.Responses;
 using NoRM.BSON;
 
 namespace NoRM
@@ -15,67 +14,20 @@ namespace NoRM
     public partial class MongoCollection<T>
     {
         //this will have a different instance for each concrete version of MongoCollection<T>
-        private static bool? _updateable = null;
+        private static bool? _updateable;
 
-        private String _collectionName;
-        private MongoDatabase _db;
-        private MongoServer _server;
+        private readonly String _collectionName;
+        private readonly IConnection _connection;
+        private readonly MongoDatabase _db;
 
         /// <summary>
         /// Represents a strongly-typed set of documents in the db.
         /// </summary>
-        /// <param name="collectionName"></param>
-        /// <param name="db"></param>
-        /// <param name="context"></param>
-        public MongoCollection(String collectionName, MongoDatabase db, MongoServer server)
+        public MongoCollection(String collectionName, MongoDatabase db, IConnection connection)
         {
-            this._db = db;
-            this._server = server;
-            this._collectionName = collectionName;
-        }
-
-        /// <summary>
-        /// Get a child collection of the specified type.
-        /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="collectionName"></param>
-        /// <returns></returns>
-        public MongoCollection<U> GetChildCollection<U>(String collectionName) where U : class, new()
-        {
-            return new MongoCollection<U>(this._collectionName + "." + collectionName, this._db, this._server);
-        }
-
-        /// <summary>
-        /// Overload of Update that updates one document and doesn't upsert if no matches are found.
-        /// </summary>
-        /// <typeparam name="X"></typeparam>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="matchDocument"></param>
-        /// <param name="valueDocument"></param>
-        public void UpdateOne<X, U>(X matchDocument, U valueDocument)
-        {
-            this.Update(matchDocument, valueDocument, false, false);
-        }
-
-        /// <summary>
-        /// Add an index for this collection.
-        /// </summary>
-        /// <typeparam name="U">A type that has the names of the items to be indexed, with a value of 1.0d or -1.0d depending on 
-        /// if you want the index to be ASC or DESC respectively.</typeparam>
-        /// <param name="indexDefinition"></param>
-        /// <param name="isUnique"></param>
-        /// <param name="indexName"></param>
-        public void CreateIndex<U>(U indexDefinition, bool isUnique, String indexName)
-        {
-            var coll = this._db.GetCollection<MongoIndex<U>>("system.indexes");
-            coll.Insert(new MongoIndex<U>()
-            {
-                key = indexDefinition,
-                ns = this.FullyQualifiedName,
-                name = indexName,
-                unique = isUnique
-            });
-
+            _db = db;
+            _connection = connection;
+            _collectionName = collectionName;
         }
 
         /// <summary>
@@ -86,21 +38,54 @@ namespace NoRM
         {
             get
             {
-                if (MongoCollection<T>._updateable == null)
+                if (_updateable == null)
                 {
-                    if (typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y =>
-                        y.Name == "_id" || y.Name == "ID" ||
-                        y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute)))
-                    {
-                        MongoCollection<T>._updateable = true;
-                    }
-                    else
-                    {
-                        MongoCollection<T>._updateable = false;
-                    }
+                    _updateable = typeof (T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y => y.Name == "_id" || string.Compare(y.Name, "id", true) == 0 || y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute));
                 }
-                return MongoCollection<T>._updateable.Value;
+                return _updateable.Value;
             }
+        }
+
+        /// <summary>
+        /// The name of this collection, including the database prefix.
+        /// </summary>
+        public String FullyQualifiedName
+        {
+            get { return String.Format("{0}.{1}", _db.DatabaseName, _collectionName); }
+        }
+
+        /// <summary>
+        /// Get a child collection of the specified type.
+        /// </summary>        
+        public MongoCollection<U> GetChildCollection<U>(String collectionName) where U : class, new()
+        {
+            return new MongoCollection<U>(_collectionName + "." + collectionName, _db, _connection);
+        }
+
+        /// <summary>
+        /// Overload of Update that updates one document and doesn't upsert if no matches are found.
+        /// </summary>        
+        public void UpdateOne<X, U>(X matchDocument, U valueDocument)
+        {
+            Update(matchDocument, valueDocument, false, false);
+        }
+
+        /// <summary>
+        /// Add an index for this collection.
+        /// </summary>
+        /// <typeparam name="U">A type that has the names of the items to be indexed, with a value of 1.0d or -1.0d depending on 
+        /// if you want the index to be ASC or DESC respectively.</typeparam>
+        public void CreateIndex<U>(U indexDefinition, bool isUnique, String indexName)
+        {
+            var coll = _db.GetCollection<MongoIndex<U>>("system.indexes");
+            coll.Insert(new MongoIndex<U>()
+            {
+                key = indexDefinition,
+                ns = this.FullyQualifiedName,
+                name = indexName,
+                unique = isUnique
+            });
+
         }
 
         /// <summary>
@@ -188,19 +173,8 @@ namespace NoRM
                 ops |= UpdateOption.Upsert;
             }
 
-            var um = new UpdateMessage<X, U>(this._server, this.FullyQualifiedName, ops, matchDocument, valueDocument);
+            var um = new UpdateMessage<X, U>(this._connection, this.FullyQualifiedName, ops, matchDocument, valueDocument);
             um.Execute();
-        }
-
-        /// <summary>
-        /// The name of this collection, including the database prefix.
-        /// </summary>
-        public String FullyQualifiedName
-        {
-            get
-            {
-                return String.Format("{0}.{1}", this._db.DatabaseName, this._collectionName);
-            }
         }
 
         /// <summary>
@@ -211,7 +185,7 @@ namespace NoRM
         /// <param name="template"></param>
         public void Delete<U>(U template)
         {
-            var dm = new DeleteMessage<U>(this._server, this.FullyQualifiedName, template);
+            var dm = new DeleteMessage<U>(this._connection, this.FullyQualifiedName, template);
             dm.Execute();
         }
 
@@ -249,20 +223,13 @@ namespace NoRM
         {
 
             //build a template based on T
-            var item = default(T);
-
-
             return null;
         }
 
 
         public bool Any<T>(Expression<Func<T, bool>> expression)
         {
-
             //turn that expression into ... something
-
-
-
             return false;
         }
 
@@ -318,7 +285,7 @@ namespace NoRM
 
         public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
         {
-            var qm = new QueryMessage<T, U>(this._server, fullyQualifiedName);
+            var qm = new QueryMessage<T, U>(this._connection, fullyQualifiedName);
             qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
@@ -398,7 +365,7 @@ namespace NoRM
                     " does not specify an identifier property");
             }
             var insertMessage = new InsertMessage<T>
-                (this._server, this.FullyQualifiedName, documentsToInsert);
+                (this._connection, this.FullyQualifiedName, documentsToInsert);
             insertMessage.Execute();
         }
 

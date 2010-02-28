@@ -10,9 +10,9 @@ namespace NoRM.BSON.DbTypes
 
     /// <summary>
     /// Shameless-ly ripped off, then slightly altered from samus' implementation on GitHub
-    /// http://github.com/samus/mongodb-csharp/blob/f3bbb3cd6757898a19313b1af50eff627ae93c16/MongoDBDriver/OidGenerator.cs
+    /// http://github.com/samus/mongodb-csharp/blob/f3bbb3cd6757898a19313b1af50eff627ae93c16/MongoDBDriver/ObjectIdGenerator.cs
     /// </summary>
-    internal static class OidGenerator
+    internal static class ObjectIdGenerator
     {
         private static int inc;
         private static object inclock = new object();
@@ -21,7 +21,7 @@ namespace NoRM.BSON.DbTypes
         private static byte[] machineHash;
         private static byte[] procID;
 
-        static OidGenerator()
+        static ObjectIdGenerator()
         {
             GenerateConstants();
         }
@@ -37,7 +37,7 @@ namespace NoRM.BSON.DbTypes
             Array.Copy(machineHash, 0, oid, copyidx, 3);
             copyidx += 3;
 
-            Array.Copy(OidGenerator.procID, 0, oid, copyidx, 2);
+            Array.Copy(ObjectIdGenerator.procID, 0, oid, copyidx, 2);
             copyidx += 2;
 
             Array.Copy(BitConverter.GetBytes(GenerateInc()), 0, oid, copyidx, 3);
@@ -55,7 +55,7 @@ namespace NoRM.BSON.DbTypes
 
         private static int GenerateInc()
         {
-            lock (OidGenerator.inclock)
+            lock (ObjectIdGenerator.inclock)
             {
                 return inc++;
             }
@@ -63,8 +63,8 @@ namespace NoRM.BSON.DbTypes
 
         private static void GenerateConstants()
         {
-            OidGenerator.machineHash = GenerateHostHash();
-            OidGenerator.procID = BitConverter.GetBytes(GenerateProcId());
+            ObjectIdGenerator.machineHash = GenerateHostHash();
+            ObjectIdGenerator.procID = BitConverter.GetBytes(GenerateProcId());
         }
 
         private static byte[] GenerateHostHash()

@@ -1,47 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using NoRM.Protocol.SystemMessages.Responses;
-using NoRM.Protocol.Messages;
 using NoRM.BSON;
+using Xunit;
 
-namespace NoRM.Tests {
+namespace NoRM.Tests
+{
+   
     
-    [TestFixture]
-    public class WhereQualifierTests {
-
-        private MongoServer _server;
-        private MongoDatabase _db;
-        private MongoCollection<TestClass> _coll;
-
-        [SetUp]
-        public void TestFixture_Setup() {
-            _server = new MongoServer();
-            _db = _server.GetDatabase("TestSuiteDatabase");
-            DroppedCollectionResponse collResponse = _db.DropCollection("TestClasses");
-            _coll = _db.GetCollection<TestClass>("TestClasses");
+    public class WhereQualifierTests : IDisposable
+    {
+        private readonly Mongo _server;
+        private readonly MongoCollection<TestClass> _collection;
+        public WhereQualifierTests()
+        {
+            _server = new Mongo("mongodb://localhost/NoRMTests?pooling=false");            
+            _collection = _server.GetCollection<TestClass>("TestClasses");
+        }
+        public void Dispose()
+        {
+            _server.Database.DropCollection("TestClasses");
+            using (var admin = new MongoAdmin("mongodb://localhost/NoRMTests?pooling=false"))
+            {
+                admin.DropDatabase();
+            }
+            _server.Dispose();
         }
 
-        [Test]
-        public void Where_Expression_Should_Work_With_FLyweight() {
+        [Fact]
+        public void WhereExpressionShouldWorkWithFLyweight()
+        {
+            _collection.Insert(new TestClass {ADouble = 1d});
+            _collection.Insert(new TestClass {ADouble = 2d});
+            _collection.Insert(new TestClass {ADouble = 3d});
+            _collection.Insert(new TestClass {ADouble = 4d});
 
-            _coll.Insert(new TestClass { ADouble = 1d });
-            _coll.Insert(new TestClass { ADouble = 2d });
-            _coll.Insert(new TestClass { ADouble = 3d });
-            _coll.Insert(new TestClass { ADouble = 4d });
-
-            var count = _coll.Find();
-            Assert.AreEqual(4, count.Count());
+            var count = _collection.Find();
+            Assert.Equal(4, count.Count());
 
             var query = new Flyweight();
             query["$where"] = " function(){return this.ADouble > 1;} ";
-            var results = _coll.Find(query);
-            Assert.AreEqual(3, results.Count());
-
-
+            var results = _collection.Find(query);
+            Assert.Equal(3, results.Count());
         }
-
     }
 }
