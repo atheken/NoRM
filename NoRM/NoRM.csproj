@@ -75,6 +75,10 @@
     <Compile Include="BSON\Flyweight.cs" />
     <Compile Include="BSON\DbTypes\GridFile.cs" />
     <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
+    <Compile Include="Connections\MongoConnection.cs" />
+    <Compile Include="Connections\MongoConnectionPool.cs" />
+    <Compile Include="Connections\MongoServer.cs" />
+    <Compile Include="IQuerySession.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
     <Compile Include="Linq\MongoQuery.cs" />
@@ -82,8 +86,7 @@
     <Compile Include="Linq\MongoQueryTranslator.cs" />
     <Compile Include="Linq\PartialEvaluator.cs" />
     <Compile Include="Linq\TypeHelper.cs" />
-    <Compile Include="MongoConnection.cs" />
-    <Compile Include="MongoServer.cs" />
+    <Compile Include="MongoSession.cs" />
     <Compile Include="Protocol\Messages\UpdateMessage.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -132,7 +135,6 @@
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\SetProfileResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />
-    <Compile Include="Session.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

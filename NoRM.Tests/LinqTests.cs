@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace NoRM.Tests
 {
 
-    class NorthwindSession : Session
+    class NorthwindSession : MongoSession
     {
         public NorthwindSession()
             : base("Northwind")

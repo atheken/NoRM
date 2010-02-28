@@ -12,7 +12,7 @@ namespace NoRM.Tests {
         [Test]
         public void One_Product_Should_Be_Returned_When_Nested_Supplier_Queried() {
 
-            var session = new Session("Northwind");
+            var session = new NorthwindSession();
             session.Drop<Product>();
 
             session.Add(new Product() { Name = "Test3", Price = 10, Supplier = new Supplier() { Name = "Steve" } });
@@ -27,7 +27,7 @@ namespace NoRM.Tests {
         [Test]
         public void Supplier_Should_Be_Queryble_By_DateMath() {
 
-            var session = new Session("Northwind");
+            var session = new NorthwindSession();
             session.Drop<Product>();
             var add = new Address() { State = "HI", Street = "100 Main" };
             

@@ -6,18 +6,30 @@ using NoRM.Linq;
 
 namespace NoRM
 {
-    public class Session
+    public class MongoSession : IQuerySession
     {
         MongoQueryProvider _provider;
 
-        public Session(String databaseName, String server, int port, bool enableExpandoProps)
+        /// <summary>
+        /// A lightweight way to interact with a MongoDB database.
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="server"></param>
+        /// <param name="port"></param>
+        /// <param name="enableExpandoProps"></param>
+        public MongoSession(String databaseName, String server, int port, bool enableExpandoProps)
         {
-            _provider = new MongoQueryProvider(databaseName, server, port, enableExpandoProps);
+            this._provider = new MongoQueryProvider(databaseName, server, port, enableExpandoProps);
+            this.Database = databaseName;
         }
 
-        public Session(String databaseName)
+        /// <summary>
+        /// A convenince overload that connects a seesion to mongodb on the default local port with expando props disabled.
+        /// </summary>
+        /// <param name="databaseName"></param>
+        public MongoSession(String databaseName)
+            : this(databaseName, "127.0.0.1", 27017, false)
         {
-            _provider = new MongoQueryProvider(databaseName);
         }
 
         //public IQueryable<Product> Products
@@ -27,6 +39,11 @@ namespace NoRM
         //        return new MongoQuery<Product>(_provider);
         //    }
         //}
+
+        /// <summary>
+        /// The database with which this session is interacting.
+        /// </summary>
+        public String Database { get; private set; }
 
         /// <summary>
         /// Produces a way to query MongoCollections from the db.
@@ -100,5 +117,14 @@ namespace NoRM
         {
             _provider.DB.DropCollection(name);
         }
+
+        /// <summary>
+        /// Cleans up the session.
+        /// </summary>
+        public void Dispose()
+        {
+            //clean up any resources if necessary.
+        }
+
     }
 }
