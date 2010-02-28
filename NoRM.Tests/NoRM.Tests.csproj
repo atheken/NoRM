@@ -58,6 +58,7 @@
     <Compile Include="ConnectionsTests\NormalConnectionProviderAuthenticationTests.cs" />
     <Compile Include="ConnectionsTests\NormalConnectionProviderTests.cs" />
     <Compile Include="ConnectionsTests\PooledConnectionProviderTests.cs" />
+    <Compile Include="ConnectionsTests\QueuedConnectionProviderTests.cs" />
     <Compile Include="FakeObject.cs" />
     <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />

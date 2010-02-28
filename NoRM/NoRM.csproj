@@ -86,6 +86,8 @@
     <Compile Include="Connections\IOptionsContainer.cs" />
     <Compile Include="Connections\NormalConnectionProvider.cs" />
     <Compile Include="Connections\PooledConnectionProvider.cs" />
+    <Compile Include="Connections\QueuedConnectionProviders.cs" />
+    <Compile Include="Connections\TimedLock.cs" />
     <Compile Include="CreateCollectionOptions.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
