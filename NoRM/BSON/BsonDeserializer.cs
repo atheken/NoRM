@@ -138,7 +138,7 @@ namespace NoRM.BSON
         private object ReadObject(Type type)
         {
             var instance = Activator.CreateInstance(type);
-            var typeHelper = ReflectionHelpers.PropertiesOf(type);
+            var typeHelper = TypeHelper.GetHelperForType(type);
             while (true)
             {
                 var storageType = ReadType();                
@@ -147,12 +147,12 @@ namespace NoRM.BSON
                 {
                     HandleError((string)DeserializeValue(typeof (string), BSONTypes.String));                    
                 }
-                var property = (name == "_id") ? typeHelper.FindIdSetter() : typeHelper.FindSetter(name);                
+                var property = (name == "_id") ? typeHelper.FindIdProperty() : typeHelper.FindProperty(name);                
                 if (storageType == BSONTypes.Object)
                 {
                     NewDocument(_reader.ReadInt32());
                 }
-                var value = DeserializeValue(property.Property.PropertyType, storageType);
+                var value = DeserializeValue(property.Type, storageType);
                 property.Setter(instance, value);                                       
                 if (IsDone())
                 {

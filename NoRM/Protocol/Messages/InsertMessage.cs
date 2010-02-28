@@ -30,7 +30,7 @@
 
             foreach (var obj in _elementsToInsert)
             {
-                message.Add(BSONSerializer.Serialize(obj));
+                message.Add(BsonSerializer.Serialize(obj));
             }
             var size = message.Sum(y => y.Length);
             message[0] = BitConverter.GetBytes(size);            

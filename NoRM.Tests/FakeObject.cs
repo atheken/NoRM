@@ -6,7 +6,7 @@ namespace NoRM.Tests
         
         public FakeObject()
         {
-            Id = ObjectId.NewOID();
+            Id = ObjectId.NewObjectId();
         }
     }
 }

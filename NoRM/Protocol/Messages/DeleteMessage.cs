@@ -32,7 +32,7 @@ namespace NoRM.Protocol.Messages
             bytes.Add(new byte[4]);
             bytes.Add(Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray());
             bytes.Add(new byte[4]);
-            bytes.Add(BSONSerializer.Serialize(this._templateDocument));
+            bytes.Add(BsonSerializer.Serialize(this._templateDocument));
             int size = bytes.Sum(j => j.Length);
             bytes[0] = BitConverter.GetBytes(size);
 
