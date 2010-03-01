@@ -39,6 +39,7 @@ namespace NoRM.Tests
             public GeneralDTO Nester { get; set; }
             public Regex ARex { get; set; }
             public float AFloat { get; set; }
+            public ScopedCode Code { get; set; }
             
             [MongoIgnore]
             public int IgnoredProperty { get; set; }
@@ -248,8 +249,7 @@ namespace NoRM.Tests
             Assert.Equal(null, hydratedObj2.ARex);
             //more tests would be useful for all the options.
         }
-
-/*        [Fact]
+        [Fact]
         public void SerializationOfScopedCodeIsNotLossy()
         {
             var obj1 = new GeneralDTO {Code = new ScopedCode {CodeString = "function(){return 'hello world!'}"}};
@@ -262,8 +262,6 @@ namespace NoRM.Tests
             Assert.Equal(obj1.Code.CodeString, obj2.Code.CodeString);
             Assert.Equal(((Flyweight)obj1.Code.Scope)["$ns"],((Flyweight)obj2.Code.Scope)["$ns"]);
         }
-
-        */
         [Fact]
         public void SerializesAndDeserializesAComplexObject()
         {

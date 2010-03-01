@@ -138,10 +138,9 @@ namespace NoRM.BSON
             {
                 return ReadRegularExpression();
             }
-            if (storedType == BSONTypes.ScopedCode)
+            if (type == typeof(ScopedCode))
             {
-                //todo
-                return null;
+                return ReadScopedCode();
             }     
             if (type == typeof(Flyweight))
             {
@@ -149,32 +148,6 @@ namespace NoRM.BSON
             }
            
             return ReadObject(type);            
-        }
-
-        private Flyweight ReadFlyweight()
-        {
-            var flyweight = new Flyweight();
-            while (true)
-            {
-                var storageType = ReadType();
-                var name = ReadName();
-                if (name == "$err" || name == "errmsg")
-                {
-                    HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
-                }                
-                if (storageType == BSONTypes.Object)
-                {
-                    NewDocument(_reader.ReadInt32());
-                }
-                var propertyType = _typeMap.ContainsKey(storageType) ? _typeMap[storageType] : typeof (object);
-                var value = DeserializeValue(propertyType, storageType);
-                flyweight.Set(name, value);
-                if (IsDone())
-                {
-                    break;
-                }
-            }
-            return flyweight;
         }
 
         private object ReadObject(Type type)
@@ -328,6 +301,39 @@ namespace NoRM.BSON
         {
             Read(1);
             return (BSONTypes)_reader.ReadByte();
+        }
+        private ScopedCode ReadScopedCode()
+        {
+            _reader.ReadInt32(); //length
+            Read(4);
+            var name = ReadString();
+            NewDocument(_reader.ReadInt32());                       
+            return new ScopedCode { CodeString = name, Scope = DeserializeValue(typeof(Flyweight), BSONTypes.Object) };            
+        }
+        private Flyweight ReadFlyweight()
+        {
+            var flyweight = new Flyweight();
+            while (true)
+            {
+                var storageType = ReadType();
+                var name = ReadName();
+                if (name == "$err" || name == "errmsg")
+                {
+                    HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
+                }
+                if (storageType == BSONTypes.Object)
+                {
+                    NewDocument(_reader.ReadInt32());
+                }
+                var propertyType = _typeMap.ContainsKey(storageType) ? _typeMap[storageType] : typeof(object);
+                var value = DeserializeValue(propertyType, storageType);
+                flyweight.Set(name, value);
+                if (IsDone())
+                {
+                    break;
+                }
+            }
+            return flyweight;
         }
 
         private static void HandleError(string message)
