@@ -5,8 +5,12 @@ namespace NoRM.Linq
 {
     public class MongoTypedSession<T> : MongoSession where T : class, new()
     {
+        private readonly string _connectionString;
+
         public MongoTypedSession(string connectionString) : base(connectionString)
-        {}
+        {
+            _connectionString = connectionString;
+        }
 
         public IQueryable<T> Query
         {
