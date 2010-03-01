@@ -28,6 +28,7 @@ namespace NoRM.Linq
             }
             _disposed = true;
         }
+
         ~MongoSession()
         {
             Dispose(false);

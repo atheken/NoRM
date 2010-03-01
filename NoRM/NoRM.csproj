@@ -94,6 +94,7 @@
     <Compile Include="Linq\MongoQueryProvider.cs" />
     <Compile Include="Linq\MongoQueryTranslator.cs" />
     <Compile Include="Linq\MongoSession.cs" />
+    <Compile Include="Linq\MongoTypedSession.cs" />
     <Compile Include="Linq\PartialEvaluator.cs" />
     <Compile Include="Linq\TypeHelper.cs" />
     <Compile Include="MongoAdmin.cs" />
