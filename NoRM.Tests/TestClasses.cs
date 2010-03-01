@@ -1,18 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.Attributes;
-using NoRM.BSON.DbTypes;
-using System.Text.RegularExpressions;
-using NoRM.Linq;
-
-namespace NoRM.Tests
+﻿namespace NoRM.Tests
 {
+    using System;
+    using System.Configuration;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using Attributes;
+    using Linq;
+
+    internal class TestHelper
+    {
+        private static readonly string _connectionStringHost = ConfigurationManager.AppSettings["connectionStringHost"];    
+        public static string ConnectionString()
+        {
+            return ConnectionString(null);            
+        }
+        public static string ConnectionString(string query)
+        {
+            return ConnectionString(query, null, null);
+        }
+        public static string ConnectionString(string userName, string password)
+        {
+            return ConnectionString(null, userName, password);
+        }
+        public static string ConnectionString(string query, string userName, string password)
+        {
+            var authentication = string.Empty;
+            if (userName != null)
+            {
+                authentication = string.Concat(userName, ':', password, '@');
+            }
+            if (!string.IsNullOrEmpty(query) && !query.StartsWith("?"))
+            {
+                query = string.Concat('?', query);
+            }
+            var host = string.IsNullOrEmpty(_connectionStringHost) ? "localhost" : _connectionStringHost;
+
+            return string.Format("mongodb://{0}{1}/NoRMTests{2}", authentication, host, query);
+        }
+    }
+    
+
     internal class Session : MongoSession
     {
-        public Session()
-            : base("mongodb://localhost/NoRMTests?pooling=false&strict=false")
+        
+        public Session() : base(TestHelper.ConnectionString("pooling=false&strict=false"))
         {
         }
 
@@ -33,7 +64,7 @@ namespace NoRM.Tests
 
         public void Drop<T>()
         {
-            Provider.Mongo.Database.DropCollection(typeof(T).Name);
+            Provider.Mongo.Database.DropCollection(typeof (T).Name);
         }
 
         public void CreateCappedCollection(string name)
@@ -81,12 +112,12 @@ namespace NoRM.Tests
 
     public class FakeObject
     {
-        public ObjectId Id { get; set; }
-
         public FakeObject()
         {
             Id = ObjectId.NewObjectId();
         }
+
+        public ObjectId Id { get; set; }
     }
 
     public enum Flags32
@@ -121,10 +152,17 @@ namespace NoRM.Tests
         public DateTime? ADateTime { get; set; }
         public GeneralDTO Nester { get; set; }
         public ScopedCode Code { get; set; }
+        public float? AFloat { get; set; }
         public Flags32? Flags32 { get; set; }
         public Flags64? Flags64 { get; set; }
 
         [MongoIgnore]
         public int IgnoredProperty { get; set; }
+    }
+
+
+    public class ChildGeneralDTO : GeneralDTO
+    {
+        public bool IsOver9000 { get; set; }
     }
 }

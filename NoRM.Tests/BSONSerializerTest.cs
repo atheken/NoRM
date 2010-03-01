@@ -9,46 +9,6 @@ namespace NoRM.Tests
 
     public class BSONSerializerTest
     {       
-        protected enum Flags32
-        {
-            FlagNone = 0,
-            FlagOn = 1,
-            FlagOff = 2
-        }
-
-        protected enum Flags64 : long
-        {
-            FlagNone = 0,
-            FlagOn = 1,
-            FlagOff = 2
-        }
-
-        protected class ChildGeneralDTO : GeneralDTO
-        {
-            public bool IsOver9000 { get; set; }
-        }
-        protected class GeneralDTO
-        {
-            public ObjectId Id { get; set; }
-            public double? Pi { get; set; }
-            public int? AnInt { get; set; }
-            public String Title { get; set; }
-            public bool? ABoolean { get; set; }
-            public byte[] Bytes { get; set; }
-            public Guid? AGuid { get; set; }
-            public DateTime? ADateTime { get; set; }
-            public string[] Strings { get; set; }
-            public Flags32? Flags32 { get; set; }
-            public Flags64? Flags64 { get; set; }
-            public GeneralDTO Nester { get; set; }
-            public Regex ARex { get; set; }
-            public float AFloat { get; set; }
-            public ScopedCode Code { get; set; }
-            
-            [MongoIgnore]
-            public int IgnoredProperty { get; set; }
-        }
-
         [Fact]
         public void DoesntSerializeIgnoredProperties()
         {

@@ -14,7 +14,7 @@ namespace NoRM.Tests
         [Fact]
         public void ThrowsExceptionWhenTryingToOverridePooling()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://localhost/")))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString())))
             {
                 var ex = Assert.Throws<MongoException>(() => connection.LoadOptions("pooling=true"));
                 Assert.Equal("Connection pooling cannot be provided as an override option", ex.Message);
@@ -23,7 +23,7 @@ namespace NoRM.Tests
         [Fact]
         public void ThrowsExceptionWhenTryingToOverridePoolSize()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://localhost/")))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString())))
             {
                 var ex = Assert.Throws<MongoException>(() => connection.LoadOptions("poolsize=23"));
                 Assert.Equal("PoolSize cannot be provided as an override option", ex.Message);
@@ -32,7 +32,7 @@ namespace NoRM.Tests
         [Fact]
         public void ThrowsExceptionWhenTryingToOverrideTimeout()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://localhost/")))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString())))
             {
                 var ex = Assert.Throws<MongoException>(() => connection.LoadOptions("timeout=23"));
                 Assert.Equal("Timeout cannot be provided as an override option", ex.Message);
@@ -41,7 +41,7 @@ namespace NoRM.Tests
         [Fact]
         public void OverridesStrictMode()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://localhost/?strict=true")))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("?strict=true"))))
             {
                 Assert.Equal(true, connection.StrictMode);
                 connection.LoadOptions("strict=false");
@@ -51,7 +51,7 @@ namespace NoRM.Tests
         [Fact]
         public void OverridesQueryTimeout()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://localhost/?querytimeout=30")))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("querytimeout=30"))))
             {
                 Assert.Equal(30, connection.QueryTimeout);
                 connection.LoadOptions("querytimeout=32");
@@ -61,7 +61,7 @@ namespace NoRM.Tests
         [Fact]
         public void OverridesExpando()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://localhost/?expando=true")))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("expando=true"))))
             {
                 Assert.Equal(true, connection.EnableExpandoProperties);
                 connection.LoadOptions("expando=false");
@@ -72,7 +72,7 @@ namespace NoRM.Tests
         [Fact]
         public void ResetsDefaults()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://localhost/?querytimeout=30&strict=false&expando=false")))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("querytimeout=30&strict=false&expando=false"))))
             {
                 connection.LoadOptions("querytimeout=23&strict=true&expando=true");
                 Assert.Equal(true, connection.StrictMode);
@@ -89,7 +89,7 @@ namespace NoRM.Tests
         [Fact]
         public void CreatesDigestFromNonce()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create("mongodb://ussrr:ppaassss@localhost/?querytimeout=30&strict=false&expando=false")))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("querytimeout=30&strict=false&expando=false", "ussrr", "ppaassss"))))
             {
                 Assert.Equal("08f11f775e2a8cf4248f0ae6126164f0", connection.Digest("1234abc"));
             }
