@@ -58,7 +58,6 @@
     <Compile Include="ConnectionsTests\NormalConnectionProviderAuthenticationTests.cs" />
     <Compile Include="ConnectionsTests\NormalConnectionProviderTests.cs" />
     <Compile Include="ConnectionsTests\PooledConnectionProviderTests.cs" />
-    <Compile Include="FakeObject.cs" />
     <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />
     <Compile Include="MongoAdminTests.cs" />
@@ -70,6 +69,7 @@
     <Compile Include="MongoTests.cs" />
     <Compile Include="ObjectIdTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestClasses.cs" />
     <Compile Include="WhereQualifierTests.cs" />
   </ItemGroup>
   <ItemGroup>

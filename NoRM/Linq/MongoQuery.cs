@@ -1,24 +1,39 @@
-﻿namespace NoRM.Linq
-{
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Expressions;
-    
-    public class MongoQuery<T> : IOrderedQueryable<T>
-    {
-        private readonly Expression _expression;
-        private readonly MongoQueryProvider _provider;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Linq.Expressions;
+using System.Collections;
+using NoRM.BSON;
 
-        public MongoQuery(MongoQueryProvider provider)
+namespace NoRM.Linq
+{
+    /// <summary>
+    /// A default implementation of IQueryable for use with QueryProvider
+    /// </summary>
+    public class MongoQuery<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable
+    {
+        MongoQueryProvider _provider;
+        Expression _expression;
+        MongoCollection<T> _collection;
+        Flyweight _query;
+
+        public MongoQuery(MongoQueryProvider provider, String collectionName)
         {
             if (provider == null)
             {
                 throw new ArgumentNullException("provider");
             }
-            _provider = provider;
-            _expression = Expression.Constant(this);        
+            this._provider = provider;
+            this._expression = Expression.Constant(this);
+            this._collection = new MongoCollection<T>(collectionName, provider.Mongo.Database, provider.Mongo.ServerConnection());
+            this._query = new Flyweight();
+        }
+
+        public MongoQuery(MongoQueryProvider provider)
+            : this(provider, typeof(T).Name)
+        {
+
         }
 
         public MongoQuery(MongoQueryProvider provider, Expression expression)
@@ -35,8 +50,8 @@
             {
                 throw new ArgumentOutOfRangeException("expression");
             }
-            _provider = provider;
-            _expression = expression;            
+            this._provider = provider;
+            this._expression = expression;            
         }
 
         Expression IQueryable.Expression
@@ -55,7 +70,9 @@
 
         public virtual IEnumerator<T> GetEnumerator()
         {
-            return _provider.Execute<T>(_expression).GetEnumerator();
+            //var docs= (ICursor)this.provider.Execute(this.expression);
+            return this._provider.Execute<T>(this._expression).GetEnumerator();
+
         }
         IEnumerator IEnumerable.GetEnumerator()
         {

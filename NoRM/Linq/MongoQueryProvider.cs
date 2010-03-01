@@ -1,4 +1,4 @@
-namespace NoRM.Linq
+﻿namespace NoRM.Linq
 {
     using System;
     using System.Collections.Generic;

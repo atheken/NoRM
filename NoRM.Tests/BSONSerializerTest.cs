@@ -6,10 +6,8 @@ namespace NoRM.Tests
     using Xunit;
     using System;
     using System.Diagnostics;
-    
     public class BSONSerializerTest
-    {
-        
+    {       
         protected enum Flags32
         {
             FlagNone = 0,
@@ -47,16 +45,28 @@ namespace NoRM.Tests
 
         [Fact]
         public void SerializationOfEnumIsNotLossy()
-        {                        
-            var obj1 = new GeneralDTO { Id = ObjectId.NewObjectId(), Pi = 3.4d, ABoolean = true, AnInt = 55, Title = "little", Bytes = new byte[] { 1, 2, 3 }, AGuid = Guid.NewGuid(), ADateTime = new DateTime(2004, 10, 21), Strings = new[] { "a", "bb", "abc" }, Flags32 = Flags32.FlagOff, Flags64 = Flags64.FlagOn, ARex = new Regex("its over (9000)", RegexOptions.Multiline | RegexOptions.IgnoreCase)};
-            var nested = new GeneralDTO {Pi = 43d, Title = "little"};
+        {
+            var obj1 = new GeneralDTO
+            {
+                Flags64 = Flags64.FlagOff,
+                Flags32 = Flags32.FlagOn,
+                Pi = 2d,
+                AnInt = 3,
+                Title = "telti",
+                ABoolean = false,
+                Strings = new[] { "a", "bb", "abc" },
+                Bytes = new byte[] { 1, 2, 3 },
+                AGuid = Guid.NewGuid(),
+                ADateTime = new DateTime(2001, 4, 8, 10, 43, 23, 104),
+                ARex = new Regex("it's over (9000)", RegexOptions.IgnoreCase)
+            };
+            var nested = new GeneralDTO { Pi = 43d, Title = "little", ARex = new Regex("^over (9000)$") };
             obj1.Nester = nested;
             var obj2 = new GeneralDTO();
 
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj2));
 
-            Assert.Equal(obj1.Id.ToString(), hydratedObj1.Id.ToString());
             Assert.Equal(obj1.Pi, hydratedObj1.Pi);
             Assert.Equal(obj1.AnInt, hydratedObj1.AnInt);
             Assert.Equal(obj1.Title, hydratedObj1.Title);
@@ -71,8 +81,7 @@ namespace NoRM.Tests
             Assert.Equal(obj1.Nester.Pi, hydratedObj1.Nester.Pi);
             Assert.Equal(obj1.ARex.ToString(), hydratedObj1.ARex.ToString());
             Assert.Equal(obj1.ARex.Options, hydratedObj1.ARex.Options);
-
-            Assert.Equal(obj2.Id, hydratedObj2.Id);
+            
             Assert.Equal(obj2.Pi, hydratedObj2.Pi);
             Assert.Equal(obj2.AnInt, hydratedObj2.AnInt);
             Assert.Equal(obj2.Title, hydratedObj2.Title);
@@ -334,6 +343,6 @@ namespace NoRM.Tests
             }
         }
 
-        
+
     }
 }

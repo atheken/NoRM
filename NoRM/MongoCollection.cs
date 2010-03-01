@@ -1,16 +1,17 @@
-﻿namespace NoRM
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
-    using Attributes;
-    using Protocol.Messages;
-    using Protocol.SystemMessages.Requests;
-    using Protocol.SystemMessages.Responses;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using NoRM.Attributes;
+using NoRM.Protocol.Messages;
+using NoRM.Protocol.SystemMessages.Requests;
+using NoRM.Protocol.SystemMessages.Responses;
+using NoRM.BSON;
 
-    public class MongoCollection<T>
+namespace NoRM
+{
+    public partial class MongoCollection<T>
     {
         //this will have a different instance for each concrete version of MongoCollection<T>
         private static bool? _updateable;
@@ -78,12 +79,13 @@
         {
             var coll = _db.GetCollection<MongoIndex<U>>("system.indexes");
             coll.Insert(new MongoIndex<U>()
-                            {
-                                key = indexDefinition,
-                                ns = FullyQualifiedName,
-                                name = indexName,
-                                unique = isUnique
-                            });
+            {
+                key = indexDefinition,
+                ns = this.FullyQualifiedName,
+                name = indexName,
+                unique = isUnique
+            });
+
         }
 
         /// <summary>
@@ -91,27 +93,35 @@
         /// </summary>
         /// <typeparam name="U">You better know that every value that could come back 
         /// is of this type, or BAD THINGS will happen.</typeparam>
+        /// <param name="keyName"></param>
+        /// <returns></returns>
         public IEnumerable<U> Distinct<U>(String keyName) where U : class, new()
         {
-            return _db.GetCollection<DistinctValuesResponse<U>>("$cmd").FindOne(new {distinct = _collectionName, key = keyName}).Values;
+            return this._db.GetCollection<DistinctValuesResponse<U>>("$cmd")
+                .FindOne(new { distinct = this._collectionName, key = keyName }).Values;
         }
 
         /// <summary>
         /// Deletes all indices on this collection.
         /// </summary>
+        /// <param name="numberDeleted"></param>
+        /// <returns></returns>
         public bool DeleteIndices(out int numberDeleted)
         {
-            return DeleteIndex("*", out numberDeleted);
+            return this.DeleteIndex("*", out numberDeleted);
         }
 
         /// <summary>
         /// Deletes the specified index for the collection.
         /// </summary>
+        /// <param name="indexName"></param>
+        /// <param name="numberDeleted"></param>
+        /// <returns></returns>
         public bool DeleteIndex(String indexName, out int numberDeleted)
         {
-            var retval = false;
-            var coll = _db.GetCollection<DeleteIndicesResponse>("$cmd");
-            var result = coll.FindOne(new {deleteIndexes = _collectionName, index = indexName});
+            bool retval = false;
+            var coll = this._db.GetCollection<DeleteIndicesResponse>("$cmd");
+            var result = coll.FindOne(new { deleteIndexes = this._collectionName, index = indexName });
             numberDeleted = 0;
 
             if (result != null && result.OK == 1.0)
@@ -119,15 +129,20 @@
                 retval = true;
                 numberDeleted = result.NIndexesWas.Value;
             }
+
             return retval;
         }
 
         /// <summary>
         /// Overload of Update that updates all matching documents, and doesn't upsert if no matches are found.
         /// </summary>
+        /// <typeparam name="X"></typeparam>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="matchDocument"></param>
+        /// <param name="valueDocument"></param>
         public void UpdateMultiple<X, U>(X matchDocument, U valueDocument)
         {
-            Update(matchDocument, valueDocument, true, false);
+            this.Update(matchDocument, valueDocument, true, false);
         }
 
 
@@ -143,11 +158,12 @@
         /// <exception cref="NotSupportedException">This exception will be raised if the collection's type "T" doesn't define an indentifier.</exception>
         public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert)
         {
-            if (!Updateable)
+            if (!this.Updateable)
             {
-                throw new NotSupportedException("This collection is not updatable, this is due to the fact that the collection's type " + typeof (T).FullName +" does not specify an identifier property");
+                throw new NotSupportedException("This collection is not updatable, this is due to the fact that the collection's type " + typeof(T).FullName +
+                    " does not specify an identifier property");
             }
-            var ops = UpdateOption.None;
+            UpdateOption ops = UpdateOption.None;
             if (updateMultiple)
             {
                 ops |= UpdateOption.MultiUpdate;
@@ -157,7 +173,7 @@
                 ops |= UpdateOption.Upsert;
             }
 
-            var um = new UpdateMessage<X, U>(_connection, FullyQualifiedName, ops, matchDocument, valueDocument);
+            var um = new UpdateMessage<X, U>(this._connection, this.FullyQualifiedName, ops, matchDocument, valueDocument);
             um.Execute();
         }
 
@@ -166,9 +182,10 @@
         /// </summary>
         /// <typeparam name="U">a document that has properties 
         /// that match what you want to delete.</typeparam>
+        /// <param name="template"></param>
         public void Delete<U>(U template)
         {
-            var dm = new DeleteMessage<U>(_connection, FullyQualifiedName, template);
+            var dm = new DeleteMessage<U>(this._connection, this.FullyQualifiedName, template);
             dm.Execute();
         }
 
@@ -178,27 +195,33 @@
         /// </summary>
         /// <typeparam name="U">A type that has each member set to the value to search. 
         /// Keep in mind that all the properties must either be concrete values, or the 
-        /// special "Qualifier"-type values.</typeparam>        
+        /// special "Qualifier"-type values.</typeparam>
+        /// <param name="template"></param>
         /// <returns>The first document that matched the template, or default(T)</returns>
         public T FindOne<U>(U template)
         {
-            return Find(template, 1).FirstOrDefault();
+            return this.Find(template, 1).FirstOrDefault();
         }
 
         /// <summary>
         /// Find objects in the collection without any qualifiers.
-        /// </summary>        
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<T> Find()
         {
             //this is a hack to get a value that will test for null into the serializer.
-            return Find(new Object(), Int32.MaxValue, FullyQualifiedName);
+            return this.Find(new Object(), Int32.MaxValue, this.FullyQualifiedName);
         }
 
         /// <summary>
         /// Find based on a Linq Expression
-        /// </summary>        
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <returns></returns>
         public IEnumerable<T> Find<T>(Expression<Func<T, bool>> expression)
         {
+
             //build a template based on T
             return null;
         }
@@ -210,49 +233,145 @@
             return false;
         }
 
+        /// <summary>
+        /// Return all documents matching the template
+        /// </summary>
+        /// <remarks>
+        /// Ok, not all documents, just all documents up to Int32.MaxValue - if you bring that many back, you've crashed. Sorry.
+        /// </remarks>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <returns></returns>
         public IEnumerable<T> Find<U>(U template)
         {
-            return Find(template, Int32.MaxValue);
+            return this.Find(template, Int32.MaxValue);
+        }
+
+        public IEnumerable<T> Find(Flyweight template)
+        {
+            int limit = 0;
+            int skip = 0;
+
+            var hasLimit = template.TryGet<int>("$limit", out limit);
+            var hasSkip = template.TryGet<int>("$skip", out skip);
+
+            if (!hasLimit)
+            {
+                limit = Int32.MaxValue;
+            }
+
+            template.Delete("$limit");
+            template.Delete("$skip");
+
+            return this.Find(template, limit, skip, this.FullyQualifiedName);
         }
 
         /// <summary>
         /// Get the documents that match the specified template.
         /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <param name="limit">The number to return from this command.</param>
+        /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit)
         {
-            return Find(template, limit, FullyQualifiedName);
+            return Find(template, limit, 0, this.FullyQualifiedName);
         }
 
         public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName)
         {
-            var qm = new QueryMessage<T, U>(_connection, fullyQualifiedName) {NumberToTake = limit, Query = template};
+            return this.Find(template, limit, 0, fullyQualifiedName);
+        }
+
+        public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
+        {
+            var qm = new QueryMessage<T, U>(this._connection, fullyQualifiedName);
+            qm.NumberToTake = limit;
+            qm.Query = template;
             var reply = qm.Execute();
-            foreach (var r in reply.Results) { yield return r; }
+
+            foreach (var r in reply.Results)
+            {
+                yield return r;
+            }
             yield break;
         }
 
         public void Insert(params T[] documentsToInsert)
         {
-            Insert(documentsToInsert.AsEnumerable());
+            this.Insert(documentsToInsert.AsEnumerable());
         }
 
+        public interface IMongoGrouping<K, V>
+        {
+            K Key { get; set; }
+            V Value { get; set; }
+        }
+
+        /// <summary>
+        /// Constructs and returns a grouping of values based on initial values
+        /// </summary>
+        /// <typeparam name="X"></typeparam>
+        /// <typeparam name="Y"></typeparam>
+        /// <typeparam name="Z"></typeparam>
+        /// <param name="key"></param>
+        /// <param name="filter"></param>
+        /// <param name="initialValue"></param>
+        /// <param name="reduce"></param>
+        /// <returns></returns>
+        public object GroupBy<X, Y, Z>(X key, Y filter, Z initialValue,
+            String reduce)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// A count on this collection without any filter.
+        /// </summary>
+        /// <returns></returns>
+        public long Count()
+        {
+            return this.Count(new { });
+        }
+
+        /// <summary>
+        /// A count using the specified filter.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        public long Count<U>(U query)
+        {
+            var f = this._db.GetCollection<Flyweight>("$cmd")
+                .FindOne(new
+                {
+                    count = this._collectionName,
+                    query = query
+                });
+            long retval = (long)f.Get<double>("n");
+            return retval;
+        }
 
         /// <summary>
         /// Insert these documents into the database.
-        /// </summary>        
+        /// </summary>
+        /// <exception cref="MongoError">Will return void if all goes well, of throw an exception otherwise.</exception>
+        /// <param name="documentsToUpsert"></param>
         public void Insert(IEnumerable<T> documentsToInsert)
         {
-            if (!Updateable)
+            if (!this.Updateable)
             {
-                throw new NotSupportedException("This collection does not accept insertions, this is due to the fact that the collection's type " + typeof (T).FullName + " does not specify an identifier property");
+                throw new NotSupportedException("This collection does not accept insertions, this is due to the fact that the collection's type " + typeof(T).FullName +
+                    " does not specify an identifier property");
             }
-            var insertMessage = new InsertMessage<T>(_connection, FullyQualifiedName, documentsToInsert);
+            var insertMessage = new InsertMessage<T>
+                (this._connection, this.FullyQualifiedName, documentsToInsert);
             insertMessage.Execute();
         }
 
         public CollectionStatistics GetCollectionStatistics()
         {
-            return _db.GetCollectionStatistics(_collectionName);
+            return this._db.GetCollectionStatistics(this._collectionName);
         }
     }
 }
