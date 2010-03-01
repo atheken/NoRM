@@ -6,6 +6,7 @@ namespace NoRM.Tests
     using Xunit;
     using System;
     using System.Diagnostics;
+
     public class BSONSerializerTest
     {       
         protected enum Flags32
@@ -37,65 +38,19 @@ namespace NoRM.Tests
             public Flags64? Flags64 { get; set; }
             public GeneralDTO Nester { get; set; }
             public Regex ARex { get; set; }
+            public float AFloat { get; set; }
             
-
             [MongoIgnore]
             public int IgnoredProperty { get; set; }
         }
 
         [Fact]
-        public void SerializationOfEnumIsNotLossy()
+        public void DoesntSerializeIgnoredProperties()
         {
-            var obj1 = new GeneralDTO
-            {
-                Flags64 = Flags64.FlagOff,
-                Flags32 = Flags32.FlagOn,
-                Pi = 2d,
-                AnInt = 3,
-                Title = "telti",
-                ABoolean = false,
-                Strings = new[] { "a", "bb", "abc" },
-                Bytes = new byte[] { 1, 2, 3 },
-                AGuid = Guid.NewGuid(),
-                ADateTime = new DateTime(2001, 4, 8, 10, 43, 23, 104),
-                ARex = new Regex("it's over (9000)", RegexOptions.IgnoreCase)
-            };
-            var nested = new GeneralDTO { Pi = 43d, Title = "little", ARex = new Regex("^over (9000)$") };
-            obj1.Nester = nested;
-            var obj2 = new GeneralDTO();
-
-            var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
-            var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj2));
-
-            Assert.Equal(obj1.Pi, hydratedObj1.Pi);
-            Assert.Equal(obj1.AnInt, hydratedObj1.AnInt);
-            Assert.Equal(obj1.Title, hydratedObj1.Title);
-            Assert.Equal(obj1.ABoolean, hydratedObj1.ABoolean);
-            Assert.Equal(obj1.Bytes, hydratedObj1.Bytes);
-            Assert.Equal(obj1.AGuid, hydratedObj1.AGuid);
-            Assert.Equal(obj1.ADateTime.Value.Ticks, hydratedObj1.ADateTime.Value.Ticks);
-            Assert.Equal(obj1.Strings, hydratedObj1.Strings);
-            Assert.Equal(obj1.Flags32, hydratedObj1.Flags32);
-            Assert.Equal(obj1.Flags64, hydratedObj1.Flags64);
-            Assert.Equal(obj1.Nester.Title, hydratedObj1.Nester.Title);
-            Assert.Equal(obj1.Nester.Pi, hydratedObj1.Nester.Pi);
-            Assert.Equal(obj1.ARex.ToString(), hydratedObj1.ARex.ToString());
-            Assert.Equal(obj1.ARex.Options, hydratedObj1.ARex.Options);
-            
-            Assert.Equal(obj2.Pi, hydratedObj2.Pi);
-            Assert.Equal(obj2.AnInt, hydratedObj2.AnInt);
-            Assert.Equal(obj2.Title, hydratedObj2.Title);
-            Assert.Equal(obj2.ABoolean, hydratedObj2.ABoolean);
-            Assert.Equal(obj2.Bytes, hydratedObj2.Bytes);
-            Assert.Equal(obj2.AGuid, hydratedObj2.AGuid);
-            Assert.Equal(obj2.ADateTime, hydratedObj2.ADateTime);
-            Assert.Equal(obj2.Strings, hydratedObj2.Strings);
-            Assert.Equal(obj2.Flags32, hydratedObj2.Flags32);
-            Assert.Equal(obj2.Flags64, hydratedObj2.Flags64);
-            Assert.Equal(obj2.Nester, hydratedObj2.Nester);
-            Assert.Equal(obj2.ARex, hydratedObj2.ARex);
+            var o = new GeneralDTO {IgnoredProperty = 4};
+            Assert.Equal(0, BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(o)).IgnoredProperty);
         }
-        /*
+
         [Fact]
         public void SerializationOfEnumIsNotLossy()
         {
@@ -119,27 +74,22 @@ namespace NoRM.Tests
             testObj["astring"] = "stringval";
             var testBytes = BsonSerializer.Serialize(testObj);
             var hydrated = BsonDeserializer.Deserialize<Flyweight>(testBytes);
-
             Assert.Equal(testObj["astring"], hydrated["astring"]);
         }
-
+        
         [Fact]
-        public void MongoIgnoredPropertiesAreIgnored()
+        public void SerializesAndDeserializesAFloat()
         {
-            var test = new GeneralDTO {IgnoredProperty = 42};
-            var hydrated = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(test));
-
-            Assert.Equal(0, hydrated.IgnoredProperty);
+            var o = new GeneralDTO {AFloat = 1.4f};
+            Assert.Equal(1.4f, BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(o)).AFloat);
         }
-
         [Fact]
         public void SerializingPocoGeneratesBytes()
         {
             var dummy = new GeneralDTO { Title = "Testing" };
             Assert.NotEmpty(BsonSerializer.Serialize(dummy));
         }
-
-
+        
         [Fact]
         public void SerializationOfDatesHasMillisecondPrecision()
         {
@@ -315,15 +265,66 @@ namespace NoRM.Tests
 
         */
         [Fact]
+        public void SerializesAndDeserializesAComplexObject()
+        {
+            var obj1 = new GeneralDTO
+            {
+                Flags64 = Flags64.FlagOff,
+                Flags32 = Flags32.FlagOn,
+                Pi = 2d,
+                AnInt = 3,
+                Title = "telti",
+                ABoolean = false,
+                Strings = new[] { "a", "bb", "abc" },
+                Bytes = new byte[] { 1, 2, 3 },
+                AGuid = Guid.NewGuid(),
+                ADateTime = new DateTime(2001, 4, 8, 10, 43, 23, 104),
+                ARex = new Regex("it's over (9000)", RegexOptions.IgnoreCase)
+            };
+            var nested = new GeneralDTO { Pi = 43d, Title = "little", ARex = new Regex("^over (9000)$") };
+            obj1.Nester = nested;
+            var obj2 = new GeneralDTO();
+
+            var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
+            var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj2));
+
+            Assert.Equal(obj1.Pi, hydratedObj1.Pi);
+            Assert.Equal(obj1.AnInt, hydratedObj1.AnInt);
+            Assert.Equal(obj1.Title, hydratedObj1.Title);
+            Assert.Equal(obj1.ABoolean, hydratedObj1.ABoolean);
+            Assert.Equal(obj1.Bytes, hydratedObj1.Bytes);
+            Assert.Equal(obj1.AGuid, hydratedObj1.AGuid);
+            Assert.Equal(obj1.ADateTime.Value.Ticks, hydratedObj1.ADateTime.Value.Ticks);
+            Assert.Equal(obj1.Strings, hydratedObj1.Strings);
+            Assert.Equal(obj1.Flags32, hydratedObj1.Flags32);
+            Assert.Equal(obj1.Flags64, hydratedObj1.Flags64);
+            Assert.Equal(obj1.Nester.Title, hydratedObj1.Nester.Title);
+            Assert.Equal(obj1.Nester.Pi, hydratedObj1.Nester.Pi);
+            Assert.Equal(obj1.ARex.ToString(), hydratedObj1.ARex.ToString());
+            Assert.Equal(obj1.ARex.Options, hydratedObj1.ARex.Options);
+
+            Assert.Equal(obj2.Pi, hydratedObj2.Pi);
+            Assert.Equal(obj2.AnInt, hydratedObj2.AnInt);
+            Assert.Equal(obj2.Title, hydratedObj2.Title);
+            Assert.Equal(obj2.ABoolean, hydratedObj2.ABoolean);
+            Assert.Equal(obj2.Bytes, hydratedObj2.Bytes);
+            Assert.Equal(obj2.AGuid, hydratedObj2.AGuid);
+            Assert.Equal(obj2.ADateTime, hydratedObj2.ADateTime);
+            Assert.Equal(obj2.Strings, hydratedObj2.Strings);
+            Assert.Equal(obj2.Flags32, hydratedObj2.Flags32);
+            Assert.Equal(obj2.Flags64, hydratedObj2.Flags64);
+            Assert.Equal(obj2.Nester, hydratedObj2.Nester);
+            Assert.Equal(obj2.ARex, hydratedObj2.ARex);
+        }
+        [Fact]
         public void SerializationSpeedTest()
         {
-            for (var i2 = 0; i2 < 10; i2++)
+            for (var i = 0; i < 5; i++)
             {
                 var stopWatch = new Stopwatch();
-
                 stopWatch.Start();
 
-                for (var i = 0; i < 10000; i++)
+                for (var j = 0; j < 10000; j++)
                 {
                     var obj1 = new GeneralDTO
                                    {
@@ -338,11 +339,8 @@ namespace NoRM.Tests
                     BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
                 }
                 stopWatch.Stop();
-
                 Console.WriteLine(stopWatch.ElapsedMilliseconds);
             }
         }
-
-
     }
 }

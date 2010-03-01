@@ -77,7 +77,6 @@ namespace NoRM.BSON
             {            
                 type = Nullable.GetUnderlyingType(type);
             }  
-
             if (type == typeof(string))
             {
                 return ReadString();                
@@ -89,6 +88,11 @@ namespace NoRM.BSON
             if (type.IsEnum)
             {
                 return ReadEnum(type, storedType);
+            }
+            if (type == typeof(float))
+            {
+                Read(8);
+                return (float)_reader.ReadDouble();
             }
             if (storedType == BSONTypes.Binary)
             {
@@ -112,7 +116,8 @@ namespace NoRM.BSON
                 Read(12);
                 return new ObjectId(_reader.ReadBytes(12));
             }                       
-  
+
+
             if (type == typeof(long))
             {
                 return ReadLong(storedType);

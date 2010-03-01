@@ -13,7 +13,7 @@
          {
              {typeof (int), BSONTypes.Int32}, {typeof (long), BSONTypes.Int64}, {typeof (bool), BSONTypes.Boolean}, {typeof (string), BSONTypes.String},
              {typeof(double), BSONTypes.Double}, {typeof (Guid), BSONTypes.Binary}, {typeof (Regex), BSONTypes.Regex}, {typeof (DateTime), BSONTypes.DateTime}, 
-             {typeof (byte[]), BSONTypes.Binary}, {typeof(ObjectId), BSONTypes.MongoOID}
+             {typeof(float), BSONTypes.Double}, {typeof (byte[]), BSONTypes.Binary}, {typeof(ObjectId), BSONTypes.MongoOID}
          };        
 
         private readonly BinaryWriter _writer;
@@ -131,7 +131,8 @@
                     return;
                 case BSONTypes.Double:
                     Written(8);
-                    _writer.Write((double)value);
+                    if (value is float) { _writer.Write(Convert.ToDouble((float)value)); }
+                    else { _writer.Write((double)value); }
                     return;
                 case BSONTypes.Boolean:
                     Written(1);
