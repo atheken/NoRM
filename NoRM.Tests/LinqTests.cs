@@ -3,11 +3,12 @@
     using System;
     using System.Linq;
     using Linq;
+    using Protocol.SystemMessages.Responses;
     using Xunit;
 
     internal class Session : MongoSession
     {
-        public Session() : base("mongodb://localhost/Northwind?pooling=false&strict=false")
+        public Session() : base("mongodb://localhost/NoRMTests?pooling=false&strict=false")
         {
         }
 
@@ -34,6 +35,10 @@
         public void CreateCappedCollection(string name)
         {
             Provider.Mongo.Database.CreateCollection(new CreateCollectionOptions(name));
+        }
+        public LastErrorResponse GetLastError()
+        {
+            return Provider.Mongo.LastError();
         }
     }
 
@@ -87,7 +92,7 @@
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {
             using (var session = new Session())
-            {
+            {                
                 session.Add(new Product {Name = "Test3X", Price = 10});
                 session.Add(new Product {Name = "Test4X", Price = 22});
                 session.Add(new Product {Name = "Test5", Price = 33});

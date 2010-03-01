@@ -17,8 +17,7 @@ namespace NoRM.BSON
             _type = type;
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             _properties = LoadMagicProperties(properties, IdProperty(properties));            
-
-        }        
+        }
 
         public static TypeHelper GetHelperForType(Type type)
         {
@@ -45,7 +44,7 @@ namespace NoRM.BSON
         }
         public MagicProperty FindIdProperty()
         {
-            return _properties["$_id"];
+            return _properties.ContainsKey("$_id") ? _properties["$_id"] : null;
         }    
         private static PropertyInfo IdProperty(IEnumerable<PropertyInfo> properties)
         {
@@ -72,10 +71,10 @@ namespace NoRM.BSON
             var magic = new Dictionary<string, MagicProperty>(StringComparer.CurrentCultureIgnoreCase);
             foreach (var property in properties)
             {
-                if (property.GetCustomAttributes(_ignoredType, true).Length > 0)
+                if (property.GetCustomAttributes(_ignoredType, true).Length > 0 || property.GetIndexParameters().Length > 0)
                 {
                     continue;
-                }
+                }                
                 var name = (property == idProperty) ? "$_id" : property.Name;
                 magic.Add(name, new MagicProperty(property));
             }
@@ -101,9 +100,9 @@ namespace NoRM.BSON
 
         public MagicProperty(PropertyInfo property)
         {
-            _property = property;
-            Setter = CreateSetterMethod(property);
+            _property = property;            
             Getter = CreateGetterMethod(property);
+            Setter = CreateSetterMethod(property);
         }
 
         private static Action<object, object> CreateSetterMethod(PropertyInfo property)
@@ -122,12 +121,15 @@ namespace NoRM.BSON
         //called via reflection
         private static Action<object, object> SetterMethod<TTarget, TParam>(PropertyInfo method) where TTarget : class
         {
-            var func = (Action<TTarget, TParam>)Delegate.CreateDelegate(typeof(Action<TTarget, TParam>), method.GetSetMethod());
+            var m = method.GetSetMethod();
+            if (m == null) { return null;  } //no setter
+            var func = (Action<TTarget, TParam>)Delegate.CreateDelegate(typeof(Action<TTarget, TParam>), m);
             return (target, param) => func((TTarget)target, (TParam)param);
         }
         private static Func<object, object> GetterMethod<TTarget, TParam>(PropertyInfo method) where TTarget : class
-        {            
-            var func = (Func<TTarget, TParam>)Delegate.CreateDelegate(typeof(Func<TTarget, TParam>), method.GetGetMethod());            
+        {
+            var m = method.GetGetMethod();
+            var func = (Func<TTarget, TParam>)Delegate.CreateDelegate(typeof(Func<TTarget, TParam>), m);            
             return target => func((TTarget)target);            
         }
     }

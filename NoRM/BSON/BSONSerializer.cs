@@ -60,26 +60,36 @@
 
         private void Write(object document)
         {
-            var type = document.GetType();
-            var typeHelper = TypeHelper.GetHelperForType(type);
-            var idProperty = typeHelper.FindIdProperty();
-            if (idProperty == null)
-            {
-                throw new MongoException(type.FullName + " cannot be saved: no valid identifer could be fine");
-            }
             NewDocument();
-            foreach (var property in typeHelper.GetProperties())
-            {                
-                var name = property == idProperty ?  "_id" : property.Name;
-                var value = property.Getter(document);                                
-                SerializeMember(name, value);
+            if (document is Flyweight)
+            {
+                WriteFlyweight((Flyweight) document);
+            }
+            else
+            {
+                WriteObject(document);
+                
             }
             EndDocument();
+        }
 
-
-            //retval.Add(new byte[1]); //null terminate the retval;
-            //var size = retval.Sum(y => y.Length);
-            //retval[0] = BitConverter.GetBytes(size);            
+        private void WriteFlyweight(Flyweight document)
+        {
+            foreach (var property in document.AllProperties())
+            {
+                SerializeMember(property.PropertyName, property.Value);
+            }
+        }
+        private void WriteObject(object document)
+        {
+            var typeHelper = TypeHelper.GetHelperForType(document.GetType());
+            var idProperty = typeHelper.FindIdProperty();
+            foreach (var property in typeHelper.GetProperties())
+            {
+                var name = property == idProperty ? "_id" : property.Name;
+                var value = property.Getter(document);
+                SerializeMember(name, value);
+            }
         }
 
         private void SerializeMember(string name, object value)
@@ -100,7 +110,7 @@
             if (!_typeMap.TryGetValue(type, out storageType))
             {
                 //this isn't a simple type;
-                Write(name, type, value);
+                Write(name, value);
                 return;
             }
             
@@ -144,7 +154,7 @@
             }
         }
 
-        private void Write(string name, Type type, object value)
+        private void Write(string name, object value)
         {
             if (value is IEnumerable)
             {
@@ -153,7 +163,25 @@
                 NewDocument();
                 WriteArray((IEnumerable)value);                
                 EndDocument();
-            }            
+            }
+            else if (value is ModifierCommand)
+            {
+                var command = (ModifierCommand)value;
+                Write(BSONTypes.Object);
+                WriteName(command.CommandName);                
+                NewDocument();
+                SerializeMember(name, command.ValueForCommand);
+                EndDocument();                               
+            }
+            else if (value is QualifierCommand)
+            {
+                var command = (QualifierCommand)value;
+                Write(BSONTypes.Object);
+                WriteName(name);
+                NewDocument();
+                SerializeMember(command.CommandName, command.ValueForCommand);
+                EndDocument();
+            }          
             else 
             {
                 Write(BSONTypes.Object);
