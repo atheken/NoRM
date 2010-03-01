@@ -11,6 +11,13 @@ namespace NoRM.BSON
     public class BsonDeserializer
     {
         private static readonly Type _IEnumerableType = typeof(IEnumerable);
+
+        private readonly IDictionary<BSONTypes, Type> _typeMap = new Dictionary<BSONTypes, Type>
+         {
+             {BSONTypes.Int32, typeof(int)}, {BSONTypes.Int64, typeof (long)}, {BSONTypes.Boolean, typeof (bool)}, {BSONTypes.String, typeof (string)},
+             {BSONTypes.Double, typeof(double)}, {BSONTypes.Binary, typeof (byte[])}, {BSONTypes.Regex, typeof (Regex)}, {BSONTypes.DateTime, typeof (DateTime)},
+             {BSONTypes.MongoOID, typeof(ObjectId)}
+         };     
         
         public static T Deserialize<T>(byte[] objectData) where T : class, new()
         {
@@ -23,12 +30,12 @@ namespace NoRM.BSON
             {
                 ms.Write(objectData, 0, objectData.Length);
                 ms.Position = 0;
-                return Deserialize<T>(new BinaryReader(ms), ref outProps);
+                return Deserialize<T>(new BinaryReader(ms));
             }
         }
-        private static T Deserialize<T>(BinaryReader stream, ref IDictionary<WeakReference, Flyweight> outProps)
+        private static T Deserialize<T>(BinaryReader stream)
         {
-            return new BsonDeserializer(stream).Read<T>(ref outProps);
+            return new BsonDeserializer(stream).Read<T>();
         }
 
         private readonly BinaryReader _reader;
@@ -39,7 +46,7 @@ namespace NoRM.BSON
             _reader = reader;             
         }
 
-        private T Read<T>(ref IDictionary<WeakReference, Flyweight> outProps)
+        private T Read<T>()
         {
             NewDocument(_reader.ReadInt32());            
             var @object = (T)DeserializeValue(typeof(T), BSONTypes.Object);            
@@ -135,9 +142,39 @@ namespace NoRM.BSON
             {
                 //todo
                 return null;
-            }      
+            }     
+            if (type == typeof(Flyweight))
+            {
+                return ReadFlyweight();
+            }
            
             return ReadObject(type);            
+        }
+
+        private Flyweight ReadFlyweight()
+        {
+            var flyweight = new Flyweight();
+            while (true)
+            {
+                var storageType = ReadType();
+                var name = ReadName();
+                if (name == "$err" || name == "errmsg")
+                {
+                    HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
+                }                
+                if (storageType == BSONTypes.Object)
+                {
+                    NewDocument(_reader.ReadInt32());
+                }
+                var propertyType = _typeMap.ContainsKey(storageType) ? _typeMap[storageType] : typeof (object);
+                var value = DeserializeValue(propertyType, storageType);
+                flyweight.Set(name, value);
+                if (IsDone())
+                {
+                    break;
+                }
+            }
+            return flyweight;
         }
 
         private object ReadObject(Type type)
