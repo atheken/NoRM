@@ -57,7 +57,7 @@
         {
             try
             {
-                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new DroppedCollectionResponse {drop = collectionName}).OK == 1;                
+                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new {drop = collectionName}).OK == 1;                
             }
             catch (MongoException exception)
             {

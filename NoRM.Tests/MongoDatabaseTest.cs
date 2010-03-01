@@ -1,4 +1,4 @@
-namespace NoRM.Tests
+﻿namespace NoRM.Tests
 {
     using System.Collections.Generic;
     using System.Linq;    

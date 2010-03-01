@@ -77,7 +77,6 @@ namespace NoRM.BSON
             {            
                 type = Nullable.GetUnderlyingType(type);
             }  
-
             if (type == typeof(string))
             {
                 return ReadString();                
@@ -89,6 +88,11 @@ namespace NoRM.BSON
             if (type.IsEnum)
             {
                 return ReadEnum(type, storedType);
+            }
+            if (type == typeof(float))
+            {
+                Read(8);
+                return (float)_reader.ReadDouble();
             }
             if (storedType == BSONTypes.Binary)
             {
@@ -112,7 +116,8 @@ namespace NoRM.BSON
                 Read(12);
                 return new ObjectId(_reader.ReadBytes(12));
             }                       
-  
+
+
             if (type == typeof(long))
             {
                 return ReadLong(storedType);
@@ -138,7 +143,7 @@ namespace NoRM.BSON
         private object ReadObject(Type type)
         {
             var instance = Activator.CreateInstance(type);
-            var typeHelper = ReflectionHelpers.PropertiesOf(type);
+            var typeHelper = TypeHelper.GetHelperForType(type);
             while (true)
             {
                 var storageType = ReadType();                
@@ -147,12 +152,12 @@ namespace NoRM.BSON
                 {
                     HandleError((string)DeserializeValue(typeof (string), BSONTypes.String));                    
                 }
-                var property = (name == "_id") ? typeHelper.FindIdSetter() : typeHelper.FindSetter(name);                
+                var property = (name == "_id") ? typeHelper.FindIdProperty() : typeHelper.FindProperty(name);                
                 if (storageType == BSONTypes.Object)
                 {
                     NewDocument(_reader.ReadInt32());
                 }
-                var value = DeserializeValue(property.Property.PropertyType, storageType);
+                var value = DeserializeValue(property.Type, storageType);
                 property.Setter(instance, value);                                       
                 if (IsDone())
                 {

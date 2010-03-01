@@ -9,7 +9,7 @@ namespace NoRM.Attributes
     /// Provides a way to specify a different name when de/serialized to and from MongoDB.
     /// </summary>
     /// <remarks>
-    /// BSONSerializer doesn't check for these (YET!)
+    /// BsonSerializer doesn't check for these (YET!)
     /// </remarks>
     [AttributeUsage(AttributeTargets.Property)]
     public class MongoNameAttribute :Attribute

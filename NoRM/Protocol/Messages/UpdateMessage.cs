@@ -30,8 +30,8 @@ namespace NoRM.Protocol.Messages
             message.Add(new byte[4]);//required by docs
             message.Add(Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray());
             message.Add(BitConverter.GetBytes((int)this._options));
-            message.Add(BSONSerializer.Serialize(this._matchDocument));
-            message.Add(BSONSerializer.Serialize(this._valueDocument));
+            message.Add(BsonSerializer.Serialize(this._matchDocument));
+            message.Add(BsonSerializer.Serialize(this._valueDocument));
             var size = message.Sum(y=>y.Length);
             message[0] = BitConverter.GetBytes(size);
 

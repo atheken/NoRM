@@ -1,4 +1,4 @@
-/*
+﻿/*
 namespace NoRM.Tests
 {
     [TestFixture]

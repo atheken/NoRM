@@ -177,13 +177,13 @@
             }
             else if (m.Method.DeclaringType == typeof (Queryable) && m.Method.Name.StartsWith("First"))
             {
-                _fly.Limit = 1;                
+                _fly["$limit"] = 1;                
                 Visit(m.Arguments[0]);
                 return m;
             }
             else if (m.Method.DeclaringType == typeof (Queryable) && m.Method.Name.StartsWith("SingleOrDefault"))
             {
-                _fly.Limit = 1;
+                _fly["$limit"] = 1;
                 var lambda = (LambdaExpression) StripQuotes(m.Arguments[1]);
                 if (lambda != null)
                 {

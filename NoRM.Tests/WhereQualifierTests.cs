@@ -1,9 +1,11 @@
+using System;
+using System.Linq;
+using NoRM.BSON;
+using Xunit;
+
 namespace NoRM.Tests
 {
-    using System;
-    using System.Linq;
-    using BSON;
-    using Xunit;
+   
     
     public class WhereQualifierTests : IDisposable
     {

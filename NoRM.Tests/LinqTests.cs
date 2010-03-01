@@ -2,77 +2,7 @@
 {
     using System;
     using System.Linq;
-    using Linq;
     using Xunit;
-
-    internal class Session : MongoSession
-    {
-        public Session() : base("mongodb://localhost/Northwind?pooling=false&strict=false")
-        {
-        }
-
-        public IQueryable<Product> Products
-        {
-            get { return new MongoQuery<Product>(Provider); }
-        }
-
-        public void Add<T>(T item) where T : class, new()
-        {
-            Provider.Mongo.GetCollection<T>().Insert(item);
-        }
-
-        public void Update<T>(T item) where T : class, new()
-        {
-            Provider.Mongo.GetCollection<T>().UpdateOne(item, item);
-        }
-
-        public void Drop<T>()
-        {
-            Provider.Mongo.Database.DropCollection(typeof (T).Name);
-        }
-
-        public void CreateCappedCollection(string name)
-        {
-            Provider.Mongo.Database.CreateCollection(new CreateCollectionOptions(name));
-        }
-    }
-
-    internal class Address
-    {
-        public string Street { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string Zip { get; set; }
-    }
-
-    internal class Supplier
-    {
-        public Supplier()
-        {
-            Address = new Address();
-            CreatedOn = DateTime.Now;
-        }
-
-        public string Name { get; set; }
-        public DateTime CreatedOn { get; set; }
-        public Address Address { get; set; }
-    }
-
-    internal class Product
-    {
-        public Product()
-        {
-            Supplier = new Supplier();
-            Id = ObjectId.NewOID();
-        }
-
-
-        public ObjectId Id { get; set; }
-        public string Name { get; set; }
-        public double Price { get; set; }
-        public Supplier Supplier { get; set; }
-        public DateTime Available { get; set; }
-    }
 
     public class LinqTests
     {
@@ -83,11 +13,12 @@
                 session.Drop<Product>();
             }
         }
+
         [Fact]
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {
             using (var session = new Session())
-            {
+            {                
                 session.Add(new Product {Name = "Test3X", Price = 10});
                 session.Add(new Product {Name = "Test4X", Price = 22});
                 session.Add(new Product {Name = "Test5", Price = 33});

@@ -57,12 +57,11 @@
     <Compile Include="BSON\DbTypes\ObjectId.cs" />
     <Compile Include="BSON\DbTypes\DBReference.cs" />
     <Compile Include="BSON\DbTypes\ScopedCode.cs" />
-    <Compile Include="BSON\BSONSerializer.cs" />
+    <Compile Include="BSON\BsonSerializer.cs" />
     <Compile Include="BSON\BSONTypes.cs" />
     <Compile Include="BSON\Commands.cs" />
     <Compile Include="BSON\DbTypes\ObjectIdGenerator.cs" />
     <Compile Include="BSON\ListHelper.cs" />
-    <Compile Include="BSON\ReflectionHelpers.cs" />
     <Compile Include="BSON\TypeHelper.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />

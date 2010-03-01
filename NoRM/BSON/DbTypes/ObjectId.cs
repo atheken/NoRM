@@ -21,7 +21,7 @@
         /// <summary>
         /// Provides an empty ObjectId (all zeros).
         /// </summary>
-        public static ObjectId EMPTY
+        public static ObjectId Empty
         {
             get { return new ObjectId(); }
         }
@@ -35,7 +35,7 @@
         /// Generates a new unique oid for use with MongoDB Objects.
         /// </summary>
         /// <returns></returns>
-        public static ObjectId NewOID()
+        public static ObjectId NewObjectId()
         {
             //TODO: generate random-ish bits.
             return new ObjectId {Value = ObjectIdGenerator.Generate()};            
@@ -43,7 +43,7 @@
 
         public static bool TryParse(string value, out ObjectId id)
         {
-            id = EMPTY;
+            id = Empty;
             if (value == null || value.Length != 24)
             {
                 return false;
