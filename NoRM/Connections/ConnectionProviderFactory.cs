@@ -31,8 +31,8 @@ namespace NoRM
         {
             if (builder.Pooled)
             {
-                //return new PooledConnectionProvider(builder);
-                return new QueuedConnectionProvider(builder);
+                return new PooledConnectionProvider(builder);
+                //return new QueuedConnectionProvider(builder);
             }
             return new NormalConnectionProvider(builder);
         }

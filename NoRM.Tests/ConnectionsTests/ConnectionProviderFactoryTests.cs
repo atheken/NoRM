@@ -28,5 +28,21 @@ namespace NoRM.Tests
             var original = ConnectionProviderFactory.Create("mongodb://localhost/test?pooling=false");
             Assert.NotSame(original, ConnectionProviderFactory.Create("mongodb://localhost/test?pooling=false&strict=false"));
         }
+        [Fact]
+        public void ConnectionProviderSupportsConfigFileValues()
+        {
+            var provider = ConnectionProviderFactory.Create("NoRMTests");
+            Assert.NotNull(provider);
+        }
+        [Fact]
+        public void ConnectionProviderConfigFileValuesMatchConnectionStringGrammar()
+        {
+            Assert.Throws<MongoException>(() => ConnectionProviderFactory.Create("NoRMTestsFail"));
+        }
+        [Fact]
+        public void ConnectionProviderConfigFailsForMissingConnectionString()
+        {
+            Assert.Throws<MongoException>(() =>  ConnectionProviderFactory.Create("NoRMTestsFail") );
+        }
     }
 }
