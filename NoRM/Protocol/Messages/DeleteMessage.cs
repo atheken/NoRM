@@ -14,8 +14,7 @@ namespace NoRM.Protocol.Messages
         /// </summary>
         /// <param name="context"></param>
         /// <param name="collection"></param>
-        internal DeleteMessage(MongoServer context, String collection, U templateDocument)
-            : base(context, collection)
+        internal DeleteMessage(IConnection connection, String collection, U templateDocument) : base(connection, collection)
         {
             this._templateDocument = templateDocument;
             this._op = MongoOp.Delete;
@@ -33,13 +32,11 @@ namespace NoRM.Protocol.Messages
             bytes.Add(new byte[4]);
             bytes.Add(Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray());
             bytes.Add(new byte[4]);
-            bytes.Add(BSONSerializer.Serialize(this._templateDocument));
+            bytes.Add(BsonSerializer.Serialize(this._templateDocument));
             int size = bytes.Sum(j => j.Length);
             bytes[0] = BitConverter.GetBytes(size);
 
-            var conn = this._context.ServerConnection();
-            
-            conn.GetStream().Write(bytes.SelectMany(y => y).ToArray(), 0, size);
+            _connection.GetStream().Write(bytes.SelectMany(y => y).ToArray(), 0, size);
             
         }
     }

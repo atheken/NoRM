@@ -9,7 +9,7 @@ namespace NoRM.Attributes
     /// Indicates that the BSON serializer should ignore the property on which this attribute is applied.
     /// </summary>
     /// <remarks>
-    /// BSONSerializer doesn't actually check for these, YET!
+    /// BsonSerializer doesn't actually check for these, YET!
     /// </remarks>
     [AttributeUsage(AttributeTargets.Property)]
     public class MongoIgnoreAttribute : Attribute

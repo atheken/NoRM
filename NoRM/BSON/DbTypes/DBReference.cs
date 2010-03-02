@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +25,7 @@ namespace NoRM.BSON.DbTypes
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
-        public U GetReferencedObject<U>(MongoServer connection)
+        public U GetReferencedObject<U>(Mongo connection)
         {
             throw new NotImplementedException();
         }

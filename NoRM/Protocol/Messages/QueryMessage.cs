@@ -15,8 +15,7 @@ namespace NoRM.Protocol.Messages
     /// <typeparam name="T">The request document type, and the response document type.</typeparam>
     public class QueryMessage<T> : QueryMessage<T, T> where T : class, new()
     {
-        public QueryMessage(MongoServer context, String fullyQualifiedCollName) :
-            base(context, fullyQualifiedCollName)
+        public QueryMessage(IConnection connection, String fullyQualifiedCollName) : base(connection, fullyQualifiedCollName)
         {
 
         }
@@ -46,8 +45,7 @@ namespace NoRM.Protocol.Messages
         private int _numberToSkip = 0;
         private int _numberToTake = Int32.MaxValue;
 
-        public QueryMessage(MongoServer context, String fullyQualifiedCollName) :
-            base(context, fullyQualifiedCollName)
+        public QueryMessage(IConnection connection, String fullyQualifiedCollName) : base(connection, fullyQualifiedCollName)
         {
             this._op = MongoOp.Query;
         }
@@ -117,7 +115,7 @@ namespace NoRM.Protocol.Messages
 
             if (this._query != null)
             {
-                messageBytes.Add(BSONSerializer.Serialize(this._query));
+                messageBytes.Add(BsonSerializer.Serialize(this._query));
             }
             #endregion
 
@@ -126,12 +124,11 @@ namespace NoRM.Protocol.Messages
             messageBytes[0] = BitConverter.GetBytes(size);
 
 
-            var conn = this._context.ServerConnection();
-            
+            var conn = _connection;            
             conn.GetStream().Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
 
             //so, the server can accepted the query, now we do the second part.
-            int timeout = this._context.QueryTimeout * 1000;
+            int timeout = conn.QueryTimeout * 1000;
 
             var stream = conn.GetStream();
 
@@ -143,9 +140,9 @@ namespace NoRM.Protocol.Messages
 
             if (!stream.DataAvailable)
             {
-                throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + this._context.QueryTimeout.ToString());
+                throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + conn.QueryTimeout.ToString());
             }
-            return new ReplyMessage<T>(this._context, this._collection, new BinaryReader(new BufferedStream(stream)));
+            return new ReplyMessage<T>(conn, this._collection, new BinaryReader(new BufferedStream(stream)));
 
         }
 

@@ -12,8 +12,7 @@ namespace NoRM.Protocol.Messages
         protected T _matchDocument;
         protected U _valueDocument;
 
-        internal UpdateMessage(MongoServer context, String collection, UpdateOption options, T matchDocument, U valueDocument)
-            : base(context, collection)
+        internal UpdateMessage(IConnection connection, String collection, UpdateOption options, T matchDocument, U valueDocument) : base(connection, collection)
         {
             this._options = options;
             this._matchDocument = matchDocument;
@@ -31,14 +30,13 @@ namespace NoRM.Protocol.Messages
             message.Add(new byte[4]);//required by docs
             message.Add(Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray());
             message.Add(BitConverter.GetBytes((int)this._options));
-            message.Add(BSONSerializer.Serialize(this._matchDocument));
-            message.Add(BSONSerializer.Serialize(this._valueDocument));
+            message.Add(BsonSerializer.Serialize(this._matchDocument));
+            message.Add(BsonSerializer.Serialize(this._valueDocument));
             var size = message.Sum(y=>y.Length);
             message[0] = BitConverter.GetBytes(size);
 
             //write update to server.
-            this._context.ServerConnection().GetStream()
-                .Write(message.SelectMany(h => h).ToArray(), 0, size);
+            _connection.GetStream().Write(message.SelectMany(h => h).ToArray(), 0, size);
             }
     }
 }

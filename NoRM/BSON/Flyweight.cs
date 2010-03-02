@@ -13,7 +13,7 @@ namespace NoRM.BSON
     /// Ok, so this is an abuse of the term "flyweight" - sorry.
     /// </remarks>
     public class Flyweight : IFlyweight
-    {
+    {        
         private Dictionary<String, int?> _intProps = new Dictionary<string, int?>(0, StringComparer.InvariantCultureIgnoreCase);
         private Dictionary<String, double?> _doubleProps = new Dictionary<string, double?>(0, StringComparer.InvariantCultureIgnoreCase);
         private Dictionary<String, long?> _longProps = new Dictionary<string, long?>(0, StringComparer.InvariantCultureIgnoreCase);
@@ -21,10 +21,6 @@ namespace NoRM.BSON
         private Dictionary<String, String> _stringProps = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
         private Dictionary<String, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
 
-        public string TypeName { get; set; }
-        public int Limit { get; set; }
-        public int Skip { get; set; }
-        public string MethodCall { get; set; }
         /// <summary>
         /// All the properties of this flyweight
         /// </summary>
@@ -40,7 +36,7 @@ namespace NoRM.BSON
         }
 
         /// <summary>
-        /// Pulls the property of the specified type "T". You better know it's in there or you're going to get an excetion.. just sayin'
+        /// Pulls the property of the specified type "T". You better know it's in there or you're going to get an exception.. just sayin'
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="propertyName"></param>
@@ -93,6 +89,32 @@ namespace NoRM.BSON
         {
             this.Delete(propertyName);
             this._kitchenSinkProps[propertyName] = value;
+        }
+
+        /// <summary>
+        /// Attempts to read the value out of the flyweight, if it's not here, 
+        /// value is set to default(T) and the method returns false.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="propertyName"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool TryGet<T>(String propertyName, out T value)
+        {
+            bool retval = false;
+            value = default(T);
+
+            try
+            {
+                value = (T)this._kitchenSinkProps[propertyName];
+
+                retval = true;
+            }
+            catch { 
+                //it's fine, we don't care.
+            }
+
+            return retval;
         }
     }
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NUnit.Framework;
-using NoRM.BSON;
-using NoRM.BSON.DbTypes;
-
+﻿/*
 namespace NoRM.Tests
 {
     [TestFixture]
@@ -13,18 +7,18 @@ namespace NoRM.Tests
     {
         public class MiniObject
         {
-            public OID _id { get; set; }
+            public ObjectId _id { get; set; }
         }
 
-        private MongoServer _server;
+        private Mongo _server;
         private MongoDatabase _db;
 
         [TestFixtureSetUp]
         public void Setup()
         {
-            this._server = new MongoServer();
+            this._server = new Mongo();
             this._db = this._server.GetDatabase("test" + Guid.NewGuid().ToString().Substring(0, 5));
-
+            
         }
 
         [TestFixtureTearDown]
@@ -36,19 +30,19 @@ namespace NoRM.Tests
         [Test]
         public void Distinct_For_Key_Returns_Correct_Set()
         {
-            var server = new MongoServer();
+            var server = new Mongo();
             var testDB = server.GetDatabase("test");
             testDB.DropCollection("testObjects");
             var testColl = testDB.GetCollection<MiniObject>("testObjects");
             var cache = new List<MiniObject>();
             for (var i = 0; i < 10; i++)
             {
-                cache.Add(new MiniObject { _id = OID.NewOID() });
+                cache.Add(new MiniObject { _id = ObjectId.NewOID() });
             }
 
             testColl.Insert(cache);
 
-            Assert.AreEqual(cache.Count, testColl.Distinct<OID>("_id").Count());
+            Assert.AreEqual(cache.Count, testColl.Distinct<ObjectId>("_id").Count());
         }
 
         [Test]
@@ -63,46 +57,6 @@ namespace NoRM.Tests
             Assert.AreEqual(coll.FullyQualifiedName, stats.Ns);
 
         }
-
-        [Test]
-        public void No_Filter_Count_Returns_Correct_Count()
-        {
-         
-            var coll = this._db.GetCollection<MiniObject>("testing");
-            coll.Delete(new { });
-            for (int i = 0; i < 10; i++)
-            {
-                coll.Insert(new MiniObject() { _id=OID.NewOID()});
-            }
-
-            var results = coll.Find();
-            Assert.AreEqual(10, results.Count());
-
-            Assert.AreEqual(10, coll.Count());
-
-        }
-
-        [Test]
-        public void Filtered_Count_Returns_Correct_Count()
-        {
-            var o = OID.NewOID();
-
-            var coll = this._db.GetCollection<MiniObject>("testing");
-            coll.Delete(new { });
-            for (int i = 0; i < 10; i++)
-            {
-                if (i == 0)
-                {
-                    coll.Insert(new MiniObject() { _id =o });
-                }
-                else
-                {
-                    coll.Insert(new MiniObject() { _id = OID.NewOID() });
-                }
-            }
-
-            Assert.AreEqual(1, coll.Count(new { _id = o }));
-        }
-
     }
 }
+*/
