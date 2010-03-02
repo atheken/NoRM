@@ -75,6 +75,9 @@ namespace NoRM.Tests
                 coll.Insert(new MiniObject() { _id=OID.NewOID()});
             }
 
+            var results = coll.Find();
+            Assert.AreEqual(10, results.Count());
+
             Assert.AreEqual(10, coll.Count());
 
         }

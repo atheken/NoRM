@@ -84,7 +84,7 @@ namespace NoRM.Linq {
             var qry = tranny.Translate(expression);
 
             Flyweight fly = (Flyweight)tranny.FlyWeight;
-            var collection = new MongoCollection(fly.CollectionName,this.DB,this.Server);
+            var collection = new MongoCollection(fly.TypeName,this.DB,this.Server);
 
             if (!String.IsNullOrEmpty(qry)) {
                 fly["$where"] = " function(){return " + qry + "; }";

@@ -85,7 +85,7 @@ namespace NoRM.Linq {
             IQueryable q = c.Value as IQueryable;
             if (q != null) {
                 //set the collection name
-                fly.CollectionName = q.ElementType.Name;
+                fly.TypeName = q.ElementType.Name;
             } else if (c.Value == null) {
                 sb.Append("NULL");
             } else {
