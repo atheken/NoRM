@@ -31,7 +31,6 @@ namespace NoRM.Linq {
             fly = new Flyweight();
             //partial evaluator will help with converting system level calls
             //to constant expressions
-
             this.Visit(exp);
             return sb.ToString();
         }
@@ -115,7 +114,11 @@ namespace NoRM.Linq {
 
         protected override Expression VisitMethodCall(MethodCallExpression m) {
             fly.MethodCall = m.Method.Name;
-            
+            if (m.Arguments.Count > 0) {
+                if (m.Arguments[0].NodeType == ExpressionType.Constant) {
+                    VisitConstant(m.Arguments[0] as ConstantExpression);
+                }
+            }
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where") {
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
@@ -168,51 +171,40 @@ namespace NoRM.Linq {
                 switch (m.Method.Name) {
 
                 }
-            } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("First")) {
-                fly.Limit = 1;
-                if (m.Arguments.Count > 1) {
-                    LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                    if (lambda != null) {
-                        this.Visit(lambda.Body);
-                    } else {
-                        this.Visit(m.Arguments[0]);
-                    }
-                } else {
-                    this.Visit(m.Arguments[0]);
-                }
-                return m;
-
-            } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("SingleOrDefault")) {
-                fly.Limit = 1;
-                if (m.Arguments.Count > 1) {
-                    LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                    if (lambda != null) {
-                        this.Visit(lambda.Body);
-                    } else {
-                        this.Visit(m.Arguments[0]);
-                    }
-                } else {
-                    this.Visit(m.Arguments[0]);
-                }
-                return m;
-
-            } else if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name.StartsWith("Count")) {
-                if (m.Arguments.Count > 1) {
-                    LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                    if (lambda != null) {
-                        this.Visit(lambda.Body);
-                    } else {
-                        this.Visit(m.Arguments[0]);
-                    }
-                } else {
-                    this.Visit(m.Arguments[0]);
-                }
-                return m;
+            } else if (m.Method.DeclaringType == typeof(Queryable) && IsCallableMethod(m.Method.Name)) {
+                return this.HandleMethodCall((MethodCallExpression)m);
             }
             //for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
 
+        bool IsCallableMethod(string methodName) {
+            var acceptableMethods = new string[]{
+                "First",
+                "Single",
+                "FirstOrDefault",
+                "SingleOrDefault",
+                "Count",
+                "Sum"
+
+            };
+            return acceptableMethods.Any(x=>x==methodName);
+        }
+        Expression HandleMethodCall(MethodCallExpression m) {
+            fly.Limit = 1;
+            fly.MethodCall = m.Method.Name;
+            if (m.Arguments.Count > 1) {
+                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                if (lambda != null) {
+                    this.Visit(lambda.Body);
+                } else {
+                    this.Visit(m.Arguments[0]);
+                }
+            } else {
+                this.Visit(m.Arguments[0]);
+            }
+            return m;
+        }
         protected override Expression VisitMemberAccess(MemberExpression m) {
 
             var fullName = m.ToString().Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);

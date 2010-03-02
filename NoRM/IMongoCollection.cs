@@ -5,6 +5,7 @@ namespace NoRM {
     public interface IMongoCollection {
         long Count();
         long Count(object template);
+        object Group(object template);
         bool DeleteIndex(string indexName, out int numberDeleted);
         bool DeleteIndices(out int numberDeleted);
         string FullyQualifiedName { get; }

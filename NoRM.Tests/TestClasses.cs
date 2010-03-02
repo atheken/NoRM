@@ -40,37 +40,45 @@
     }
     
 
-    internal class Session : MongoSession
+    internal class Session:IDisposable
     {
         
-        public Session() : base(TestHelper.ConnectionString("pooling=false&strict=false"))
+        MongoQueryProvider _provider;
+        public Session()
         {
+            _provider=new MongoQueryProvider("test");
         }
 
         public IQueryable<Product> Products
         {
-            get { return new MongoQuery<Product>(Provider); }
+            get { return new MongoQuery<Product>(_provider); }
         }
 
         public void Add<T>(T item) where T : class, new()
         {
-            Provider.Mongo.GetCollection<T>().Insert(item);
+            _provider.DB.GetCollection<T>().Insert(item);
         }
 
         public void Update<T>(T item) where T : class, new()
         {
-            Provider.Mongo.GetCollection<T>().UpdateOne(item, item);
+            _provider.DB.GetCollection<T>().UpdateOne(item, item);
         }
 
         public void Drop<T>()
         {
-            Provider.Mongo.Database.DropCollection(typeof (T).Name);
+            _provider.DB.DropCollection(typeof (T).Name);
         }
 
         public void CreateCappedCollection(string name)
         {
-            Provider.Mongo.Database.CreateCollection(new CreateCollectionOptions(name));
+            _provider.DB.CreateCollection(new CreateCollectionOptions(name));
         }
+
+
+        public void Dispose() {
+            _provider.Server.Dispose();
+        }
+
     }
 
     internal class Address
