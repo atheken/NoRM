@@ -59,10 +59,10 @@
     <Compile Include="ConnectionsTests\NormalConnectionProviderAuthenticationTests.cs" />
     <Compile Include="ConnectionsTests\NormalConnectionProviderTests.cs" />
     <Compile Include="ConnectionsTests\PooledConnectionProviderTests.cs" />
+    <Compile Include="LinqAggregates.cs" />
     <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />
     <Compile Include="MongoAdminTests.cs" />
-    <Compile Include="MongoCollectionTest.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
     <Compile Include="MongoFixture.cs" />
@@ -81,11 +81,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="config.user">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

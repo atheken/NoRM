@@ -20,6 +20,10 @@ namespace NoRM.BSON
         private Dictionary<String, bool?> _booleanProps = new Dictionary<string, bool?>(0, StringComparer.InvariantCultureIgnoreCase);
         private Dictionary<String, String> _stringProps = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
         private Dictionary<String, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
+        public string TypeName { get; set; }
+        public int Limit { get; set; }
+        public int Skip { get; set; }
+        public string MethodCall { get; set; }
 
         /// <summary>
         /// All the properties of this flyweight

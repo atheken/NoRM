@@ -97,6 +97,7 @@ namespace NoRM.Protocol.Messages
         public ReplyMessage<T> Execute()
         {
             List<byte[]> messageBytes = new List<byte[]>(9);
+          
             #region Message Header
             messageBytes.Add(new byte[4]);//allocate 4 bytes for the query.
             messageBytes.Add(BitConverter.GetBytes(this._requestID));//the requestid

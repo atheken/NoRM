@@ -3,29 +3,60 @@
 namespace NoRM
 {
     using Protocol.SystemMessages.Responses;
+    using System.Reflection;
+    using System.Configuration;
 
     public class Mongo : IDisposable
     {
         private readonly IConnectionProvider _connectionProvider;
-        private readonly MongoDatabase _database;
         private bool _disposed;
         private IConnection _connection;
+
+        private readonly MongoDatabase _database;
         private readonly string _options;
-        
+
         public MongoDatabase Database
         {
             get { return _database; }
         }
 
-        public Mongo() : this("mongodb://127.0.0.1:27017") { }        
-        public Mongo(string connectionString) : this(connectionString, null){}
-        public Mongo(string connectionString, string options)
-        {
+        public IConnectionProvider ConnectionProvider {
+            get {
+                return _connectionProvider;
+            }
+        }
+        public static Mongo ParseConnection(string connectionString) {
+            return ParseConnection(connectionString, "");
+        }
+        public static Mongo ParseConnection(string connectionString, string options) {
+
+            return new Mongo(ConnectionProviderFactory.Create(connectionString),options);
+
+        }
+        public Mongo(IConnectionProvider provider, string options) {
+            var parsed = provider.ConnectionString;
+            var db = new MongoDatabase(parsed.Database, provider.Open(options));
             _options = options;
-            _connectionProvider = ConnectionProviderFactory.Create(connectionString);
-            var parsed = _connectionProvider.ConnectionString;
+            _connectionProvider = provider;
             _database = new MongoDatabase(parsed.Database, ServerConnection());            
         }
+        public Mongo() : this("", "127.0.0.1", "27017", "") { }
+        public Mongo(string db) : this(db,"127.0.0.1","27017", "") { }
+        public Mongo(string db, string server) : this(db,server,"27017","") { }
+        public Mongo(string db, string server, string port) : this(db,server,port, "") { }
+        public Mongo(string db, string server, string port, string options) {
+
+            if (string.IsNullOrEmpty(options)) {
+                options = "strict=false";
+            }
+            var cstring = string.Format("mongodb://{0}:{1}", server, port); ;
+            _options = options;
+            _connectionProvider = ConnectionProviderFactory.Create(cstring);
+            
+            _database = new MongoDatabase(db, ServerConnection());
+
+        }
+
         internal IConnection ServerConnection()
         {
             if (_connection == null)

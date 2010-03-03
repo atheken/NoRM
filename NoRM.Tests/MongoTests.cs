@@ -1,9 +1,7 @@
-using System.Net;
-using Xunit;
-
 namespace NoRM.Tests
 {
-    using System.Linq;
+    using System.Net;
+    using Xunit;
 
     public class MongoTests
     {

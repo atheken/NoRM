@@ -26,7 +26,7 @@ namespace NoRM.Linq
             }
             this._provider = provider;
             this._expression = Expression.Constant(this);
-            this._collection = new MongoCollection<T>(collectionName, provider.Mongo.Database, provider.Mongo.ServerConnection());
+            this._collection = provider.DB.GetCollection<T>();
             this._query = new Flyweight();
         }
 
