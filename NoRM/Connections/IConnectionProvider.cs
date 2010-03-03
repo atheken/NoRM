@@ -3,8 +3,8 @@ namespace NoRM
     using System;
     using Protocol.Messages;
     using Protocol.SystemMessages.Requests;
-    using Protocol.SystemMessages.Responses;
     using System.Linq;
+    using Responses;
 
     public interface IConnectionProvider
     {

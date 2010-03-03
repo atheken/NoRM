@@ -4,7 +4,7 @@ namespace NoRM
     using System.Collections.Generic;
     using System.Linq;
     using Protocol.SystemMessages.Requests;
-    using Protocol.SystemMessages.Responses;
+    using Responses;
 
     public class MongoAdmin : IDisposable
     {

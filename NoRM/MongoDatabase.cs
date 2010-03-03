@@ -1,10 +1,9 @@
 ﻿namespace NoRM
 {
-    using System;
     using System.Collections.Generic;   
     using Protocol.SystemMessages;
     using Protocol.SystemMessages.Request;
-    using Protocol.SystemMessages.Responses;
+    using Responses;
 
     public class MongoDatabase
     {

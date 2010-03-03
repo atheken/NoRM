@@ -9,7 +9,7 @@ namespace NoRM {
         bool DeleteIndex(string indexName, out int numberDeleted);
         bool DeleteIndices(out int numberDeleted);
         string FullyQualifiedName { get; }
-        NoRM.Protocol.SystemMessages.Responses.CollectionStatistics GetCollectionStatistics();
+        NoRM.Responses.CollectionStatistics GetCollectionStatistics();
         object FindOne(object template);
         IEnumerable Find(object template);
         IEnumerable Find();

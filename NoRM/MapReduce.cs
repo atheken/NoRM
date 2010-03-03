@@ -3,7 +3,7 @@ namespace NoRM
     using System;
     using System.Collections.Generic;
     using Protocol.Messages;
-    using Protocol.SystemMessages.Responses;
+    using Responses;
 
     public class MapReduce : IDisposable
     {

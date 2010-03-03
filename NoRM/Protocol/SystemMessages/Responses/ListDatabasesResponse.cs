@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NoRM.Protocol.SystemMessages.Responses
+namespace NoRM.Responses
 {
     /// <summary>
     /// The structure for the response to the "listdatabases" command.

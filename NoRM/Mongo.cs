@@ -2,7 +2,7 @@
 
 namespace NoRM
 {
-    using Protocol.SystemMessages.Responses;
+    using Responses;
 
     public class Mongo : IDisposable
     {

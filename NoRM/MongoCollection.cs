@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NoRM.Protocol.Messages;
 using NoRM.Protocol.SystemMessages.Requests;
-using NoRM.Protocol.SystemMessages.Responses;
+using NoRM.Responses;
 using System.Linq.Expressions;
 using System.Reflection;
 using NoRM.Attributes;

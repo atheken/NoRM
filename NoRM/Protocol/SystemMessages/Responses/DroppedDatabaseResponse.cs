@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NoRM.BSON;
 
-namespace NoRM.Protocol.SystemMessages.Responses
+namespace NoRM.Responses
 {
     public class DroppedDatabaseResponse : IFlyweight
     {

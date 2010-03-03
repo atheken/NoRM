@@ -1,4 +1,4 @@
-﻿namespace NoRM.Protocol.SystemMessages.Responses
+﻿namespace NoRM.Responses
 {
     public class ValidateCollectionResponse
     {

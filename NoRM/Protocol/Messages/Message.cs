@@ -1,7 +1,7 @@
 ﻿namespace NoRM.Protocol
 {
-    using SystemMessages.Responses;
     using Messages;
+    using Responses;
 
     public class Message
     {
