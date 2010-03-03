@@ -85,7 +85,9 @@ namespace NoRM.BSON
     internal class MagicProperty
     {
         private static readonly Type _myType = typeof(MagicProperty);
+        private static readonly Type _ignoredIfNullType = typeof(MongoIgnoreIfNullAttribute);
         private readonly PropertyInfo _property;
+        private readonly bool _ignoreIfNull;
         
         public Type Type
         {
@@ -95,12 +97,18 @@ namespace NoRM.BSON
         {
             get { return _property.Name; }
         }
+        public bool IgnoreIfNull
+        {
+            get { return _ignoreIfNull; }
+        }
+
         public Action<object, object> Setter { get; private set; }
         public Func<object, object> Getter { get; private set; }
 
         public MagicProperty(PropertyInfo property)
         {
-            _property = property;            
+            _property = property;
+            _ignoreIfNull = property.GetCustomAttributes(_ignoredIfNullType, true).Length > 0;
             Getter = CreateGetterMethod(property);
             Setter = CreateSetterMethod(property);
         }

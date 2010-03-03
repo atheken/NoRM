@@ -92,6 +92,10 @@
             {
                 var name = property == idProperty ? "_id" : property.Name;
                 var value = property.Getter(document);
+                if (value == null && property.IgnoreIfNull)
+                {
+                    continue;
+                }
                 SerializeMember(name, value);
             }
         }

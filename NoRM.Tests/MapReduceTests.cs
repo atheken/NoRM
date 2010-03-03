@@ -24,6 +24,11 @@ namespace NoRM.Tests
             public int Id { get; set; }
             public int Value { get; set; }
         }
+        public class ProductSumObjectId
+        {
+            public ObjectId Id { get; set; }
+            public int Value { get; set; }
+        }
 
         public MapReduceTests()
         {
@@ -149,11 +154,59 @@ namespace NoRM.Tests
                 mongo.GetCollection<Product>().Insert(new Product { Price = 1.5f }, new Product { Price = 2.5f });
                 using (var mr = mongo.CreateMapReduce())
                 {
-                    var response = mr.Execute(new MapReduceOptions<Product> { Map = _map, Reduce = _reduce, Permenant = true});
+                    var response = mr.Execute(new MapReduceOptions<Product> { Map = _map, Reduce = _reduce});
                     var collection = response.GetCollection<ProductSum>();
                     var r = collection.Find().FirstOrDefault();
                     Assert.Equal(0, r.Id);
                     Assert.Equal(4, r.Value);
+                }
+            }
+        }
+
+        [Fact]
+        public void SettingLimitLimitsTheNumberOfResults()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            {
+                mongo.GetCollection<Product>().Insert(new Product { Price = 1.5f }, new Product { Price = 2.5f });
+                using (var mr = mongo.CreateMapReduce())
+                {
+                    var response = mr.Execute(new MapReduceOptions<Product> { Map = "function(){emit(this._id, this.Price);}", Reduce = _reduce, Limit = 1 });
+                    var collection = response.GetCollection<ProductSumObjectId>();
+                    Assert.Equal(1, collection.Find().Count());
+                }
+            }
+        }
+
+        [Fact]
+        public void NotSettingLimitDoesntLimitTheNumberOfResults()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            {
+                mongo.GetCollection<Product>().Insert(new Product { Price = 1.5f }, new Product { Price = 2.5f });
+                using (var mr = mongo.CreateMapReduce())
+                {
+                    var response = mr.Execute(new MapReduceOptions<Product> { Map = "function(){emit(this._id, this.Price);}", Reduce = _reduce});
+                    var collection = response.GetCollection<ProductSumObjectId>();
+                    Assert.Equal(2, collection.Find().Count());
+                }
+            }
+        }
+
+        [Fact]
+        public void FinalizesTheResults()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            {
+                mongo.GetCollection<Product>().Insert(new Product { Price = 1.5f }, new Product { Price = 2.5f });
+                using (var mr = mongo.CreateMapReduce())
+                {
+                    const string finalize = "function(key, value){return 1;}";
+                    var response = mr.Execute(new MapReduceOptions<Product> { Map = _map, Reduce = _reduce, Permenant = true, Finalize = finalize});
+                    var collection = response.GetCollection<ProductSum>();
+                    var r = collection.Find().FirstOrDefault();
+                    Assert.Equal(0, r.Id);
+                    Assert.Equal(1, r.Value);
                 }
             }
         }

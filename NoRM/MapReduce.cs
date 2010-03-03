@@ -26,6 +26,8 @@ namespace NoRM
                                                                                               mapreduce = options.CollectionName,
                                                                                               keeptemp = options.Permenant,
                                                                                               @out = options.OutputCollectionName,
+                                                                                              limit = options.Limit,
+                                                                                              finalize = options.Finalize,
                                                                                            });
            if (!options.Permenant && !string.IsNullOrEmpty(response.Result))
            {
