@@ -94,8 +94,10 @@
     <Compile Include="Linq\MongoSession.cs" />
     <Compile Include="Linq\PartialEvaluator.cs" />
     <Compile Include="Linq\TypeHelper.cs" />
+    <Compile Include="MapReduce.cs" />
     <Compile Include="MongoAdmin.cs" />
     <Compile Include="Mongo.cs" />
+    <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
     <Compile Include="Protocol\Messages\UpdateMessage.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -108,6 +110,7 @@
     <Compile Include="Protocol\SystemMessages\Responses\DistinctValuesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DroppedCollectionResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\LastErrorResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\MapReduceResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfileLevelResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\CollectionStatisticsRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\DropDatabaseRequest.cs" />

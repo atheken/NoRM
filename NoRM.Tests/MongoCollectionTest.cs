@@ -60,3 +60,44 @@ namespace NoRM.Tests
     }
 }
 */
+
+namespace NoRM.Tests
+{
+    using Xunit;
+
+    public class MongoCollectionTests
+    {
+        public class Product
+        {
+            public ObjectId Id { get; set; }
+            public float Price { get; set; }
+
+            public Product()
+            {
+                Id = ObjectId.NewObjectId();
+            }
+        }
+        public MongoCollectionTests()
+        {
+            using (var mongo = new Mongo(TestHelper.ConnectionString("pooling=false&strict=false")))
+            {
+                mongo.Database.DropCollection("Product");
+            }
+        }
+        [Fact]
+        public void MapReduceTest()
+        {
+            using (var mongo = new Mongo(TestHelper.ConnectionString("pooling=false")))
+            {
+                var collection = mongo.GetCollection<Product>();
+                collection.Insert(new Product { Price = 1.5f });
+                collection.Insert(new Product { Price = 2.5f });
+                collection.Insert(new Product { Price = 3f });
+
+                var map = "function(){emit(0, this.Price);}";
+                var reduce = "function(key, values){var sumPrice = 0;for(var i = 0; i < values.length; ++i){sumPrice += values[i];} return sumPrice;}";
+                var result = mongo.MapReduce<Product>().Execute(map, reduce);                
+            }
+        }
+    }
+}

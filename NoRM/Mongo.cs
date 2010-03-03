@@ -44,6 +44,10 @@ namespace NoRM
         {
             return _database.GetCollection<T>(collectionName);
         }
+        public MapReduce<T> MapReduce<T>() where T : class, new()
+        {
+            return new MapReduce<T>(_database);
+        }
        
         public LastErrorResponse LastError()
         {
