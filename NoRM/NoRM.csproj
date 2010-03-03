@@ -96,6 +96,7 @@
     <Compile Include="Linq\PartialEvaluator.cs" />
     <Compile Include="Linq\TypeHelper.cs" />
     <Compile Include="MapReduce.cs" />
+    <Compile Include="MapReduceOptions.cs" />
     <Compile Include="MongoAdmin.cs" />
     <Compile Include="Mongo.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />

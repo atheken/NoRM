@@ -19,7 +19,7 @@ namespace NoRM.Tests
         [Fact]
         public void CreatesConnectionWithOverrideOptions()
         {
-            using (var mongo = new Mongo(TestHelper.ConnectionString("strict=true"), "strict=false"))
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("strict=true"), "strict=false"))
             {
                 Assert.Equal(false, mongo.ServerConnection().StrictMode);
             }
@@ -28,7 +28,7 @@ namespace NoRM.Tests
         [Fact]
         public void GetsTheLastError()
         {
-            using (var mongo = new Mongo(TestHelper.ConnectionString("strict=false&pooling=false")))
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("strict=false&pooling=false")))
             {
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject { Id = null });
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject { Id = null });

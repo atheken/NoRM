@@ -3,8 +3,6 @@
 namespace NoRM
 {
     using Protocol.SystemMessages.Responses;
-    using System.Reflection;
-    using System.Configuration;
 
     public class Mongo : IDisposable
     {
@@ -49,7 +47,7 @@ namespace NoRM
             if (string.IsNullOrEmpty(options)) {
                 options = "strict=false";
             }
-            var cstring = string.Format("mongodb://{0}:{1}", server, port); ;
+            var cstring = string.Format("mongodb://{0}:{1}/", server, port); ;
             _options = options;
             _connectionProvider = ConnectionProviderFactory.Create(cstring);
             
@@ -75,9 +73,10 @@ namespace NoRM
         {
             return _database.GetCollection<T>(collectionName);
         }
-        public MapReduce<T> MapReduce<T>() where T : class, new()
+
+        public MapReduce CreateMapReduce()
         {
-            return new MapReduce<T>(_database);
+            return new MapReduce(_database);
         }
        
         public LastErrorResponse LastError()

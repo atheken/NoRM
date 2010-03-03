@@ -150,7 +150,7 @@ namespace NoRM
 
     }
 
-    public partial class MongoCollection<T> : MongoCollection, IMongoCollection<T> {
+    public class MongoCollection<T> : MongoCollection, IMongoCollection<T> {
         //this will have a different instance for each concrete version of MongoCollection<T>
         protected MongoCollection() { }
         /// <summary>

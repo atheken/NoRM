@@ -62,6 +62,7 @@
     <Compile Include="LinqAggregates.cs" />
     <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />
+    <Compile Include="MapReduceTests.cs" />
     <Compile Include="MongoAdminTests.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />

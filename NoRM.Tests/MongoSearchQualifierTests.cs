@@ -28,7 +28,7 @@
 
         public MongoSearchQualifierTests()
         {
-            _server = new Mongo(TestHelper.ConnectionString("pooling=false"));
+            _server = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false"));
             _coll = _server.GetCollection<TestClass>("TestClasses");
         }
 

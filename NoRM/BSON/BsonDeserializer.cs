@@ -12,7 +12,7 @@ namespace NoRM.BSON
     {
         private static readonly Type _IEnumerableType = typeof(IEnumerable);
 
-        private readonly IDictionary<BSONTypes, Type> _typeMap = new Dictionary<BSONTypes, Type>
+        private readonly static IDictionary<BSONTypes, Type> _typeMap = new Dictionary<BSONTypes, Type>
          {
              {BSONTypes.Int32, typeof(int)}, {BSONTypes.Int64, typeof (long)}, {BSONTypes.Boolean, typeof (bool)}, {BSONTypes.String, typeof (string)},
              {BSONTypes.Double, typeof(double)}, {BSONTypes.Binary, typeof (byte[])}, {BSONTypes.Regex, typeof (Regex)}, {BSONTypes.DateTime, typeof (DateTime)},

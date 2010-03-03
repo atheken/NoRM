@@ -9,7 +9,7 @@
 
     internal class BsonSerializer
     {
-        private readonly IDictionary<Type, BSONTypes> _typeMap = new Dictionary<Type, BSONTypes>
+        private readonly static IDictionary<Type, BSONTypes> _typeMap = new Dictionary<Type, BSONTypes>
          {
              {typeof (int), BSONTypes.Int32}, {typeof (long), BSONTypes.Int64}, {typeof (bool), BSONTypes.Boolean}, {typeof (string), BSONTypes.String},
              {typeof(double), BSONTypes.Double}, {typeof (Guid), BSONTypes.Binary}, {typeof (Regex), BSONTypes.Regex}, {typeof (DateTime), BSONTypes.DateTime}, 

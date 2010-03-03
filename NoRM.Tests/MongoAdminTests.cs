@@ -13,7 +13,7 @@ namespace NoRM.Tests
             var expected = new List<string> {"admin", "temp", "local"};
 
             //create another database
-            using (var mongo = new Mongo(ConnectionString("temp")))
+            using (var mongo = Mongo.ParseConnection(ConnectionString("temp")))
             {
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject());
             } 
