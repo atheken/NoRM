@@ -63,6 +63,7 @@
     <Compile Include="BSON\BSONTypes.cs" />
     <Compile Include="BSON\Commands.cs" />
     <Compile Include="BSON\DbTypes\ObjectIdGenerator.cs" />
+    <Compile Include="BSON\DocumentExceedsSizeLimitsException.cs" />
     <Compile Include="BSON\ListHelper.cs" />
     <Compile Include="BSON\TypeHelper.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />

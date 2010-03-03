@@ -13,11 +13,9 @@ using System.Collections;
 
 namespace NoRM
 {
-
     public class MongoCollection : IMongoCollection {
 
-        //this will have a different instance for each concrete version of MongoCollection<T>
-        protected static bool? _updateable = null;
+        
 
         protected String _collectionName;
         protected MongoDatabase _db;
@@ -151,8 +149,12 @@ namespace NoRM
     }
 
     public class MongoCollection<T> : MongoCollection, IMongoCollection<T> {
+
         //this will have a different instance for each concrete version of MongoCollection<T>
+        protected static bool? _updateable = null;
+
         protected MongoCollection() { }
+        
         /// <summary>
         /// Represents a strongly-typed set of documents in the db.
         /// </summary>
@@ -242,6 +244,7 @@ namespace NoRM
         /// <param name="updateMultiple">true if you want to update all documents that match, not just the first</param>
         /// <param name="upsert">true if you want to insert the value document if no matches are found.</param>
         /// <exception cref="NotSupportedException">This exception will be raised if the collection's type "T" doesn't define an indentifier.</exception>
+        /// <exception cref="DocumentExceedsSizeLimitsException<T>">Will be thrown if any document is larger than the size allowed by MongoDB (currently, 4MB - this includes all the BSON overhead, too.)</exception>
         public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert) {
             if (!this.Updateable) {
                 throw new NotSupportedException("This collection is not updatable, this is due to the fact that the collection's type " + typeof(T).FullName +
@@ -414,6 +417,7 @@ namespace NoRM
         /// Insert these documents into the database.
         /// </summary>
         /// <exception cref="MongoError">Will return void if all goes well, of throw an exception otherwise.</exception>
+        /// <exception cref="DocumentExceedsSizeLimitsException<T>">Will be thrown if any document is larger than the size allowed by MongoDB (currently, 4MB - this includes all the BSON overhead, too.)</exception>
         /// <param name="documentsToUpsert"></param>
         public void Insert(IEnumerable<T> documentsToInsert) {
             if (!this.Updateable) {
