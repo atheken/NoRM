@@ -9,7 +9,7 @@ namespace NoRM.Tests
         {
             IConnection connection1 = null;
             IConnection connection2 = null;
-            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create("mongodb://localhost/"));
+            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString()));
             
             try
             {            
@@ -26,8 +26,8 @@ namespace NoRM.Tests
 
         [Fact]
         public void ClosesTheUnderlyingConnection()
-        {            
-            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create("mongodb://localhost/"));
+        {
+            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString()));
             var connection = provider.Open(null);
             provider.Close(connection);
             Assert.Null(connection.Client.Client);

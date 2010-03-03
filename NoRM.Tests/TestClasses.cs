@@ -1,45 +1,84 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.Attributes;
-using NoRM.BSON.DbTypes;
-using System.Text.RegularExpressions;
-using NoRM.Linq;
-
-namespace NoRM.Tests
+﻿namespace NoRM.Tests
 {
-    internal class Session : MongoSession
+    using System;
+    using System.Configuration;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using Attributes;
+    using Linq;
+
+    internal class TestHelper
     {
-        public Session()
-            : base("mongodb://localhost/NoRMTests?pooling=false&strict=false")
+        private static readonly string _connectionStringHost = ConfigurationManager.AppSettings["connectionStringHost"];    
+        public static string ConnectionString()
         {
+            return ConnectionString(null);            
+        }
+        public static string ConnectionString(string query)
+        {
+            return ConnectionString(query, null, null);
+        }
+        public static string ConnectionString(string userName, string password)
+        {
+            return ConnectionString(null, userName, password);
+        }
+        public static string ConnectionString(string query, string userName, string password)
+        {
+            var authentication = string.Empty;
+            if (userName != null)
+            {
+                authentication = string.Concat(userName, ':', password, '@');
+            }
+            if (!string.IsNullOrEmpty(query) && !query.StartsWith("?"))
+            {
+                query = string.Concat('?', query);
+            }
+            var host = string.IsNullOrEmpty(_connectionStringHost) ? "localhost" : _connectionStringHost;
+
+            return string.Format("mongodb://{0}{1}/NoRMTests{2}", authentication, host, query);
+        }
+    }
+    
+
+    internal class Session:IDisposable
+    {
+        
+        MongoQueryProvider _provider;
+        public Session()
+        {
+            _provider=new MongoQueryProvider("test");
         }
 
         public IQueryable<Product> Products
         {
-            get { return new MongoQuery<Product>(Provider); }
+            get { return new MongoQuery<Product>(_provider); }
         }
 
         public void Add<T>(T item) where T : class, new()
         {
-            Provider.Mongo.GetCollection<T>().Insert(item);
+            _provider.DB.GetCollection<T>().Insert(item);
         }
 
         public void Update<T>(T item) where T : class, new()
         {
-            Provider.Mongo.GetCollection<T>().UpdateOne(item, item);
+            _provider.DB.GetCollection<T>().UpdateOne(item, item);
         }
 
         public void Drop<T>()
         {
-            Provider.Mongo.Database.DropCollection(typeof(T).Name);
+            _provider.DB.DropCollection(typeof (T).Name);
         }
 
         public void CreateCappedCollection(string name)
         {
-            Provider.Mongo.Database.CreateCollection(new CreateCollectionOptions(name));
+            _provider.DB.CreateCollection(new CreateCollectionOptions(name));
         }
+
+
+        public void Dispose() {
+            _provider.Server.Dispose();
+        }
+
     }
 
     internal class Address
@@ -81,12 +120,12 @@ namespace NoRM.Tests
 
     public class FakeObject
     {
-        public ObjectId Id { get; set; }
-
         public FakeObject()
         {
             Id = ObjectId.NewObjectId();
         }
+
+        public ObjectId Id { get; set; }
     }
 
     public enum Flags32
@@ -121,10 +160,17 @@ namespace NoRM.Tests
         public DateTime? ADateTime { get; set; }
         public GeneralDTO Nester { get; set; }
         public ScopedCode Code { get; set; }
+        public float? AFloat { get; set; }
         public Flags32? Flags32 { get; set; }
         public Flags64? Flags64 { get; set; }
 
         [MongoIgnore]
         public int IgnoredProperty { get; set; }
+    }
+
+
+    public class ChildGeneralDTO : GeneralDTO
+    {
+        public bool IsOver9000 { get; set; }
     }
 }

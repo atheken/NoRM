@@ -15,7 +15,7 @@ namespace NoRM.BSON
         public TypeHelper(Type type)
         {
             _type = type;
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
             _properties = LoadMagicProperties(properties, IdProperty(properties));            
         }
 

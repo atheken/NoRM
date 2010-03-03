@@ -89,13 +89,12 @@
     <Compile Include="Connections\QueuedConnectionProviders.cs" />
     <Compile Include="Connections\TimedLock.cs" />
     <Compile Include="CreateCollectionOptions.cs" />
+    <Compile Include="IMongoCollection.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
     <Compile Include="Linq\MongoQuery.cs" />
     <Compile Include="Linq\MongoQueryProvider.cs" />
     <Compile Include="Linq\MongoQueryTranslator.cs" />
-    <Compile Include="Linq\MongoSession.cs" />
-    <Compile Include="Linq\MongoTypedSession.cs" />
     <Compile Include="Linq\PartialEvaluator.cs" />
     <Compile Include="Linq\TypeHelper.cs" />
     <Compile Include="MongoAdmin.cs" />

@@ -9,41 +9,6 @@ namespace NoRM.Tests
 
     public class BSONSerializerTest
     {       
-        protected enum Flags32
-        {
-            FlagNone = 0,
-            FlagOn = 1,
-            FlagOff = 2
-        }
-
-        protected enum Flags64 : long
-        {
-            FlagNone = 0,
-            FlagOn = 1,
-            FlagOff = 2
-        }
-
-        protected class GeneralDTO
-        {
-            public ObjectId Id { get; set; }
-            public double? Pi { get; set; }
-            public int? AnInt { get; set; }
-            public String Title { get; set; }
-            public bool? ABoolean { get; set; }
-            public byte[] Bytes { get; set; }
-            public Guid? AGuid { get; set; }
-            public DateTime? ADateTime { get; set; }
-            public string[] Strings { get; set; }
-            public Flags32? Flags32 { get; set; }
-            public Flags64? Flags64 { get; set; }
-            public GeneralDTO Nester { get; set; }
-            public Regex ARex { get; set; }
-            public float AFloat { get; set; }
-            
-            [MongoIgnore]
-            public int IgnoredProperty { get; set; }
-        }
-
         [Fact]
         public void DoesntSerializeIgnoredProperties()
         {
@@ -232,6 +197,14 @@ namespace NoRM.Tests
         }
 
         [Fact]
+        public void SerializationOfInheritenceIsNotLossy()
+        {
+            var obj1 = new ChildGeneralDTO {Pi = 3.14, IsOver9000 = true};
+            var hydratedObj1 = BsonDeserializer.Deserialize<ChildGeneralDTO>(BsonSerializer.Serialize(obj1));
+            Assert.Equal(obj1.Pi, hydratedObj1.Pi);
+            Assert.Equal(obj1.IsOver9000, hydratedObj1.IsOver9000); 
+        }
+        [Fact]
         public void SerializationOfRegexIsNotLossy()
         {
             var obj1 = new GeneralDTO { ARex = new Regex("[0-9]{5}", RegexOptions.Multiline) };
@@ -248,8 +221,7 @@ namespace NoRM.Tests
             Assert.Equal(null, hydratedObj2.ARex);
             //more tests would be useful for all the options.
         }
-
-/*        [Fact]
+        [Fact]
         public void SerializationOfScopedCodeIsNotLossy()
         {
             var obj1 = new GeneralDTO {Code = new ScopedCode {CodeString = "function(){return 'hello world!'}"}};
@@ -262,8 +234,6 @@ namespace NoRM.Tests
             Assert.Equal(obj1.Code.CodeString, obj2.Code.CodeString);
             Assert.Equal(((Flyweight)obj1.Code.Scope)["$ns"],((Flyweight)obj2.Code.Scope)["$ns"]);
         }
-
-        */
         [Fact]
         public void SerializesAndDeserializesAComplexObject()
         {

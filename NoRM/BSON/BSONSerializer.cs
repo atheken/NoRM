@@ -13,7 +13,7 @@
          {
              {typeof (int), BSONTypes.Int32}, {typeof (long), BSONTypes.Int64}, {typeof (bool), BSONTypes.Boolean}, {typeof (string), BSONTypes.String},
              {typeof(double), BSONTypes.Double}, {typeof (Guid), BSONTypes.Binary}, {typeof (Regex), BSONTypes.Regex}, {typeof (DateTime), BSONTypes.DateTime}, 
-             {typeof(float), BSONTypes.Double}, {typeof (byte[]), BSONTypes.Binary}, {typeof(ObjectId), BSONTypes.MongoOID}
+             {typeof(float), BSONTypes.Double}, {typeof (byte[]), BSONTypes.Binary}, {typeof(ObjectId), BSONTypes.MongoOID}, {typeof(ScopedCode), BSONTypes.ScopedCode}
          };        
 
         private readonly BinaryWriter _writer;
@@ -28,7 +28,7 @@
             using (var ms = new MemoryStream(250))
             using (var writer = new BinaryWriter(ms))
             {                
-                new BsonSerializer(writer).Write(document);
+                new BsonSerializer(writer).WriteDocument(document);
                 return ms.ToArray();
             }
         }
@@ -39,17 +39,21 @@
             _current = new Document { Parent = old, Start = (int)_writer.BaseStream.Position, Written  = 4};
             _writer.Write(0); //length placeholder
         }
-        private void EndDocument()
+        private void EndDocument(bool includeEeo)
         {
             var old = _current;
-            _writer.Write((byte)0); //EOO
+            if (includeEeo)
+            {
+                Written(1);
+                _writer.Write((byte)0);
+            }            
             _writer.Seek(_current.Start, SeekOrigin.Begin);
-            _writer.Write(_current.Written+1); //override the document length placeholder (+eeo);
+            _writer.Write(_current.Written); //override the document length placeholder
             _writer.Seek(0, SeekOrigin.End); //back to the end
             _current = _current.Parent;
             if (_current != null)
             {
-                Written(old.Written+1); //+eeo
+                Written(old.Written);
             }
 
         }
@@ -58,7 +62,7 @@
             _current.Written += length;
         }
 
-        private void Write(object document)
+        private void WriteDocument(object document)
         {
             NewDocument();
             if (document is Flyweight)
@@ -70,7 +74,7 @@
                 WriteObject(document);
                 
             }
-            EndDocument();
+            EndDocument(true);
         }
 
         private void WriteFlyweight(Flyweight document)
@@ -145,6 +149,9 @@
                 case BSONTypes.Binary:
                     WriteBinnary(value);
                     return;
+                case BSONTypes.ScopedCode:
+                    Write((ScopedCode)value);
+                    return;
                 case BSONTypes.MongoOID:                    
                     Written(((ObjectId)value).Value.Length);
                     _writer.Write(((ObjectId)value).Value);
@@ -162,8 +169,8 @@
                 Write(BSONTypes.Array);
                 WriteName(name);    
                 NewDocument();
-                WriteArray((IEnumerable)value);                
-                EndDocument();
+                Write((IEnumerable)value);                
+                EndDocument(true);
             }
             else if (value is ModifierCommand)
             {
@@ -172,7 +179,7 @@
                 WriteName(command.CommandName);                
                 NewDocument();
                 SerializeMember(name, command.ValueForCommand);
-                EndDocument();                               
+                EndDocument(true);                               
             }
             else if (value is QualifierCommand)
             {
@@ -181,18 +188,18 @@
                 WriteName(name);
                 NewDocument();
                 SerializeMember(command.CommandName, command.ValueForCommand);
-                EndDocument();
+                EndDocument(true);
             }          
             else 
             {
                 Write(BSONTypes.Object);
                 WriteName(name);                
-                Write(value); //Write manages new/end document                
+                WriteDocument(value); //Write manages new/end document                
             }
             
                     
         }
-        private void WriteArray(IEnumerable enumerable)
+        private void Write(IEnumerable enumerable)
         {
 
             var index = 0;
@@ -259,6 +266,14 @@
             if ((regex.Options & RegexOptions.ExplicitCapture) == RegexOptions.ExplicitCapture) { options = string.Concat(options, 'x'); }
             WriteName(options);            
         }
+        private void Write(ScopedCode value)
+        {
+            NewDocument();
+            Write(value.CodeString);
+            WriteDocument(value.Scope);
+            EndDocument(false);
+        }
+        
 
 
 

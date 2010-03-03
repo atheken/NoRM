@@ -8,7 +8,7 @@ namespace NoRM.Tests
         [Fact]
         public void ClosingAConnectionReturnsItToThePool()
         {
-            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create("mongodb://localhost?pooling=true&poolsize=1"));
+            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString("pooling=true&poolsize=1")));
             var connection1 = provider.Open(null);
             provider.Close(connection1);
             Assert.Same(connection1, provider.Open(null));
@@ -17,7 +17,7 @@ namespace NoRM.Tests
         [Fact]
         public void ThrowsExceptionIfNoConnectionsAvailable()
         {
-            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create("mongodb://localhost?pooling=true&poolsize=1&timeout=1"));
+            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString("pooling=true&poolsize=1&timeout=1")));
             provider.Open(null);
             
             var ex = Assert.Throws<MongoException>(() => provider.Open(null));
@@ -27,7 +27,7 @@ namespace NoRM.Tests
         [Fact]
         public void WaitsUntilTimeoutForConnectionToFreeUp()
         {
-            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create("mongodb://localhost?pooling=true&poolsize=1&timeout=3"));
+            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString("pooling=true&poolsize=1&timeout=3")));
             provider.Open(null);
 
             var start = DateTime.Now; //this doesn't seem like a very good way to do this..we'll see
@@ -40,14 +40,14 @@ namespace NoRM.Tests
         [Fact]
         public void ReturnsDifferentConnections()
         {
-            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create("mongodb://localhost?pooling=true&poolsize=2"));
+            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString("pooling=true&poolsize=2")));
             Assert.NotSame(provider.Open(null), provider.Open(null));            
         }
 
         [Fact]
         public void PoolsUpToPoolSizeConections()
         {
-            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create("mongodb://localhost?pooling=true&poolsize=4&timeout=1"));
+            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString("pooling=true&poolsize=4&timeout=1")));
             provider.Open(null);
             provider.Open(null);
             provider.Open(null);

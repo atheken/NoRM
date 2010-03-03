@@ -19,7 +19,7 @@
         [Fact]
         public void CreateCollectionCreatesACappedCollection()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {                
                 Assert.Equal(true, mongo.Database.CreateCollection(new CreateCollectionOptions("capped") { Max = 3 }));
                 var collection = mongo.GetCollection<FakeObject>("capped");
@@ -33,7 +33,7 @@
         [Fact]
         public void CreateCollectionThrowsExceptionIfAlreadyExist()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {                
                 mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));
@@ -43,7 +43,7 @@
         [Fact]
         public void CreateCollectionFailsSilentlyWithStrictModeOff()
         {
-            using (var mongo = new Mongo(_connectionString + "&strict=false"))
+            using (var mongo = Mongo.ParseConnection(_connectionString + "&strict=false"))
             {
                 mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
                 Assert.Equal(false, mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));
@@ -55,7 +55,7 @@
         public void GetsAllCollections()
         {
             var expected = new List<string> { "NoRMTests.temp", "NoRMTests.temp2" };
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 var database = mongo.Database;
                 database.CreateCollection(new CreateCollectionOptions("temp"));
@@ -71,7 +71,7 @@
         [Fact]
         public void GetCollectionsReturnsNothingIfEmpty()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 Assert.Equal(0, mongo.Database.GetAllCollections().Count());
             }
@@ -80,7 +80,7 @@
         [Fact]
         public void DropsACollection()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 var database = mongo.Database;
                 database.CreateCollection(new CreateCollectionOptions("temp"));
@@ -91,7 +91,7 @@
         [Fact]
         public void ThrowsExceptionIfDropCollectionFailsWithStrictModeOn()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.DropCollection("temp"));
                 Assert.Equal("ns not found", ex.Message);
@@ -100,7 +100,7 @@
         [Fact]
         public void DropCollectionFailsSilentlyWithStrictModeOff()
         {
-            using (var mongo = new Mongo(_connectionString + "&strict=false"))
+            using (var mongo = Mongo.ParseConnection(_connectionString + "&strict=false"))
             {
                 Assert.Equal(false, mongo.Database.DropCollection("temp"));
             }
@@ -109,7 +109,7 @@
         [Fact]
         public void ReturnsTheDatabasesName()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 Assert.Equal("NoRMTests", mongo.Database.DatabaseName);
             }
@@ -118,7 +118,7 @@
         [Fact(Skip = "failing to deserialized, this appears to return a more complex object than what we are ready to handle")]
         public void GetsACollectionsStatistics()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {   
                 mongo.Database.CreateCollection(new CreateCollectionOptions("temp"));
                 var statistic = mongo.Database.GetCollectionStatistics("temp");                               
@@ -127,7 +127,7 @@
         [Fact]
         public void ThrowsExceptionIfGettingStatisticsFailsWithStrictModeOn()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.GetCollectionStatistics("temp"));
                 Assert.Equal("ns not found", ex.Message);
@@ -136,7 +136,7 @@
         [Fact]
         public void GettingStatisticsFailsSilentlyWithStrictModeOff()
         {
-            using (var mongo = new Mongo(_connectionString + "&strict=false"))
+            using (var mongo = Mongo.ParseConnection(_connectionString + "&strict=false"))
             {
                 Assert.Equal(null, mongo.Database.GetCollectionStatistics("temp"));
             }
@@ -145,7 +145,7 @@
         [Fact]
         public void SetProfilingLevel()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 var response = mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.AllOperations);
                 Assert.True((response.Was == 0.0));
@@ -157,7 +157,7 @@
         [Fact]
         public void GetProfilingInformation()
         {
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.AllOperations);
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject());
@@ -175,7 +175,7 @@
         [Fact]
         public void ValidateCollection()
         {            
-            using (var mongo = new Mongo(_connectionString))
+            using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 var collection = mongo.Database.GetCollection<FakeObject>("validCollection");
                 collection.Insert(new FakeObject());

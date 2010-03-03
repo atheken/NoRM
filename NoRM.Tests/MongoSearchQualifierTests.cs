@@ -28,14 +28,14 @@
 
         public MongoSearchQualifierTests()
         {
-            _server = new Mongo("mongodb://localhost/NoRMTests?pooling=false");            
+            _server = new Mongo(TestHelper.ConnectionString("pooling=false"));
             _coll = _server.GetCollection<TestClass>("TestClasses");
         }
 
         public void Dispose()
         {
             _server.Database.DropCollection("TestClasses");
-            using (var admin = new MongoAdmin("mongodb://localhost/NoRMTests?pooling=false"))
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString("pooling=false")))
             {
                 admin.DropDatabase();
             }

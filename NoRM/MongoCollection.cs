@@ -1,30 +1,162 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using NoRM.Attributes;
+using System.Text;
 using NoRM.Protocol.Messages;
 using NoRM.Protocol.SystemMessages.Requests;
 using NoRM.Protocol.SystemMessages.Responses;
+using System.Linq.Expressions;
+using System.Reflection;
+using NoRM.Attributes;
 using NoRM.BSON;
+using System.Collections;
 
 namespace NoRM
 {
-    public partial class MongoCollection<T>
-    {
-        //this will have a different instance for each concrete version of MongoCollection<T>
-        private static bool? _updateable;
 
-        private readonly String _collectionName;
-        private readonly IConnection _connection;
-        private readonly MongoDatabase _db;
+    public class MongoCollection : IMongoCollection {
+
+        //this will have a different instance for each concrete version of MongoCollection<T>
+        protected static bool? _updateable = null;
+
+        protected String _collectionName;
+        protected MongoDatabase _db;
+        protected IConnection _connection;
+        protected MongoCollection() { }
 
         /// <summary>
         /// Represents a strongly-typed set of documents in the db.
         /// </summary>
-        public MongoCollection(String collectionName, MongoDatabase db, IConnection connection)
-        {
+        /// <param name="collectionName"></param>
+        /// <param name="db"></param>
+        /// <param name="context"></param>
+        public MongoCollection(String collectionName, MongoDatabase db, IConnection connection) {
+            this._db = db;
+            this._connection = connection;
+            this._collectionName = collectionName;
+        }
+
+
+        public long Count() {
+            return this.Count(new { });
+        }
+
+
+        public long Count(object query) {
+            long retval = 0;
+
+            var f = this._db.GetCollection<Flyweight>("$cmd")
+                .FindOne(new { count = this._collectionName, query = query });
+
+            if (f != null) {
+                retval = (long)f.Get<double>("n");
+            }
+            return retval;
+        }
+
+        public object Group(object query) {
+            long retval = 0;
+
+            var f = this._db.GetCollection<Flyweight>("$cmd")
+                .FindOne(new { group = this._collectionName, query = query });
+
+
+            return null;
+        }
+
+        /// <summary>
+        /// Deletes all indices on this collection.
+        /// </summary>
+        /// <param name="numberDeleted"></param>
+        /// <returns></returns>
+        public bool DeleteIndices(out int numberDeleted) {
+            return this.DeleteIndex("*", out numberDeleted);
+        }
+
+        /// <summary>
+        /// Deletes the specified index for the collection.
+        /// </summary>
+        /// <param name="indexName"></param>
+        /// <param name="numberDeleted"></param>
+        /// <returns></returns>
+        public bool DeleteIndex(String indexName, out int numberDeleted) {
+            bool retval = false;
+            var coll = this._db.GetCollection<DeleteIndicesResponse>("$cmd");
+            var result = coll.FindOne(new { deleteIndexes = this._collectionName, index = indexName });
+            numberDeleted = 0;
+
+            if (result != null && result.OK == 1.0) {
+                retval = true;
+                numberDeleted = result.NIndexesWas.Value;
+            }
+
+            return retval;
+        }
+
+        /// <summary>
+        /// The name of this collection, including the database prefix.
+        /// </summary>
+        public String FullyQualifiedName {
+            get {
+                return String.Format("{0}.{1}", this._db.DatabaseName, this._collectionName);
+            }
+        }
+
+        public CollectionStatistics GetCollectionStatistics() {
+            return this._db.GetCollectionStatistics(this._collectionName);
+        }
+
+        public object FindOne(object template) {
+            return this.Find(template, 1);
+        }
+
+        /// <summary>
+        /// Find objects in the collection without any qualifiers.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable Find() {
+            //this is a hack to get a value that will test for null into the serializer.
+            return this.Find(new Object(), Int32.MaxValue, this.FullyQualifiedName);
+        }
+
+
+        public IEnumerable Find(object template) {
+            return this.Find(template, Int32.MaxValue);
+        }
+
+        /// <summary>
+        /// Get the documents that match the specified template.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <param name="limit">The number to return from this command.</param>
+        /// <returns></returns>
+        public IEnumerable Find(object template, int limit) {
+            return Find(template, limit, this.FullyQualifiedName);
+        }
+
+        public IEnumerable Find(object template, int limit, string fullyQualifiedName) {
+            var qm = new QueryMessage<object, object>(this._db.CurrentConnection, fullyQualifiedName);
+            qm.NumberToTake = limit;
+            qm.Query = template;
+            var reply = qm.Execute();
+
+            foreach (var r in reply.Results) {
+                yield return r;
+            }
+            yield break;
+        }
+
+
+    }
+
+    public partial class MongoCollection<T> : MongoCollection, IMongoCollection<T> {
+        //this will have a different instance for each concrete version of MongoCollection<T>
+        protected MongoCollection() { }
+        /// <summary>
+        /// Represents a strongly-typed set of documents in the db.
+        /// </summary>
+        public MongoCollection(String collectionName, MongoDatabase db, IConnection connection) {
             _db = db;
             _connection = connection;
             _collectionName = collectionName;
@@ -34,39 +166,26 @@ namespace NoRM
         /// True if the type of this collection can be updated 
         /// (i.e. the Type specifies "_id", "ID", or a property with the attributed "MongoIdentifier").
         /// </summary>
-        public bool Updateable
-        {
-            get
-            {
-                if (_updateable == null)
-                {
-                    _updateable = typeof (T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y => y.Name == "_id" || string.Compare(y.Name, "id", true) == 0 || y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute));
+        public bool Updateable {
+            get {
+                if (_updateable == null) {
+                    _updateable = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y => y.Name == "_id" || string.Compare(y.Name, "id", true) == 0 || y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute));
                 }
                 return _updateable.Value;
             }
         }
 
         /// <summary>
-        /// The name of this collection, including the database prefix.
-        /// </summary>
-        public String FullyQualifiedName
-        {
-            get { return String.Format("{0}.{1}", _db.DatabaseName, _collectionName); }
-        }
-
-        /// <summary>
         /// Get a child collection of the specified type.
         /// </summary>        
-        public MongoCollection<U> GetChildCollection<U>(String collectionName) where U : class, new()
-        {
+        public MongoCollection<U> GetChildCollection<U>(String collectionName) where U : class, new() {
             return new MongoCollection<U>(_collectionName + "." + collectionName, _db, _connection);
         }
 
         /// <summary>
         /// Overload of Update that updates one document and doesn't upsert if no matches are found.
         /// </summary>        
-        public void UpdateOne<X, U>(X matchDocument, U valueDocument)
-        {
+        public void UpdateOne<X, U>(X matchDocument, U valueDocument) {
             Update(matchDocument, valueDocument, false, false);
         }
 
@@ -75,11 +194,9 @@ namespace NoRM
         /// </summary>
         /// <typeparam name="U">A type that has the names of the items to be indexed, with a value of 1.0d or -1.0d depending on 
         /// if you want the index to be ASC or DESC respectively.</typeparam>
-        public void CreateIndex<U>(U indexDefinition, bool isUnique, String indexName)
-        {
+        public void CreateIndex<U>(U indexDefinition, bool isUnique, String indexName) {
             var coll = _db.GetCollection<MongoIndex<U>>("system.indexes");
-            coll.Insert(new MongoIndex<U>()
-            {
+            coll.Insert(new MongoIndex<U>() {
                 key = indexDefinition,
                 ns = this.FullyQualifiedName,
                 name = indexName,
@@ -95,43 +212,13 @@ namespace NoRM
         /// is of this type, or BAD THINGS will happen.</typeparam>
         /// <param name="keyName"></param>
         /// <returns></returns>
-        public IEnumerable<U> Distinct<U>(String keyName) where U : class, new()
-        {
+        public IEnumerable<U> Distinct<U>(String keyName) where U : class, new() {
             return this._db.GetCollection<DistinctValuesResponse<U>>("$cmd")
                 .FindOne(new { distinct = this._collectionName, key = keyName }).Values;
         }
 
-        /// <summary>
-        /// Deletes all indices on this collection.
-        /// </summary>
-        /// <param name="numberDeleted"></param>
-        /// <returns></returns>
-        public bool DeleteIndices(out int numberDeleted)
-        {
-            return this.DeleteIndex("*", out numberDeleted);
-        }
 
-        /// <summary>
-        /// Deletes the specified index for the collection.
-        /// </summary>
-        /// <param name="indexName"></param>
-        /// <param name="numberDeleted"></param>
-        /// <returns></returns>
-        public bool DeleteIndex(String indexName, out int numberDeleted)
-        {
-            bool retval = false;
-            var coll = this._db.GetCollection<DeleteIndicesResponse>("$cmd");
-            var result = coll.FindOne(new { deleteIndexes = this._collectionName, index = indexName });
-            numberDeleted = 0;
 
-            if (result != null && result.OK == 1.0)
-            {
-                retval = true;
-                numberDeleted = result.NIndexesWas.Value;
-            }
-
-            return retval;
-        }
 
         /// <summary>
         /// Overload of Update that updates all matching documents, and doesn't upsert if no matches are found.
@@ -140,8 +227,7 @@ namespace NoRM
         /// <typeparam name="U"></typeparam>
         /// <param name="matchDocument"></param>
         /// <param name="valueDocument"></param>
-        public void UpdateMultiple<X, U>(X matchDocument, U valueDocument)
-        {
+        public void UpdateMultiple<X, U>(X matchDocument, U valueDocument) {
             this.Update(matchDocument, valueDocument, true, false);
         }
 
@@ -156,20 +242,16 @@ namespace NoRM
         /// <param name="updateMultiple">true if you want to update all documents that match, not just the first</param>
         /// <param name="upsert">true if you want to insert the value document if no matches are found.</param>
         /// <exception cref="NotSupportedException">This exception will be raised if the collection's type "T" doesn't define an indentifier.</exception>
-        public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert)
-        {
-            if (!this.Updateable)
-            {
+        public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert) {
+            if (!this.Updateable) {
                 throw new NotSupportedException("This collection is not updatable, this is due to the fact that the collection's type " + typeof(T).FullName +
                     " does not specify an identifier property");
             }
             UpdateOption ops = UpdateOption.None;
-            if (updateMultiple)
-            {
+            if (updateMultiple) {
                 ops |= UpdateOption.MultiUpdate;
             }
-            if (upsert)
-            {
+            if (upsert) {
                 ops |= UpdateOption.Upsert;
             }
 
@@ -183,8 +265,7 @@ namespace NoRM
         /// <typeparam name="U">a document that has properties 
         /// that match what you want to delete.</typeparam>
         /// <param name="template"></param>
-        public void Delete<U>(U template)
-        {
+        public void Delete<U>(U template) {
             var dm = new DeleteMessage<U>(this._connection, this.FullyQualifiedName, template);
             dm.Execute();
         }
@@ -198,8 +279,7 @@ namespace NoRM
         /// special "Qualifier"-type values.</typeparam>
         /// <param name="template"></param>
         /// <returns>The first document that matched the template, or default(T)</returns>
-        public T FindOne<U>(U template)
-        {
+        public T FindOne<U>(U template) {
             return this.Find(template, 1).FirstOrDefault();
         }
 
@@ -207,8 +287,7 @@ namespace NoRM
         /// Find objects in the collection without any qualifiers.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<T> Find()
-        {
+        public IEnumerable<T> Find() {
             //this is a hack to get a value that will test for null into the serializer.
             return this.Find(new Object(), Int32.MaxValue, this.FullyQualifiedName);
         }
@@ -219,18 +298,10 @@ namespace NoRM
         /// <typeparam name="U"></typeparam>
         /// <param name="template"></param>
         /// <returns></returns>
-        public IEnumerable<T> Find<T>(Expression<Func<T, bool>> expression)
-        {
+        public IEnumerable<T> Find<T>(Expression<Func<T, bool>> expression) {
 
             //build a template based on T
             return null;
-        }
-
-
-        public bool Any<T>(Expression<Func<T, bool>> expression)
-        {
-            //turn that expression into ... something
-            return false;
         }
 
         /// <summary>
@@ -242,21 +313,18 @@ namespace NoRM
         /// <typeparam name="U"></typeparam>
         /// <param name="template"></param>
         /// <returns></returns>
-        public IEnumerable<T> Find<U>(U template)
-        {
+        public IEnumerable<T> Find<U>(U template) {
             return this.Find(template, Int32.MaxValue);
         }
 
-        public IEnumerable<T> Find(Flyweight template)
-        {
+        public IEnumerable<T> Find(Flyweight template) {
             int limit = 0;
             int skip = 0;
 
             var hasLimit = template.TryGet<int>("$limit", out limit);
             var hasSkip = template.TryGet<int>("$skip", out skip);
 
-            if (!hasLimit)
-            {
+            if (!hasLimit) {
                 limit = Int32.MaxValue;
             }
 
@@ -273,37 +341,31 @@ namespace NoRM
         /// <param name="template"></param>
         /// <param name="limit">The number to return from this command.</param>
         /// <returns></returns>
-        public IEnumerable<T> Find<U>(U template, int limit)
-        {
+        public IEnumerable<T> Find<U>(U template, int limit) {
             return Find(template, limit, 0, this.FullyQualifiedName);
         }
 
-        public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName)
-        {
+        public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName) {
             return this.Find(template, limit, 0, fullyQualifiedName);
         }
 
-        public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
-        {
+        public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName) {
             var qm = new QueryMessage<T, U>(this._connection, fullyQualifiedName);
             qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
 
-            foreach (var r in reply.Results)
-            {
+            foreach (var r in reply.Results) {
                 yield return r;
             }
             yield break;
         }
 
-        public void Insert(params T[] documentsToInsert)
-        {
+        public void Insert(params T[] documentsToInsert) {
             this.Insert(documentsToInsert.AsEnumerable());
         }
 
-        public interface IMongoGrouping<K, V>
-        {
+        public interface IMongoGrouping<K, V> {
             K Key { get; set; }
             V Value { get; set; }
         }
@@ -320,8 +382,7 @@ namespace NoRM
         /// <param name="reduce"></param>
         /// <returns></returns>
         public object GroupBy<X, Y, Z>(X key, Y filter, Z initialValue,
-            String reduce)
-        {
+            String reduce) {
             return null;
         }
 
@@ -329,8 +390,7 @@ namespace NoRM
         /// A count on this collection without any filter.
         /// </summary>
         /// <returns></returns>
-        public long Count()
-        {
+        public long Count() {
             return this.Count(new { });
         }
 
@@ -340,11 +400,9 @@ namespace NoRM
         /// <typeparam name="U"></typeparam>
         /// <param name="query"></param>
         /// <returns></returns>
-        public long Count<U>(U query)
-        {
+        public long Count<U>(U query) {
             var f = this._db.GetCollection<Flyweight>("$cmd")
-                .FindOne(new
-                {
+                .FindOne(new {
                     count = this._collectionName,
                     query = query
                 });
@@ -357,10 +415,8 @@ namespace NoRM
         /// </summary>
         /// <exception cref="MongoError">Will return void if all goes well, of throw an exception otherwise.</exception>
         /// <param name="documentsToUpsert"></param>
-        public void Insert(IEnumerable<T> documentsToInsert)
-        {
-            if (!this.Updateable)
-            {
+        public void Insert(IEnumerable<T> documentsToInsert) {
+            if (!this.Updateable) {
                 throw new NotSupportedException("This collection does not accept insertions, this is due to the fact that the collection's type " + typeof(T).FullName +
                     " does not specify an identifier property");
             }
@@ -369,8 +425,7 @@ namespace NoRM
             insertMessage.Execute();
         }
 
-        public CollectionStatistics GetCollectionStatistics()
-        {
+        public CollectionStatistics GetCollectionStatistics() {
             return this._db.GetCollectionStatistics(this._collectionName);
         }
     }

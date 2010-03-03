@@ -15,6 +15,18 @@
         }
 
         [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDB() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                var products = session.Products.ToList();
+                Assert.Equal(3, products.Count);
+            }
+        }
+
+
+        [Fact]
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {
             using (var session = new Session())

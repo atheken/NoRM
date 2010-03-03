@@ -16,18 +16,24 @@
             _databaseName = databaseName;
             _connection = connection;         
         }
-        
+
+        public IConnection CurrentConnection {
+            get {
+                return _connection;
+            }
+        }
+
         public string DatabaseName
         {
             get { return _databaseName; }
         }
 
-        public MongoCollection<T> GetCollection<T>(string collectionName) where T : class, new()
+        public MongoCollection<T> GetCollection<T>(string collectionName)
         {
             return new MongoCollection<T>(collectionName, this, _connection);
         }
 
-        public MongoCollection<T> GetCollection<T>() where T : class, new()
+        public MongoCollection<T> GetCollection<T>()
         {
             return new MongoCollection<T>(typeof (T).Name, this, _connection);
         }
