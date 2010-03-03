@@ -64,6 +64,7 @@
     <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />
     <Compile Include="MongoAdminTests.cs" />
+    <Compile Include="MongoConfigutationTests.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
     <Compile Include="MongoFixture.cs" />

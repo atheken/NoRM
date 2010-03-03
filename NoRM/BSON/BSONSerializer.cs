@@ -1,4 +1,6 @@
-﻿namespace NoRM.BSON
+﻿using NoRM.Configuration;
+
+namespace NoRM.BSON
 {
     using System;
     using System.Collections.Generic;
@@ -88,9 +90,13 @@
         {
             var typeHelper = TypeHelper.GetHelperForType(document.GetType());
             var idProperty = typeHelper.FindIdProperty();
+            var documentType = document.GetType();
+
             foreach (var property in typeHelper.GetProperties())
             {
-                var name = property == idProperty ? "_id" : property.Name;
+                var name = property == idProperty 
+                    ? "_id"
+                    : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
                 var value = property.Getter(document);
                 SerializeMember(name, value);
             }
