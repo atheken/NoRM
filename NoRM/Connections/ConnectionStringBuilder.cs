@@ -44,16 +44,18 @@ namespace NoRM
 
             if (!connection.StartsWith(PROTOCOL, StringComparison.InvariantCultureIgnoreCase))
             {
-                connection = ConfigurationManager.ConnectionStrings[connectionString].ConnectionString;
-
-                if (string.IsNullOrEmpty(connection))
+                try
                 {
-                    throw new MongoException("Invalid connection string: the protocol must be mongodb://");
+                    connection = ConfigurationManager.ConnectionStrings[connectionString].ConnectionString;
+                }
+                catch(NullReferenceException)
+                {
+                    throw new MongoException("Connection string is missing");
                 }
 
-                if (!connection.StartsWith(PROTOCOL, StringComparison.InvariantCultureIgnoreCase))
+                if (string.IsNullOrEmpty(connection) || !connection.StartsWith(PROTOCOL, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    throw new MongoException("Invalid connection string config file entry: the protocol must be mongodb://");
+                    throw new MongoException("Invalid connection string: the protocol must be mongodb://");
                 }
             }
 
