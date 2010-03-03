@@ -48,7 +48,11 @@
         {
             _provider=new MongoQueryProvider("test");
         }
-
+        public MongoQueryProvider Provider {
+            get {
+                return _provider;
+            }
+        }
         public IQueryable<Product> Products
         {
             get { return new MongoQuery<Product>(_provider); }

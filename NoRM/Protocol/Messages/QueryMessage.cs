@@ -15,6 +15,10 @@ namespace NoRM.Protocol.Messages
     /// <typeparam name="T">The request document type, and the response document type.</typeparam>
     public class QueryMessage<T> : QueryMessage<T, T> where T : class, new()
     {
+        public QueryMessage(IConnection connection)
+            : base(connection, typeof(T).Name) {
+
+        }
         public QueryMessage(IConnection connection, String fullyQualifiedCollName) : base(connection, fullyQualifiedCollName)
         {
 
