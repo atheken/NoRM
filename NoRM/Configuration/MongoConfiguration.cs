@@ -33,15 +33,6 @@ namespace NoRM.Configuration
             }
         }
 
-        public static void Reset()
-        {
-            lock(_objectLock)
-            {
-                _configuration = null;
-                GC.Collect();
-            }
-        }
-
         internal static string GetPropertyAlias(Type type, string propertyName)
         {
             return _configuration != null

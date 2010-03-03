@@ -27,8 +27,6 @@ namespace NoRM.Tests
                     admin.DropDatabase();
                 }
             }
-
-            MongoConfiguration.Reset();
         }
 
         [Fact]
@@ -54,8 +52,6 @@ namespace NoRM.Tests
             {
                 admin.DropDatabase();
             }
-
-            MongoConfiguration.Reset();
         }
 
         [Fact]
@@ -72,8 +68,6 @@ namespace NoRM.Tests
             Assert.Equal("last", last);
             Assert.Equal("UserBucket", collection);
             Assert.Equal("mongodb://localhost/NoRMTests", connection);
-
-            MongoConfiguration.Reset();
         }
 
         [Fact]
@@ -84,7 +78,6 @@ namespace NoRM.Tests
             var alias = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
 
             Assert.Equal("first", alias);
-            MongoConfiguration.Reset();
         }
 
         [Fact]
@@ -97,7 +90,6 @@ namespace NoRM.Tests
 
             Assert.Equal("first", first);
             Assert.Equal("LastName", last);
-            MongoConfiguration.Reset();
         }
 
         [Fact]
@@ -108,7 +100,6 @@ namespace NoRM.Tests
             var connection = MongoConfiguration.GetConnectionString(typeof(Product));
 
             Assert.Equal(null, connection);
-            MongoConfiguration.Reset();
         }
     }
 
