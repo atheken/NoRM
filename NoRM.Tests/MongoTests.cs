@@ -3,6 +3,8 @@ using Xunit;
 
 namespace NoRM.Tests
 {
+    using System.Linq;
+
     public class MongoTests
     {
         [Fact]
@@ -19,7 +21,7 @@ namespace NoRM.Tests
         [Fact]
         public void CreatesConnectionWithOverrideOptions()
         {
-            using (var mongo = new Mongo("mongodb://localhost/NoRMTests?strict=true", "strict=false"))
+            using (var mongo = new Mongo(TestHelper.ConnectionString("strict=true"), "strict=false"))
             {
                 Assert.Equal(false, mongo.ServerConnection().StrictMode);
             }
@@ -28,14 +30,13 @@ namespace NoRM.Tests
         [Fact]
         public void GetsTheLastError()
         {
-            using (var mongo = new Mongo("mongodb://localhost/NoRMTests?strict=false&pooling=false"))
+            using (var mongo = new Mongo(TestHelper.ConnectionString("strict=false&pooling=false")))
             {
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject { Id = null });
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject { Id = null });
                 var error = mongo.LastError();
                 Assert.Equal(1d, error.Ok);
                 Assert.Equal("E11000 duplicate key error index: NoRMTests.FakeObject.$_id_  dup key: { : null }", error.Err);
-
             }
         }
     }
