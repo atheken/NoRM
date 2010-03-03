@@ -79,6 +79,7 @@
     <Compile Include="BSON\Flyweight.cs" />
     <Compile Include="BSON\DbTypes\GridFile.cs" />
     <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
+    <Compile Include="Configuration\MongoConfiguration.cs" />
     <Compile Include="Connections\ConnectionProviderFactory.cs" />
     <Compile Include="Connections\ConnectionStringBuilder.cs" />
     <Compile Include="Connections\IConnection.cs" />
@@ -148,9 +149,6 @@
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\SetProfileResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
