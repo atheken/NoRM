@@ -81,7 +81,6 @@ namespace NoRM.Linq {
             //this is called from things OTHER than Enumerable() - like ToList() etc
             //create the collection
             var tranny = new MongoQueryTranslator();
-            expression = PartialEvaluator.Eval(expression);
             var qry = tranny.Translate(expression);
 
             Flyweight fly = (Flyweight)tranny.FlyWeight;
