@@ -8,6 +8,7 @@ namespace NoRM.Protocol.Messages
 {
     internal class UpdateMessage<T,U> : Message
     {
+        private const int FOUR_MEGABYTES = 4 * 1024 * 1024;
         protected UpdateOption _options = UpdateOption.None;
         protected T _matchDocument;
         protected U _valueDocument;
@@ -30,8 +31,20 @@ namespace NoRM.Protocol.Messages
             message.Add(new byte[4]);//required by docs
             message.Add(Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray());
             message.Add(BitConverter.GetBytes((int)this._options));
-            message.Add(BsonSerializer.Serialize(this._matchDocument));
-            message.Add(BsonSerializer.Serialize(this._valueDocument));
+            
+            var matchData = BsonSerializer.Serialize(this._matchDocument);
+            if (matchData.Length > FOUR_MEGABYTES)
+            {
+                throw new DocumentExceedsSizeLimitsException<T>(this._matchDocument, matchData.Length);
+            }
+            message.Add(matchData);
+            
+            var valueData = BsonSerializer.Serialize(this._valueDocument);
+            message.Add(valueData);
+            if (valueData.Length > FOUR_MEGABYTES)
+            {
+                throw new DocumentExceedsSizeLimitsException<U>(this._valueDocument, valueData.Length);
+            }
             var size = message.Sum(y=>y.Length);
             message[0] = BitConverter.GetBytes(size);
 

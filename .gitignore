@@ -13,6 +13,7 @@ Tests.VisualState.xml
 *.suo
 *.orig
 *.user
+LastBuild.log
 .svn
 _ReSharper*
 .DS_Store

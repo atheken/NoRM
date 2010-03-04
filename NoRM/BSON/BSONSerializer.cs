@@ -1,14 +1,13 @@
-﻿using NoRM.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Collections;
+using NoRM.Configuration;
 
 namespace NoRM.BSON
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Collections;
-
     internal class BsonSerializer
     {
         private readonly static IDictionary<Type, BSONTypes> _typeMap = new Dictionary<Type, BSONTypes>
@@ -16,7 +15,7 @@ namespace NoRM.BSON
              {typeof (int), BSONTypes.Int32}, {typeof (long), BSONTypes.Int64}, {typeof (bool), BSONTypes.Boolean}, {typeof (string), BSONTypes.String},
              {typeof(double), BSONTypes.Double}, {typeof (Guid), BSONTypes.Binary}, {typeof (Regex), BSONTypes.Regex}, {typeof (DateTime), BSONTypes.DateTime}, 
              {typeof(float), BSONTypes.Double}, {typeof (byte[]), BSONTypes.Binary}, {typeof(ObjectId), BSONTypes.MongoOID}, {typeof(ScopedCode), BSONTypes.ScopedCode}
-         };        
+         };
 
         private readonly BinaryWriter _writer;
         private Document _current;
@@ -29,7 +28,7 @@ namespace NoRM.BSON
         {
             using (var ms = new MemoryStream(250))
             using (var writer = new BinaryWriter(ms))
-            {                
+            {
                 new BsonSerializer(writer).WriteDocument(document);
                 return ms.ToArray();
             }
@@ -74,7 +73,6 @@ namespace NoRM.BSON
             else
             {
                 WriteObject(document);
-                
             }
             EndDocument(true);
         }
