@@ -1,3 +1,4 @@
+
 namespace NoRM
 {
     using System.Collections.Generic;
@@ -31,6 +32,7 @@ namespace NoRM
             if (builder.Pooled)
             {
                 return new PooledConnectionProvider(builder);
+                //return new QueuedConnectionProvider(builder);
             }
             return new NormalConnectionProvider(builder);
         }

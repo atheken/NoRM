@@ -1,4 +1,6 @@
-﻿namespace NoRM
+﻿using NoRM.Configuration;
+
+namespace NoRM
 {
     using System.Collections.Generic;   
     using Protocol.SystemMessages;
@@ -37,7 +39,10 @@
 
         public MongoCollection<T> GetCollection<T>()
         {
-            return new MongoCollection<T>(typeof (T).Name, this, _connection);
+            //return new MongoCollection<T>(typeof (T).Name, this, _connection);
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
+
+            return GetCollection<T>(collectionName);
         }
 
         public IEnumerable<CollectionInfo> GetAllCollections()

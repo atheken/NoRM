@@ -1,3 +1,5 @@
+using System.Configuration;
+
 namespace NoRM
 {
     using System;
@@ -38,11 +40,26 @@ namespace NoRM
         
         public static ConnectionStringBuilder Create(string connectionString)
         {
-            if (!connectionString.StartsWith(PROTOCOL, StringComparison.InvariantCultureIgnoreCase))
+            var connection = connectionString;
+
+            if (!connection.StartsWith(PROTOCOL, StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new MongoException("Invalid connection string: the protocol must be mongodb://");
+                try
+                {
+                    connection = ConfigurationManager.ConnectionStrings[connectionString].ConnectionString;
+                }
+                catch(NullReferenceException)
+                {
+                    throw new MongoException("Connection string is missing");
+                }
+
+                if (string.IsNullOrEmpty(connection) || !connection.StartsWith(PROTOCOL, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new MongoException("Invalid connection string: the protocol must be mongodb://");
+                }
             }
-            var parts = connectionString.Split(new[]{'?'}, StringSplitOptions.RemoveEmptyEntries);
+
+            var parts = connection.Split(new[] { '?' }, StringSplitOptions.RemoveEmptyEntries);
             var options = parts.Length == 2 ? parts[1] : null;
             var sb = new StringBuilder(parts[0].Substring(PROTOCOL.Length));
             var builder = new ConnectionStringBuilder
