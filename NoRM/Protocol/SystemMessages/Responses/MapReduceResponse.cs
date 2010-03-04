@@ -21,6 +21,10 @@ namespace NoRM.Responses
             _database = database;
         }
 
+        public MongoCollection GetCollection(string collectionName) {
+            return _database.GetCollection(collectionName);
+        }
+
         public MongoCollection<T> GetCollection<T>()
         {
             return _database.GetCollection<T>(Result);
