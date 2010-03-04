@@ -167,7 +167,10 @@ namespace NoRM.Linq {
             //if a query comes back, create a $where. We'll use this for Count() 
             //and Group in the future.
             if (!String.IsNullOrEmpty(qry)) {
-                fly["$where"] = " function(){return " + qry + "; }";
+                if (tranny.IsComplex) {
+                    fly = new Flyweight();
+                    fly["$where"] = " function(){return " + qry + "; }";
+                }
             }
 
             //This is the mapping function (javascript. Yummy).
