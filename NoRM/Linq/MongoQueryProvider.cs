@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using NoRM.BSON;
 
 namespace NoRM.Linq {
@@ -14,13 +12,13 @@ namespace NoRM.Linq {
     }
     public class MongoQueryProvider : IQueryProvider {
 
-        private Mongo _server;
+        private readonly Mongo _server;
 
         public MongoQueryProvider(string dbName) : this(dbName, "127.0.0.1", "27017", "") { }
-        public MongoQueryProvider(string dbName, string server, string port, string options) {
-
-            _server = new Mongo(dbName, server, port, options);
-
+        public MongoQueryProvider(string dbName, string server, string port, string options) : this(new Mongo(dbName, server, port, options)){}
+        public MongoQueryProvider(Mongo server)
+        {
+            _server = server;   
         }
         public MongoDatabase DB {
             get {
