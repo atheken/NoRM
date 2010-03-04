@@ -8,6 +8,10 @@ using System.Text;
 using NoRM.BSON;
 
 namespace NoRM.Linq {
+    public class MapReduceResult {
+        public int Id { get; set; }
+        public int Value { get; set; }
+    }
     public class MongoQueryProvider : IQueryProvider {
 
         private Mongo _server;
@@ -45,11 +49,12 @@ namespace NoRM.Linq {
         }
 
         S IQueryProvider.Execute<S>(Expression expression) {
+
             var result = this.Execute(expression);
+
             var converted=Convert.ChangeType(result, typeof(S));
             return (S)converted;
         }
-
         object IQueryProvider.Execute(Expression expression) {
 
             return this.Execute(expression);
@@ -76,40 +81,110 @@ namespace NoRM.Linq {
 
         }
 
+        /// <summary>
+        /// Avert your eyes all who come here seeking enlightenment. You cannot behold the true
+        /// joy and intense power of the treasure lying inside the mess. So I beseech you - turn
+        /// back now if you are queasy, squeemish, or otherwise feel entitled to code that not 
+        /// only does what you need, but looks pretty doing it.
+        /// 
+        /// I'll clean this up as I have time. For now, it's vomitous.
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         public object Execute(Expression expression) {
 
             //this is called from things OTHER than Enumerable() - like ToList() etc
             //create the collection
             var tranny = new MongoQueryTranslator();
-            var qry = tranny.Translate(expression);
 
-            Flyweight fly = (Flyweight)tranny.FlyWeight;
+            //need to know what method was called here. This corresponds to functions 
+            //like "Sum, Join," etc. It's the last thing in the method chain
+            //Where gets sent to the Enumeration method, as does Select etc.
+            //pull out the MethodCallExpression
+            var m = expression as MethodCallExpression;
+
+            //The query itself is the first arg of the main expression. This is what we need to eval.
+            var qry = tranny.Translate(m.Arguments[0]);
+            Flyweight fly = tranny.FlyWeight;
+
+            //if it's here, we need it - the last arg is the lambda passed in as an argument to the method
+            //this will give us the prop name for our mapreduce action
+            if (m.Arguments.Count > 1) {
+                fly.PropName = tranny.Translate(m.Arguments[1]);
+            }
+
+            //set the method call to the Method name. Yeehaa.
+            fly.MethodCall = m.Method.Name;
+
+            //This is the actual Query mechanism...
             var collection = new MongoCollection(fly.TypeName, this.DB, this.DB.CurrentConnection);
 
+            //if a query comes back, create a $where. We'll use this for Count() 
+            //and Group in the future.
             if (!String.IsNullOrEmpty(qry)) {
                 fly["$where"] = " function(){return " + qry + "; }";
             }
 
+            //James, you're an animal.
+            var averyMap = "function(){emit(0, " + fly.PropName + ")};";
+            if (!string.IsNullOrEmpty(qry)) {
+                averyMap = "function(){if" + qry + "{emit(0, " + fly.PropName + ")};}";
+            } 
+            
+            var reduce = "";
             object result = null;
-            //what's the method call?
+            
+            //Whachoo SAY!
             switch (fly.MethodCall) {
+                
+                //I'm Just ASKIN!!!
+                case "Any":
+                    result = collection.Count(fly)>0;
+                    break;
                 case "Count":
                     result = collection.Count(fly);
                     break;
                 case "Sum":
+                    reduce = "function(key, values){var sum = 0;for(var i in values){ sum+=values[i];} return sum;}";
+                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    break;
+                case "Average":
+                    reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){sum += values[i]} return sum/values.length;}";
 
-                    //fly["key"] = "{}";
-                    //fly["cond"] = "price > 0";
-                    result = collection.Group(fly);
+                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    break;
+                case "Min":
+                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least > values[i]){least=values[i];}} return least;}";
+                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    break;
+                case "Max":
+                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least < values[i]){least=values[i];}} return least;}";
+                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
                     break;
                 default:
                     break;
 
             }
             return result;
-            //this has a method call associated with it - which one?
 
         }
 
+        /// <summary>
+        /// Actual execution of the MapReduce stuff (thanks Karl!)
+        /// </summary>
+        /// <param name="typeName"></param>
+        /// <param name="map"></param>
+        /// <param name="reduce"></param>
+        /// <returns></returns>
+        object ExecuteMR(string typeName,string map, string reduce) {
+            object result = null;
+            using (var mr = this.Server.CreateMapReduce()) {
+                var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce });
+                var coll = response.GetCollection<MapReduceResult>();
+                var r = coll.Find().FirstOrDefault();
+                result = r.Value;
+            }
+            return result;
+        }
     }
 }

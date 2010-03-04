@@ -15,7 +15,7 @@ namespace NoRM.Linq {
         StringBuilder sb;
         Flyweight fly;
 
-        public object FlyWeight {
+        public Flyweight FlyWeight {
             get {
                 return fly;
             }
@@ -113,7 +113,8 @@ namespace NoRM.Linq {
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m) {
-            fly.MethodCall = m.Method.Name;
+            if(string.IsNullOrEmpty(fly.MethodCall))
+                fly.MethodCall = m.Method.Name;
             if (m.Arguments.Count > 0) {
                 if (m.Arguments[0].NodeType == ExpressionType.Constant) {
                     VisitConstant(m.Arguments[0] as ConstantExpression);
@@ -174,6 +175,7 @@ namespace NoRM.Linq {
             } else if (m.Method.DeclaringType == typeof(Queryable) && IsCallableMethod(m.Method.Name)) {
                 return this.HandleMethodCall((MethodCallExpression)m);
             }
+
             //for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
@@ -185,7 +187,11 @@ namespace NoRM.Linq {
                 "FirstOrDefault",
                 "SingleOrDefault",
                 "Count",
-                "Sum"
+                "Sum",
+                "Average",
+                "Min",
+                "Max",
+                "Any"
 
             };
             return acceptableMethods.Any(x=>x==methodName);
