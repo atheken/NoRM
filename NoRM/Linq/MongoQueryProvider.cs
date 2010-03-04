@@ -50,10 +50,29 @@ namespace NoRM.Linq {
 
         S IQueryProvider.Execute<S>(Expression expression) {
 
-            var result = this.Execute(expression);
+            //This duplication of code sucks - I'll refactor it out 
+            //but right now the type conversion is SUCK
+            
 
-            var converted=Convert.ChangeType(result, typeof(S));
-            return (S)converted;
+            var m = (MethodCallExpression)expression;
+            if (m.Method.Name.StartsWith("First") || m.Method.Name.StartsWith("Single")) {
+                MongoCollection<S> collection = DB.GetCollection<S>();
+                var tranny = new MongoQueryTranslator();
+                var qry = tranny.Translate(expression);
+                var fly = new Flyweight();
+                if (!String.IsNullOrEmpty(qry)) {
+                    fly.Limit = 1;
+                    fly["$where"] = " function(){return " + qry + "; }";
+                }
+                return collection.FindOne(fly);
+
+            } else {
+                var result = this.Execute(expression);
+                var converted=(S)Convert.ChangeType(result, typeof(S));
+                return converted;
+
+            }
+
         }
         object IQueryProvider.Execute(Expression expression) {
 
@@ -107,14 +126,30 @@ namespace NoRM.Linq {
             var qry = tranny.Translate(m.Arguments[0]);
             Flyweight fly = tranny.FlyWeight;
 
+            //set the method call to the Method name. Yeehaa.
+            fly.MethodCall = m.Method.Name;
+            
             //if it's here, we need it - the last arg is the lambda passed in as an argument to the method
             //this will give us the prop name for our mapreduce action
             if (m.Arguments.Count > 1) {
-                fly.PropName = tranny.Translate(m.Arguments[1]);
+                if (fly.MethodCall == "Any") {
+                    //any has a boolean lambda as a body - translate this 
+                    //as normal
+                    qry = tranny.Translate(m.Arguments[1]);
+                    //the property name doesn't matter with Any
+                } else {
+                    fly.PropName = tranny.Translate(m.Arguments[1]);
+                }
+            } else {
+                //it's a straight query call - grab from first
+                fly.PropName = tranny.Translate(m.Arguments[0]);
             }
 
-            //set the method call to the Method name. Yeehaa.
-            fly.MethodCall = m.Method.Name;
+            //the type we're dealing with is a ConstantExpression, hanging off the 
+            //first argument. Need to set it so our little fly guy
+            //knows what collection to use
+            fly.TypeName = tranny.TranslateCollectionName(m.Arguments[0]);
+
 
             //This is the actual Query mechanism...
             var collection = new MongoCollection(fly.TypeName, this.DB, this.DB.CurrentConnection);
@@ -125,8 +160,13 @@ namespace NoRM.Linq {
                 fly["$where"] = " function(){return " + qry + "; }";
             }
 
+            //This is the mapping function (javascript. Yummy).
+            //It defines our collection that we'll iterate (reduce) over
             //James, you're an animal.
             var averyMap = "function(){emit(0, " + fly.PropName + ")};";
+            
+            //if they pass in a query (Where()), we need to graft that on
+            //to our Mapping. You can thank Avery for this one.
             if (!string.IsNullOrEmpty(qry)) {
                 averyMap = "function(){if" + qry + "{emit(0, " + fly.PropName + ")};}";
             } 
@@ -150,7 +190,6 @@ namespace NoRM.Linq {
                     break;
                 case "Average":
                     reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){sum += values[i]} return sum/values.length;}";
-
                     result = ExecuteMR(fly.TypeName, averyMap, reduce);
                     break;
                 case "Min":
