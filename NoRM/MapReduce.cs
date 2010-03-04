@@ -20,15 +20,15 @@ namespace NoRM
         public MapReduceResponse Execute(MapReduceOptions options)
         {
             var response = _database.GetCollection<MapReduceResponse>("$cmd").FindOne(new MapReduceMessage
-                                                                                          {
-                                                                                              map = options.Map,
-                                                                                              reduce = options.Reduce,
-                                                                                              mapreduce = options.CollectionName,
-                                                                                              keeptemp = options.Permenant,
-                                                                                              @out = options.OutputCollectionName,
-                                                                                              limit = options.Limit,
-                                                                                              finalize = options.Finalize,
-                                                                                           });
+                              {
+                                  map = options.Map,
+                                  reduce = options.Reduce,
+                                  mapreduce = options.CollectionName,
+                                  keeptemp = options.Permenant,
+                                  @out = options.OutputCollectionName,
+                                  limit = options.Limit,
+                                  finalize = options.Finalize,
+                               });
            if (!options.Permenant && !string.IsNullOrEmpty(response.Result))
            {
                _temporaryCollections.Add(response.Result);

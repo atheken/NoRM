@@ -15,7 +15,7 @@ namespace NoRM.Linq {
         StringBuilder sb;
         Flyweight fly;
 
-        public object FlyWeight {
+        public Flyweight FlyWeight {
             get {
                 return fly;
             }
@@ -29,8 +29,6 @@ namespace NoRM.Linq {
         public string Translate(Expression exp) {
             this.sb = new StringBuilder();
             fly = new Flyweight();
-            //partial evaluator will help with converting system level calls
-            //to constant expressions
             this.Visit(exp);
             return sb.ToString();
         }
@@ -111,14 +109,27 @@ namespace NoRM.Linq {
             }
             return c;
         }
-
-        protected override Expression VisitMethodCall(MethodCallExpression m) {
-            fly.MethodCall = m.Method.Name;
-            if (m.Arguments.Count > 0) {
-                if (m.Arguments[0].NodeType == ExpressionType.Constant) {
-                    VisitConstant(m.Arguments[0] as ConstantExpression);
-                }
+        public string TranslateCollectionName(Expression exp) {
+            ConstantExpression c = null;
+            if (exp.NodeType == ExpressionType.Constant) {
+                c = (ConstantExpression)exp;
+            }else if (exp.NodeType == ExpressionType.Call) {
+                var m = (MethodCallExpression)exp;
+                c = m.Arguments[0] as ConstantExpression;
             }
+
+            var result = "";
+
+            //the first argument is a Constant - it's the query itself
+            IQueryable q = c.Value as IQueryable;
+            result = q.ElementType.Name;
+
+            return result;
+        }
+        protected override Expression VisitMethodCall(MethodCallExpression m) {
+            if(string.IsNullOrEmpty(fly.MethodCall))
+                fly.MethodCall = m.Method.Name;
+
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where") {
                 LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 this.Visit(lambda.Body);
@@ -174,6 +185,7 @@ namespace NoRM.Linq {
             } else if (m.Method.DeclaringType == typeof(Queryable) && IsCallableMethod(m.Method.Name)) {
                 return this.HandleMethodCall((MethodCallExpression)m);
             }
+
             //for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
@@ -185,7 +197,11 @@ namespace NoRM.Linq {
                 "FirstOrDefault",
                 "SingleOrDefault",
                 "Count",
-                "Sum"
+                "Sum",
+                "Average",
+                "Min",
+                "Max",
+                "Any"
 
             };
             return acceptableMethods.Any(x=>x==methodName);
