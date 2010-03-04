@@ -1,3 +1,6 @@
+using System.Linq.Expressions;
+using NoRM.Configuration;
+
 namespace NoRM.BSON
 {
     using System;
@@ -74,12 +77,58 @@ namespace NoRM.BSON
                 if (property.GetCustomAttributes(_ignoredType, true).Length > 0 || property.GetIndexParameters().Length > 0)
                 {
                     continue;
-                }                
-                var name = (property == idProperty) ? "$_id" : property.Name;
+                }
+
+                var name = (property == idProperty) 
+                    ? "$_id" 
+                    : MongoConfiguration.GetPropertyAlias(property.DeclaringType, property.Name);
+
                 magic.Add(name, new MagicProperty(property));
             }
             return magic;
-        }        
+        }
+
+        /// <summary>
+        /// Lifted from AutoMaper.
+        /// </summary>
+        /// <param name="lambdaExpression">The lambda expression.</param>
+        /// <returns>Property name</returns>
+        public static string FindProperty(LambdaExpression lambdaExpression)
+        {
+            Expression expressionToCheck = lambdaExpression;
+
+            var done = false;
+
+            while (!done)
+            {
+                switch (expressionToCheck.NodeType)
+                {
+                    case ExpressionType.Convert:
+                        expressionToCheck = ((UnaryExpression)expressionToCheck).Operand;
+                        break;
+
+                    case ExpressionType.Lambda:
+                        expressionToCheck = ((LambdaExpression)expressionToCheck).Body;
+                        break;
+
+                    case ExpressionType.MemberAccess:
+                        var memberExpression = ((MemberExpression)expressionToCheck);
+
+                        if (memberExpression.Expression.NodeType != ExpressionType.Parameter && memberExpression.Expression.NodeType != ExpressionType.Convert)
+                        {
+                            throw new ArgumentException(string.Format("Expression '{0}' must resolve to top-level member.", lambdaExpression), "lambdaExpression");
+                        }
+
+                        return memberExpression.Member.Name;
+
+                    default:
+                        done = true;
+                        break;
+                }
+            }
+
+            return null;
+        }
     }
 
     internal class MagicProperty
