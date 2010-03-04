@@ -12,7 +12,7 @@ namespace NoRM.Tests
         {
             MongoConfiguration.Initialize(r => r.UseMap(new CustomMap()));
 
-            using (var mongo = Mongo.ParseConnection("mongodb://localhost/NoRMTests"))
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<User>().Insert(new User { FirstName = "Test", LastName = "User" });
 
@@ -22,7 +22,7 @@ namespace NoRM.Tests
                 Assert.Equal("Test", result.FirstName);
                 Assert.Equal("User", result.LastName);
 
-                using (var admin = new MongoAdmin("mongodb://localhost/NoRMTests"))
+                using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
                 {
                     admin.DropDatabase();
                 }
@@ -39,7 +39,7 @@ namespace NoRM.Tests
             /// 
             MongoConfiguration.Initialize(r => r.For<User>(user => user.UseCollectionNamed("UserCollection")));
 
-            using (var mongo = Mongo.ParseConnection("mongodb://localhost/NoRMTests"))
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<User>().Insert(new User { FirstName = "Test", LastName = "User" });
 
@@ -48,7 +48,7 @@ namespace NoRM.Tests
                 Assert.NotNull(user);
             }
 
-            using (var admin = new MongoAdmin("mongodb://localhost/NoRMTests"))
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 admin.DropDatabase();
             }
@@ -67,7 +67,7 @@ namespace NoRM.Tests
             Assert.Equal("first", first);
             Assert.Equal("last", last);
             Assert.Equal("UserBucket", collection);
-            Assert.Equal("mongodb://localhost/NoRMTests", connection);
+            Assert.Equal(TestHelper.ConnectionString(), connection);
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace NoRM.Tests
                               cfg.ForProperty(u => u.FirstName).UseAlias("first");
                               cfg.ForProperty(u => u.LastName).UseAlias("last");
                               cfg.UseCollectionNamed("UserBucket");
-                              cfg.UseConnectionString("mongodb://localhost/NoRMTests");
+                              cfg.UseConnectionString(TestHelper.ConnectionString());
                           });
 
             For<Product>(cfg => cfg.ForProperty(p => p.Name).UseAlias("productname"));
