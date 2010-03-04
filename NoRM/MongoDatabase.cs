@@ -28,6 +28,9 @@ namespace NoRM
         {
             get { return _databaseName; }
         }
+        public MongoCollection GetCollection(string collectionName) {
+            return new MongoCollection(collectionName,this,this.CurrentConnection);
+        }
 
         public MongoCollection<T> GetCollection<T>(string collectionName)
         {

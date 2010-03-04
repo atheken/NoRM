@@ -9,13 +9,13 @@ namespace NoRM
         public string OutputCollectionName { get; set; }
         public int? Limit{ get; set;}
         public string Finalize{ get; set;}
-
         public MapReduceOptions(){}
         public MapReduceOptions(string collectionName)
         {
             CollectionName = collectionName;
         }
     }
+
 
     public class MapReduceOptions<T> : MapReduceOptions
     {
