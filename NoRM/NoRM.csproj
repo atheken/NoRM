@@ -54,7 +54,6 @@
     <Compile Include="Attributes\MongoIdentifierAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreIfNullAttribute.cs" />
-    <Compile Include="Attributes\MongoNameAttribute.cs" />
     <Compile Include="BSON\BsonDeserializer.cs" />
     <Compile Include="BSON\BsonHelper.cs" />
     <Compile Include="BSON\DbTypes\GridReadStream.cs" />

@@ -26,31 +26,31 @@ namespace NoRM
         /// <summary>
         /// The ID used to reference this file by the chunks.
         /// </summary>
-        [MongoName("_id")]
+        //[MongoName("_id")]
         public Guid? _id { get; set; }
 
         /// <summary>
         /// The original name of this file.
         /// </summary>
-        [MongoName("filename")]
+        //[MongoName("filename")]
         public String filename { get; set; }
 
         /// <summary>
         /// A valide MIME type for this file.
         /// </summary>
-        [MongoName("contentType")]
+        //[MongoName("contentType")]
         public String contentType { get; set; }
 
         /// <summary>
         /// How bit is this file in total?
         /// </summary>
-        [MongoName("length")]
+        //[MongoName("length")]
         public long? length { get; set; }
 
         /// <summary>
         /// How big is each piece of this file in bytes?
         /// </summary>
-        [MongoName("chunkSize")]
+        //[MongoName("chunkSize")]
         public int? chunkSize { get; set; }
 
         [MongoIgnore]
@@ -68,7 +68,7 @@ namespace NoRM
         /// <summary>
         /// When was this file added?
         /// </summary>
-        [MongoName("uploadDate")]
+        //[MongoName("uploadDate")]
         public DateTime? uploadDate { get; set; }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace NoRM
         /// </summary>
         public Flyweight metadata { get; set; }
 
-        [MongoName("md5")]
+        //[MongoName("md5")]
         public String md5 { get; set; }
     }
 
