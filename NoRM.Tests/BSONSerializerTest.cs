@@ -2,7 +2,6 @@ namespace NoRM.Tests
 {
     using System.Text.RegularExpressions;
     using BSON;
-    using Attributes;
     using Xunit;
     using System;
     using System.Diagnostics;
