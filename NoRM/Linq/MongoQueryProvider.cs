@@ -59,10 +59,14 @@ namespace NoRM.Linq {
                 MongoCollection<S> collection = DB.GetCollection<S>();
                 var tranny = new MongoQueryTranslator();
                 var qry = tranny.Translate(expression);
-                var fly = new Flyweight();
+                var fly = tranny.FlyWeight;
+
                 if (!String.IsNullOrEmpty(qry)) {
                     fly.Limit = 1;
-                    fly["$where"] = " function(){return " + qry + "; }";
+                    if (tranny.IsComplex) {
+                        fly = new Flyweight();
+                        fly["$where"] = " function(){return " + qry + "; }";
+                    }
                 }
                 return collection.FindOne(fly);
 
@@ -91,8 +95,14 @@ namespace NoRM.Linq {
 
             //execute
             if (!String.IsNullOrEmpty(qry)) {
-                var fly = new Flyweight();
-                fly["$where"] = " function(){return "+ qry+"; }";
+                var fly = tranny.FlyWeight;
+                if (tranny.IsComplex) {
+                    //reset - need to use the where statement generated
+                    //instead of the props set on the internal flyweight
+                    fly = new Flyweight();
+                    fly["$where"] = " function(){return " + qry + "; }";
+                    
+                }
                 return collection.Find(fly);
             }
 
