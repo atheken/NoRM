@@ -1,23 +1,29 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace NoRM.Configuration
 {
-    public class ConfigurationContainer : MongoConfigurationMap, IConfigurationContainer
+    /// <summary>
+    /// Mongo configuration container
+    /// </summary>
+    public class ConfigurationContainer : MongoConfigurationMap, IConfigurationContainer  
     {
-        private IMongoConfigurationMap _configuration;
-
-        public ConfigurationContainer()
+        /// <summary>
+        /// Registers a mongo type map implicitly.
+        /// </summary>
+        /// <typeparam name="T">Type of configuration container to create.</typeparam>
+        public void AddMap<T>() where T : IMongoConfigurationMap, new()
         {
-            _configuration = this;
+            new T();
         }
-
-        public void UseMap(IMongoConfigurationMap configurationMap)
-        {
-            _configuration = configurationMap;
-        }
-
+        /// <summary>
+        /// Gets the configuration map.
+        /// </summary>
+        /// <returns></returns>
         public IMongoConfigurationMap GetConfigurationMap()
         {
-            return _configuration;
+            return this;
         }
     }
 }

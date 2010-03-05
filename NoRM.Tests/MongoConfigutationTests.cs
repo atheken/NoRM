@@ -8,9 +8,10 @@ namespace NoRM.Tests
     public class MongoConfigutationTests
     {
         [Fact]
-        public void MongoConfigurationMapsPropertyNameToAlias()
+        public void MongoConfigurationMapsMergesConfigurationMaps()
         {
-            MongoConfiguration.Initialize(r => r.UseMap(new CustomMap()));
+            MongoConfiguration.Initialize(r => r.AddMap<CustomMap>());
+            MongoConfiguration.Initialize(r => r.AddMap<OtherMap>());
 
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
@@ -55,22 +56,6 @@ namespace NoRM.Tests
         }
 
         [Fact]
-        public void MongoConfigurationSupportsRegistrationSubtypes()
-        {
-            MongoConfiguration.Initialize(r => r.UseMap(new CustomMap()));
-
-            var first = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
-            var last = MongoConfiguration.GetPropertyAlias(typeof(User), "LastName");
-            var collection = MongoConfiguration.GetCollectionName(typeof(User));
-            var connection = MongoConfiguration.GetConnectionString(typeof(User));
-
-            Assert.Equal("first", first);
-            Assert.Equal("last", last);
-            Assert.Equal("UserBucket", collection);
-            Assert.Equal(TestHelper.ConnectionString(), connection);
-        }
-
-        [Fact]
         public void MongoConfigurationSupportsLambdaSyntaxRegistration()
         {
             MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first")));
@@ -83,7 +68,7 @@ namespace NoRM.Tests
         [Fact]
         public void MongoConfigurationEchoesMissingPropertyNames()
         {
-            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first")));
+            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first"))/*.WithProfileNamed("Sample")*/);
 
             var first = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
             var last = MongoConfiguration.GetPropertyAlias(typeof(User), "LastName");
@@ -95,11 +80,19 @@ namespace NoRM.Tests
         [Fact]
         public void MongoConfigurationReturnsNullForUninitializedTypeConnectionStrings()
         {
-            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first")));
+            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first"))/*.WithProfileNamed("Sample")*/);
 
             var connection = MongoConfiguration.GetConnectionString(typeof(Product));
 
             Assert.Equal(null, connection);
+        }
+    }
+
+    public class OtherMap : MongoConfigurationMap
+    {
+        public OtherMap()
+        {
+            For<User>(cfg => cfg.ForProperty(u => u.LastName).UseAlias("last"));
         }
     }
 
@@ -117,11 +110,6 @@ namespace NoRM.Tests
 
             For<Product>(cfg => cfg.ForProperty(p => p.Name).UseAlias("productname"));
         }
-    }
-
-    public class EmptyMap : MongoConfigurationMap
-    {
-        
     }
 
     public class User
