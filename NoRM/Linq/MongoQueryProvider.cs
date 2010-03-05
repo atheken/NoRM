@@ -1,26 +1,24 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using NoRM.BSON;
 
 namespace NoRM.Linq {
-    public class MapReduceResult {
+    public class MapReduceResult<T> {
         public int Id { get; set; }
-        public int Value { get; set; }
+        public T Value { get; set; }
     }
     public class MongoQueryProvider : IQueryProvider {
 
-        private Mongo _server;
+        private readonly Mongo _server;
 
         public MongoQueryProvider(string dbName) : this(dbName, "127.0.0.1", "27017", "") { }
-        public MongoQueryProvider(string dbName, string server, string port, string options) {
-
-            _server = new Mongo(dbName, server, port, options);
-
+        public MongoQueryProvider(string dbName, string server, string port, string options) : this(new Mongo(dbName, server, port, options)){}
+        public MongoQueryProvider(Mongo server)
+        {
+            _server = server;   
         }
         public MongoDatabase DB {
             get {
@@ -59,10 +57,14 @@ namespace NoRM.Linq {
                 MongoCollection<S> collection = DB.GetCollection<S>();
                 var tranny = new MongoQueryTranslator();
                 var qry = tranny.Translate(expression);
-                var fly = new Flyweight();
+                var fly = tranny.FlyWeight;
+
                 if (!String.IsNullOrEmpty(qry)) {
                     fly.Limit = 1;
-                    fly["$where"] = " function(){return " + qry + "; }";
+                    if (tranny.IsComplex) {
+                        fly = new Flyweight();
+                        fly["$where"] = " function(){return " + qry + "; }";
+                    }
                 }
                 return collection.FindOne(fly);
 
@@ -91,8 +93,14 @@ namespace NoRM.Linq {
 
             //execute
             if (!String.IsNullOrEmpty(qry)) {
-                var fly = new Flyweight();
-                fly["$where"] = " function(){return "+ qry+"; }";
+                var fly = tranny.FlyWeight;
+                if (tranny.IsComplex) {
+                    //reset - need to use the where statement generated
+                    //instead of the props set on the internal flyweight
+                    fly = new Flyweight();
+                    fly["$where"] = " function(){return " + qry + "; }";
+                    
+                }
                 return collection.Find(fly);
             }
 
@@ -157,7 +165,10 @@ namespace NoRM.Linq {
             //if a query comes back, create a $where. We'll use this for Count() 
             //and Group in the future.
             if (!String.IsNullOrEmpty(qry)) {
-                fly["$where"] = " function(){return " + qry + "; }";
+                if (tranny.IsComplex) {
+                    fly = new Flyweight();
+                    fly["$where"] = " function(){return " + qry + "; }";
+                }
             }
 
             //This is the mapping function (javascript. Yummy).
@@ -186,19 +197,19 @@ namespace NoRM.Linq {
                     break;
                 case "Sum":
                     reduce = "function(key, values){var sum = 0;for(var i in values){ sum+=values[i];} return sum;}";
-                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
                     break;
                 case "Average":
                     reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){sum += values[i]} return sum/values.length;}";
-                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
                     break;
                 case "Min":
                     reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least > values[i]){least=values[i];}} return least;}";
-                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
                     break;
                 case "Max":
                     reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least < values[i]){least=values[i];}} return least;}";
-                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
                     break;
                 default:
                     break;
@@ -215,11 +226,11 @@ namespace NoRM.Linq {
         /// <param name="map"></param>
         /// <param name="reduce"></param>
         /// <returns></returns>
-        object ExecuteMR(string typeName,string map, string reduce) {
-            object result = null;
+        T ExecuteMR<T>(string typeName,string map, string reduce) {
+            T result;
             using (var mr = this.Server.CreateMapReduce()) {
                 var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce });
-                var coll = response.GetCollection<MapReduceResult>();
+                var coll = response.GetCollection<MapReduceResult<T>>();
                 var r = coll.Find().FirstOrDefault();
                 result = r.Value;
             }

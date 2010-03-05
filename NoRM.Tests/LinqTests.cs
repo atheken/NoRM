@@ -40,7 +40,38 @@
                 Assert.Equal(4, products.Count);
             }
         }
+        [Fact]
+        public void OneProductsShouldBeReturnedWhen3InDbWithPriceEqual10() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "Test3", Price = 10 });
+                session.Add(new Product { Name = "Test4", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
+                var products = session.Products.Where(x => x.Price ==10).ToList();
+                Assert.Equal(1, products.Count);
+            }
+        }
 
+        [Fact]
+        public void TwoProductsShouldBeReturnedWhen3InDbWithPriceGreaterThan10() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "Test3", Price = 10 });
+                session.Add(new Product { Name = "Test4", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
+                var products = session.Products.Where(x => x.Price > 10).ToList();
+                Assert.Equal(2, products.Count);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhen3InDbWithPriceEqual10AndNameTest3() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "Test3", Price = 10 });
+                session.Add(new Product { Name = "Test4", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
+                var products = session.Products.Where(x => x.Price == 10 && x.Name=="Test3").ToList();
+                Assert.Equal(1, products.Count);
+            }
+        }
         [Fact]
         public void OneProductsShouldBeReturnedWhen3InDbWithPriceGreaterThan10LessThan30()
         {
@@ -102,10 +133,10 @@
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2)});
+session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
+session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
+session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
+session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2)});
                 var products = session.Products.Where(x => x.Available > DateTime.Now.AddDays(1)).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -250,19 +281,6 @@
         }
 
         [Fact]
-        public void TwoProductsShouldBeReturnedWhen3InDbWithPriceGreaterThan10()
-        {
-            using (var session = new Session())
-            {
-                session.Add(new Product {Name = "Test3", Price = 10});
-                session.Add(new Product {Name = "Test4", Price = 22});
-                session.Add(new Product {Name = "Test5", Price = 33});
-                var products = session.Products.Where(x => x.Price > 10).ToList();
-                Assert.Equal(2, products.Count);
-            }
-        }
-
-        [Fact]
         public void TwoProductsShouldBeReturnedWhen3InDbWithPriceLessThan10OrGreaterThan30()
         {
             using (var session = new Session())
@@ -313,5 +331,6 @@
                 Assert.Equal(2, products.Count);
             }
         }
+
     }
 }

@@ -1,28 +1,39 @@
-﻿namespace NoRM.Tests
-{
-    using System;
-    using System.Configuration;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using Attributes;
-    using Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Text.RegularExpressions;
+using NoRM.Attributes;
+using NoRM.Linq;
+using NoRM.Responses;
 
+namespace NoRM.Tests
+{
     internal class TestHelper
     {
-        private static readonly string _connectionStringHost = ConfigurationManager.AppSettings["connectionStringHost"];    
+        private static readonly string _connectionStringHost = ConfigurationManager.AppSettings["connectionStringHost"];
+
         public static string ConnectionString()
         {
-            return ConnectionString(null);            
+            return ConnectionString(null);
         }
+
         public static string ConnectionString(string query)
         {
-            return ConnectionString(query, null, null);
+            return ConnectionString(query, null, null, null);
         }
+
         public static string ConnectionString(string userName, string password)
         {
-            return ConnectionString(null, userName, password);
+            return ConnectionString(null, null, userName, password);
         }
+
         public static string ConnectionString(string query, string userName, string password)
+        {
+            return ConnectionString(query, null, userName, password);
+        }
+
+        public static string ConnectionString(string query, string database, string userName, string password)
         {
             var authentication = string.Empty;
             if (userName != null)
@@ -34,28 +45,51 @@
                 query = string.Concat('?', query);
             }
             var host = string.IsNullOrEmpty(_connectionStringHost) ? "localhost" : _connectionStringHost;
-
-            return string.Format("mongodb://{0}{1}/NoRMTests{2}", authentication, host, query);
+            database = database ?? "NoRMTests";
+            return string.Format("mongodb://{0}{1}/{2}{3}", authentication, host, database, query);            
         }
     }
-    
 
-    internal class Session:IDisposable
+
+    internal class Session : IDisposable
     {
-        
-        MongoQueryProvider _provider;
+        private readonly MongoQueryProvider _provider;
+
         public Session()
         {
-            _provider=new MongoQueryProvider("test");
+            _provider = new MongoQueryProvider("test");
         }
-        public MongoQueryProvider Provider {
-            get {
-                return _provider;
-            }
+
+        public MongoQueryProvider Provider
+        {
+            get { return _provider; }
         }
+
         public IQueryable<Product> Products
         {
             get { return new MongoQuery<Product>(_provider); }
+        }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            _provider.Server.Dispose();
+        }
+
+        #endregion
+
+        public T MapReduce<T>(string map, string reduce)
+        {
+            T result = default(T);
+            using (MapReduce mr = _provider.Server.CreateMapReduce())
+            {
+                MapReduceResponse response = mr.Execute(new MapReduceOptions(typeof (T).Name) {Map = map, Reduce = reduce});
+                MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
+                MapReduceResult<T> r = coll.Find().FirstOrDefault();
+                result = r.Value;
+            }
+            return result;
         }
 
         public void Add<T>(T item) where T : class, new()
@@ -77,12 +111,6 @@
         {
             _provider.DB.CreateCollection(new CreateCollectionOptions(name));
         }
-
-
-        public void Dispose() {
-            _provider.Server.Dispose();
-        }
-
     }
 
     internal class Address
@@ -162,6 +190,7 @@
         public Guid? AGuid { get; set; }
         public Regex ARex { get; set; }
         public DateTime? ADateTime { get; set; }
+        public List<string> AList { get; set; }
         public GeneralDTO Nester { get; set; }
         public ScopedCode Code { get; set; }
         public float? AFloat { get; set; }

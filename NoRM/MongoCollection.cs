@@ -296,18 +296,6 @@ namespace NoRM
         }
 
         /// <summary>
-        /// Find based on a Linq Expression
-        /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="template"></param>
-        /// <returns></returns>
-        public IEnumerable<T> Find<T>(Expression<Func<T, bool>> expression) {
-
-            //build a template based on T
-            return null;
-        }
-
-        /// <summary>
         /// Return all documents matching the template
         /// </summary>
         /// <remarks>

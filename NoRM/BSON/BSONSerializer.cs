@@ -203,9 +203,7 @@ namespace NoRM.BSON
                 Write(BSONTypes.Object);
                 WriteName(name);                
                 WriteDocument(value); //Write manages new/end document                
-            }
-            
-                    
+            }  
         }
         private void Write(IEnumerable enumerable)
         {

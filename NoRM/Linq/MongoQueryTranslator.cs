@@ -13,8 +13,27 @@ namespace NoRM.Linq {
         Expression _expression;
         bool collectionSet = false;
         StringBuilder sb;
+        StringBuilder sbIndexed;
         Flyweight fly;
+        int _conditionals;
+        bool _isComplex = false;
 
+        public bool IsComplex {
+            get {
+                return _isComplex;
+            }
+        }
+
+        public string OptimizedWhere {
+            get {
+                return sbIndexed.ToString();
+            }
+        }
+        public int ConditionalCount {
+            get {
+                return _conditionals;
+            }
+        }
         public Flyweight FlyWeight {
             get {
                 return fly;
@@ -28,12 +47,14 @@ namespace NoRM.Linq {
 
         public string Translate(Expression exp) {
             this.sb = new StringBuilder();
+            sbIndexed = new StringBuilder();
             fly = new Flyweight();
             this.Visit(exp);
             return sb.ToString();
         }
 
         protected override Expression VisitBinary(BinaryExpression b) {
+            _conditionals++;
             sb.Append("(");
             this.Visit(b.Left);
             switch (b.NodeType) {
@@ -44,25 +65,32 @@ namespace NoRM.Linq {
 
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
+                    _isComplex = true;
                     sb.Append(" || ");
                     break;
                 case ExpressionType.Equal:
-                    sb.Append(" == ");
+                    lastOperator = " == ";
+                    sb.Append(lastOperator);
                     break;
                 case ExpressionType.NotEqual:
-                    sb.Append(" <> ");
+                    lastOperator = " <> ";
+                    sb.Append(lastOperator);
                     break;
                 case ExpressionType.LessThan:
-                    sb.Append(" < ");
+                    lastOperator = " < ";
+                    sb.Append(lastOperator);
                     break;
                 case ExpressionType.LessThanOrEqual:
-                    sb.Append(" <= ");
+                    lastOperator = " <= ";
+                    sb.Append(lastOperator);
                     break;
                 case ExpressionType.GreaterThan:
-                    sb.Append(" > ");
+                    lastOperator = " > ";
+                    sb.Append(lastOperator);
                     break;
                 case ExpressionType.GreaterThanOrEqual:
-                    sb.Append(" >= ");
+                    lastOperator = " >= ";
+                    sb.Append(lastOperator);
                     break;
                 default:
                     throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported", b.NodeType));
@@ -78,6 +106,49 @@ namespace NoRM.Linq {
             }
             return e;
         }
+        string lastFlyProperty = "";
+        string lastOperator = " == ";
+        
+        void SetFlyValue(object value) {
+
+            //if the property has already been set, we can't set it again
+            //as fly uses Dictionaries. This means to BETWEEN style native queries
+            if (fly.Contains(lastFlyProperty)) {
+                _isComplex = true;
+                return;
+            }
+            
+            if (lastFlyProperty != " == ") {
+                //Can't do comparisons here unless the type is a double
+                //which is a limitation of mongo, apparently
+                //and won't work if we're doing date comparisons
+                if (value.GetType().IsAssignableFrom(typeof(double))) {
+                    switch (lastOperator) {
+                        case (" > "):
+                            fly[lastFlyProperty] = Q.GreaterThan((double)value);
+                            break;
+                        case (" < "):
+                            fly[lastFlyProperty] = Q.LessThan((double)value);
+                            break;
+                        case (" <= "):
+                            fly[lastFlyProperty] = Q.LessOrEqual((double)value);
+                            break;
+                        case (" >= "):
+                            fly[lastFlyProperty] = Q.GreaterOrEqual((double)value);
+                            break;
+                        case (" <> "):
+                            fly[lastFlyProperty] = Q.NotEqual(value);
+                            break;
+                    }
+                } else {
+
+                    //Can't assign? Push to the $where
+                    _isComplex = true;
+                }
+            } else {
+                fly[lastFlyProperty] = value;
+            }
+        }
         protected override Expression VisitConstant(ConstantExpression c) {
             IQueryable q = c.Value as IQueryable;
             if (q != null) {
@@ -89,21 +160,23 @@ namespace NoRM.Linq {
                 switch (Type.GetTypeCode(c.Value.GetType())) {
                     case TypeCode.Boolean:
                         sb.Append(((bool)c.Value) ? 1 : 0);
+                        SetFlyValue(((bool)c.Value) ? 1 : 0);
                         break;
                     case TypeCode.DateTime:
-                        sb.Append("new Date('");
-                        sb.Append(c.Value);
-                        sb.Append("')");
+                        var val = "new Date('" + c.Value + "')";
+                        sb.Append(val);
+                        SetFlyValue(c.Value);
                         break;
                     case TypeCode.String:
-                        sb.Append("'");
-                        sb.Append(c.Value);
-                        sb.Append("'");
+                        var sval = "'" + c.Value + "'";
+                        sb.Append(sval);
+                        SetFlyValue(c.Value);
                         break;
                     case TypeCode.Object:
                         throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
                     default:
                         sb.Append(c.Value);
+                        SetFlyValue(c.Value);
                         break;
                 }
             }
@@ -135,7 +208,7 @@ namespace NoRM.Linq {
                 this.Visit(lambda.Body);
                 return m;
             } else if (m.Method.DeclaringType == typeof(string)){
-
+                _isComplex = true;
                 switch (m.Method.Name) {
                     case "StartsWith":
                         sb.Append("(");
@@ -227,6 +300,7 @@ namespace NoRM.Linq {
 
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter) {
                 sb.Append("this." + m.Member.Name);
+                lastFlyProperty=m.Member.Name;
                 return m;
             }else if (m.Member.DeclaringType == typeof(string)) {
                 switch (m.Member.Name) {
@@ -238,6 +312,9 @@ namespace NoRM.Linq {
                 }
             } else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset)) {
                 
+                //this is complex
+                _isComplex = true;
+
                 //this is a DateProperty hanging off the property - clip the last 2 elements
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 2).ToArray();
                 var propName = String.Join(".", fixedName);
@@ -254,7 +331,7 @@ namespace NoRM.Linq {
                         return m;
                     case "Year":
                         this.Visit(m.Expression);
-                        sb.Append(".getYear()");
+                        sb.Append(".getFullYear()");
                         return m;
                     case "Hour":
                         this.Visit(m.Expression);
@@ -274,12 +351,12 @@ namespace NoRM.Linq {
                         return m;
                 }
             } else {
-                //don't want the first - that's the lambda thing
+                //this supports the "deep graph" name - "Product.Address.City"
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
 
                 var result = String.Join(".", fixedName);
                 sb.Append("this." + result);
-
+                lastFlyProperty = result;
                 return m;
 
             }

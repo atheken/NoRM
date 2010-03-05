@@ -53,7 +53,13 @@ namespace NoRM.BSON
             object retval;
 
             this._kitchenSinkProps.TryGetValue(propertyName, out retval);
+            if (retval == null)
+                throw new InvalidOperationException("Can't find the property " + propertyName);
             return (T)retval;
+        }
+
+        public bool Contains(string propertyName) {
+            return _kitchenSinkProps.ContainsKey(propertyName);
         }
 
         public void Delete(String propertyName)

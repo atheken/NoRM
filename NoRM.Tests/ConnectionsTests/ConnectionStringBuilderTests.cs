@@ -9,7 +9,7 @@ namespace NoRM.Tests
         public void ThrowsExceptionWhenProtocolIsInvalid()
         {
             var ex = Assert.Throws<MongoException>(() => ConnectionStringBuilder.Create("http://www.google.com"));
-            Assert.Equal("Invalid connection string: the protocol must be mongodb://", ex.Message);
+            Assert.Equal("Connection string is missing", ex.Message);
         }
 
         [Fact]
