@@ -1,13 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using NoRM.Attributes;
 using System.Linq.Expressions;
 using NoRM.Configuration;
 
 namespace NoRM.BSON
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
-    using Attributes;
-
     internal class TypeHelper
     {
         private static readonly Type _ignoredType = typeof (MongoIgnoreAttribute);

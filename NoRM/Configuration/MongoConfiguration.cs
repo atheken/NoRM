@@ -13,6 +13,7 @@ namespace NoRM.Configuration
             action(ConfigurationProvider);
         }
 
+
         private static IConfigurationContainer ConfigurationProvider
         {
             get
@@ -40,6 +41,11 @@ namespace NoRM.Configuration
                 : propertyName;
         }
 
+        /// <summary>
+        /// Produces the mapped connection string for the type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         internal static string GetCollectionName(Type type)
         {
             return _configuration != null

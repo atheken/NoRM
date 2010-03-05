@@ -13,7 +13,7 @@ namespace NoRM
     {
         private readonly object _target;
         private readonly Sentinel _leakDetector;
-
+        
         private TimedLock(object o)
         {
             _target = o;
