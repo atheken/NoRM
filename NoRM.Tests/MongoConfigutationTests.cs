@@ -33,11 +33,6 @@ namespace NoRM.Tests
         [Fact]
         public void MongoConfigurationMapsCollectionNameToAlias()
         {
-            /// xUnit doesn't have a tear down method, and it uses the same app domain for all tests.  
-            /// That means that the static properties used for BSON deserialization as well as this
-            /// configuration aren't destroyed after each test.  This test will fail if all tests
-            /// in this class are run at once.
-            /// 
             MongoConfiguration.Initialize(r => r.For<User>(user => user.UseCollectionNamed("UserCollection")));
 
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
