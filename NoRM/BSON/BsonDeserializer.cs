@@ -168,7 +168,7 @@ namespace NoRM.BSON
                     NewDocument(_reader.ReadInt32());
                 }
                 var value = DeserializeValue(property.Type, storageType);
-                property.Setter(instance, value);                                       
+                property.Setter(instance, value);
                 if (IsDone())
                 {
                     break;
@@ -182,17 +182,17 @@ namespace NoRM.BSON
             var itemType = ListHelper.GetListItemType(listType);            
             bool isReadonly;
             var container = ListHelper.CreateContainer(listType, itemType, out isReadonly);            
-            while (true)
+            while (!IsDone())
             {
                 var storageType = ReadType();
+                
                 ReadName();
                 if (storageType == BSONTypes.Object)
                 {
                     NewDocument(_reader.ReadInt32());
                 }
                 var value = DeserializeValue(itemType, storageType);
-                container.Add(value);  
-                if (IsDone()) { break; }
+                container.Add(value);                  
             }
             if (listType.IsArray)
             {

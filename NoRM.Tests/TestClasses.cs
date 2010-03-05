@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -189,6 +190,7 @@ namespace NoRM.Tests
         public Guid? AGuid { get; set; }
         public Regex ARex { get; set; }
         public DateTime? ADateTime { get; set; }
+        public List<string> AList { get; set; }
         public GeneralDTO Nester { get; set; }
         public ScopedCode Code { get; set; }
         public float? AFloat { get; set; }

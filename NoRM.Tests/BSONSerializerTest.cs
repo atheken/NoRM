@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace NoRM.Tests
 {
     using System.Text.RegularExpressions;
@@ -310,6 +313,13 @@ namespace NoRM.Tests
                 stopWatch.Stop();
                 Console.WriteLine(stopWatch.ElapsedMilliseconds);
             }
-        }
+        }   
+
+        [Fact]
+        public void SerializationOfEmptyListIsNotLossy()
+        {
+            var obj1Bytes = BsonSerializer.Serialize(new GeneralDTO { AList = new List<string>() });
+            BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);  
+        } 
     }
 }
