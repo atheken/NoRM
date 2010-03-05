@@ -331,7 +331,7 @@ namespace NoRM.Linq {
                         return m;
                     case "Year":
                         this.Visit(m.Expression);
-                        sb.Append(".getYear()");
+                        sb.Append(".getFullYear()");
                         return m;
                     case "Hour":
                         this.Visit(m.Expression);

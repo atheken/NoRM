@@ -17,7 +17,7 @@ namespace NoRM.Tests
         [Fact]
         public void ListsAllDatabases()
         {
-            var expected = new List<string> {"admin", "NormTests", "local"};
+            var expected = new List<string> { "admin", "NoRMTests", "local" };
 
             //create another database
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))

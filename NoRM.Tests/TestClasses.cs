@@ -44,7 +44,7 @@ namespace NoRM.Tests
                 query = string.Concat('?', query);
             }
             var host = string.IsNullOrEmpty(_connectionStringHost) ? "localhost" : _connectionStringHost;
-            database = database ?? "NormTests";
+            database = database ?? "NoRMTests";
             return string.Format("mongodb://{0}{1}/{2}{3}", authentication, host, database, query);            
         }
     }
