@@ -32,8 +32,7 @@ namespace NoRM
 
         }
         public Mongo(IConnectionProvider provider, string options) {
-            var parsed = provider.ConnectionString;
-            var db = new MongoDatabase(parsed.Database, provider.Open(options));
+            var parsed = provider.ConnectionString;           
             _options = options;
             _connectionProvider = provider;
             _database = new MongoDatabase(parsed.Database, ServerConnection());            
