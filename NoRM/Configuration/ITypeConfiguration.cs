@@ -1,8 +1,9 @@
-﻿using System;
-using System.Linq.Expressions;
-
+﻿
 namespace NoRM.Configuration
 {
+    /// <summary>
+    /// Defines a type's collection name and connection string.
+    /// </summary>
     public interface ITypeConfiguration
     {
         /// <summary>
@@ -15,15 +16,5 @@ namespace NoRM.Configuration
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
         void UseConnectionString(string connectionString);
-    }
-
-    public interface ITypeConfiguration<T> : ITypeConfiguration
-    {
-        /// <summary>
-        /// Looks up property names for use with aliases.
-        /// </summary>
-        /// <param name="sourcePropery">The source propery.</param>
-        /// <returns></returns>
-        IPropertyMappingExpression ForProperty(Expression<Func<T, object>> sourcePropery);
     }
 }

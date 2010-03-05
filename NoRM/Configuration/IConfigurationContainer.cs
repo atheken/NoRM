@@ -2,15 +2,10 @@
 namespace NoRM.Configuration
 {
     /// <summary>
-    /// Outlines methods for accessing configuration containers
+    /// Defines access for configuration containers
     /// </summary>
     public interface IConfigurationContainer : IMongoConfigurationMap
     {
-        /// <summary>
-        /// Registers a mongo type map.
-        /// </summary>
-        /// <param name="configurationMap">The configuration map.</param>
-        //void AddMap(IMongoConfigurationMap configurationMap);
         /// <summary>
         /// Registers a mongo type map implicitly.
         /// </summary>

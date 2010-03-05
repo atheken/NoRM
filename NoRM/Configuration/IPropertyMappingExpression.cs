@@ -1,6 +1,9 @@
 ﻿
 namespace NoRM.Configuration
 {
+    /// <summary>
+    /// Defines a property mapping expression
+    /// </summary>
     public interface IPropertyMappingExpression : IHideObjectMembers
     {
         /// <summary>

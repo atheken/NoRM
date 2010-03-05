@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace NoRM.Configuration
 {
+    /// <summary>
+    /// Defines a configuration map
+    /// </summary>
     public interface IMongoConfigurationMap : IHideObjectMembers
     {
         /// <summary>

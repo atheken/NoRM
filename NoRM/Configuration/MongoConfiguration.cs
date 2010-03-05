@@ -3,6 +3,9 @@ using System;
 
 namespace NoRM.Configuration
 {
+    /// <summary>
+    /// Responsible for Mongo type configuration 
+    /// </summary>
     public static class MongoConfiguration
     {
         private static readonly object _objectLock = new object();

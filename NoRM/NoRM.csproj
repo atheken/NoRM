@@ -87,6 +87,7 @@
     <Compile Include="Configuration\IMongoConfigurationMap.cs" />
     <Compile Include="Configuration\IPropertyMappingExpression.cs" />
     <Compile Include="Configuration\ITypeConfiguration.cs" />
+    <Compile Include="Configuration\ITypedConfigurationGeneric.cs" />
     <Compile Include="Configuration\MongoConfiguration.cs" />
     <Compile Include="Configuration\MongoConfigurationMap.cs" />
     <Compile Include="Configuration\MongoConfigurationTypeMap.cs" />
