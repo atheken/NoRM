@@ -50,7 +50,9 @@ namespace NoRM.Configuration
         /// <returns>Property alias if one is configured; otherwise returns the input propertyName</returns>
         internal static string GetPropertyAlias(Type type, string propertyName)
         {
-            return _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName);
+            return _configuration != null
+                       ? _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName)
+                       : propertyName;
         }
         /// <summary>
         /// Produces the mapped connection string for the type.
@@ -59,7 +61,9 @@ namespace NoRM.Configuration
         /// <returns>Type's Collection name</returns>
         internal static string GetCollectionName(Type type)
         {
-            return _configuration.GetConfigurationMap().GetCollectionName(type);
+            return _configuration != null
+                       ? _configuration.GetConfigurationMap().GetCollectionName(type)
+                       : type.Name;
         }
         /// <summary>
         /// Gets the connection string.
@@ -68,7 +72,9 @@ namespace NoRM.Configuration
         /// <returns>The type's connection string if configured; otherwise null.</returns>
         internal static string GetConnectionString(Type type)
         {
-            return _configuration.GetConfigurationMap().GetConnectionString(type);
+            return _configuration != null
+                     ? _configuration.GetConfigurationMap().GetConnectionString(type)
+                     : null;
         }
     }
 }

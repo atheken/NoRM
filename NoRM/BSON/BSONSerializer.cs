@@ -160,7 +160,7 @@ namespace NoRM.BSON
                 case BSONTypes.ScopedCode:
                     Write((ScopedCode)value);
                     return;
-                case BSONTypes.MongoOID:                    
+                case BSONTypes.MongoOID:
                     Written(((ObjectId)value).Value.Length);
                     _writer.Write(((ObjectId)value).Value);
                     return;

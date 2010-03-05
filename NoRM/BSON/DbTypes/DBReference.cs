@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.Attributes;
 using NoRM.Configuration;
 
 namespace NoRM.BSON.DbTypes
@@ -12,23 +8,14 @@ namespace NoRM.BSON.DbTypes
     /// </summary>
     public class DBReference
     {
-        /// <summary>
-        /// indicates that the DBReference mapping has happened.
-        /// </summary>
-        private static bool? _mapped;
-
-        public DBReference()
+        static DBReference()
         {
-            if (DBReference._mapped == null)
-            {
-                //MongoConfiguration.Initialize(config => config.For<DBReference>(cfg =>
-                //{
-                //    cfg.ForProperty(h => h.Collection).UseAlias("$ref");
-                //    cfg.ForProperty(h => h.DatabaseName).UseAlias("$db");
-                //    cfg.ForProperty(h => h.ID).UseAlias("$id");
-                //}));
-                DBReference._mapped = true;
-            }
+            MongoConfiguration.Initialize(c => c.For<DBReference>(dbr =>
+                                                                      {
+                                                                          dbr.ForProperty(d => d.Collection).UseAlias("$ref");
+                                                                          dbr.ForProperty(d => d.DatabaseName).UseAlias("$db");
+                                                                          dbr.ForProperty(d => d.ID).UseAlias("$id");
+                                                                      }));
         }
 
         /// <summary>
@@ -39,7 +26,7 @@ namespace NoRM.BSON.DbTypes
         /// <summary>
         /// The ID of the referenced object.
         /// </summary>
-        public object ID { get; set; }
+        public ObjectId ID { get; set; }
 
         /// <summary>
         /// The name of the db where the reference is stored.
@@ -53,7 +40,7 @@ namespace NoRM.BSON.DbTypes
         /// <remarks>
         /// This is not quite right yet....
         /// </remarks>
-        /// <typeparam name="U"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <param name="connection"></param>
         /// <returns></returns>
         public virtual T FollowReference<T>(Mongo connection) where T : class, new()
