@@ -59,7 +59,6 @@
             }
         }
 
-
         protected static byte[] DecodeHex(string val)
         {
             var chars = val.ToCharArray();
@@ -71,6 +70,10 @@
                 bytes[i/2] = Convert.ToByte(new string(chars, i, 2), 16);
             }
             return bytes;
+        }
+        public override string ToString()
+        {
+            return BitConverter.ToString(Value).Replace("-", "").ToLower();
         }
     }
 }
