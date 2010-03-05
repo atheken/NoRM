@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace NoRM
 {
@@ -18,38 +18,45 @@ namespace NoRM
             get { return _database; }
         }
 
-        public IConnectionProvider ConnectionProvider {
-            get {
+        public IConnectionProvider ConnectionProvider
+        {
+            get
+            {
                 return _connectionProvider;
             }
         }
-        public static Mongo ParseConnection(string connectionString) {
+        public static Mongo ParseConnection(string connectionString)
+        {
             return ParseConnection(connectionString, "");
         }
-        public static Mongo ParseConnection(string connectionString, string options) {
+        public static Mongo ParseConnection(string connectionString, string options)
+        {
 
-            return new Mongo(ConnectionProviderFactory.Create(connectionString),options);
+            return new Mongo(ConnectionProviderFactory.Create(connectionString), options);
 
         }
-        public Mongo(IConnectionProvider provider, string options) {
-            var parsed = provider.ConnectionString;           
+        public Mongo(IConnectionProvider provider, string options)
+        {
+            var parsed = provider.ConnectionString;
             _options = options;
             _connectionProvider = provider;
-            _database = new MongoDatabase(parsed.Database, ServerConnection());            
+            _database = new MongoDatabase(parsed.Database, ServerConnection());
         }
         public Mongo() : this("", "127.0.0.1", "27017", "") { }
-        public Mongo(string db) : this(db,"127.0.0.1","27017", "") { }
-        public Mongo(string db, string server) : this(db,server,"27017","") { }
-        public Mongo(string db, string server, string port) : this(db,server,port, "") { }
-        public Mongo(string db, string server, string port, string options) {
+        public Mongo(string db) : this(db, "127.0.0.1", "27017", "") { }
+        public Mongo(string db, string server) : this(db, server, "27017", "") { }
+        public Mongo(string db, string server, string port) : this(db, server, port, "") { }
+        public Mongo(string db, string server, string port, string options)
+        {
 
-            if (string.IsNullOrEmpty(options)) {
+            if (string.IsNullOrEmpty(options))
+            {
                 options = "strict=false";
             }
             var cstring = string.Format("mongodb://{0}:{1}/", server, port); ;
             _options = options;
             _connectionProvider = ConnectionProviderFactory.Create(cstring);
-            
+
             _database = new MongoDatabase(db, ServerConnection());
 
         }
@@ -77,7 +84,7 @@ namespace NoRM
         {
             return new MapReduce(_database);
         }
-       
+
         public LastErrorResponse LastError()
         {
             return _database.GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });
@@ -87,7 +94,7 @@ namespace NoRM
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-        }        
+        }
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed && disposing && _connection != null)

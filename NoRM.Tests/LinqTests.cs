@@ -133,10 +133,10 @@
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2)});
+session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
+session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
+session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
+session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2)});
                 var products = session.Products.Where(x => x.Available > DateTime.Now.AddDays(1)).ToList();
                 Assert.Equal(1, products.Count);
             }

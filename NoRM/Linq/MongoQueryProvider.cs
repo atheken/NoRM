@@ -8,7 +8,7 @@ using NoRM.BSON;
 namespace NoRM.Linq {
     public class MapReduceResult {
         public int Id { get; set; }
-        public int Value { get; set; }
+        public object Value { get; set; }
     }
     public class MongoQueryProvider : IQueryProvider {
 
