@@ -58,6 +58,17 @@
             get { return new MongoQuery<Product>(_provider); }
         }
 
+        public T MapReduce<T>(string map, string reduce) {
+            T result = default(T);
+            using (var mr = _provider.Server.CreateMapReduce()) {
+                var response = mr.Execute(new MapReduceOptions(typeof(T).Name) { Map = map, Reduce = reduce });
+                var coll = response.GetCollection<MapReduceResult>();
+                var r = coll.Find().FirstOrDefault();
+                result = (T)r.Value;
+            }
+            return result;
+        }
+
         public void Add<T>(T item) where T : class, new()
         {
             _provider.DB.GetCollection<T>().Insert(item);
