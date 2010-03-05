@@ -6,9 +6,9 @@ using System.Reflection;
 using NoRM.BSON;
 
 namespace NoRM.Linq {
-    public class MapReduceResult {
+    public class MapReduceResult<T> {
         public int Id { get; set; }
-        public object Value { get; set; }
+        public T Value { get; set; }
     }
     public class MongoQueryProvider : IQueryProvider {
 
@@ -197,19 +197,19 @@ namespace NoRM.Linq {
                     break;
                 case "Sum":
                     reduce = "function(key, values){var sum = 0;for(var i in values){ sum+=values[i];} return sum;}";
-                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
                     break;
                 case "Average":
                     reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){sum += values[i]} return sum/values.length;}";
-                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
                     break;
                 case "Min":
                     reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least > values[i]){least=values[i];}} return least;}";
-                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
                     break;
                 case "Max":
                     reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least < values[i]){least=values[i];}} return least;}";
-                    result = ExecuteMR(fly.TypeName, averyMap, reduce);
+                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
                     break;
                 default:
                     break;
@@ -226,11 +226,11 @@ namespace NoRM.Linq {
         /// <param name="map"></param>
         /// <param name="reduce"></param>
         /// <returns></returns>
-        object ExecuteMR(string typeName,string map, string reduce) {
-            object result = null;
+        T ExecuteMR<T>(string typeName,string map, string reduce) {
+            T result;
             using (var mr = this.Server.CreateMapReduce()) {
                 var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce });
-                var coll = response.GetCollection<MapReduceResult>();
+                var coll = response.GetCollection<MapReduceResult<T>>();
                 var r = coll.Find().FirstOrDefault();
                 result = r.Value;
             }

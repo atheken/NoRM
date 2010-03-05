@@ -85,9 +85,9 @@ namespace NoRM.Tests
             using (MapReduce mr = _provider.Server.CreateMapReduce())
             {
                 MapReduceResponse response = mr.Execute(new MapReduceOptions(typeof (T).Name) {Map = map, Reduce = reduce});
-                MongoCollection<MapReduceResult> coll = response.GetCollection<MapReduceResult>();
-                MapReduceResult r = coll.Find().FirstOrDefault();
-                result = (T) r.Value;
+                MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
+                MapReduceResult<T> r = coll.Find().FirstOrDefault();
+                result = r.Value;
             }
             return result;
         }
