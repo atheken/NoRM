@@ -15,7 +15,7 @@ namespace NoRM.Tests
             using (var session = new Session())
             {
                 session.Drop<Product>();
-                session.Drop<Order>();
+                session.Drop<Cart>();
             }
         }
 
@@ -39,20 +39,22 @@ namespace NoRM.Tests
                                 {
                                     Id = ObjectId.NewObjectId(),
                                     Name = "FullCart",
-                                    Order = new Order{ ProductOrdered = productReference }
+                                    ProductsOrdered = new[] { productReference }
                                 });
             }
 
-            //var server = Mongo.ParseConnection("mongodb://localhost/test");
-            //var collection = server.GetCollection<Cart>();
 
-            // TODO: This should return a product
-            //var query = new Flyweight(); 
-            //query["$where"] = " function(){return this.Order.ProductOrdered.fetch();} ";
+            var server = Mongo.ParseConnection("mongodb://localhost/test");
+            var cart = server.GetCollection<Cart>().Find().First();
+            var product = cart.ProductsOrdered[0].Fetch(() => GetReferenceCollection());
+                
+            Assert.Equal(id.Value, product.Id.Value);
+        }
 
-            // TODO: Not sure this makes sense.
-            var product = new DBReference{ID = id}.FollowReference<Product>(Mongo.ParseConnection("mongodb://localhost/test"));
-            Assert.Equal(id, product.Id);
+        internal MongoCollection<Product> GetReferenceCollection()
+        {
+            var server = Mongo.ParseConnection("mongodb://localhost/test");
+            return server.GetCollection<Product>();
         }
 
         internal class Cart
@@ -64,19 +66,19 @@ namespace NoRM.Tests
 
             public string Name { get; set; }
             public ObjectId Id { get; set; }
-            public Order Order { get; set; }
+            public DBReference[] ProductsOrdered { get; set; }
         }
 
-        public class Order
-        {
-            public Order()
-            {
-                Id = ObjectId.NewObjectId();
-            }
+        //public class Order
+        //{
+        //    public Order()
+        //    {
+        //        Id = ObjectId.NewObjectId();
+        //    }
 
-            public ObjectId Id{get;set;}
-            public int Quantity { get; set; }
-            public DBReference ProductOrdered { get; set; }
-        }
+        //    public ObjectId Id{get;set;}
+        //    public int Quantity { get; set; }
+        //    public DBReference ProductOrdered { get; set; }
+        //}
     }
 }
