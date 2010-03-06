@@ -6,7 +6,7 @@ namespace NoRM.BSON.DbTypes
     /// <summary>
     /// A DB-pointer to another document.
     /// </summary>
-    public class DBReference
+    public class DBReference : ObjectId
     {
         static DBReference()
         {
@@ -32,7 +32,6 @@ namespace NoRM.BSON.DbTypes
         /// The name of the db where the reference is stored.
         /// </summary>
         public String DatabaseName { get; set; }
-
 
         /// <summary>
         /// Pulls the document using the connection specified.

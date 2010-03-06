@@ -94,7 +94,8 @@ namespace NoRM.BSON
             {
                 var name = property == idProperty 
                     ? "_id"
-                    : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
+                    :   MongoConfiguration.GetPropertyAlias(documentType, property.Name);
+
                 var value = property.Getter(document);
                 if (value == null && property.IgnoreIfNull)
                 {
