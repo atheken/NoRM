@@ -28,7 +28,7 @@
             get { return new ObjectId("000000000000000000000000"); }
         }
 
- /// <summary>
+    /// <summary>
         /// Generates a new unique oid for use with MongoDB Objects.
         /// </summary>
         /// <returns></returns>
@@ -80,8 +80,31 @@
         public override bool Equals(object o)
         {
             var other = o as ObjectId;
+            return Equals(other);
+        }
+        public bool Equals(ObjectId other)
+        {
             return other != null && ToString() == other.ToString();
         }
+
+        public static bool operator ==(ObjectId a, ObjectId b)
+        {
+            if (ReferenceEquals(a, b))
+            {
+                return true;
+            }
+            if (((object)a == null) || ((object)b == null))
+            {
+                return false;
+            }
+
+            return a.Equals(b);
+        }
+        public static bool operator !=(ObjectId a, ObjectId b)
+        {
+            return !(a == b);
+        }
+
 
         public override int GetHashCode()
         {

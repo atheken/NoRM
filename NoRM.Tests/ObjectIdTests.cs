@@ -48,6 +48,7 @@ namespace NoRM.Tests
             var a = new ObjectId("4b883faad657000000002665");
             var b = new ObjectId("4b883faad657000000002665");
             Assert.Equal(a, b);
+            Assert.True(a == b);
         }
         [Fact]
         public void ObjectIdWithDifferentValuesAreNotEqual()
@@ -55,6 +56,7 @@ namespace NoRM.Tests
             var a = new ObjectId("4b883faad657000000002665");
             var b = new ObjectId("4b883faad657000000002666");
             Assert.NotEqual(a, b);
+            Assert.True(a != b);
         }
     }
 }
