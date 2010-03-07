@@ -101,7 +101,7 @@ namespace NoRM.Tests
                     {
                         Id = ObjectId.NewObjectId(),
                         Name = "Cart1",
-                        Product = new Product{ Name="SomeProduct" }
+                        Product = new Product { Name = "SomeProduct" }
                     }
                 });
 
@@ -128,6 +128,43 @@ namespace NoRM.Tests
             }
         }
 
+        [Fact]
+        public void AreQueriesFullyLinqified()
+        {
+            MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
+            using (var shoppers = new Shoppers(new MongoQueryProvider("test", "localhost", "27017", "")))
+            {
+                shoppers.Drop<Shopper>();
+                shoppers.Add(new Shopper
+                {
+                    Id = ObjectId.NewObjectId(),
+                    Name = "John",
+                    Cart = new Cart
+                    {
+                        Id = ObjectId.NewObjectId(),
+                        Name = "Cart1",
+                        CartSuppliers = new[] { new Supplier { Name = "Supplier1" }, new Supplier { Name = "Supplier2" } }
+                    }
+                });
+
+                shoppers.Add(new Shopper
+                {
+                    Id = ObjectId.NewObjectId(),
+                    Name = "Jane",
+                    Cart = new Cart
+                    {
+                        Id = ObjectId.NewObjectId(),
+                        Name = "Cart2",
+                        CartSuppliers = new[] { new Supplier { Name = "Supplier3" }, new Supplier { Name = "Supplier4" } }
+                    }
+                });
+
+                // Dies a miserable death when the translator splits this query by "." leaving
+                // no way to deal with an argument called "First()"
+                var tooDeep = shoppers.Where(x => x.Cart.CartSuppliers.First().Name == "Supplier1").ToList();
+            }
+        }
+
         public class ShopperMap : MongoConfigurationMap
         {
             public ShopperMap()
@@ -140,13 +177,13 @@ namespace NoRM.Tests
                 });
 
                 For<Cart>(c =>
-                              {
-                                  c.UseCollectionNamed("ListOfCarts");
-                                  c.ForProperty(cart => cart.Product).UseAlias("ProductsGoHere");
-                                  c.ForProperty(ca => ca.Name).UseAlias("ThisCartName");
-                              });
+                {
+                    c.UseCollectionNamed("ListOfCarts");
+                    c.ForProperty(cart => cart.Product).UseAlias("ProductsGoHere");
+                    c.ForProperty(ca => ca.Name).UseAlias("ThisCartName");
+                });
 
-                For<Product>(c => c.ForProperty(p => p.Price).UseAlias("DiscountPrice") );
+                For<Product>(c => c.ForProperty(p => p.Price).UseAlias("DiscountPrice"));
             }
         }
 
@@ -171,13 +208,15 @@ namespace NoRM.Tests
             public string Name { get; set; }
             public ObjectId Id { get; set; }
             public Product Product { get; set; }
+            public Supplier[] CartSuppliers { get; set; }
         }
 
         internal class Shoppers : MongoQuery<Shopper>, IDisposable
         {
             private readonly MongoQueryProvider _provider;
 
-            public Shoppers(MongoQueryProvider provider) : base(provider)
+            public Shoppers(MongoQueryProvider provider)
+                : base(provider)
             {
                 _provider = provider;
             }
@@ -215,7 +254,7 @@ namespace NoRM.Tests
 
             public void Drop<T>()
             {
-                _provider.DB.DropCollection(MongoConfiguration.GetCollectionName(typeof (T)));
+                _provider.DB.DropCollection(MongoConfiguration.GetCollectionName(typeof(T)));
             }
 
             #region IDisposable Members
