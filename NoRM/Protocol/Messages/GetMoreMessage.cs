@@ -34,18 +34,15 @@ namespace NoRM.Protocol.Messages
             requestBytes.Add(BitConverter.GetBytes(this._cursorID));
             int size = requestBytes.Sum(h => h.Length);
             requestBytes[0] = BitConverter.GetBytes(size);
-            
-            
-            _connection.GetStream().Write(requestBytes.SelectMany(h => h).ToArray(), 0, size);
+
+
+            _connection.Write(requestBytes.SelectMany(y => y).ToArray(), 0, size);
 
             var stream = _connection.GetStream();
-
             // so, the server can accepted the query,
             // now we do the second part.
-            int timeout = this._connection.QueryTimeout;
-            while (!stream.DataAvailable && timeout > 0)
-            {
-                timeout--;
+            while (!stream.DataAvailable)
+            {                
                 Thread.Sleep(1000);
             }
 

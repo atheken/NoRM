@@ -128,17 +128,14 @@ namespace NoRM.Protocol.Messages
             messageBytes[0] = BitConverter.GetBytes(size);
 
 
-            var conn = _connection;            
-            conn.GetStream().Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
-
+            var conn = _connection;
+            conn.Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
+            
             //so, the server can accepted the query, now we do the second part.
-            int timeout = conn.QueryTimeout * 1000;
-
+            
             var stream = conn.GetStream();
-
-            while (!stream.DataAvailable && timeout > 0)
-            {
-                timeout--;
+            while (!stream.DataAvailable)
+            {                
                 Thread.Sleep(1);
             }
 

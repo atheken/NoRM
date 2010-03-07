@@ -36,8 +36,7 @@ namespace NoRM.Protocol.Messages
             int size = bytes.Sum(j => j.Length);
             bytes[0] = BitConverter.GetBytes(size);
 
-            _connection.GetStream().Write(bytes.SelectMany(y => y).ToArray(), 0, size);
-            
+            _connection.Write(bytes.SelectMany(y => y).ToArray(), 0, size);            
         }
     }
 }

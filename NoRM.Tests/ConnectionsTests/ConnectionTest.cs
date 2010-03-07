@@ -39,6 +39,15 @@ namespace NoRM.Tests
             }
         }
         [Fact]
+        public void ThrowsExceptionWhenTryingToOverrideLifetime()
+        {
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString())))
+            {
+                var ex = Assert.Throws<MongoException>(() => connection.LoadOptions("lifetime=23"));
+                Assert.Equal("Lifetime cannot be provided as an override option", ex.Message);
+            }
+        }
+        [Fact]
         public void OverridesStrictMode()
         {
             using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("?strict=true"))))
