@@ -340,6 +340,7 @@ namespace NoRM
         public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName) {
             var qm = new QueryMessage<T, U>(this._connection, fullyQualifiedName);
             qm.NumberToTake = limit;
+            qm.NumberToSkip = skip;
             qm.Query = template;
             var reply = qm.Execute();
 

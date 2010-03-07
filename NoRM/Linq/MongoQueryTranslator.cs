@@ -118,7 +118,7 @@ namespace NoRM.Linq {
                 return;
             }
             
-            if (lastFlyProperty != " == ") {
+            if (lastOperator != " == ") {
                 //Can't do comparisons here unless the type is a double
                 //which is a limitation of mongo, apparently
                 //and won't work if we're doing date comparisons
@@ -154,6 +154,14 @@ namespace NoRM.Linq {
             if (q != null) {
                 //set the collection name
                 fly.TypeName = q.ElementType.Name;
+                
+                //this is our Query wrapper - see if it has an expression
+                var qry = (IMongoQuery)c.Value;
+                var innerExpression = qry.GetExpression();
+                if (innerExpression.NodeType == ExpressionType.Call) {
+                    VisitMethodCall(innerExpression as MethodCallExpression);
+                }
+
             } else if (c.Value == null) {
                 sb.Append("NULL");
             } else {
@@ -274,23 +282,44 @@ namespace NoRM.Linq {
                 "Average",
                 "Min",
                 "Max",
-                "Any"
+                "Any",
+                "Take",
+                "Skip"
 
             };
             return acceptableMethods.Any(x=>x==methodName);
         }
+
+        void HandleSkip(Expression exp) {
+            fly["$skip"] = (int)exp.GetConstantValue();
+        }
+
+        void HandleTake(Expression exp) {
+            fly["$limit"] = (int)exp.GetConstantValue();
+        }
         Expression HandleMethodCall(MethodCallExpression m) {
-            fly.Limit = 1;
-            fly.MethodCall = m.Method.Name;
-            if (m.Arguments.Count > 1) {
-                LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                if (lambda != null) {
-                    this.Visit(lambda.Body);
+
+            if (m.Method.Name == "Skip") {
+                HandleSkip(m.Arguments[1]);
+                //see if there's a take
+                return m;
+            } else if (m.Method.Name == "Take") {
+                HandleTake(m.Arguments[1]);
+                Visit(m.Arguments[0]);
+                return m;
+            } else {
+                fly.Limit = 1;
+                fly.MethodCall = m.Method.Name;
+                if (m.Arguments.Count > 1) {
+                    LambdaExpression lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                    if (lambda != null) {
+                        this.Visit(lambda.Body);
+                    } else {
+                        this.Visit(m.Arguments[0]);
+                    }
                 } else {
                     this.Visit(m.Arguments[0]);
                 }
-            } else {
-                this.Visit(m.Arguments[0]);
             }
             return m;
         }

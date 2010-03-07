@@ -133,10 +133,10 @@
         {
             using (var session = new Session())
             {
-session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
-session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
-session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
-session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2)});
+                session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
+                session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
+                session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
+                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2)});
                 var products = session.Products.Where(x => x.Available > DateTime.Now.AddDays(1)).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -331,6 +331,19 @@ session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.A
                 Assert.Equal(2, products.Count);
             }
         }
+
+        [Fact]
+        public void LastTwoProductsofThreeShouldBeReturnedWithSkipTake() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Skip(1).Take(2).ToList();
+                Assert.Equal(22.0, products[0].Price);
+                Assert.Equal(33.0, products[1].Price);
+            }
+        }
+
 
     }
 }
