@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using NoRM.Attributes;
 using System.Linq.Expressions;
@@ -131,6 +132,11 @@ namespace NoRM.BSON
             }
 
             return null;
+        }
+
+        public static PropertyInfo FindProperty(Type type, string name)
+        {
+            return type.GetProperties().Where(p => p.Name == name).First();
         }
     }
 

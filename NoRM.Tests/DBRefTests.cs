@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Linq;
+using NoRM.Attributes;
 using NoRM.BSON;
 using NoRM.BSON.DbTypes;
 using NoRM.Configuration;
+using NoRM.Linq;
+using NoRM.Responses;
 using Xunit;
 
 
@@ -15,7 +18,7 @@ namespace NoRM.Tests
             using (var session = new Session())
             {
                 session.Drop<Product>();
-                session.Drop<Cart>();
+                session.Drop<ProductReference>();
             }
         }
 
@@ -26,16 +29,16 @@ namespace NoRM.Tests
 
             using (var session = new Session())
             {
-                session.Add(new Product {Id = id, Name = "RefProduct"});
+                session.Add(new Product { Id = id, Name = "RefProduct" });
 
                 var productReference = new DBReference
                                            {
-                                               Collection = MongoConfiguration.GetCollectionName(typeof (Product)),
+                                               Collection = MongoConfiguration.GetCollectionName(typeof(Product)),
                                                DatabaseName = "test",
                                                ID = id,
                                            };
 
-                session.Add(new Cart
+                session.Add(new ProductReference
                                 {
                                     Id = ObjectId.NewObjectId(),
                                     Name = "FullCart",
@@ -45,9 +48,9 @@ namespace NoRM.Tests
 
 
             var server = Mongo.ParseConnection("mongodb://localhost/test");
-            var cart = server.GetCollection<Cart>().Find().First();
-            var product = cart.ProductsOrdered[0].Fetch(() => GetReferenceCollection());
-                
+            var reference = server.GetCollection<ProductReference>().Find().First();
+            var product = reference.ProductsOrdered[0].Fetch(() => GetReferenceCollection());
+
             Assert.Equal(id.Value, product.Id.Value);
         }
 
@@ -57,28 +60,15 @@ namespace NoRM.Tests
             return server.GetCollection<Product>();
         }
 
-        internal class Cart
+        public class ProductReference
         {
-            public Cart()
+            public ProductReference()
             {
-                Id = ObjectId.NewObjectId();                
+                Id = ObjectId.NewObjectId();
             }
-
-            public string Name { get; set; }
             public ObjectId Id { get; set; }
+            public string Name { get; set; }
             public DBReference[] ProductsOrdered { get; set; }
         }
-
-        //public class Order
-        //{
-        //    public Order()
-        //    {
-        //        Id = ObjectId.NewObjectId();
-        //    }
-
-        //    public ObjectId Id{get;set;}
-        //    public int Quantity { get; set; }
-        //    public DBReference ProductOrdered { get; set; }
-        //}
     }
 }
