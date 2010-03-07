@@ -42,5 +42,19 @@ namespace NoRM.Tests
             Assert.Equal(true, ObjectId.TryParse("1234567890abCDEf123456ab", out objectId));
             Assert.NotEqual(ObjectId.Empty, objectId);
         }
+        [Fact]
+        public void ObjectIdWithSameValueAreEqual()
+        {
+            var a = new ObjectId("4b883faad657000000002665");
+            var b = new ObjectId("4b883faad657000000002665");
+            Assert.Equal(a, b);
+        }
+        [Fact]
+        public void ObjectIdWithDifferentValuesAreNotEqual()
+        {
+            var a = new ObjectId("4b883faad657000000002665");
+            var b = new ObjectId("4b883faad657000000002666");
+            Assert.NotEqual(a, b);
+        }
     }
 }
