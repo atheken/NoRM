@@ -61,6 +61,8 @@
     <Compile Include="ConnectionsTests\PooledConnectionProviderTests.cs" />
     <Compile Include="ConnectionsTests\QueuedConnectionProviderTests.cs" />
     <Compile Include="DBRefTests.cs" />
+	<Compile Include="QueryTests.cs" />
+    <Compile Include="UpdateTests.cs" />
     <Compile Include="LinqAggregates.cs" />
     <Compile Include="LinqDeepGraph.cs" />
     <Compile Include="LinqTests.cs" />
