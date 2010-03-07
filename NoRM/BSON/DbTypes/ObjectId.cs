@@ -5,17 +5,19 @@
 
     public class ObjectId
     {
-        public ObjectId()
+        private byte[] _value;
+        private string _string;
+
+        public byte[] Value
         {
+            get { return _value; }
         }
 
-        public ObjectId(string value)
-        {
-            Value = DecodeHex(value);
-        }
+        public ObjectId(){}
+        public ObjectId(string value) : this(DecodeHex(value)){}        
         internal ObjectId(byte[] value)
         {
-            Value = value;
+            _value = value;
         }
 
         /// <summary>
@@ -23,22 +25,17 @@
         /// </summary>
         public static ObjectId Empty
         {
-            get { return new ObjectId(); }
+            get { return new ObjectId("000000000000000000000000"); }
         }
 
-        /// <summary>
-        /// A 12-byte unique identifier.
-        /// </summary>
-        public byte[] Value { get; set; }
-
-        /// <summary>
+    /// <summary>
         /// Generates a new unique oid for use with MongoDB Objects.
         /// </summary>
         /// <returns></returns>
         public static ObjectId NewObjectId()
         {
             //TODO: generate random-ish bits.
-            return new ObjectId {Value = ObjectIdGenerator.Generate()};            
+            return new ObjectId { _value = ObjectIdGenerator.Generate() };            
         }
 
         public static bool TryParse(string value, out ObjectId id)
@@ -73,7 +70,45 @@
         }
         public override string ToString()
         {
-            return BitConverter.ToString(Value).Replace("-", "").ToLower();
+            if (_string == null && _value != null)
+            {
+                _string = BitConverter.ToString(_value).Replace("-", string.Empty).ToLower();
+            }
+            return _string;
+        }
+
+        public override bool Equals(object o)
+        {
+            var other = o as ObjectId;
+            return Equals(other);
+        }
+        public bool Equals(ObjectId other)
+        {
+            return other != null && ToString() == other.ToString();
+        }
+
+        public static bool operator ==(ObjectId a, ObjectId b)
+        {
+            if (ReferenceEquals(a, b))
+            {
+                return true;
+            }
+            if (((object)a == null) || ((object)b == null))
+            {
+                return false;
+            }
+
+            return a.Equals(b);
+        }
+        public static bool operator !=(ObjectId a, ObjectId b)
+        {
+            return !(a == b);
+        }
+
+
+        public override int GetHashCode()
+        {
+            return (_value != null ? ToString().GetHashCode() : 0);
         }
     }
 }

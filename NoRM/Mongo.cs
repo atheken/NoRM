@@ -31,7 +31,6 @@ namespace NoRM
         }
         public static Mongo ParseConnection(string connectionString, string options)
         {
-
             return new Mongo(ConnectionProviderFactory.Create(connectionString), options);
 
         }

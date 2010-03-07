@@ -48,8 +48,8 @@ namespace NoRM.Protocol.Messages
             var size = message.Sum(y=>y.Length);
             message[0] = BitConverter.GetBytes(size);
 
-            //write update to server.
-            _connection.GetStream().Write(message.SelectMany(h => h).ToArray(), 0, size);
-            }
+            //write update to server.            
+            _connection.Write(message.SelectMany(h => h).ToArray(), 0, size);
+         }
     }
 }

@@ -43,9 +43,8 @@ namespace NoRM.Protocol.Messages
             message[0] = BitConverter.GetBytes(size);
 
             var bytes = message.SelectMany(y => y).ToArray();
-            var stream = _connection.GetStream();
-            stream.Write(bytes, 0, size);
-
+            _connection.Write(bytes, 0, size);
+            
             if (_connection.StrictMode)
             {
                 AssertHasNotError();

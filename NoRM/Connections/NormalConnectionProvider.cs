@@ -22,7 +22,7 @@ namespace NoRM
         {
             if (connection.Client.Connected)
             {
-                connection.Client.Close();
+                connection.Dispose();
             }
         }
     }

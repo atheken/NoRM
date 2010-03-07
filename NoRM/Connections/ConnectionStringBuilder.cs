@@ -16,6 +16,7 @@ namespace NoRM
                   {"pooling", (v, b) => b.SetPooled(bool.Parse(v))},
                   {"poolsize", (v, b) => b.SetPoolSize(int.Parse(v))},
                   {"timeout", (v, b) => b.SetTimeout(int.Parse(v))},
+                  {"lifetime", (v, b) => b.SetLifetime(int.Parse(v))},
               };            
         private const int DEFAULT_PORT = 27017;
         private const string DEFAULT_DATABASE = "admin";
@@ -35,6 +36,7 @@ namespace NoRM
         public bool Pooled{ get; private set;}   
         public int PoolSize{ get; private set;}
         public int Timeout { get; private set; }
+        public int Lifetime { get; private set; }
         
         private ConnectionStringBuilder(){}
         
@@ -176,6 +178,11 @@ namespace NoRM
         public void SetTimeout(int timeout)
         {
             Timeout = timeout;
+        }
+
+        public void SetLifetime(int lifetime)
+        {
+            Lifetime = lifetime;
         }
     }
 }
