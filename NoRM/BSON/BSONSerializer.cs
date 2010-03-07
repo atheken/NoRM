@@ -94,7 +94,8 @@ namespace NoRM.BSON
             {
                 var name = property == idProperty 
                     ? "_id"
-                    : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
+                    :   MongoConfiguration.GetPropertyAlias(documentType, property.Name);
+
                 var value = property.Getter(document);
                 if (value == null && property.IgnoreIfNull)
                 {
@@ -160,7 +161,7 @@ namespace NoRM.BSON
                 case BSONTypes.ScopedCode:
                     Write((ScopedCode)value);
                     return;
-                case BSONTypes.MongoOID:                    
+                case BSONTypes.MongoOID:
                     Written(((ObjectId)value).Value.Length);
                     _writer.Write(((ObjectId)value).Value);
                     return;

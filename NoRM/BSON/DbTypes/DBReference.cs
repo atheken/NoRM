@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.Attributes;
 using NoRM.Configuration;
 
 namespace NoRM.BSON.DbTypes
@@ -10,25 +6,16 @@ namespace NoRM.BSON.DbTypes
     /// <summary>
     /// A DB-pointer to another document.
     /// </summary>
-    public class DBReference
+    public class DBReference : ObjectId
     {
-        /// <summary>
-        /// indicates that the DBReference mapping has happened.
-        /// </summary>
-        private static bool? _mapped;
-
-        public DBReference()
+        static DBReference()
         {
-            if (DBReference._mapped == null)
-            {
-                //MongoConfiguration.Initialize(config => config.For<DBReference>(cfg =>
-                //{
-                //    cfg.ForProperty(h => h.Collection).UseAlias("$ref");
-                //    cfg.ForProperty(h => h.DatabaseName).UseAlias("$db");
-                //    cfg.ForProperty(h => h.ID).UseAlias("$id");
-                //}));
-                DBReference._mapped = true;
-            }
+            MongoConfiguration.Initialize(c => c.For<DBReference>(dbr =>
+                                                                      {
+                                                                          dbr.ForProperty(d => d.Collection).UseAlias("$ref");
+                                                                          dbr.ForProperty(d => d.DatabaseName).UseAlias("$db");
+                                                                          dbr.ForProperty(d => d.ID).UseAlias("$id");
+                                                                      }));
         }
 
         /// <summary>
@@ -39,28 +26,37 @@ namespace NoRM.BSON.DbTypes
         /// <summary>
         /// The ID of the referenced object.
         /// </summary>
-        public object ID { get; set; }
+        public ObjectId ID { get; set; }
 
         /// <summary>
         /// The name of the db where the reference is stored.
         /// </summary>
         public String DatabaseName { get; set; }
 
-
         /// <summary>
-        /// Pulls the document using the connection specified.
+        /// Fetches the instance of type T in the collection referenced by the DBRef $id
         /// </summary>
-        /// <remarks>
-        /// This is not quite right yet....
-        /// </remarks>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="connection"></param>
-        /// <returns></returns>
-        public virtual T FollowReference<T>(Mongo connection) where T : class, new()
+        /// <typeparam name="T">Type referenced by DBRef</typeparam>
+        /// <param name="referenceCollection">The reference collection.</param>
+        /// <returns>Referenced type T</returns>
+        public T Fetch<T>(Func<MongoCollection<T>> referenceCollection) where T : class, new()
         {
-
-            return connection.GetCollection<T>().FindOne(new { _id = this.ID });
+            return referenceCollection().FindOne(new { _id = this.ID });
         }
+
+        ///// <summary>
+        ///// Pulls the document using the connection specified.
+        ///// </summary>
+        ///// <remarks>
+        ///// This is not quite right yet....
+        ///// </remarks>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="connection"></param>
+        ///// <returns></returns>
+        //public virtual T FollowReference<T>(Mongo connection) where T : class, new()
+        //{
+        //    return connection.GetCollection<T>().FindOne(new { _id = this.ID });
+        //}
     }
 
     /// <summary>
@@ -68,12 +64,12 @@ namespace NoRM.BSON.DbTypes
     /// </summary>
     /// <remarks>This is purely a convenience so that we don't have to specify
     /// the type each time FollowReference</remarks>
-    public class DBReference<U>  : DBReference where U : class, new()
-    {
-        public override U FollowReference<U>(Mongo connection)
-        {
-            return base.FollowReference<U>(connection);
-        }
+    //public class DBReference<U>  : DBReference where U : class, new()
+    //{
+    //    public override U FollowReference<U>(/*Mongo connection*/)
+    //    {
+    //        return base.FollowReference<U>(/*connection*/);
+    //    }
         
-    }
+    //}
 }

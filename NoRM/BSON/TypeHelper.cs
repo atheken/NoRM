@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using NoRM.Attributes;
 using System.Linq.Expressions;
+using NoRM.BSON.DbTypes;
 using NoRM.Configuration;
 
 namespace NoRM.BSON
@@ -48,6 +50,7 @@ namespace NoRM.BSON
         {
             return _properties.ContainsKey("$_id") ? _properties["$_id"] : null;
         }    
+        
         private static PropertyInfo IdProperty(IEnumerable<PropertyInfo> properties)
         {
             PropertyInfo foundSoFar = null;
@@ -78,9 +81,11 @@ namespace NoRM.BSON
                     continue;
                 }
 
-                var name = (property == idProperty) 
-                    ? "$_id" 
-                    : MongoConfiguration.GetPropertyAlias(property.DeclaringType, property.Name);
+                var alias = MongoConfiguration.GetPropertyAlias(property.DeclaringType, property.Name);
+
+                var name = (property == idProperty && alias != "$id")
+                               ? "$_id"
+                               : alias;
 
                 magic.Add(name, new MagicProperty(property));
             }
@@ -127,6 +132,11 @@ namespace NoRM.BSON
             }
 
             return null;
+        }
+
+        public static PropertyInfo FindProperty(Type type, string name)
+        {
+            return type.GetProperties().Where(p => p.Name == name).First();
         }
     }
 

@@ -5,58 +5,37 @@ using NoRM.BSON;
 
 namespace NoRM.Configuration
 {
-    public class MongoTypeConfiguration<T> : ITypeConfiguration<T>
+    public class MongoTypeConfiguration
     {
-        private readonly Dictionary<Type, MongoConfigurationTypeMap> _maps = new Dictionary<Type, MongoConfigurationTypeMap>();
+        private static readonly Dictionary<Type, Dictionary<string, PropertyMappingExpression>> _typeConfigurations =
+           new Dictionary<Type, Dictionary<string, PropertyMappingExpression>>();
 
-        public IPropertyMappingExpression ForProperty(Expression<Func<T, object>> sourcePropery)
+        private static readonly Dictionary<Type, string> _connectionStrings = new Dictionary<Type, string>();
+        private static readonly Dictionary<Type, string> _collectionNames = new Dictionary<Type, string>();
+
+        /// <summary>
+        /// Gets the property maps.
+        /// </summary>
+        /// <value>The property maps.</value>
+        internal static Dictionary<Type, Dictionary<string, PropertyMappingExpression>> PropertyMaps
         {
-            var typeMap = GetTypeMap();
-
-            var propertyName = TypeHelper.FindProperty(sourcePropery);
-            var expression = new PropertyMappingExpression { SourcePropertyName = propertyName };
-
-            typeMap.FieldMap.Add(propertyName, expression);
-
-            return expression;
+            get { return _typeConfigurations; }
         }
-
-        public void UseCollectionNamed(string collectionName)
+        /// <summary>
+        /// Gets the connection strings.
+        /// </summary>
+        /// <value>The connection strings.</value>
+        internal static Dictionary<Type, string> ConnectionStrings
         {
-            GetTypeMap().CollectionName = collectionName;
+            get { return _connectionStrings; }
         }
-
-        public void UseConnectionString(string connectionString)
+        /// <summary>
+        /// Gets the collection names.
+        /// </summary>
+        /// <value>The collection names.</value>
+        internal static Dictionary<Type, string> CollectionNames
         {
-            GetTypeMap().ConnectionString = connectionString;
-        }
-
-        private MongoConfigurationTypeMap GetTypeMap()
-        {
-            var mapType = typeof(T);
-
-            if (!_maps.ContainsKey(mapType))
-            {
-                _maps.Add(mapType, new MongoConfigurationTypeMap());
-            }
-
-            return _maps[mapType];
-        }
-
-        public string GetPropertyAlias(Type type, string propertyName)
-        {
-            return _maps.ContainsKey(type) && _maps[type].FieldMap.ContainsKey(propertyName)
-                ? _maps[type].FieldMap[propertyName].Alias
-                : propertyName;
-        }
-        public string GetCollectionName(Type type)
-        {
-            return _maps[type].CollectionName;
-        }
-
-        public string GetConnectionString(Type type)
-        {
-            return _maps[type].ConnectionString;
+            get { return _collectionNames; }
         }
     }
 }
