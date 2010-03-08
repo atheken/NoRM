@@ -75,6 +75,7 @@
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
     <Compile Include="MongoFixture.cs" />
+    <Compile Include="MongoOptimizationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestClasses.cs" />
   </ItemGroup>
