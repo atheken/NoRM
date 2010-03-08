@@ -90,10 +90,10 @@ namespace NoRM.Linq {
             //pass off the to the translator, which will set the query stuff
             var tranny = new MongoQueryTranslator();
             var qry = tranny.Translate(expression);
-
+            var fly = tranny.FlyWeight;
             //execute
             if (!String.IsNullOrEmpty(qry)) {
-                var fly = tranny.FlyWeight;
+               
                 if (tranny.IsComplex) {
                     //reset - need to use the where statement generated
                     //instead of the props set on the internal flyweight
@@ -101,11 +101,9 @@ namespace NoRM.Linq {
                     fly["$where"] = " function(){return " + qry + "; }";
                     
                 }
-                return collection.Find(fly);
             }
 
-            return collection.Find();
-
+            return collection.Find(fly);
         }
 
         /// <summary>

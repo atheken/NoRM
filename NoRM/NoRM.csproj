@@ -107,6 +107,7 @@
     <Compile Include="IHideSystemTypes.cs" />
     <Compile Include="IMongoCollection.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
+    <Compile Include="Linq\IMongoQuery.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
     <Compile Include="Linq\MongoQuery.cs" />
     <Compile Include="Linq\MongoQueryProvider.cs" />

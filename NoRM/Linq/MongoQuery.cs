@@ -11,7 +11,7 @@ namespace NoRM.Linq
     /// <summary>
     /// A default implementation of IQueryable for use with QueryProvider
     /// </summary>
-    public class MongoQuery<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable
+    public class MongoQuery<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable, IMongoQuery
     {
         MongoQueryProvider _provider;
         Expression _expression;
@@ -29,7 +29,9 @@ namespace NoRM.Linq
             this._collection = provider.DB.GetCollection<T>();
             this._query = new Flyweight();
         }
-
+        public Expression GetExpression() {
+            return this._expression;
+        }
         public MongoQuery(MongoQueryProvider provider)
             : this(provider, typeof(T).Name)
         {
