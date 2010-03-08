@@ -37,7 +37,7 @@ namespace NoRM
             {
                 if (_freeConnections.Count > 0)
                 {
-                    connection = _freeConnections.Dequeue();
+                    connection = _freeConnections.Dequeue();                    
                     _usedConnections.Add(connection);
                     return connection;
                 }
@@ -57,10 +57,8 @@ namespace NoRM
             {
                 _usedConnections.Add(connection);
             }
-
+            connection.LoadOptions(options);
             return connection;
-
-
         }
         public override void Close(IConnection connection)
         {
