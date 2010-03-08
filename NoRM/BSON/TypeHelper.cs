@@ -86,12 +86,7 @@ namespace NoRM.BSON
                 var name = (property == idProperty && alias != "$id")
                                ? "$_id"
                                : alias;
-
-                var magicProperty = new MagicProperty(property);
-                if (magicProperty.Setter != null)
-                {
-                    magic.Add(name, magicProperty);
-                }
+                magic.Add(name, new MagicProperty(property));
             }
             return magic;
         }

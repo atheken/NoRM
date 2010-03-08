@@ -191,12 +191,18 @@ namespace NoRM.Tests
     }
     public class ReadOnly
     {
-        public string FirstName{ get; set;}
-        public string LastName{ get; set;}
-        public string Name
+        private IList<string> _names;
+        public IList<string> Names
         {
-            get{ return string.Concat(FirstName, " ", LastName);}
-        }
+            get
+            {
+                if (_names == null)
+                {
+                    _names =new List<string>();
+                }
+                return _names;
+            }
+        }        
     }
 
     public class GeneralDTO

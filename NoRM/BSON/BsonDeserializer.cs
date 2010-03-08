@@ -76,6 +76,10 @@ namespace NoRM.BSON
         }
         private object DeserializeValue(Type type, BSONTypes storedType)
         {
+            return DeserializeValue(type, storedType, null);
+        }
+        private object DeserializeValue(Type type, BSONTypes storedType, IList container)
+        {
             if (storedType == BSONTypes.Null)
             {
                 return null;
@@ -107,7 +111,7 @@ namespace NoRM.BSON
             }
             if (_IEnumerableType.IsAssignableFrom(type))
             {
-                return ReadList(type);
+                return ReadList(type, container);
             }
             if (type == typeof(bool))
             {
@@ -123,8 +127,6 @@ namespace NoRM.BSON
                 Read(12);
                 return new ObjectId(_reader.ReadBytes(12));
             }                       
-
-
             if (type == typeof(long))
             {
                 return ReadLong(storedType);
@@ -167,8 +169,17 @@ namespace NoRM.BSON
                 {
                     NewDocument(_reader.ReadInt32());
                 }
-                var value = DeserializeValue(property.Type, storageType);
-                property.Setter(instance, value);
+                IList container = null;
+                if (property.Setter == null)
+                {
+                    var o = property.Getter(instance);
+                    container = o is IList ? (IList)o : null; 
+                }
+                var value = DeserializeValue(property.Type, storageType, container); 
+                if (container == null)
+                {
+                    property.Setter(instance, value);
+                }
                 if (IsDone())
                 {
                     break;
@@ -176,12 +187,16 @@ namespace NoRM.BSON
             }
             return instance;
         }        
-        private object ReadList(Type listType)
+        private object ReadList(Type listType, IList container)
         {
             NewDocument(_reader.ReadInt32());
-            var itemType = ListHelper.GetListItemType(listType);            
-            bool isReadonly;
-            var container = ListHelper.CreateContainer(listType, itemType, out isReadonly);            
+
+            var isReadonly = false;
+            var itemType = ListHelper.GetListItemType(listType);
+            if (container == null)
+            {
+                container = ListHelper.CreateContainer(listType, itemType, out isReadonly);
+            }
             while (!IsDone())
             {
                 var storageType = ReadType();
