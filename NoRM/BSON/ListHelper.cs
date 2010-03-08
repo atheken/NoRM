@@ -22,6 +22,22 @@ namespace NoRM.BSON
             }
             return typeof(object);
         }
+        public static Type GetDictionarKeyType(Type enumerableType)
+        {            
+            if (enumerableType.IsGenericType)
+            {
+                return enumerableType.GetGenericArguments()[0];
+            }
+            return typeof(object);
+        }
+        public static Type GetDictionarValueType(Type enumerableType)
+        {          
+            if (enumerableType.IsGenericType)
+            {
+                return enumerableType.GetGenericArguments()[1];
+            }
+            return typeof(object);
+        }
         public static Array ToArray(List<object> container, Type itemType)
         {
             var array = Array.CreateInstance(itemType, container.Count);
@@ -47,9 +63,20 @@ namespace NoRM.BSON
             {
                 isReadOnly = true;
                 return (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(listItemType));
-            }
-            
+            }            
             return new List<object>();
+        }
+        public static IDictionary CreateDictionary(Type dictionaryType, Type keyType, Type valueType)
+        {            
+            if (dictionaryType.IsInterface)
+            {
+                return (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(keyType, valueType));
+            }
+            if (dictionaryType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, new Type[0], null) != null)
+            {
+                return (IDictionary)Activator.CreateInstance(dictionaryType);
+            }     
+            return new Dictionary<object, object>();
         }
     }
 }

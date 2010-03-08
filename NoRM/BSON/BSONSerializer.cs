@@ -173,7 +173,15 @@ namespace NoRM.BSON
 
         private void Write(string name, object value)
         {
-            if (value is IEnumerable)
+            if (value is IDictionary)
+            {
+                Write(BSONTypes.Object);
+                WriteName(name);
+                NewDocument();
+                Write((IDictionary)value);
+                EndDocument(true);
+            }
+            else if (value is IEnumerable)
             {
                 Write(BSONTypes.Array);
                 WriteName(name);    
@@ -208,14 +216,19 @@ namespace NoRM.BSON
         }
         private void Write(IEnumerable enumerable)
         {
-
             var index = 0;
-            foreach(var value in enumerable)
+            foreach (var value in enumerable)
             {
                 SerializeMember(index++.ToString(), value);
             }
-            
         }
+        private void Write(IDictionary dictionary)
+        {
+            foreach (var key in dictionary.Keys)
+            {
+                SerializeMember((string)key, dictionary[key]);
+            }
+        }        
         private void WriteBinnary(object value)
         {            
             if (value is byte[])

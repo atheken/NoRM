@@ -11,7 +11,8 @@ namespace NoRM.BSON
     public class BsonDeserializer
     {
         private static readonly Type _IEnumerableType = typeof(IEnumerable);
-
+        private static readonly Type _IDictionaryType = typeof (IDictionary<,>);
+        
         private readonly static IDictionary<BSONTypes, Type> _typeMap = new Dictionary<BSONTypes, Type>
          {
              {BSONTypes.Int32, typeof(int)}, {BSONTypes.Int64, typeof (long)}, {BSONTypes.Boolean, typeof (bool)}, {BSONTypes.String, typeof (string)},
@@ -78,7 +79,7 @@ namespace NoRM.BSON
         {
             return DeserializeValue(type, storedType, null);
         }
-        private object DeserializeValue(Type type, BSONTypes storedType, IList container)
+        private object DeserializeValue(Type type, BSONTypes storedType, object container)
         {
             if (storedType == BSONTypes.Null)
             {
@@ -169,11 +170,11 @@ namespace NoRM.BSON
                 {
                     NewDocument(_reader.ReadInt32());
                 }
-                IList container = null;
+                object container = null;
                 if (property.Setter == null)
                 {
                     var o = property.Getter(instance);
-                    container = o is IList ? (IList)o : null; 
+                    container = o is IList || IsDictionary(property.Type) ? o : null;                    
                 }
                 var value = DeserializeValue(property.Type, storageType, container); 
                 if (container == null)
@@ -187,16 +188,17 @@ namespace NoRM.BSON
             }
             return instance;
         }        
-        private object ReadList(Type listType, IList container)
+        private object ReadList(Type listType, object existingContainer)
         {
-            NewDocument(_reader.ReadInt32());
+            if (IsDictionary(listType))
+            {
+                return ReadDictionary(listType, existingContainer);
+            }
 
+            NewDocument(_reader.ReadInt32());
             var isReadonly = false;
             var itemType = ListHelper.GetListItemType(listType);
-            if (container == null)
-            {
-                container = ListHelper.CreateContainer(listType, itemType, out isReadonly);
-            }
+            var container = existingContainer == null ? ListHelper.CreateContainer(listType, itemType, out isReadonly) : (IList) existingContainer;
             while (!IsDone())
             {
                 var storageType = ReadType();
@@ -216,6 +218,33 @@ namespace NoRM.BSON
             if (isReadonly)
             {
                 return listType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, new[] { container.GetType() }, null).Invoke(new object[] { container });
+            }
+            return container;
+        }
+
+        private static bool IsDictionary(Type type)
+        {
+            return type.IsGenericType && _IDictionaryType.IsAssignableFrom(type.GetGenericTypeDefinition());
+        }
+
+        private object ReadDictionary(Type listType, object existingContainer)
+        {
+            var valueType = ListHelper.GetDictionarValueType(listType);
+            var container = existingContainer == null ? 
+                ListHelper.CreateDictionary(listType, ListHelper.GetDictionarKeyType(listType), valueType) 
+                : (IDictionary) existingContainer;
+                
+            while (!IsDone())
+            {
+                var storageType = ReadType();
+                
+                var key = ReadName();
+                if (storageType == BSONTypes.Object)
+                {
+                    NewDocument(_reader.ReadInt32());
+                }
+                var value = DeserializeValue(valueType, storageType);
+                container.Add(key, value);                  
             }
             return container;
         }

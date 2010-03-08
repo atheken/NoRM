@@ -189,7 +189,7 @@ namespace NoRM.Tests
             Id = id;
         }
     }
-    public class ReadOnly
+    public class ReadOnlyList
     {
         private IList<string> _names;
         public IList<string> Names
@@ -203,6 +203,37 @@ namespace NoRM.Tests
                 return _names;
             }
         }        
+    }
+    public class DictionaryObject
+    {
+        private IDictionary<string, int> _lookup;
+        public IDictionary<string, int> Names
+        {
+            get
+            {
+                if (_lookup == null)
+                {
+                    _lookup = new Dictionary<string, int>();
+                }
+                return _lookup;
+            }
+            set{ _lookup = value;}
+        }
+    }
+    public class ReadOnlyDictionary
+    {
+        private IDictionary<string, int> _lookup;
+        public IDictionary<string, int> Names
+        {
+            get
+            {
+                if (_lookup == null)
+                {
+                    _lookup = new Dictionary<string, int>();
+                }
+                return _lookup;
+            }
+        }
     }
 
     public class GeneralDTO

@@ -332,14 +332,38 @@ namespace NoRM.Tests
         }
 
         [Fact]
-        public void SerializesReadonlyProperties()
+        public void SerializesReadonlyList()
         {
-            var start = new ReadOnly();
+            var start = new ReadOnlyList();
             start.Names.Add("Duncan Idaho");
             var bytes = BsonSerializer.Serialize(start);
-            var end = BsonDeserializer.Deserialize<ReadOnly>(bytes);
+            var end = BsonDeserializer.Deserialize<ReadOnlyList>(bytes);
             Assert.Equal(1, end.Names.Count);
             Assert.Equal("Duncan Idaho", end.Names[0]);
+        }
+
+        [Fact]
+        public void SerializesDictionary()
+        {
+            var start = new DictionaryObject();
+            start.Names.Add("Duncan Idaho", 2);
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<DictionaryObject>(bytes);
+            Assert.Equal(1, end.Names.Count);
+            Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
+            Assert.Equal(2, end.Names.ElementAt(0).Value);
+        }
+       
+        [Fact]
+        public void SerializesReadonlyDictionary()
+        {
+            var start = new ReadOnlyDictionary();
+            start.Names.Add("Duncan Idaho", 2);
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<ReadOnlyDictionary>(bytes);
+            Assert.Equal(1, end.Names.Count);
+            Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
+            Assert.Equal(2, end.Names.ElementAt(0).Value);
         }
     }
 }
