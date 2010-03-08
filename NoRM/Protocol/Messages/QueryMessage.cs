@@ -9,21 +9,17 @@ using System.Threading;
 
 namespace NoRM.Protocol.Messages
 {
-
     /// <summary>
     /// A query to the db.
     /// </summary>
     /// <typeparam name="T">The request document type, and the response document type.</typeparam>
-    public class QueryMessage<T> : QueryMessage<T, T, Object>
-        where T : class, new()
+    public class QueryMessage<T> : QueryMessage<T, T> where T : class, new()
     {
         public QueryMessage(IConnection connection)
-            : base(connection, typeof(T).Name)
-        {
+            : base(connection, typeof(T).Name) {
 
         }
-        public QueryMessage(IConnection connection, String fullyQualifiedCollName)
-            : base(connection, fullyQualifiedCollName)
+        public QueryMessage(IConnection connection, String fullyQualifiedCollName) : base(connection, fullyQualifiedCollName)
         {
 
         }
@@ -34,8 +30,7 @@ namespace NoRM.Protocol.Messages
     /// </summary>
     /// <typeparam name="T">The response type.</typeparam>
     /// <typeparam name="U">The request type.</typeparam>
-    /// <typeparam name="X">The field filter type.</typeparam>
-    public class QueryMessage<T, U, X> : Message where X : class
+    public class QueryMessage<T, U> : Message 
     {
         /// <summary>
         /// The available options when creating a query against Mongo.
@@ -53,10 +48,8 @@ namespace NoRM.Protocol.Messages
         private QueryOptions _queryOptions = QueryOptions.None;
         private int _numberToSkip = 0;
         private int _numberToTake = Int32.MaxValue;
-        private X _fieldSet = null;
 
-        public QueryMessage(IConnection connection, String fullyQualifiedCollName) :
-            base(connection, fullyQualifiedCollName)
+        public QueryMessage(IConnection connection, String fullyQualifiedCollName) : base(connection, fullyQualifiedCollName)
         {
             this._op = MongoOp.Query;
         }
@@ -71,21 +64,6 @@ namespace NoRM.Protocol.Messages
             set
             {
                 this._query = value;
-            }
-        }
-
-
-
-        /// <summary>
-        /// The properties of the document that should be returned. Leaving this null will mean that it is ignored. Each property of X must be true or false.
-        /// Setting the property to true means that the same property in the DB will be returned, setting the property to false means that the property will
-        /// not be retrieved.
-        /// </summary>
-        public X FieldSet
-        {
-            set
-            {
-                this._fieldSet = value;
             }
         }
 
@@ -123,7 +101,7 @@ namespace NoRM.Protocol.Messages
         public ReplyMessage<T> Execute()
         {
             List<byte[]> messageBytes = new List<byte[]>(9);
-
+          
             #region Message Header
             messageBytes.Add(new byte[4]);//allocate 4 bytes for the query.
             messageBytes.Add(BitConverter.GetBytes(this._requestID));//the requestid
@@ -143,11 +121,6 @@ namespace NoRM.Protocol.Messages
             {
                 messageBytes.Add(BsonSerializer.Serialize(this._query));
             }
-            if (this._fieldSet != null)
-            {
-                messageBytes.Add(BsonSerializer.Serialize(this._fieldSet));
-            }
-
             #endregion
 
             //now that we know the full size of the message, we can write it to the first array.
@@ -157,12 +130,12 @@ namespace NoRM.Protocol.Messages
 
             var conn = _connection;
             conn.Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
-
+            
             //so, the server can accepted the query, now we do the second part.
-
+            
             var stream = conn.GetStream();
             while (!stream.DataAvailable)
-            {
+            {                
                 Thread.Sleep(1);
             }
 

@@ -204,6 +204,26 @@ namespace NoRM.Tests
     {
         public ObjectId _id { get; set; }
     }
+    
+    public class PrivateSetter
+    {
+        public int Id{ get; private set;}
+
+        public PrivateSetter(){}
+        public PrivateSetter(int id)
+        {
+            Id = id;
+        }
+    }
+    public class ReadOnly
+    {
+        public string FirstName{ get; set;}
+        public string LastName{ get; set;}
+        public string Name
+        {
+            get{ return string.Concat(FirstName, " ", LastName);}
+        }
+    }
 
     public class GeneralDTO
     {

@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace NoRM.Tests
 {
     using System;
@@ -25,7 +27,7 @@ namespace NoRM.Tests
         }
 
         [Fact]
-        public void WaitsUntilTimeoutForConnectionToFreeUp()
+        public void WaitsUntilTimeoutForConnectionToFreeUpAndThrowsExceptionIfNot()
         {
             var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString("pooling=true&poolsize=1&timeout=3")));
             provider.Open(null);
@@ -35,6 +37,14 @@ namespace NoRM.Tests
             var elasped = DateTime.Now.Subtract(start).TotalSeconds;
             Assert.True(elasped > 3);
             Assert.True(elasped < 4);
+        }
+        [Fact]
+        public void WaitsUntilTimeoutForConnectionToFreeUp()
+        {
+            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString("pooling=true&poolsize=1&timeout=3")));
+            var connection = provider.Open(null);
+            new Timer(c => provider.Close(connection), null, 2000, 0);
+            Assert.Same(connection, provider.Open(null));      
         }
 
         [Fact]

@@ -71,6 +71,7 @@
     <Compile Include="LinqTests\LinqTests.cs" />
     <Compile Include="MapReduceTests.cs" />
     <Compile Include="MongoAdminTests.cs" />
+    <Compile Include="MongoCollectionTests.cs" />
     <Compile Include="MongoConfigutationTests.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />

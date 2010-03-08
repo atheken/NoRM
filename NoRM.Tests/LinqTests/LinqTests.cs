@@ -281,6 +281,20 @@
         }
 
         [Fact]
+        public void OneProductShouldBeReturnedWhen3InDbWithSingleUsingVariable()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                var target = 22;
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var result = session.Products.SingleOrDefault(x => x.Price == target);
+                Assert.Equal(target, result.Price);
+            }
+        }
+
+        [Fact]
         public void TwoProductsShouldBeReturnedWhen3InDbWithPriceLessThan10OrGreaterThan30()
         {
             using (var session = new Session())
