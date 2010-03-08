@@ -15,8 +15,7 @@ namespace NoRM
 {
     public class MongoCollection : IMongoCollection {
 
-        
-
+                
         protected String _collectionName;
         protected MongoDatabase _db;
         protected IConnection _connection;
@@ -170,8 +169,9 @@ namespace NoRM
         /// </summary>
         public bool Updateable {
             get {
-                if (_updateable == null) {
-                    _updateable = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y => y.Name == "_id" || string.Compare(y.Name, "id", true) == 0 || y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute));
+                if (_updateable == null) 
+                {
+                    _updateable = TypeHelper.GetHelperForType(typeof (T)).FindIdProperty() != null;                    
                 }
                 return _updateable.Value;
             }
@@ -184,6 +184,24 @@ namespace NoRM
             return new MongoCollection<U>(_collectionName + "." + collectionName, _db, _connection);
         }
 
+        /// <summary>
+        /// Attempts to save or update an instance
+        /// </summary>  
+        /// <remarks>
+        /// Only works when the Id property is of type ObjectId
+        /// </remarks>
+        public void SaveOrUpdate(T entity)
+        {
+            var helper = TypeHelper.GetHelperForType(typeof (T));
+            var idProperty = helper.FindIdProperty();
+            if (idProperty == null)
+            {
+                throw new MongoException("SaveOrUpdate can only be called on an entity with a property named Id or one marked with the MongoIdentifierAttribute");
+            }
+            var id = idProperty.Getter(entity);
+            Update(new { Id = id }, entity, false, true);            
+        }
+        
         /// <summary>
         /// Overload of Update that updates one document and doesn't upsert if no matches are found.
         /// </summary>        
