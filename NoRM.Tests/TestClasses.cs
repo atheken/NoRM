@@ -178,6 +178,17 @@ namespace NoRM.Tests
     {
         public ObjectId _id { get; set; }
     }
+    
+    public class PrivateSetter
+    {
+        public int Id{ get; private set;}
+
+        public PrivateSetter(){}
+        public PrivateSetter(int id)
+        {
+            Id = id;
+        }
+    }
 
     public class GeneralDTO
     {

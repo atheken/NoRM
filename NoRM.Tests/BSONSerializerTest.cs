@@ -321,5 +321,14 @@ namespace NoRM.Tests
             var obj1Bytes = BsonSerializer.Serialize(new GeneralDTO { AList = new List<string>() });
             BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);  
         } 
+        
+        [Fact]
+        public void SerializesWithPrivateSetter()
+        {
+            var start = new PrivateSetter(4);
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<PrivateSetter>(bytes);  
+            Assert.Equal(start.Id, end.Id);
+        }
     }
 }

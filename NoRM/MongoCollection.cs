@@ -199,7 +199,7 @@ namespace NoRM
                 throw new MongoException("Save can only be called on an entity with a property named Id or one marked with the MongoIdentifierAttribute");
             }
             var id = idProperty.Getter(entity);
-            Update(new { Id = id }, entity, false, true);            
+            Update(new { Id = id }, entity, false, true);
         }
         
         /// <summary>
