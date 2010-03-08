@@ -130,6 +130,7 @@
     <Compile Include="Protocol\SystemMessages\Responses\DeleteIndicesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DistinctValuesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DroppedCollectionResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ExplainResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\LastErrorResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\MapReduceResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfileLevelResponse.cs" />

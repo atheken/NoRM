@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Collections;
 using NoRM.BSON;
 using NoRM.Configuration;
+using NoRM.Protocol.SystemMessages.Responses;
 using NoRM.Responses;
 
 namespace NoRM.Linq
@@ -84,6 +85,23 @@ namespace NoRM.Linq
             return ((IEnumerable)_provider.Execute(_expression)).GetEnumerator();
         }
 
+        internal ExplainResponse Explain(string query)
+        {
+            var queryFlyweight = new Flyweight
+            {
+                MethodCall = query
+            };
+
+            // I have no idea if $query should be another flyweight, a raw string, or what.
+            var explain = new Flyweight();
+            explain["$query"] = queryFlyweight;
+            explain["$explain"] = true;
+
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
+            var response = _provider.DB.GetCollection<ExplainResponse>(collectionName).FindOne(explain);
+
+            return new ExplainResponse();
+        }
        
         public override string ToString()
         {

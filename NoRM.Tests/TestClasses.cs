@@ -57,7 +57,7 @@ namespace NoRM.Tests
 
         public Session()
         {
-            _provider = new MongoQueryProvider("test");
+            _provider = new MongoQueryProvider("NoRMTests");
         }
 
         public MongoQueryProvider Provider
