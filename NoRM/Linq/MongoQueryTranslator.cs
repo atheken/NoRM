@@ -265,6 +265,12 @@ namespace NoRM.Linq {
                 }
             } else if (m.Method.DeclaringType == typeof(Queryable) && IsCallableMethod(m.Method.Name)) {
                 return this.HandleMethodCall((MethodCallExpression)m);
+            
+            } else if (m.Method.DeclaringType == typeof(Enumerable)) {
+                //Subquery - Count() or Sum()
+                if (IsCallableMethod(m.Method.Name)) {
+
+                }
             }
 
             //for now...
@@ -284,7 +290,8 @@ namespace NoRM.Linq {
                 "Max",
                 "Any",
                 "Take",
-                "Skip"
+                "Skip",
+                "Count"
 
             };
             return acceptableMethods.Any(x=>x==methodName);
