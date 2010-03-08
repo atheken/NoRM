@@ -13,11 +13,9 @@ using System.Collections;
 
 namespace NoRM
 {
-
     public class MongoCollection : IMongoCollection {
 
-        //this will have a different instance for each concrete version of MongoCollection<T>
-        protected static bool? _updateable = null;
+        
 
         protected String _collectionName;
         protected MongoDatabase _db;
@@ -136,7 +134,7 @@ namespace NoRM
         }
 
         public IEnumerable Find(object template, int limit, string fullyQualifiedName) {
-            var qm = new QueryMessage<object, object>(this._db.CurrentConnection, fullyQualifiedName);
+            var qm = new QueryMessage<object, object, object>(this._db.CurrentConnection, fullyQualifiedName);
             qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
@@ -151,8 +149,12 @@ namespace NoRM
     }
 
     public class MongoCollection<T> : MongoCollection, IMongoCollection<T> {
+
         //this will have a different instance for each concrete version of MongoCollection<T>
+        protected static bool? _updateable = null;
+
         protected MongoCollection() { }
+        
         /// <summary>
         /// Represents a strongly-typed set of documents in the db.
         /// </summary>
@@ -169,7 +171,9 @@ namespace NoRM
         public bool Updateable {
             get {
                 if (_updateable == null) {
-                    _updateable = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y => y.Name == "_id" || string.Compare(y.Name, "id", true) == 0 || y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute));
+                    _updateable = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                        .Any(y => y.Name == "_id" || string.Compare(y.Name, "id", true) == 0 || y.GetCustomAttributes(true)
+                            .Any(f => f is MongoIdentifierAttribute));
                 }
                 return _updateable.Value;
             }
@@ -242,6 +246,7 @@ namespace NoRM
         /// <param name="updateMultiple">true if you want to update all documents that match, not just the first</param>
         /// <param name="upsert">true if you want to insert the value document if no matches are found.</param>
         /// <exception cref="NotSupportedException">This exception will be raised if the collection's type "T" doesn't define an indentifier.</exception>
+        /// <exception cref="DocumentExceedsSizeLimitsException<T>">Will be thrown if any document is larger than the size allowed by MongoDB (currently, 4MB - this includes all the BSON overhead, too.)</exception>
         public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert) {
             if (!this.Updateable) {
                 throw new NotSupportedException("This collection is not updatable, this is due to the fact that the collection's type " + typeof(T).FullName +
@@ -337,11 +342,18 @@ namespace NoRM
             return this.Find(template, limit, 0, fullyQualifiedName);
         }
 
-        public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName) {
-            var qm = new QueryMessage<T, U>(this._connection, fullyQualifiedName);
+        public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
+        {
+            return this.Find<U,Object>(template, null, limit, skip, fullyQualifiedName);
+        }
+
+        public IEnumerable<T> Find<U, X>(U template, X fieldSelector, int limit, int skip, string fullyQualifiedName) where X : class
+        {
+            var qm = new QueryMessage<T, U, X>(this._connection, fullyQualifiedName);
             qm.NumberToTake = limit;
-            qm.NumberToSkip = skip;
-            qm.Query = template;
+			qm.NumberToSkip = skip;
+            qm.FieldSet = fieldSelector;
+			qm.Query = template;        	
             var reply = qm.Execute();
 
             foreach (var r in reply.Results) {
@@ -403,6 +415,7 @@ namespace NoRM
         /// Insert these documents into the database.
         /// </summary>
         /// <exception cref="MongoError">Will return void if all goes well, of throw an exception otherwise.</exception>
+        /// <exception cref="DocumentExceedsSizeLimitsException<T>">Will be thrown if any document is larger than the size allowed by MongoDB (currently, 4MB - this includes all the BSON overhead, too.)</exception>
         /// <param name="documentsToUpsert"></param>
         public void Insert(IEnumerable<T> documentsToInsert) {
             if (!this.Updateable) {

@@ -5,24 +5,30 @@ namespace NoRM.Tests
     using System.Text.RegularExpressions;
     using Xunit;
 
-    public class MongoAdminTests : MongoFixture
+    public class MongoAdminTests
     {
+        public MongoAdminTests()
+        {
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString("strict=false")))
+            {
+                admin.DropDatabase();
+            }
+        }
         [Fact]
         public void ListsAllDatabases()
         {
-            var expected = new List<string> {"admin", "temp", "local"};
+            var expected = new List<string> { "admin", "NoRMTests", "local" };
 
             //create another database
-            using (var mongo = Mongo.ParseConnection(ConnectionString("temp")))
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject());
-            } 
-            
-            using (var admin = new MongoAdmin(ConnectionString()))
+            }
+
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {            
                 foreach (var db in admin.GetAllDatabases())
-                {
-                    Assert.Contains(db.Name, expected);
+                {                   
                     expected.Remove(db.Name);
                 }
             }
@@ -30,8 +36,8 @@ namespace NoRM.Tests
         }
         [Fact]
         public void ListsAllDatabasesThrowsExceptionIfNotConnectedToAdmin()
-        {            
-            using (var admin = new MongoAdmin(ConnectionString("temp")))
+        {
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => admin.GetAllDatabases());
                 Assert.Equal("This command is only valid when connected to admin", ex.Message);
@@ -54,8 +60,8 @@ namespace NoRM.Tests
                     version = Regex.Match(data, "db version v([^,]+),").Groups[1].Value;
                 }
             }
-            
-            using (var admin = new MongoAdmin(ConnectionString()))
+
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var info = admin.BuildInfo(); 
                 Assert.Equal(1d, info.OK);
@@ -65,8 +71,8 @@ namespace NoRM.Tests
         }
         [Fact]
         public void BuildInfoThrowsExceptionIfNotConnectedToAdmin()
-        {            
-            using (var admin = new MongoAdmin(ConnectionString("temp")))
+        {
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => admin.BuildInfo());
                 Assert.Equal("This command is only valid when connected to admin", ex.Message);
@@ -76,17 +82,17 @@ namespace NoRM.Tests
         [Fact]
         public void ForceSyncDoesSomethingOk()
         {
-            using (var admin = new MongoAdmin(ConnectionString()))
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var response = admin.ForceSync(true);
                 Assert.Equal(1d, response.OK);
-                Assert.Equal(2, response.NumFiles); //don't know what this is
+                Assert.True(response.NumFiles > 0); //don't know what this is
             }
         }
         [Fact]
         public void ForceSyncThrowsExceptionIfNotConnectedToAdmin()
         {
-            using (var admin = new MongoAdmin(ConnectionString("temp")))
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => admin.ForceSync(true));
                 Assert.Equal("This command is only valid when connected to admin", ex.Message);
@@ -97,28 +103,28 @@ namespace NoRM.Tests
         public void DropsDatabase()
         {
             //create another database
-            using (var mongo = Mongo.ParseConnection(ConnectionString("temp")))
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject());                
-            }           
-            using (var admin = new MongoAdmin(ConnectionString("temp")))
+            }
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 admin.DropDatabase();
             }
-            
-            using (var admin = new MongoAdmin(ConnectionString()))
+
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 foreach (var db in admin.GetAllDatabases())
                 {
-                   Assert.NotEqual("temp", db.Name);
+                   Assert.NotEqual("NoRMTests", db.Name);
                 }
             }
         }
 
         [Fact(Skip="todo")]
         public void GetsServerStatus()
-        {                        
-            using (var admin = new MongoAdmin(ConnectionString()))
+        {
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var status = admin.ServerStatus();
             }            

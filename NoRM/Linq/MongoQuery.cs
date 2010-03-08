@@ -5,6 +5,8 @@ using System.Text;
 using System.Linq.Expressions;
 using System.Collections;
 using NoRM.BSON;
+using NoRM.Configuration;
+using NoRM.Responses;
 
 namespace NoRM.Linq
 {
@@ -29,7 +31,8 @@ namespace NoRM.Linq
             this._collection = provider.DB.GetCollection<T>();
             this._query = new Flyweight();
         }
-        public Expression GetExpression() {
+        public Expression GetExpression()
+        {
             return this._expression;
         }
         public MongoQuery(MongoQueryProvider provider)
@@ -48,22 +51,22 @@ namespace NoRM.Linq
             {
                 throw new ArgumentNullException("expression");
             }
-            if (!typeof (IQueryable<T>).IsAssignableFrom(expression.Type))
+            if (!typeof(IQueryable<T>).IsAssignableFrom(expression.Type))
             {
                 throw new ArgumentOutOfRangeException("expression");
             }
             this._provider = provider;
-            this._expression = expression;            
+            this._expression = expression;
         }
 
         Expression IQueryable.Expression
         {
             get { return _expression; }
         }
-        
+
         Type IQueryable.ElementType
         {
-            get { return typeof (T); }
+            get { return typeof(T); }
         }
         IQueryProvider IQueryable.Provider
         {
@@ -78,15 +81,15 @@ namespace NoRM.Linq
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable) _provider.Execute(_expression)).GetEnumerator();
+            return ((IEnumerable)_provider.Execute(_expression)).GetEnumerator();
         }
 
-        
+       
         public override string ToString()
         {
-            if (_expression.NodeType == ExpressionType.Constant && ((ConstantExpression) _expression).Value == this)
+            if (_expression.NodeType == ExpressionType.Constant && ((ConstantExpression)_expression).Value == this)
             {
-                return "Query(" + typeof (T) + ")";
+                return "Query(" + typeof(T) + ")";
             }
             return _expression.ToString();
         }

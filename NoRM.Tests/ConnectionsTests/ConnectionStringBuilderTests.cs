@@ -9,7 +9,7 @@ namespace NoRM.Tests
         public void ThrowsExceptionWhenProtocolIsInvalid()
         {
             var ex = Assert.Throws<MongoException>(() => ConnectionStringBuilder.Create("http://www.google.com"));
-            Assert.Equal("Invalid connection string: the protocol must be mongodb://", ex.Message);
+            Assert.Equal("Connection string is missing", ex.Message);
         }
 
         [Fact]
@@ -193,6 +193,16 @@ namespace NoRM.Tests
         public void ParsesTimeoutOption()
         {
             Assert.Equal(14, ConnectionStringBuilder.Create("mongodb://localhost?timeout=14").Timeout);
+        }
+        [Fact]
+        public void LifetimeIs0ByDefault()
+        {
+            Assert.Equal(0, ConnectionStringBuilder.Create("mongodb://localhost").Lifetime);
+        }
+        [Fact]
+        public void ParsesLifetimeOption()
+        {
+            Assert.Equal(13, ConnectionStringBuilder.Create("mongodb://localhost?lifetime=13").Lifetime);
         }
                 
         [Fact]

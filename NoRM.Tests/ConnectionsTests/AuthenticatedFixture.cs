@@ -1,3 +1,5 @@
+using System.Configuration;
+
 namespace NoRM.Tests
 {
     /// <summary>
@@ -13,13 +15,9 @@ namespace NoRM.Tests
     /// </summary>
     public abstract class AuthenticatedFixture : MongoFixture
     {
-        protected override bool WipeDataDirectory
-        {
-            get { return false; }
-        }
         protected override string DataPath
         {
-            get { return "c:/data/NoRMAuth/"; }
+            get { return ConfigurationManager.AppSettings["authDbPath"]; }
         }
         protected override string Arguments
         {

@@ -65,6 +65,16 @@
         }
 
         [Fact]
+        public void Find_Returns_Subset_of_Properties_When_Field_Limiter_Specified()
+        {
+            _coll.Insert(new TestClass { ADouble = 1d, AStringArray = (new[] { "a", "b", "c" }).ToList() });
+            var result = _coll.Find(new { ADouble = 1d },
+                new { AStringArray = true }, 1, 0, _coll.FullyQualifiedName).First();
+            Assert.Equal(null, result.ADouble);
+            Assert.Equal(3, result.AStringArray.Count);
+        }
+
+        [Fact]
         public void FindOneQualifierExists()
         {
             _coll.Insert(new TestClass {ADouble = 1d},

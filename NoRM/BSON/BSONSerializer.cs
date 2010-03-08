@@ -1,12 +1,13 @@
-﻿namespace NoRM.BSON
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Collections;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Collections;
+using NoRM.Configuration;
 
+namespace NoRM.BSON
+{
     internal class BsonSerializer
     {
         private readonly static IDictionary<Type, BSONTypes> _typeMap = new Dictionary<Type, BSONTypes>
@@ -14,7 +15,7 @@
              {typeof (int), BSONTypes.Int32}, {typeof (long), BSONTypes.Int64}, {typeof (bool), BSONTypes.Boolean}, {typeof (string), BSONTypes.String},
              {typeof(double), BSONTypes.Double}, {typeof (Guid), BSONTypes.Binary}, {typeof (Regex), BSONTypes.Regex}, {typeof (DateTime), BSONTypes.DateTime}, 
              {typeof(float), BSONTypes.Double}, {typeof (byte[]), BSONTypes.Binary}, {typeof(ObjectId), BSONTypes.MongoOID}, {typeof(ScopedCode), BSONTypes.ScopedCode}
-         };        
+         };
 
         private readonly BinaryWriter _writer;
         private Document _current;
@@ -27,7 +28,7 @@
         {
             using (var ms = new MemoryStream(250))
             using (var writer = new BinaryWriter(ms))
-            {                
+            {
                 new BsonSerializer(writer).WriteDocument(document);
                 return ms.ToArray();
             }
@@ -72,7 +73,6 @@
             else
             {
                 WriteObject(document);
-                
             }
             EndDocument(true);
         }
@@ -88,9 +88,14 @@
         {
             var typeHelper = TypeHelper.GetHelperForType(document.GetType());
             var idProperty = typeHelper.FindIdProperty();
+            var documentType = document.GetType();
+
             foreach (var property in typeHelper.GetProperties())
             {
-                var name = property == idProperty ? "_id" : property.Name;
+                var name = property == idProperty 
+                    ? "_id"
+                    :   MongoConfiguration.GetPropertyAlias(documentType, property.Name);
+
                 var value = property.Getter(document);
                 if (value == null && property.IgnoreIfNull)
                 {
@@ -156,7 +161,7 @@
                 case BSONTypes.ScopedCode:
                     Write((ScopedCode)value);
                     return;
-                case BSONTypes.MongoOID:                    
+                case BSONTypes.MongoOID:
                     Written(((ObjectId)value).Value.Length);
                     _writer.Write(((ObjectId)value).Value);
                     return;
@@ -199,9 +204,7 @@
                 Write(BSONTypes.Object);
                 WriteName(name);                
                 WriteDocument(value); //Write manages new/end document                
-            }
-            
-                    
+            }  
         }
         private void Write(IEnumerable enumerable)
         {
@@ -278,200 +281,11 @@
             EndDocument(false);
         }
         
-
-
-
         private class Document
         {
             public int Start;
             public int Written;
             public Document Parent;
         }
-
-        //"special" case.
-        /*if (value is ModifierCommand)
-        {
-            var o = value as ModifierCommand;
-            //set type of member.
-            retval.Add(new[] {(byte) BSONTypes.Object});
-            //set name of member
-            retval.Add(CStringBytes(o.CommandName));
-
-            //construct member bytes
-            var modValue = new List<byte[]> {new byte[4], SerializeMember(name, o.ValueForCommand), new byte[1]};
-            modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length));
-
-            //add this to the main retval.
-            retval.AddRange(modValue);
-        }
-        else if (value is QualifierCommand)
-        {
-            //wow, this is insane, the idiom for "query" commands is exactly opposite of that for "update" commands.
-            var o = value as QualifierCommand;
-            //set type of member.
-            retval.Add(new[] {(byte) BSONTypes.Object});
-            //set name of member
-            retval.Add(CStringBytes(name));
-
-            //construct member bytes
-            var modValue = new List<byte[]> {new byte[4], SerializeMember(o.CommandName, o.ValueForCommand), new byte[1]};
-            modValue[0] = BitConverter.GetBytes(modValue.Sum(y => y.Length)); //add this to the main retval.
-
-            retval.AddRange(modValue);
-        }*/
-        /*
-        private void SerializeMember(string key, object value)
-        {
-            var isEnum = (value is Enum);
-            Type enumType = null;
-            if (isEnum)
-            {
-                enumType = Enum.GetUnderlyingType(value.GetType());
-            }
-
-            //type + name + data
-            var retval = new List<byte[]>(4) {new byte[0], new byte[0], new byte[0], new byte[0]};
-
-
-            retval[0] = new[] {(byte) BSONTypes.Null};
-            retval[1] = string.Compare(key, "id", true) == 0 ? CStringBytes("_id") : CStringBytes(key);
-            retval[2] = new byte[0];
-            //this is where the magic occurs
-            //HEED MY WARNING! ALWAYS test for NULL first, as other things below ASSUME that if it gets past here, it's NOT NULL!
-            if (value == null)
-            {
-                retval[0] = new[] {(byte) BSONTypes.Null};
-                retval[2] = new byte[0];
-            }
-            else if (value is int || (isEnum && typeof (int).IsAssignableFrom(enumType)))
-            {
-                retval[0] = new[] {(byte) BSONTypes.Int32};
-                retval[2] = BitConverter.GetBytes((int) value);
-            }
-            else if (value is double || (isEnum && typeof (double).IsAssignableFrom(enumType)))
-            {
-                retval[0] = new[] {(byte) BSONTypes.Double};
-                retval[2] = BitConverter.GetBytes((double) value);
-            }
-            else if (value is string)
-            {
-                retval[0] = new[] {(byte) BSONTypes.String};
-                //get bytes and append a null to the end.
-
-                var bytes = CStringBytes((string) value);
-                retval[2] = BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray();
-            }
-            else if (value is Regex)
-            {
-                retval[0] = new[] {(byte) BSONTypes.Regex};
-                var rex = (Regex) value;
-                var pattern = rex.ToString();
-                var options = "";
-                //compiled option can't be set on deserialized regex, therefore - no good can come of this.
-                if (rex.Options == RegexOptions.ECMAScript) options += "e";
-                if (rex.Options == RegexOptions.IgnoreCase) options += "i";
-                if (rex.Options == RegexOptions.CultureInvariant) options += "l";
-                if (rex.Options == RegexOptions.Multiline) options += "m";
-                if (rex.Options == RegexOptions.Singleline) options += "s";
-                //all .net regex are unicode regex, therefore:
-                options += "u";
-                if (rex.Options == RegexOptions.IgnorePatternWhitespace) options += "w";
-                if (rex.Options == RegexOptions.ExplicitCapture) options += "x";
-
-                retval[2] = Encoding.UTF8.GetBytes(pattern).Concat(new byte[1])
-                    .Concat(Encoding.UTF8.GetBytes(options)).Concat(new byte[1]).ToArray();
-            }
-            else if (value is bool)
-            {
-                retval[0] = new[] {(byte) BSONTypes.Boolean};
-                retval[2] = BitConverter.GetBytes((bool) value);
-            }
-            else if (value is byte[])
-            {
-                retval[0] = new[] {(byte) BSONTypes.Binary};
-                var binary = new List<byte[]> {new byte[0], new[] {(byte) 2}};
-                var theBytes = (byte[]) value;
-                binary.Add(BitConverter.GetBytes(theBytes.Length)); //describe the number of bytes.
-                binary.Add(theBytes); //add the bytes
-                binary[0] = BitConverter.GetBytes(binary.Sum(y => y.Length) - 1); //set the total binary size (after the subtype.. weird)
-                //not sure if this is correct.
-                retval[2] = binary.SelectMany(h => h).ToArray();
-            }
-            else if (value is Guid)
-            {
-                retval[0] = new[] {(byte) BSONTypes.Binary};
-                var binary = new List<byte[]> {BitConverter.GetBytes(16)};
-                var val = (Guid?) value;
-                binary.Add(new[] {(byte) 3});
-                binary.Add(val.Value.ToByteArray());
-                retval[2] = binary.SelectMany(y => y).ToArray();
-            }
-            else if (value is ObjectId)
-            {
-                retval[0] = new[] {(byte) BSONTypes.MongoOID};
-                var oid = (ObjectId) value;
-                retval[2] = oid.Value;
-            }
-            else if (value is DBReference)
-            {
-                retval[0] = new[] {(byte) BSONTypes.Reference};
-                //TODO: serialize document reference.
-            }
-            else if (value is ScopedCode)
-            {
-                retval[0] = new[] {(byte) BSONTypes.ScopedCode};
-                var code = value as ScopedCode;
-                var scopedCode = new List<byte[]> {new byte[4], new byte[4], CStringBytes(code.CodeString ?? ""), Serialize(code.Scope), new byte[1]};
-                scopedCode[0] = BitConverter.GetBytes(scopedCode.Sum(y => y.Length));
-                scopedCode[1] = BitConverter.GetBytes(scopedCode[2].Length);
-                retval[2] = scopedCode.SelectMany(y => y).ToArray();
-            }
-            else if (value is DateTime?)
-            {
-                retval[0] = new[] {(byte) BSONTypes.DateTime};
-                retval[2] = BitConverter.GetBytes((long) (((DateTime?) value).Value - BsonHelper.EPOCH).TotalMilliseconds);
-            }
-            else if (value is long || (isEnum && typeof (long).IsAssignableFrom(enumType)))
-            {
-                retval[0] = new[] {(byte) BSONTypes.Int64};
-                retval[2] = BitConverter.GetBytes((long) value);
-            }
-                //handle arrays and the like.
-            else if (value is IEnumerable)
-            {
-                retval[0] = new[] {(byte) BSONTypes.Array};
-                var index = -1;
-                var o = value as IEnumerable;
-                var memberBytes = o.OfType<Object>().Select(y =>
-                                                                {
-                                                                    index++;
-                                                                    return SerializeMember(index.ToString(), y);
-                                                                }).SelectMany(h => h).ToArray();
-
-                retval[2] = BitConverter.GetBytes(4 + memberBytes.Length + 1).Concat(memberBytes).Concat(new byte[1]).ToArray();
-            }
-                //TODO: implement something for "Symbol"
-                //TODO: implement non-scoped code handling.
-            else
-            {
-                retval[0] = new[] {(byte) BSONTypes.Object};
-                retval[2] = Serialize(value);
-            }
-
-            return retval.SelectMany(h => h).ToArray();
-        }
-
-      
-        public static byte[] CStringBytes(string stringToEncode)
-        {
-            return Encoding.UTF8.GetBytes(stringToEncode).Concat(new byte[1]).ToArray();
-        }
-        public static void CStringBytes(string stringToEncode, BinaryWriter binaryWriter)
-        {
-            var bytes = Encoding.UTF8.GetBytes(stringToEncode);
-            binaryWriter.Write(bytes.Length + 1);
-            binaryWriter.Write(bytes);
-            binaryWriter.Write(new byte[1]);
-        }*/
     }
 }

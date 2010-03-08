@@ -19,7 +19,7 @@ namespace NoRM.Tests
         {
             var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString("pooling=true&poolsize=1&timeout=1")));
             provider.Open(null);
-            
+
             var ex = Assert.Throws<MongoException>(() => provider.Open(null));
             Assert.Equal("Connection timeout trying to get connection from connection pool", ex.Message);
         }

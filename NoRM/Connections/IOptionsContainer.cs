@@ -8,5 +8,6 @@ namespace NoRM
         void SetPoolSize(int size);
         void SetPooled(bool pooled);
         void SetTimeout(int timeout);
+        void SetLifetime(int lifetime);
     }
 }

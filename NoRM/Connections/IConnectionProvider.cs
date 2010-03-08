@@ -50,7 +50,7 @@ namespace NoRM
 
             if (nonce.OK == 1)
             {
-                var result = new QueryMessage<GenericCommandResponse, AuthenticationRequest>(connection, string.Concat(connection.Database, ".$cmd"))
+                var result = new QueryMessage<GenericCommandResponse, AuthenticationRequest, Object>(connection, string.Concat(connection.Database, ".$cmd"))
                     {
                         NumberToTake = 1,
                         Query = new AuthenticationRequest

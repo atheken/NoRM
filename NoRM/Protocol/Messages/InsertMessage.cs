@@ -1,16 +1,18 @@
-﻿namespace NoRM.Protocol.Messages
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using BSON;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using NoRM.BSON;
 
-    internal class InsertMessage<T> : Message 
+namespace NoRM.Protocol.Messages
+{
+    internal class InsertMessage<T> : Message
     {
+        private const int FOUR_MEGABYTES = 4 * 1024 * 1024;
         private readonly T[] _elementsToInsert;
 
-        public InsertMessage(IConnection connection, String collectionName, IEnumerable<T> itemsToInsert) : base(connection, collectionName)
+        public InsertMessage(IConnection connection, String collectionName, IEnumerable<T> itemsToInsert)
+            : base(connection, collectionName)
         {
             _elementsToInsert = itemsToInsert.ToArray();
             _op = MongoOp.Insert;
@@ -31,18 +33,21 @@
             foreach (var obj in _elementsToInsert)
             {
                 var data = BsonSerializer.Serialize(obj);
+                if (data.Length > InsertMessage<T>.FOUR_MEGABYTES)
+                {
+                    throw new DocumentExceedsSizeLimitsException<T>(obj, data.Length);
+                }
                 message.Add(data);
             }
             var size = message.Sum(y => y.Length);
-            message[0] = BitConverter.GetBytes(size);            
+            message[0] = BitConverter.GetBytes(size);
 
             var bytes = message.SelectMany(y => y).ToArray();
-            var stream = _connection.GetStream();
-            stream.Write(bytes, 0, size); 
-           
+            _connection.Write(bytes, 0, size);
+            
             if (_connection.StrictMode)
             {
-                AssertHasNotError();                
+                AssertHasNotError();
             }
         }
     }

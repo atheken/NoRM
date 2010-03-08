@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\NoRM.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\NoRM.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -52,7 +54,6 @@
     <Compile Include="Attributes\MongoIdentifierAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreIfNullAttribute.cs" />
-    <Compile Include="Attributes\MongoNameAttribute.cs" />
     <Compile Include="BSON\BsonDeserializer.cs" />
     <Compile Include="BSON\BsonHelper.cs" />
     <Compile Include="BSON\DbTypes\GridReadStream.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="BSON\BSONTypes.cs" />
     <Compile Include="BSON\Commands.cs" />
     <Compile Include="BSON\DbTypes\ObjectIdGenerator.cs" />
+    <Compile Include="BSON\DocumentExceedsSizeLimitsException.cs" />
     <Compile Include="BSON\ListHelper.cs" />
     <Compile Include="BSON\TypeHelper.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
@@ -80,6 +82,18 @@
     <Compile Include="BSON\Flyweight.cs" />
     <Compile Include="BSON\DbTypes\GridFile.cs" />
     <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
+    <Compile Include="Configuration\ConfigurationContainer.cs" />
+    <Compile Include="Configuration\IConfigurationContainer.cs" />
+    <Compile Include="Configuration\IMongoConfigurationMap.cs" />
+    <Compile Include="Configuration\IPropertyMappingExpression.cs" />
+    <Compile Include="Configuration\ITypeConfiguration.cs" />
+    <Compile Include="Configuration\ITypedConfigurationGeneric.cs" />
+    <Compile Include="Configuration\MongoConfiguration.cs" />
+    <Compile Include="Configuration\MongoConfigurationMap.cs" />
+    <Compile Include="Configuration\MongoConfigurationTypeMap.cs" />
+    <Compile Include="Configuration\MongoTypeConfiguration.cs" />
+    <Compile Include="Configuration\MongoTypeConfigurationGeneric.cs" />
+    <Compile Include="Configuration\PropertyMappingExpression.cs" />
     <Compile Include="Connections\ConnectionProviderFactory.cs" />
     <Compile Include="Connections\ConnectionStringBuilder.cs" />
     <Compile Include="Connections\IConnection.cs" />
@@ -87,7 +101,10 @@
     <Compile Include="Connections\IOptionsContainer.cs" />
     <Compile Include="Connections\NormalConnectionProvider.cs" />
     <Compile Include="Connections\PooledConnectionProvider.cs" />
+    <Compile Include="Connections\QueuedConnectionProviders.cs" />
+    <Compile Include="Connections\TimedLock.cs" />
     <Compile Include="CreateCollectionOptions.cs" />
+    <Compile Include="IHideSystemTypes.cs" />
     <Compile Include="IMongoCollection.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\IMongoQuery.cs" />

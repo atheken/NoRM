@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using NoRM.BSON;
 
 namespace NoRM.Linq {
     public static class LinqExtensions {

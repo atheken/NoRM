@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Collections;
 using NoRM.BSON;
+using NoRM.Configuration;
 
 namespace NoRM.Linq {
     public class MongoQueryTranslator:ExpressionVisitor {
@@ -328,8 +329,9 @@ namespace NoRM.Linq {
             var fullName = m.ToString().Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter) {
-                sb.Append("this." + m.Member.Name);
-                lastFlyProperty=m.Member.Name;
+                var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
+                sb.Append("this." + alias);// m.Member.Name);
+                lastFlyProperty = alias;// m.Member.Name;
                 return m;
             }else if (m.Member.DeclaringType == typeof(string)) {
                 switch (m.Member.Name) {
@@ -360,7 +362,7 @@ namespace NoRM.Linq {
                         return m;
                     case "Year":
                         this.Visit(m.Expression);
-                        sb.Append(".getYear()");
+                        sb.Append(".getFullYear()");
                         return m;
                     case "Hour":
                         this.Visit(m.Expression);
@@ -383,6 +385,14 @@ namespace NoRM.Linq {
                 //this supports the "deep graph" name - "Product.Address.City"
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
 
+
+                var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
+
+                if (expressionRootType != null)
+                {
+                    fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
+                }
+
                 var result = String.Join(".", fixedName);
                 sb.Append("this." + result);
                 lastFlyProperty = result;
@@ -391,7 +401,35 @@ namespace NoRM.Linq {
             }
             //if this is a property NOT on the object...
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
+        }
 
+        private static ParameterExpression GetParameterExpression(MemberExpression expression)
+        {
+            var expressionRoot = false;
+            Expression parentExpression = expression;
+
+            while(!expressionRoot)
+            {
+                parentExpression = ((MemberExpression)(parentExpression)).Expression;
+                expressionRoot = parentExpression is ParameterExpression;
+            }
+
+            return (ParameterExpression)parentExpression;
+        }
+
+        private static string[] GetDeepAlias(Type type, string[] graph)
+        {
+            var graphParts = new string[graph.Length];
+            var typeToQuery = type;
+
+            for (var i = 0; i <graph.Length; i++)
+            {
+                var prpperty = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
+                graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
+                typeToQuery = prpperty.PropertyType;
+            }
+
+            return graphParts;
         }
     }
 
