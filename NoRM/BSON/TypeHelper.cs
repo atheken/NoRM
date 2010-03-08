@@ -38,13 +38,15 @@ namespace NoRM.BSON
         {
             return _properties.Values;
         }
+
+        /// <summary>
+        /// Returns the magic property for the specified name, or null if it doesn't exist.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public MagicProperty FindProperty(string name)
         {
-            if (!_properties.ContainsKey(name))
-            {
-                throw new MongoException(string.Format("The type {0} doesn't have a property named {1}", _type.FullName, name));
-            }
-            return _properties[name];
+            return this._properties.ContainsKey(name) ? this._properties[name] : null;
         }
         public MagicProperty FindIdProperty()
         {
