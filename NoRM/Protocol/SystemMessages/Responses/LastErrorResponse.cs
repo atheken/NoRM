@@ -1,5 +1,8 @@
 namespace NoRM.Responses
 {
+    /// <summary>
+    /// Indicates what the last error the MongoDB server encountered was.
+    /// </summary>
     public class LastErrorResponse
     {
         public long? N { get; set; }

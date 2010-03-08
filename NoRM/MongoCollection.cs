@@ -134,7 +134,7 @@ namespace NoRM
         }
 
         public IEnumerable Find(object template, int limit, string fullyQualifiedName) {
-            var qm = new QueryMessage<object, object>(this._db.CurrentConnection, fullyQualifiedName);
+            var qm = new QueryMessage<object, object, object>(this._db.CurrentConnection, fullyQualifiedName);
             qm.NumberToTake = limit;
             qm.Query = template;
             var reply = qm.Execute();
@@ -171,7 +171,9 @@ namespace NoRM
         public bool Updateable {
             get {
                 if (_updateable == null) {
-                    _updateable = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public).Any(y => y.Name == "_id" || string.Compare(y.Name, "id", true) == 0 || y.GetCustomAttributes(true).Any(f => f is MongoIdentifierAttribute));
+                    _updateable = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                        .Any(y => y.Name == "_id" || string.Compare(y.Name, "id", true) == 0 || y.GetCustomAttributes(true)
+                            .Any(f => f is MongoIdentifierAttribute));
                 }
                 return _updateable.Value;
             }
@@ -340,10 +342,17 @@ namespace NoRM
             return this.Find(template, limit, 0, fullyQualifiedName);
         }
 
-        public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName) {
-            var qm = new QueryMessage<T, U>(this._connection, fullyQualifiedName);
+        public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
+        {
+            return this.Find<U,Object>(template, null, limit, skip, fullyQualifiedName);
+        }
+
+        public IEnumerable<T> Find<U, X>(U template, X fieldSelector, int limit, int skip, string fullyQualifiedName) where X : class
+        {
+            var qm = new QueryMessage<T, U, X>(this._connection, fullyQualifiedName);
             qm.NumberToTake = limit;
 			qm.NumberToSkip = skip;
+            qm.FieldSet = fieldSelector;
 			qm.Query = template;        	
             var reply = qm.Execute();
 

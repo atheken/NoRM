@@ -30,11 +30,10 @@ namespace NoRM.Tests
             _collection.Insert(new Person { Name = "Joe Cool", Address = { Street="123 Main St", City="Anytown", State="CO", Zip="45123" } });
             _collection.Insert(new Person { Name = "Sam Cool", Address = { Street = "300 Main St", City = "Anytown", State = "CO", Zip = "45123" } });
 
-            var query = new Flyweight();
-            query["Name"] = Q.Equals<string>("Joe Cool");
-            
-            var results = _collection.Find(query);
+            var results = _collection.Find(new { Name = "Joe Cool" });
             Assert.Equal(1, results.Count());
+
+            Assert.Equal(1, _collection.Find(new { Name = Q.Equals("Sam Cool") }).Count());
         }
 
         [Fact]

@@ -27,7 +27,7 @@ namespace NoRM.Tests
         }
 
         [Fact]
-        public void WhereExpressionShouldWorkWithFLyweight()
+        public void WhereExpressionShouldWorkWithFlyweight()
         {
             _collection.Insert(new TestClass {ADouble = 1d});
             _collection.Insert(new TestClass {ADouble = 2d});
