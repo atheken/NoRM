@@ -17,8 +17,8 @@ namespace NoRM.Tests
         {
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
-                var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").SaveOrUpdate(new Address()));
-                Assert.Equal("SaveOrUpdate can only be called on an entity with a property named Id or one marked with the MongoIdentifierAttribute", ex.Message);
+                var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Save(new Address()));
+                Assert.Equal("Save can only be called on an entity with a property named Id or one marked with the MongoIdentifierAttribute", ex.Message);
             }
         }
 
@@ -27,8 +27,8 @@ namespace NoRM.Tests
         {
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
-                mongo.GetCollection<IntId>("Fake").SaveOrUpdate(new IntId { Id = 4, Name = "Test 1" });
-                mongo.GetCollection<IntId>("Fake").SaveOrUpdate(new IntId { Id = 5, Name = "Test 2" });
+                mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 4, Name = "Test 1" });
+                mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 5, Name = "Test 2" });
                 var found = mongo.GetCollection<IntId>("Fake").Find();
                 Assert.Equal(2, found.Count());
                 Assert.Equal(4, found.ElementAt(0).Id);
@@ -43,8 +43,8 @@ namespace NoRM.Tests
         {
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
-                mongo.GetCollection<IntId>("Fake").SaveOrUpdate(new IntId { Id = 4, Name = "Test" });
-                mongo.GetCollection<IntId>("Fake").SaveOrUpdate(new IntId { Id = 4, Name = "Updated" });
+                mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 4, Name = "Test" });
+                mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 4, Name = "Updated" });
                 var found = mongo.GetCollection<IntId>("Fake").Find();
                 Assert.Equal(1, found.Count());
                 Assert.Equal(4, found.ElementAt(0).Id);
@@ -59,8 +59,8 @@ namespace NoRM.Tests
             {
                 var id1 = new ObjectId("123456123456123456123456");
                 var id2 = new ObjectId("123456123456123456123457");
-                mongo.GetCollection<Product>("Fake").SaveOrUpdate(new Product { Id = id1, Name = "Prod1" });
-                mongo.GetCollection<Product>("Fake").SaveOrUpdate(new Product { Id = id2, Name = "Prod2" });
+                mongo.GetCollection<Product>("Fake").Save(new Product { Id = id1, Name = "Prod1" });
+                mongo.GetCollection<Product>("Fake").Save(new Product { Id = id2, Name = "Prod2" });
                 var found = mongo.GetCollection<Product>("Fake").Find();
                 Assert.Equal(2, found.Count());
                 Assert.Equal(id1, found.ElementAt(0).Id);
@@ -76,8 +76,8 @@ namespace NoRM.Tests
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 var id = new ObjectId("123456123456123456123456");
-                mongo.GetCollection<Product>("Fake").SaveOrUpdate(new Product { Id = id, Name = "Prod" });
-                mongo.GetCollection<Product>("Fake").SaveOrUpdate(new Product { Id = id, Name = "Updated Prod" });
+                mongo.GetCollection<Product>("Fake").Save(new Product { Id = id, Name = "Prod" });
+                mongo.GetCollection<Product>("Fake").Save(new Product { Id = id, Name = "Updated Prod" });
                 var found = mongo.GetCollection<Product>("Fake").Find();
                 Assert.Equal(1, found.Count());
                 Assert.Equal(id, found.ElementAt(0).Id);

@@ -190,13 +190,13 @@ namespace NoRM
         /// <remarks>
         /// Only works when the Id property is of type ObjectId
         /// </remarks>
-        public void SaveOrUpdate(T entity)
+        public void Save(T entity)
         {
             var helper = TypeHelper.GetHelperForType(typeof (T));
             var idProperty = helper.FindIdProperty();
             if (idProperty == null)
             {
-                throw new MongoException("SaveOrUpdate can only be called on an entity with a property named Id or one marked with the MongoIdentifierAttribute");
+                throw new MongoException("Save can only be called on an entity with a property named Id or one marked with the MongoIdentifierAttribute");
             }
             var id = idProperty.Getter(entity);
             Update(new { Id = id }, entity, false, true);            
