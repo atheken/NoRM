@@ -69,12 +69,12 @@ namespace NoRM
             return _connection;
         }
 
-        public MongoCollection<T> GetCollection<T>() where T : class, new()
+        public MongoCollection<T> GetCollection<T>()
         {
             return _database.GetCollection<T>();
         }
 
-        public MongoCollection<T> GetCollection<T>(string collectionName) where T : class, new()
+        public MongoCollection<T> GetCollection<T>(string collectionName)
         {
             return _database.GetCollection<T>(collectionName);
         }
