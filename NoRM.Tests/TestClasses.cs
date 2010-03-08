@@ -189,6 +189,15 @@ namespace NoRM.Tests
             Id = id;
         }
     }
+    public class ReadOnly
+    {
+        public string FirstName{ get; set;}
+        public string LastName{ get; set;}
+        public string Name
+        {
+            get{ return string.Concat(FirstName, " ", LastName);}
+        }
+    }
 
     public class GeneralDTO
     {

@@ -87,7 +87,11 @@ namespace NoRM.BSON
                                ? "$_id"
                                : alias;
 
-                magic.Add(name, new MagicProperty(property));
+                var magicProperty = new MagicProperty(property);
+                if (magicProperty.Setter != null)
+                {
+                    magic.Add(name, magicProperty);
+                }
             }
             return magic;
         }

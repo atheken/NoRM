@@ -330,5 +330,14 @@ namespace NoRM.Tests
             var end = BsonDeserializer.Deserialize<PrivateSetter>(bytes);  
             Assert.Equal(start.Id, end.Id);
         }
+        [Fact]
+        public void ReadOnlyPropertyIsNotSerialized()
+        {
+            var start = new ReadOnly {FirstName = "Duncan", LastName = "Idaho"};
+            var bytes = BsonSerializer.Serialize(start);
+            Assert.Equal(47, bytes.Length);
+            Assert.Equal(47, BitConverter.ToInt32(bytes, 0));
+            BsonDeserializer.Deserialize<ReadOnly>(bytes); //just for completness
+        }
     }
 }
