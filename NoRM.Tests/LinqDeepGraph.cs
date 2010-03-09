@@ -79,5 +79,31 @@
                 Assert.Equal(2, products.Count);
             }
         }
+
+        [Fact]
+        public void InventorySubqueryShouldReturnOneForTwoProducts() {
+            using (var session = new Session()) {
+                session.Drop<Product>();
+
+                //create a Product
+                var p = new Product() { Name = "Test1", Price = 10 };
+                //change the inventory
+                p.Inventory.Add(new InventoryChange() { AmountChanged = 1 });
+                session.Add(p);
+
+                p = new Product() { Name = "Test1", Price = 10 };
+                //change the inventory
+                p.Inventory.Add(new InventoryChange() { AmountChanged = 1 });
+                p.Inventory.Add(new InventoryChange() { AmountChanged = 2 });
+                p.Inventory.Add(new InventoryChange() { AmountChanged = -1 });
+
+                session.Add(p);
+
+                var products = session.Products.Where(x => x.Inventory.Count() > 1).ToList();
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+
     }
 }

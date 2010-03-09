@@ -134,15 +134,23 @@ namespace NoRM.Tests
         public Address Address { get; set; }
     }
 
+    internal class InventoryChange {
+        public int AmountChanged { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public InventoryChange() {
+            CreatedOn = DateTime.Now;
+        }
+    }
+
     internal class Product
     {
         public Product()
         {
             Supplier = new Supplier();
             Id = ObjectId.NewObjectId();
+            Inventory = new List<InventoryChange>();
         }
-
-
+        public List<InventoryChange> Inventory { get; set; }
         public ObjectId Id { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
