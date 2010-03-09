@@ -23,10 +23,10 @@
         protected void AssertHasNotError()
         {
             new QueryMessage<GenericCommandResponse, object>(_connection, _collection)
-                         {
-                             NumberToTake = 1,
-                             Query = new { getlasterror = 1d },
-                         }.Execute();
+            {
+                NumberToTake = 1,
+                Query = new { getlasterror = 1d },
+            }.Execute();
         }
     }
 }

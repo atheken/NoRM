@@ -57,7 +57,7 @@ namespace NoRM.Tests
 
         public Session()
         {
-            _provider = new MongoQueryProvider("test");
+            _provider = new MongoQueryProvider("NoRMTests");
         }
 
         public MongoQueryProvider Provider
@@ -113,6 +113,32 @@ namespace NoRM.Tests
         }
     }
 
+    internal class CheeseClubContact
+    {
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+        public string FavoriteCheese { get; set; }
+
+        public CheeseClubContact()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+    }
+
+    internal class Person
+    {
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+        public Address Address { get; set; }
+        public DateTime LastContact { get; set; }
+
+        public Person()
+        {
+            Id = ObjectId.NewObjectId();
+            Address = new Address();
+        }
+    }
+    
     internal class Address
     {
         public string Street { get; set; }

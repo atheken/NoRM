@@ -1,5 +1,8 @@
 ﻿namespace NoRM.Responses
 {
+    /// <summary>
+    /// MongoDB information related to a particular collection.
+    /// </summary>
     public class CollectionStatistics
     {
         public string collstats { get; set; }

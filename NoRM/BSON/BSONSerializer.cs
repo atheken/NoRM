@@ -24,6 +24,13 @@ namespace NoRM.BSON
         {
             _writer = writer;
         }
+
+        /// <summary>
+        /// Convert a document to it's BSON equivalent.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="document"></param>
+        /// <returns></returns>
         public static byte[] Serialize<T>(T document)
         {
             using (var ms = new MemoryStream(250))
@@ -34,12 +41,20 @@ namespace NoRM.BSON
             }
         }
 
+        /// <summary>
+        /// Write the peramble of the BSON document.
+        /// </summary>
         private void NewDocument()
         {
             var old = _current;
-            _current = new Document { Parent = old, Start = (int)_writer.BaseStream.Position, Written  = 4};
+            _current = new Document { Parent = old, Start = (int)_writer.BaseStream.Position, Written = 4 };
             _writer.Write(0); //length placeholder
         }
+
+        /// <summary>
+        /// Write the document terminator, prepenf the original length.
+        /// </summary>
+        /// <param name="includeEeo"></param>
         private void EndDocument(bool includeEeo)
         {
             var old = _current;
@@ -47,7 +62,7 @@ namespace NoRM.BSON
             {
                 Written(1);
                 _writer.Write((byte)0);
-            }            
+            }
             _writer.Seek(_current.Start, SeekOrigin.Begin);
             _writer.Write(_current.Written); //override the document length placeholder
             _writer.Seek(0, SeekOrigin.End); //back to the end
@@ -58,6 +73,11 @@ namespace NoRM.BSON
             }
 
         }
+
+        /// <summary>
+        /// increment the number of bytes written.
+        /// </summary>
+        /// <param name="length"></param>
         private void Written(int length)
         {
             _current.Written += length;
@@ -68,7 +88,7 @@ namespace NoRM.BSON
             NewDocument();
             if (document is Flyweight)
             {
-                WriteFlyweight((Flyweight) document);
+                WriteFlyweight((Flyweight)document);
             }
             else
             {
@@ -77,6 +97,10 @@ namespace NoRM.BSON
             EndDocument(true);
         }
 
+        /// <summary>
+        /// Flyweight is really easy.
+        /// </summary>
+        /// <param name="document"></param>
         private void WriteFlyweight(Flyweight document)
         {
             foreach (var property in document.AllProperties())
@@ -84,6 +108,11 @@ namespace NoRM.BSON
                 SerializeMember(property.PropertyName, property.Value);
             }
         }
+
+        /// <summary>
+        /// Actually write the property bytes.
+        /// </summary>
+        /// <param name="document"></param>
         private void WriteObject(object document)
         {
             var typeHelper = TypeHelper.GetHelperForType(document.GetType());
@@ -92,9 +121,9 @@ namespace NoRM.BSON
 
             foreach (var property in typeHelper.GetProperties())
             {
-                var name = property == idProperty 
+                var name = property == idProperty
                     ? "_id"
-                    :   MongoConfiguration.GetPropertyAlias(documentType, property.Name);
+                    : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
 
                 var value = property.Getter(document);
                 if (value == null && property.IgnoreIfNull)
@@ -102,6 +131,15 @@ namespace NoRM.BSON
                     continue;
                 }
                 SerializeMember(name, value);
+            }
+
+            var fly = document as IFlyweight;
+            if (fly != null)
+            {
+                foreach(var f in fly.AllProperties())
+                {
+                    this.SerializeMember(f.PropertyName, f.Value);
+                }
             }
         }
 
@@ -119,17 +157,17 @@ namespace NoRM.BSON
                 type = Enum.GetUnderlyingType(type);
             }
 
-            BSONTypes storageType;           
+            BSONTypes storageType;
             if (!_typeMap.TryGetValue(type, out storageType))
             {
                 //this isn't a simple type;
                 Write(name, value);
                 return;
             }
-            
+
             Write(storageType);
             WriteName(name);
-            switch(storageType)
+            switch (storageType)
             {
                 case BSONTypes.Int32:
                     Written(4);
@@ -184,19 +222,19 @@ namespace NoRM.BSON
             else if (value is IEnumerable)
             {
                 Write(BSONTypes.Array);
-                WriteName(name);    
+                WriteName(name);
                 NewDocument();
-                Write((IEnumerable)value);                
+                Write((IEnumerable)value);
                 EndDocument(true);
             }
             else if (value is ModifierCommand)
             {
                 var command = (ModifierCommand)value;
                 Write(BSONTypes.Object);
-                WriteName(command.CommandName);                
+                WriteName(command.CommandName);
                 NewDocument();
                 SerializeMember(name, command.ValueForCommand);
-                EndDocument(true);                               
+                EndDocument(true);
             }
             else if (value is QualifierCommand)
             {
@@ -206,13 +244,13 @@ namespace NoRM.BSON
                 NewDocument();
                 SerializeMember(command.CommandName, command.ValueForCommand);
                 EndDocument(true);
-            }          
-            else 
+            }
+            else
             {
                 Write(BSONTypes.Object);
-                WriteName(name);                
+                WriteName(name);
                 WriteDocument(value); //Write manages new/end document                
-            }  
+            }
         }
         private void Write(IEnumerable enumerable)
         {
@@ -230,9 +268,9 @@ namespace NoRM.BSON
             }
         }        
         private void WriteBinnary(object value)
-        {            
+        {
             if (value is byte[])
-            {                
+            {
                 var bytes = (byte[])value;
                 var length = bytes.Length;
                 _writer.Write(length + 4);
@@ -243,7 +281,7 @@ namespace NoRM.BSON
             }
             else if (value is Guid)
             {
-                var guid = (Guid) value;
+                var guid = (Guid)value;
                 var bytes = guid.ToByteArray();
                 _writer.Write(bytes.Length);
                 _writer.Write((byte)3);
@@ -284,7 +322,7 @@ namespace NoRM.BSON
             options = string.Concat(options, 'u'); //all .net regex are unicode regex, therefore:
             if ((regex.Options & RegexOptions.IgnorePatternWhitespace) == RegexOptions.IgnorePatternWhitespace) { options = string.Concat(options, 'w'); }
             if ((regex.Options & RegexOptions.ExplicitCapture) == RegexOptions.ExplicitCapture) { options = string.Concat(options, 'x'); }
-            WriteName(options);            
+            WriteName(options);
         }
         private void Write(ScopedCode value)
         {
@@ -293,7 +331,7 @@ namespace NoRM.BSON
             WriteDocument(value.Scope);
             EndDocument(false);
         }
-        
+
         private class Document
         {
             public int Start;

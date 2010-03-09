@@ -11,15 +11,15 @@ namespace NoRM.BSON
     public class BsonDeserializer
     {
         private static readonly Type _IEnumerableType = typeof(IEnumerable);
-        private static readonly Type _IDictionaryType = typeof (IDictionary<,>);
-        
+        private static readonly Type _IDictionaryType = typeof(IDictionary<,>);
+
         private readonly static IDictionary<BSONTypes, Type> _typeMap = new Dictionary<BSONTypes, Type>
          {
              {BSONTypes.Int32, typeof(int)}, {BSONTypes.Int64, typeof (long)}, {BSONTypes.Boolean, typeof (bool)}, {BSONTypes.String, typeof (string)},
              {BSONTypes.Double, typeof(double)}, {BSONTypes.Binary, typeof (byte[])}, {BSONTypes.Regex, typeof (Regex)}, {BSONTypes.DateTime, typeof (DateTime)},
              {BSONTypes.MongoOID, typeof(ObjectId)}
-         };     
-        
+         };
+
         public static T Deserialize<T>(byte[] objectData) where T : class, new()
         {
             IDictionary<WeakReference, Flyweight> outprops = new Dictionary<WeakReference, Flyweight>();
@@ -43,19 +43,19 @@ namespace NoRM.BSON
         private Document _current;
 
         private BsonDeserializer(BinaryReader reader)
-        {            
-            _reader = reader;             
+        {
+            _reader = reader;
         }
 
         private T Read<T>()
         {
-            NewDocument(_reader.ReadInt32());            
-            var @object = (T)DeserializeValue(typeof(T), BSONTypes.Object);            
+            NewDocument(_reader.ReadInt32());
+            var @object = (T)DeserializeValue(typeof(T), BSONTypes.Object);
             return @object;
         }
 
         private void Read(int read)
-        {            
+        {
             _current.Read += read;
         }
         private bool IsDone()
@@ -66,14 +66,14 @@ namespace NoRM.BSON
                 _reader.ReadByte(); // EOO
                 var old = _current;
                 _current = old.Parent;
-                if (_current != null){ Read(old.Length); }
+                if (_current != null) { Read(old.Length); }
             }
             return isDone;
         }
         private void NewDocument(int length)
         {
             var old = _current;
-            _current = new Document {Length = length, Parent = old, Read = 4};            
+            _current = new Document { Length = length, Parent = old, Read = 4 };
         }
         private object DeserializeValue(Type type, BSONTypes storedType)
         {
@@ -86,12 +86,12 @@ namespace NoRM.BSON
                 return null;
             }
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {            
+            {
                 type = Nullable.GetUnderlyingType(type);
-            }  
+            }
             if (type == typeof(string))
             {
-                return ReadString();                
+                return ReadString();
             }
             if (type == typeof(int))
             {
@@ -118,7 +118,7 @@ namespace NoRM.BSON
             {
                 Read(1);
                 return _reader.ReadBoolean();
-            } 
+            }
             if (type == typeof(DateTime))
             {
                 return BsonHelper.EPOCH.AddMilliseconds(ReadLong(BSONTypes.Int64));
@@ -127,7 +127,7 @@ namespace NoRM.BSON
             {
                 Read(12);
                 return new ObjectId(_reader.ReadBytes(12));
-            }                       
+            }
             if (type == typeof(long))
             {
                 return ReadLong(storedType);
@@ -144,13 +144,13 @@ namespace NoRM.BSON
             if (type == typeof(ScopedCode))
             {
                 return ReadScopedCode();
-            }     
+            }
             if (type == typeof(Flyweight))
             {
                 return ReadFlyweight();
             }
-           
-            return ReadObject(type);            
+
+            return ReadObject(type);
         }
 
         private object ReadObject(Type type)
@@ -159,24 +159,35 @@ namespace NoRM.BSON
             var typeHelper = TypeHelper.GetHelperForType(type);
             while (true)
             {
-                var storageType = ReadType();                
+                var storageType = ReadType();
                 var name = ReadName();
                 if (name == "$err" || name == "errmsg")
                 {
-                    HandleError((string)DeserializeValue(typeof (string), BSONTypes.String));                    
+                    HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
-                var property = (name == "_id") ? typeHelper.FindIdProperty() : typeHelper.FindProperty(name);                
+                var property = (name == "_id") ? typeHelper.FindIdProperty() : typeHelper.FindProperty(name);
+                var isNull = false;
                 if (storageType == BSONTypes.Object)
                 {
-                    NewDocument(_reader.ReadInt32());
+                    var length = _reader.ReadInt32();
+                    if (length == 5)
+                    {
+                        _reader.ReadByte(); //eoo
+                        Read(5);
+                        isNull = true;
+                    }
+                    else
+                    {
+                        NewDocument(length);    
+                    }                                        
                 }
                 object container = null;
                 if (property.Setter == null)
                 {
                     var o = property.Getter(instance);
-                    container = o is IList || IsDictionary(property.Type) ? o : null;                    
+                    container = o is IList || IsDictionary(property.Type) ? o : null;
                 }
-                var value = DeserializeValue(property.Type, storageType, container); 
+                var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
                 if (container == null)
                 {
                     property.Setter(instance, value);
@@ -187,7 +198,7 @@ namespace NoRM.BSON
                 }
             }
             return instance;
-        }        
+        }
         private object ReadList(Type listType, object existingContainer)
         {
             if (IsDictionary(listType))
@@ -198,18 +209,18 @@ namespace NoRM.BSON
             NewDocument(_reader.ReadInt32());
             var isReadonly = false;
             var itemType = ListHelper.GetListItemType(listType);
-            var container = existingContainer == null ? ListHelper.CreateContainer(listType, itemType, out isReadonly) : (IList) existingContainer;
+            var container = existingContainer == null ? ListHelper.CreateContainer(listType, itemType, out isReadonly) : (IList)existingContainer;
             while (!IsDone())
             {
                 var storageType = ReadType();
-                
+
                 ReadName();
                 if (storageType == BSONTypes.Object)
                 {
                     NewDocument(_reader.ReadInt32());
                 }
                 var value = DeserializeValue(itemType, storageType);
-                container.Add(value);                  
+                container.Add(value);
             }
             if (listType.IsArray)
             {
@@ -230,32 +241,32 @@ namespace NoRM.BSON
         private object ReadDictionary(Type listType, object existingContainer)
         {
             var valueType = ListHelper.GetDictionarValueType(listType);
-            var container = existingContainer == null ? 
-                ListHelper.CreateDictionary(listType, ListHelper.GetDictionarKeyType(listType), valueType) 
-                : (IDictionary) existingContainer;
-                
+            var container = existingContainer == null ?
+                ListHelper.CreateDictionary(listType, ListHelper.GetDictionarKeyType(listType), valueType)
+                : (IDictionary)existingContainer;
+
             while (!IsDone())
             {
                 var storageType = ReadType();
-                
+
                 var key = ReadName();
                 if (storageType == BSONTypes.Object)
                 {
                     NewDocument(_reader.ReadInt32());
                 }
                 var value = DeserializeValue(valueType, storageType);
-                container.Add(key, value);                  
+                container.Add(key, value);
             }
             return container;
         }
         private object ReadBinary()
         {
-            var length = _reader.ReadInt32();            
+            var length = _reader.ReadInt32();
             var subType = _reader.ReadByte();
-            Read(5 + length);            
+            Read(5 + length);
             if (subType == 2)
-            {                
-                return _reader.ReadBytes(_reader.ReadInt32());  
+            {
+                return _reader.ReadBytes(_reader.ReadInt32());
             }
             if (subType == 3)
             {
@@ -269,9 +280,9 @@ namespace NoRM.BSON
             byte b;
             while ((b = _reader.ReadByte()) > 0)
             {
-                buffer.Add(b);                
+                buffer.Add(b);
             }
-            Read(buffer.Count+1);
+            Read(buffer.Count + 1);
             return Encoding.UTF8.GetString(buffer.ToArray());
         }
         private string ReadString()
@@ -285,7 +296,7 @@ namespace NoRM.BSON
         }
         private int ReadInt(BSONTypes storedType)
         {
-            switch(storedType)
+            switch (storedType)
             {
                 case BSONTypes.Int32:
                     Read(4);
@@ -295,7 +306,7 @@ namespace NoRM.BSON
                     return (int)_reader.ReadInt64();
                 case BSONTypes.Double:
                     Read(8);
-                    return (int)_reader.ReadDouble();    
+                    return (int)_reader.ReadDouble();
                 default:
                     throw new MongoException("Could not create an int from " + storedType);
             }
@@ -323,7 +334,7 @@ namespace NoRM.BSON
             {
                 return Enum.Parse(type, ReadLong(storedType).ToString(), false);
             }
-            return Enum.Parse(type, ReadInt(storedType).ToString(), false);            
+            return Enum.Parse(type, ReadInt(storedType).ToString(), false);
         }
         private object ReadRegularExpression()
         {
@@ -338,7 +349,7 @@ namespace NoRM.BSON
             if (optionsString.Contains("s")) options = options | RegexOptions.Singleline;
             if (optionsString.Contains("w")) options = options | RegexOptions.IgnorePatternWhitespace;
             if (optionsString.Contains("x")) options = options | RegexOptions.ExplicitCapture;
-            
+
             return new Regex(pattern, options);
         }
         private BSONTypes ReadType()
@@ -351,8 +362,8 @@ namespace NoRM.BSON
             _reader.ReadInt32(); //length
             Read(4);
             var name = ReadString();
-            NewDocument(_reader.ReadInt32());                       
-            return new ScopedCode { CodeString = name, Scope = DeserializeValue(typeof(Flyweight), BSONTypes.Object) };            
+            NewDocument(_reader.ReadInt32());
+            return new ScopedCode { CodeString = name, Scope = DeserializeValue(typeof(Flyweight), BSONTypes.Object) };
         }
         private Flyweight ReadFlyweight()
         {
