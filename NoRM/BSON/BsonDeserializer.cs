@@ -8,6 +8,9 @@ namespace NoRM.BSON
     using System.Text;
     using System.Text.RegularExpressions;
 
+    /// <summary>
+    /// BSON Deserializer
+    /// </summary>
     public class BsonDeserializer
     {
         private static readonly Type _IEnumerableType = typeof(IEnumerable);
@@ -19,12 +22,37 @@ namespace NoRM.BSON
              {BSONTypes.Double, typeof(double)}, {BSONTypes.Binary, typeof (byte[])}, {BSONTypes.Regex, typeof (Regex)}, {BSONTypes.DateTime, typeof (DateTime)},
              {BSONTypes.MongoOID, typeof(ObjectId)}
          };
+        private readonly BinaryReader _reader;
+        private Document _current;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BsonDeserializer"/> class.
+        /// </summary>
+        /// <param name="reader">The reader.</param>
+        private BsonDeserializer(BinaryReader reader)
+        {
+            _reader = reader;
+        }
+
+        /// <summary>
+        /// Deserializes the specified object data.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectData">The object data.</param>
+        /// <returns></returns>
         public static T Deserialize<T>(byte[] objectData) where T : class, new()
         {
             IDictionary<WeakReference, Flyweight> outprops = new Dictionary<WeakReference, Flyweight>();
             return Deserialize<T>(objectData, ref outprops);
         }
+
+        /// <summary>
+        /// Deserializes the specified object data.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectData">The object data.</param>
+        /// <param name="outProps">The out props.</param>
+        /// <returns></returns>
         public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Flyweight> outProps)
         {
             using (var ms = new MemoryStream())
@@ -34,19 +62,23 @@ namespace NoRM.BSON
                 return Deserialize<T>(new BinaryReader(ms));
             }
         }
+
+        /// <summary>
+        /// Deserializes the specified stream.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stream">The stream.</param>
+        /// <returns></returns>
         private static T Deserialize<T>(BinaryReader stream)
         {
             return new BsonDeserializer(stream).Read<T>();
         }
 
-        private readonly BinaryReader _reader;
-        private Document _current;
-
-        private BsonDeserializer(BinaryReader reader)
-        {
-            _reader = reader;
-        }
-
+        /// <summary>
+        /// Reads a document instance.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         private T Read<T>()
         {
             NewDocument(_reader.ReadInt32());
@@ -54,13 +86,24 @@ namespace NoRM.BSON
             return @object;
         }
 
+        /// <summary>
+        /// Reads the specified document forward by the input value.
+        /// </summary>
+        /// <param name="read">Read length.</param>
         private void Read(int read)
         {
-            _current.Read += read;
+            _current.Digested += read;
         }
+
+        /// <summary>
+        /// Determines whether there is more to read.
+        /// </summary>
+        /// <returns>
+        /// 	<c>true</c> if this instance is read; otherwise, <c>false</c>.
+        /// </returns>
         private bool IsDone()
         {
-            var isDone = _current.Read + 1 == _current.Length;
+            var isDone = _current.Digested + 1 == _current.Length;
             if (isDone)
             {
                 _reader.ReadByte(); // EOO
@@ -70,15 +113,34 @@ namespace NoRM.BSON
             }
             return isDone;
         }
+        /// <summary>
+        /// Creates a new document.
+        /// </summary>
+        /// <param name="length">The document length.</param>
         private void NewDocument(int length)
         {
             var old = _current;
-            _current = new Document { Length = length, Parent = old, Read = 4 };
+            _current = new Document { Length = length, Parent = old, Digested = 4 };
         }
+
+        /// <summary>
+        /// Deserializes the value.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="storedType">Type of the stored.</param>
+        /// <returns></returns>
         private object DeserializeValue(Type type, BSONTypes storedType)
         {
             return DeserializeValue(type, storedType, null);
         }
+
+        /// <summary>
+        /// Deserializes the value.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="storedType">Type of the stored.</param>
+        /// <param name="container">The container.</param>
+        /// <returns></returns>
         private object DeserializeValue(Type type, BSONTypes storedType, object container)
         {
             if (storedType == BSONTypes.Null)
@@ -153,6 +215,11 @@ namespace NoRM.BSON
             return ReadObject(type);
         }
 
+        /// <summary>
+        /// Reads an object.
+        /// </summary>
+        /// <param name="type">The object type.</param>
+        /// <returns></returns>
         private object ReadObject(Type type)
         {
             var instance = Activator.CreateInstance(type);
@@ -199,6 +266,13 @@ namespace NoRM.BSON
             }
             return instance;
         }
+
+        /// <summary>
+        /// Reads a list.
+        /// </summary>
+        /// <param name="listType">Type of the list.</param>
+        /// <param name="existingContainer">The existing container.</param>
+        /// <returns></returns>
         private object ReadList(Type listType, object existingContainer)
         {
             if (IsDictionary(listType))
@@ -233,11 +307,24 @@ namespace NoRM.BSON
             return container;
         }
 
+        /// <summary>
+        /// Determines whether the specified type is a dictionary.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>
+        /// 	<c>true</c> if the specified type is a dictionary; otherwise, <c>false</c>.
+        /// </returns>
         private static bool IsDictionary(Type type)
         {
             return type.IsGenericType && _IDictionaryType.IsAssignableFrom(type.GetGenericTypeDefinition());
         }
 
+        /// <summary>
+        /// Reads a dictionary.
+        /// </summary>
+        /// <param name="listType">Type of the list.</param>
+        /// <param name="existingContainer">The existing container.</param>
+        /// <returns></returns>
         private object ReadDictionary(Type listType, object existingContainer)
         {
             var valueType = ListHelper.GetDictionarValueType(listType);
@@ -259,6 +346,11 @@ namespace NoRM.BSON
             }
             return container;
         }
+
+        /// <summary>
+        /// Reads binary.
+        /// </summary>
+        /// <returns></returns>
         private object ReadBinary()
         {
             var length = _reader.ReadInt32();
@@ -274,6 +366,11 @@ namespace NoRM.BSON
             }
             throw new MongoException("No support for binary type: " + subType);
         }
+
+        /// <summary>
+        /// Reads a name.
+        /// </summary>
+        /// <returns></returns>
         private string ReadName()
         {
             var buffer = new List<byte>(128); //todo: use a pool to prevent fragmentation
@@ -285,6 +382,11 @@ namespace NoRM.BSON
             Read(buffer.Count + 1);
             return Encoding.UTF8.GetString(buffer.ToArray());
         }
+
+        /// <summary>
+        /// Reads a string.
+        /// </summary>
+        /// <returns></returns>
         private string ReadString()
         {
             var length = _reader.ReadInt32();
@@ -294,6 +396,12 @@ namespace NoRM.BSON
 
             return Encoding.UTF8.GetString(buffer);
         }
+
+        /// <summary>
+        /// Reads ag int.
+        /// </summary>
+        /// <param name="storedType">Type of the stored.</param>
+        /// <returns></returns>
         private int ReadInt(BSONTypes storedType)
         {
             switch (storedType)
@@ -311,6 +419,12 @@ namespace NoRM.BSON
                     throw new MongoException("Could not create an int from " + storedType);
             }
         }
+
+        /// <summary>
+        /// Reads a long.
+        /// </summary>
+        /// <param name="storedType">Type of the stored.</param>
+        /// <returns></returns>
         private long ReadLong(BSONTypes storedType)
         {
             switch (storedType)
@@ -328,6 +442,13 @@ namespace NoRM.BSON
                     throw new MongoException("Could not create an int64 from " + storedType);
             }
         }
+
+        /// <summary>
+        /// Reads an enum.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="storedType">Type of the stored.</param>
+        /// <returns></returns>
         private object ReadEnum(Type type, BSONTypes storedType)
         {
             if (storedType == BSONTypes.Int64)
@@ -336,6 +457,11 @@ namespace NoRM.BSON
             }
             return Enum.Parse(type, ReadInt(storedType).ToString(), false);
         }
+
+        /// <summary>
+        /// Reads the regular expression.
+        /// </summary>
+        /// <returns></returns>
         private object ReadRegularExpression()
         {
             var pattern = ReadName();
@@ -352,11 +478,21 @@ namespace NoRM.BSON
 
             return new Regex(pattern, options);
         }
+
+        /// <summary>
+        /// Reads a type.
+        /// </summary>
+        /// <returns></returns>
         private BSONTypes ReadType()
         {
             Read(1);
             return (BSONTypes)_reader.ReadByte();
         }
+
+        /// <summary>
+        /// Reads scoped code.
+        /// </summary>
+        /// <returns></returns>
         private ScopedCode ReadScopedCode()
         {
             _reader.ReadInt32(); //length
@@ -365,6 +501,11 @@ namespace NoRM.BSON
             NewDocument(_reader.ReadInt32());
             return new ScopedCode { CodeString = name, Scope = DeserializeValue(typeof(Flyweight), BSONTypes.Object) };
         }
+
+        /// <summary>
+        /// Reads a flyweight.
+        /// </summary>
+        /// <returns></returns>
         private Flyweight ReadFlyweight()
         {
             var flyweight = new Flyweight();
@@ -391,18 +532,13 @@ namespace NoRM.BSON
             return flyweight;
         }
 
+        /// <summary>
+        /// Handles ab error.
+        /// </summary>
+        /// <param name="message">The message.</param>
         private static void HandleError(string message)
         {
             throw new MongoException(message);
         }
-
-
-        private class Document
-        {
-            public int Length;
-            public int Read;
-            public Document Parent;
-        }
-
     }
 }

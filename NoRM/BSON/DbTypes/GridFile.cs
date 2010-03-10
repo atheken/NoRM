@@ -125,7 +125,7 @@ namespace NoRM
                 i++;
                 chunks.Insert(chunk);
             }
- while (read > 0);
+            while (read > 0);
         }
 
         /// <summary>
