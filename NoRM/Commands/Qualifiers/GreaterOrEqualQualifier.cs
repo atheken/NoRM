@@ -1,17 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Commands.Qualifiers
 {
+    /// <summary>
+    /// The greater or equal qualifier.
+    /// </summary>
     public class GreaterOrEqualQualifier : QualifierCommand
     {
-        internal GreaterOrEqualQualifier(double value)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GreaterOrEqualQualifier"/> class.
+        /// </summary>
+        /// <param name="value">
+        /// The value.
+        /// </param>
+        internal GreaterOrEqualQualifier(double value) : base("$gte", value)
         {
-            this.CommandName = "$gte";
-            this.ValueForCommand = value;
         }
     }
 }

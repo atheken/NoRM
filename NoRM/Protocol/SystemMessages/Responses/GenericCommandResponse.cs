@@ -1,5 +1,9 @@
-﻿namespace NoRM.Responses
+﻿
+namespace NoRM.Responses
 {
+    /// <summary>
+    /// The generic command response.
+    /// </summary>
     public class GenericCommandResponse
     {
         public double? OK { get; set; }

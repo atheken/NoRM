@@ -56,16 +56,23 @@
     <Compile Include="Attributes\MongoIgnoreIfNullAttribute.cs" />
     <Compile Include="BSON\BsonDeserializer.cs" />
     <Compile Include="BSON\BsonHelper.cs" />
+    <Compile Include="BSON\Command.cs" />
+    <Compile Include="BSON\DbTypes\GridFileChunk.cs" />
     <Compile Include="BSON\DbTypes\GridReadStream.cs" />
     <Compile Include="BSON\DbTypes\ObjectId.cs" />
     <Compile Include="BSON\DbTypes\DBReference.cs" />
     <Compile Include="BSON\DbTypes\ScopedCode.cs" />
     <Compile Include="BSON\BsonSerializer.cs" />
     <Compile Include="BSON\BSONTypes.cs" />
-    <Compile Include="BSON\Commands.cs" />
+    <Compile Include="BSON\ExpandoProperty.cs" />
+    <Compile Include="BSON\MagicProperty.cs" />
+    <Compile Include="BSON\QualifierCommand.cs" />
     <Compile Include="BSON\DbTypes\ObjectIdGenerator.cs" />
+    <Compile Include="BSON\DbTypes\ScopedCodeGeneric.cs" />
+    <Compile Include="BSON\Document.cs" />
     <Compile Include="BSON\DocumentExceedsSizeLimitsException.cs" />
     <Compile Include="BSON\ListHelper.cs" />
+    <Compile Include="BSON\ModifierCommand.cs" />
     <Compile Include="BSON\TypeHelper.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
@@ -94,6 +101,8 @@
     <Compile Include="Configuration\MongoTypeConfiguration.cs" />
     <Compile Include="Configuration\MongoTypeConfigurationGeneric.cs" />
     <Compile Include="Configuration\PropertyMappingExpression.cs" />
+    <Compile Include="Connections\Connection.cs" />
+    <Compile Include="Connections\ConnectionProvider.cs" />
     <Compile Include="Connections\ConnectionProviderFactory.cs" />
     <Compile Include="Connections\ConnectionStringBuilder.cs" />
     <Compile Include="Connections\IConnection.cs" />
@@ -102,13 +111,17 @@
     <Compile Include="Connections\NormalConnectionProvider.cs" />
     <Compile Include="Connections\PooledConnectionProvider.cs" />
     <Compile Include="Connections\QueuedConnectionProviders.cs" />
+    <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
     <Compile Include="CreateCollectionOptions.cs" />
     <Compile Include="IHideSystemTypes.cs" />
     <Compile Include="IMongoCollection.cs" />
+    <Compile Include="IMongoCollectionGeneric.cs" />
+    <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\IMongoQuery.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
+    <Compile Include="Linq\MapReduceResult.cs" />
     <Compile Include="Linq\MongoQuery.cs" />
     <Compile Include="Linq\MongoQueryProvider.cs" />
     <Compile Include="Linq\MongoQueryTranslator.cs" />
@@ -116,9 +129,12 @@
     <Compile Include="Linq\TypeHelper.cs" />
     <Compile Include="MapReduce.cs" />
     <Compile Include="MapReduceOptions.cs" />
+    <Compile Include="MapReduceOptionsGeneric.cs" />
     <Compile Include="MongoAdmin.cs" />
     <Compile Include="Mongo.cs" />
+    <Compile Include="MongoCollectionGeneric.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
+    <Compile Include="Protocol\Messages\QueryMessageGeneric.cs" />
     <Compile Include="Protocol\Messages\UpdateMessage.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -170,9 +186,6 @@
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\SetProfileResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DBTypes\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

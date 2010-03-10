@@ -1,3 +1,4 @@
+
 namespace NoRM.Tests
 {
     using System;

@@ -2,8 +2,14 @@
 
 namespace NoRM.Configuration
 {
+    /// <summary>
+    /// The mongo configuration type map.
+    /// </summary>
     internal class MongoConfigurationTypeMap
     {
+        /// <summary>
+        /// The _field map.
+        /// </summary>
         private readonly Dictionary<string, PropertyMappingExpression> _fieldMap = new Dictionary<string, PropertyMappingExpression>();
 
         /// <summary>
@@ -14,11 +20,13 @@ namespace NoRM.Configuration
         {
             get { return _fieldMap; }
         }
+
         /// <summary>
         /// Gets or sets the name of the collection.
         /// </summary>
         /// <value>The name of the collection.</value>
         internal string CollectionName { get; set; }
+
         /// <summary>
         /// Gets or sets the connection string.
         /// </summary>

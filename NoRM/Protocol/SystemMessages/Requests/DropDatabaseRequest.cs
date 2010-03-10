@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace NoRM.Protocol.SystemMessages.Requests
 {
+    /// <summary>
+    /// The drop database request.
+    /// </summary>
     public class DropDatabaseRequest
     {
-        public double dropDatabase { get { return 1d; } }
+        /// <summary>
+        /// Drop database.
+        /// </summary>
+        public double dropDatabase
+        {
+            get { return 1d; }
+        }
     }
 }

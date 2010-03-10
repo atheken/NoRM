@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace NoRM.Responses
 {
+    /// <summary>
+    /// The server status response.
+    /// </summary>
     public class ServerStatusResponse
     {
         public double? Uptime { get; set; }
@@ -13,6 +12,9 @@ namespace NoRM.Responses
         public MemoryResponse Mem { get; set; }
     }
 
+    /// <summary>
+    /// The global lock response.
+    /// </summary>
     public class GlobalLockResponse
     {
         public double? TotalTime { get; set; }
@@ -20,6 +22,9 @@ namespace NoRM.Responses
         public double? Ratio { get; set; }
     }
 
+    /// <summary>
+    /// The memory response.
+    /// </summary>
     public class MemoryResponse
     {
         public int? Resident { get; set; }

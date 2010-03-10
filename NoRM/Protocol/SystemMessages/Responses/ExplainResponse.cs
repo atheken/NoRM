@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Protocol.SystemMessages.Responses
 {
+    /// <summary>
+    /// The explain response.
+    /// </summary>
     public class ExplainResponse : Explain, IFlyweight
     {
         public int nscanned { get; set; }
@@ -12,6 +14,9 @@ namespace NoRM.Protocol.SystemMessages.Responses
         public Explain[] allPlans { get; set; }
     }
 
+    /// <summary>
+    /// The explain.
+    /// </summary>
     public class Explain
     {
         public string cursor { get; set; }

@@ -1,5 +1,9 @@
-﻿namespace NoRM.Responses
+﻿
+namespace NoRM.Responses
 {
+    /// <summary>
+    /// The validate collection response.
+    /// </summary>
     public class ValidateCollectionResponse
     {
         public string Ns { get; set; }

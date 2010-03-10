@@ -1,0 +1,18 @@
+﻿
+namespace NoRM
+{
+    /// <summary>
+    /// Map/reduce options for a given type
+    /// </summary>
+    /// <typeparam name="T">Type to map and recude</typeparam>
+    public class MapReduceOptions<T> : MapReduceOptions
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MapReduceOptions&lt;T&gt;"/> class.
+        /// </summary>
+        public MapReduceOptions()
+        {
+            CollectionName = typeof(T).Name;
+        }
+    }
+}

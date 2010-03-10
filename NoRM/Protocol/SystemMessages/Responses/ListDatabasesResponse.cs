@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace NoRM.Responses
 {
@@ -14,5 +11,4 @@ namespace NoRM.Responses
         public double? TotalSize { get; set; }
         public List<DatabaseInfo> Databases { get; set; }
     }
-
 }

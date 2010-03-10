@@ -8,7 +8,9 @@ namespace NoRM.Configuration
     /// <summary>
     /// Mongo configuration for a specific type
     /// </summary>
-    /// <typeparam name="T">Type under configuratino</typeparam>
+    /// <typeparam name="T">
+    /// Type under configuratino
+    /// </typeparam>
     public class MongoTypeConfiguration<T> : MongoTypeConfiguration, ITypeConfiguration<T>
     {
         /// <summary>
@@ -33,6 +35,7 @@ namespace NoRM.Configuration
 
             return expression;
         }
+
         /// <summary>
         /// Uses a name collection for a given type.
         /// </summary>
@@ -41,6 +44,7 @@ namespace NoRM.Configuration
         {
             CollectionNames[typeof(T)] = connectionStrings;
         }
+
         /// <summary>
         /// Uses a connection string for a given type.
         /// </summary>

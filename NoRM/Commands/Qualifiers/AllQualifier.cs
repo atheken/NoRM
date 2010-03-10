@@ -1,17 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Commands.Qualifiers
 {
+    /// <summary>
+    /// The all qualifier.
+    /// </summary>
+    /// <typeparam name="T">
+    /// </typeparam>
     public class AllQualifier<T> : QualifierCommand
     {
-        public AllQualifier(params T[] all)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AllQualifier{T}"/> class.
+        /// </summary>
+        /// <param name="all">The value.</param>
+        public AllQualifier(params T[] all) : base("$all", all)
         {
-            this.CommandName = "$all";
-            this.ValueForCommand = all;
         }
     }
 }

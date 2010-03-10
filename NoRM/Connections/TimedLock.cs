@@ -11,9 +11,22 @@ namespace NoRM
     /// </summary>
     public struct TimedLock : IDisposable
     {
+        /// <summary>
+        /// The _target.
+        /// </summary>
         private readonly object _target;
+
+        /// <summary>
+        /// The _leak detector.
+        /// </summary>
         private readonly Sentinel _leakDetector;
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TimedLock"/> struct.
+        /// </summary>
+        /// <param name="o">
+        /// The o.
+        /// </param>
         private TimedLock(object o)
         {
             _target = o;
@@ -22,11 +35,32 @@ namespace NoRM
 #endif
         }
 
+        /// <summary>
+        /// The lock.
+        /// </summary>
+        /// <param name="o">
+        /// The o.
+        /// </param>
+        /// <returns>
+        /// </returns>
         public static TimedLock Lock(object o)
         {
             return Lock(o, TimeSpan.FromSeconds(10));
         }
 
+        /// <summary>
+        /// The lock.
+        /// </summary>
+        /// <param name="o">
+        /// The o.
+        /// </param>
+        /// <param name="timeout">
+        /// The timeout.
+        /// </param>
+        /// <returns>
+        /// </returns>
+        /// <exception cref="LockTimeoutException">
+        /// </exception>
         public static TimedLock Lock(object o, TimeSpan timeout)
         {
             var tl = new TimedLock(o);
@@ -40,22 +74,30 @@ namespace NoRM
                 {
                     blockingTrace = Sentinel.StackTraces[o] as StackTrace;
                 }
+
                 throw new LockTimeoutException(blockingTrace);
 #else
 				throw new LockTimeoutException();
 #endif
             }
+
 #if DEBUG
-            // Lock acquired. Store the stack trace.
+
+
+// Lock acquired. Store the stack trace.
             var trace = new StackTrace();
             lock (Sentinel.StackTraces)
             {
                 Sentinel.StackTraces.Add(o, trace);
             }
+
 #endif
             return tl;
         }
 
+        /// <summary>
+        /// The dispose.
+        /// </summary>
         public void Dispose()
         {
             Monitor.Exit(_target);
@@ -70,16 +112,28 @@ namespace NoRM
             {
                 Sentinel.StackTraces.Remove(_target);
             }
+
 #endif
         }
 
 #if DEBUG
-        // (In Debug mode, we make it a class so that we can add a finalizer
+
+
+// (In Debug mode, we make it a class so that we can add a finalizer
         // in order to detect when the object is not freed.)
+        /// <summary>
+        /// The sentinel.
+        /// </summary>
         private class Sentinel
         {
+            /// <summary>
+            /// The stack traces.
+            /// </summary>
             public static readonly Hashtable StackTraces = new Hashtable();
 
+            /// <summary>
+            /// Finalizes an instance of the <see cref="Sentinel"/> class. 
+            /// </summary>
             ~Sentinel()
             {
                 // If this finalizer runs, someone somewhere failed to
@@ -92,35 +146,79 @@ namespace NoRM
     }
 
     #region public class LockTimeoutException : ApplicationException
+
     /// <summary>
     /// Thrown when a lock times out.
     /// </summary>
     [Serializable]
     public class LockTimeoutException : ApplicationException
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
+        /// </summary>
         public LockTimeoutException() : base("Timeout waiting for lock")
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
+        /// </summary>
+        /// <param name="message">
+        /// The message.
+        /// </param>
         public LockTimeoutException(string message) : base(message)
-        { }
+        {
+        }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
+        /// </summary>
+        /// <param name="message">
+        /// The message.
+        /// </param>
+        /// <param name="innerException">
+        /// The inner exception.
+        /// </param>
         public LockTimeoutException(string message, Exception innerException) : base(message, innerException)
-        { }
+        {
+        }
 
 #if DEBUG
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
+        /// </summary>
+        /// <param name="blockingStackTrace">
+        /// The blocking stack trace.
+        /// </param>
         public LockTimeoutException(StackTrace blockingStackTrace)
         {
             BlockingStackTrace = blockingStackTrace;
         }
+
 #endif
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
+        /// </summary>
+        /// <param name="info">
+        /// The info.
+        /// </param>
+        /// <param name="context">
+        /// The context.
+        /// </param>
         protected LockTimeoutException(SerializationInfo info, StreamingContext context) : base(info, context)
-        { }
+        {
+        }
 
 #if DEBUG
+
+        /// <summary>
+        /// Gets BlockingStackTrace.
+        /// </summary>
         public StackTrace BlockingStackTrace { get; private set; }
 #endif
     }
+
     #endregion
 }

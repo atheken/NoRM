@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Commands.Qualifiers
 {
-    public class LessOrEqualQualifier: QualifierCommand
+    /// <summary>
+    /// The less or equal qualifier.
+    /// </summary>
+    public class LessOrEqualQualifier : QualifierCommand
     {
-        internal LessOrEqualQualifier(double value)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LessOrEqualQualifier"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        internal LessOrEqualQualifier(double value) : base("$lte", value)
         {
-            this.CommandName = "$lte";
-            this.ValueForCommand = value;
         }
     }
 }

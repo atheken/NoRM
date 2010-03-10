@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Commands
 {
+    /// <summary>
+    /// The increment operation.
+    /// </summary>
     public class IncrementOperation : ModifierCommand
     {
-        public IncrementOperation(int amountToIncrement)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IncrementOperation"/> class.
+        /// </summary>
+        /// <param name="amountToIncrement">The amount to increment.</param>
+        public IncrementOperation(int amountToIncrement) : base("$inc", amountToIncrement)
         {
-            this.CommandName = "$inc";
-            this.ValueForCommand = amountToIncrement;
         }
     }
 }

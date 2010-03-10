@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Commands.Qualifiers
 {
+    /// <summary>
+    /// The greater than qualifier.
+    /// </summary>
     public class GreaterThanQualifier : QualifierCommand
     {
-        internal GreaterThanQualifier(double value)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GreaterThanQualifier"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        internal GreaterThanQualifier(double value) : base("$gt", value)
         {
-            this.CommandName = "$gt";
-            this.ValueForCommand = value;
         }
     }
 }

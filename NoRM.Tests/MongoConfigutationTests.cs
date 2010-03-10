@@ -1,10 +1,8 @@
 ﻿
 using System;
 using System.Linq;
-using NoRM.BSON.DbTypes;
 using NoRM.Configuration;
 using NoRM.Linq;
-using NoRM.Responses;
 using Xunit;
 
 namespace NoRM.Tests
