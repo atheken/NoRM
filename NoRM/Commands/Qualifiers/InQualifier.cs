@@ -1,17 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Commands.Qualifiers
 {
-    public class InQualifier<T> :QualifierCommand
+    /// <summary>
+    /// The in qualifier.
+    /// </summary>
+    /// <typeparam name="T">In type to qualify</typeparam>
+    public class InQualifier<T> : QualifierCommand
     {
-        public InQualifier(params T[] inset)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InQualifier{T}"/> class.
+        /// </summary>
+        /// <param name="inset">
+        /// The inset.
+        /// </param>
+        public InQualifier(params T[] inset) : base("$in", inset)
         {
-            this.CommandName = "$in";
-            this.ValueForCommand = inset;
         }
     }
 }

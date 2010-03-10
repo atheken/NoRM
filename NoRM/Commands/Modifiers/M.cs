@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.Commands;
+﻿using NoRM.Commands;
 
 namespace NoRM
 {
@@ -19,11 +15,11 @@ namespace NoRM
         /// <summary>
         /// Creates a $inc operation to be applied to a field using the update command.
         /// </summary>
-        /// <param name="amountToIncrementBy"></param>
+        /// <param name="amountToIncrementBy">The amount to increment by.</param>
         /// <returns></returns>
         public static IncrementOperation Inc(int amountToIncrementBy)
         {
-           return new IncrementOperation(amountToIncrementBy);
+            return new IncrementOperation(amountToIncrementBy);
         }
     }
 }

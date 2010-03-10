@@ -2,7 +2,6 @@ namespace NoRM.Tests
 {
     using System;
     using System.Diagnostics;
-    using System.Threading;
 
     public abstract class MongoFixture : IDisposable
     {

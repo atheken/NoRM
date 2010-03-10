@@ -1,25 +1,46 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Collections;
 using NoRM.Configuration;
 
 namespace NoRM.BSON
 {
+    /// <summary>
+    /// The bson serializer.
+    /// </summary>
     internal class BsonSerializer
     {
-        private readonly static IDictionary<Type, BSONTypes> _typeMap = new Dictionary<Type, BSONTypes>
-         {
-             {typeof (int), BSONTypes.Int32}, {typeof (long), BSONTypes.Int64}, {typeof (bool), BSONTypes.Boolean}, {typeof (string), BSONTypes.String},
-             {typeof(double), BSONTypes.Double}, {typeof (Guid), BSONTypes.Binary}, {typeof (Regex), BSONTypes.Regex}, {typeof (DateTime), BSONTypes.DateTime}, 
-             {typeof(float), BSONTypes.Double}, {typeof (byte[]), BSONTypes.Binary}, {typeof(ObjectId), BSONTypes.MongoOID}, {typeof(ScopedCode), BSONTypes.ScopedCode}
-         };
+        private static readonly IDictionary<Type, BSONTypes> _typeMap = new Dictionary<Type, BSONTypes>
+                                                                            {
+                                                                                {typeof (int), BSONTypes.Int32},
+                                                                                {typeof (long), BSONTypes.Int64},
+                                                                                {typeof (bool), BSONTypes.Boolean},
+                                                                                {typeof (string), BSONTypes.String},
+                                                                                {typeof (double), BSONTypes.Double},
+                                                                                {typeof (Guid), BSONTypes.Binary},
+                                                                                {typeof (Regex), BSONTypes.Regex},
+                                                                                {typeof (DateTime), BSONTypes.DateTime},
+                                                                                {typeof (float), BSONTypes.Double},
+                                                                                {typeof (byte[]), BSONTypes.Binary},
+                                                                                {typeof (ObjectId), BSONTypes.MongoOID},
+                                                                                {
+                                                                                    typeof (ScopedCode),
+                                                                                    BSONTypes.ScopedCode
+                                                                                    }
+                                                                            };
 
         private readonly BinaryWriter _writer;
         private Document _current;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BsonSerializer"/> class.
+        /// </summary>
+        /// <param name="writer">
+        /// The writer.
+        /// </param>
         private BsonSerializer(BinaryWriter writer)
         {
             _writer = writer;
@@ -28,8 +49,8 @@ namespace NoRM.BSON
         /// <summary>
         /// Convert a document to it's BSON equivalent.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="document"></param>
+        /// <typeparam name="T">Type to serialize</typeparam>
+        /// <param name="document">The document.</param>
         /// <returns></returns>
         public static byte[] Serialize<T>(T document)
         {
@@ -47,14 +68,14 @@ namespace NoRM.BSON
         private void NewDocument()
         {
             var old = _current;
-            _current = new Document { Parent = old, Start = (int)_writer.BaseStream.Position, Written = 4 };
-            _writer.Write(0); //length placeholder
+            _current = new Document { Parent = old, Length = (int)_writer.BaseStream.Position, Digested = 4 };
+            _writer.Write(0); // length placeholder
         }
 
         /// <summary>
         /// Write the document terminator, prepenf the original length.
         /// </summary>
-        /// <param name="includeEeo"></param>
+        /// <param name="includeEeo">if set to <c>true</c> include eeo.</param>
         private void EndDocument(bool includeEeo)
         {
             var old = _current;
@@ -63,26 +84,30 @@ namespace NoRM.BSON
                 Written(1);
                 _writer.Write((byte)0);
             }
-            _writer.Seek(_current.Start, SeekOrigin.Begin);
-            _writer.Write(_current.Written); //override the document length placeholder
-            _writer.Seek(0, SeekOrigin.End); //back to the end
+
+            _writer.Seek(_current.Length, SeekOrigin.Begin);
+            _writer.Write(_current.Digested); // override the document length placeholder
+            _writer.Seek(0, SeekOrigin.End); // back to the end
             _current = _current.Parent;
             if (_current != null)
             {
-                Written(old.Written);
+                Written(old.Digested);
             }
-
         }
 
         /// <summary>
         /// increment the number of bytes written.
         /// </summary>
-        /// <param name="length"></param>
+        /// <param name="length">The length written.</param>
         private void Written(int length)
         {
-            _current.Written += length;
+            _current.Digested += length;
         }
 
+        /// <summary>
+        /// Writes a document.
+        /// </summary>
+        /// <param name="document">The document.</param>
         private void WriteDocument(object document)
         {
             NewDocument();
@@ -94,13 +119,14 @@ namespace NoRM.BSON
             {
                 WriteObject(document);
             }
+
             EndDocument(true);
         }
 
         /// <summary>
-        /// Flyweight is really easy.
+        /// Writes a Flyweight.
         /// </summary>
-        /// <param name="document"></param>
+        /// <param name="document">The document.</param>
         private void WriteFlyweight(Flyweight document)
         {
             foreach (var property in document.AllProperties())
@@ -112,7 +138,7 @@ namespace NoRM.BSON
         /// <summary>
         /// Actually write the property bytes.
         /// </summary>
-        /// <param name="document"></param>
+        /// <param name="document">The document.</param>
         private void WriteObject(object document)
         {
             var typeHelper = TypeHelper.GetHelperForType(document.GetType());
@@ -122,27 +148,33 @@ namespace NoRM.BSON
             foreach (var property in typeHelper.GetProperties())
             {
                 var name = property == idProperty
-                    ? "_id"
-                    : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
+                               ? "_id"
+                               : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
 
                 var value = property.Getter(document);
                 if (value == null && property.IgnoreIfNull)
                 {
                     continue;
                 }
+
                 SerializeMember(name, value);
             }
 
             var fly = document as IFlyweight;
             if (fly != null)
             {
-                foreach(var f in fly.AllProperties())
+                foreach (var f in fly.AllProperties())
                 {
-                    this.SerializeMember(f.PropertyName, f.Value);
+                    SerializeMember(f.PropertyName, f.Value);
                 }
             }
         }
 
+        /// <summary>
+        /// Serializes a member.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="value">The value.</param>
         private void SerializeMember(string name, object value)
         {
             if (value == null)
@@ -151,6 +183,7 @@ namespace NoRM.BSON
                 WriteName(name);
                 return;
             }
+
             var type = value.GetType();
             if (type.IsEnum)
             {
@@ -160,7 +193,7 @@ namespace NoRM.BSON
             BSONTypes storageType;
             if (!_typeMap.TryGetValue(type, out storageType))
             {
-                //this isn't a simple type;
+                // this isn't a simple type;
                 Write(name, value);
                 return;
             }
@@ -182,8 +215,15 @@ namespace NoRM.BSON
                     return;
                 case BSONTypes.Double:
                     Written(8);
-                    if (value is float) { _writer.Write(Convert.ToDouble((float)value)); }
-                    else { _writer.Write((double)value); }
+                    if (value is float)
+                    {
+                        _writer.Write(Convert.ToDouble((float)value));
+                    }
+                    else
+                    {
+                        _writer.Write((double)value);
+                    }
+
                     return;
                 case BSONTypes.Boolean:
                     Written(1);
@@ -209,6 +249,11 @@ namespace NoRM.BSON
             }
         }
 
+        /// <summary>
+        /// Writes a name/value pair.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="value">The value.</param>
         private void Write(string name, object value)
         {
             if (value is IDictionary)
@@ -249,24 +294,45 @@ namespace NoRM.BSON
             {
                 Write(BSONTypes.Object);
                 WriteName(name);
-                WriteDocument(value); //Write manages new/end document                
+                WriteDocument(value); // Write manages new/end document                
             }
         }
+
+        /// <summary>
+        /// Writes an enumerable list.
+        /// </summary>
+        /// <param name="enumerable">
+        /// The enumerable.
+        /// </param>
         private void Write(IEnumerable enumerable)
         {
             var index = 0;
             foreach (var value in enumerable)
             {
-                SerializeMember(index++.ToString(), value);
+                SerializeMember((index++).ToString(), value);
             }
         }
+
+        /// <summary>
+        /// Writes a dictionary.
+        /// </summary>
+        /// <param name="dictionary">
+        /// The dictionary.
+        /// </param>
         private void Write(IDictionary dictionary)
         {
             foreach (var key in dictionary.Keys)
             {
                 SerializeMember((string)key, dictionary[key]);
             }
-        }        
+        }
+
+        /// <summary>
+        /// Writes binnary.
+        /// </summary>
+        /// <param name="value">
+        /// The value.
+        /// </param>
         private void WriteBinnary(object value)
         {
             if (value is byte[])
@@ -289,11 +355,25 @@ namespace NoRM.BSON
                 Written(5 + bytes.Length);
             }
         }
+
+        /// <summary>
+        /// Writes a BSON type.
+        /// </summary>
+        /// <param name="type">
+        /// The type.
+        /// </param>
         private void Write(BSONTypes type)
         {
             _writer.Write((byte)type);
             Written(1);
         }
+
+        /// <summary>
+        /// Writes a name.
+        /// </summary>
+        /// <param name="name">
+        /// The name.
+        /// </param>
         private void WriteName(string name)
         {
             var bytes = Encoding.UTF8.GetBytes(name);
@@ -301,42 +381,84 @@ namespace NoRM.BSON
             _writer.Write((byte)0);
             Written(bytes.Length + 1);
         }
+
+        /// <summary>
+        /// Writes a string name.
+        /// </summary>
+        /// <param name="name">
+        /// The name.
+        /// </param>
         private void Write(string name)
         {
             var bytes = Encoding.UTF8.GetBytes(name);
             _writer.Write(bytes.Length + 1);
             _writer.Write(bytes);
             _writer.Write((byte)0);
-            Written(bytes.Length + 5); //stringLength + length + null byte
+            Written(bytes.Length + 5); // stringLength + length + null byte
         }
+
+        /// <summary>
+        /// Writes a regex.
+        /// </summary>
+        /// <param name="regex">
+        /// The regex.
+        /// </param>
         private void Write(Regex regex)
         {
             WriteName(regex.ToString());
 
             var options = string.Empty;
-            if ((regex.Options & RegexOptions.ECMAScript) == RegexOptions.ECMAScript) { options = string.Concat(options, 'e'); }
-            if ((regex.Options & RegexOptions.IgnoreCase) == RegexOptions.IgnoreCase) { options = string.Concat(options, 'i'); }
-            if ((regex.Options & RegexOptions.CultureInvariant) == RegexOptions.CultureInvariant) { options = string.Concat(options, 'l'); }
-            if ((regex.Options & RegexOptions.Multiline) == RegexOptions.Multiline) { options = string.Concat(options, 'm'); }
-            if ((regex.Options & RegexOptions.Singleline) == RegexOptions.Singleline) { options = string.Concat(options, 's'); }
-            options = string.Concat(options, 'u'); //all .net regex are unicode regex, therefore:
-            if ((regex.Options & RegexOptions.IgnorePatternWhitespace) == RegexOptions.IgnorePatternWhitespace) { options = string.Concat(options, 'w'); }
-            if ((regex.Options & RegexOptions.ExplicitCapture) == RegexOptions.ExplicitCapture) { options = string.Concat(options, 'x'); }
+            if ((regex.Options & RegexOptions.ECMAScript) == RegexOptions.ECMAScript)
+            {
+                options = string.Concat(options, 'e');
+            }
+
+            if ((regex.Options & RegexOptions.IgnoreCase) == RegexOptions.IgnoreCase)
+            {
+                options = string.Concat(options, 'i');
+            }
+
+            if ((regex.Options & RegexOptions.CultureInvariant) == RegexOptions.CultureInvariant)
+            {
+                options = string.Concat(options, 'l');
+            }
+
+            if ((regex.Options & RegexOptions.Multiline) == RegexOptions.Multiline)
+            {
+                options = string.Concat(options, 'm');
+            }
+
+            if ((regex.Options & RegexOptions.Singleline) == RegexOptions.Singleline)
+            {
+                options = string.Concat(options, 's');
+            }
+
+            options = string.Concat(options, 'u'); // all .net regex are unicode regex, therefore:
+            if ((regex.Options & RegexOptions.IgnorePatternWhitespace) == RegexOptions.IgnorePatternWhitespace)
+            {
+                options = string.Concat(options, 'w');
+            }
+
+            if ((regex.Options & RegexOptions.ExplicitCapture) == RegexOptions.ExplicitCapture)
+            {
+                options = string.Concat(options, 'x');
+            }
+
             WriteName(options);
         }
+
+        /// <summary>
+        /// Writes scoped code.
+        /// </summary>
+        /// <param name="value">
+        /// The value.
+        /// </param>
         private void Write(ScopedCode value)
         {
             NewDocument();
             Write(value.CodeString);
             WriteDocument(value.Scope);
             EndDocument(false);
-        }
-
-        private class Document
-        {
-            public int Start;
-            public int Written;
-            public Document Parent;
         }
     }
 }

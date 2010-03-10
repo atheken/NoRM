@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Responses
 {
+    /// <summary>
+    /// The dropped database response.
+    /// </summary>
     public class DroppedDatabaseResponse : IFlyweight
     {
-        public String Dropped { get; set; }
+        public string Dropped { get; set; }
         public double? OK { get; set; }
     }
 }

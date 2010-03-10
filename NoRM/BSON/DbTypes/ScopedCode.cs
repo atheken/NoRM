@@ -1,16 +1,9 @@
-﻿namespace NoRM
+﻿
+namespace NoRM
 {
     /// <summary>
-    /// A class that represents code with scoping - will be serialized to 
+    /// The scoped code.
     /// </summary>
-    public class ScopedCode<T>:ScopedCode
-    {        
-        /// <summary>
-        /// The Scope this this code.
-        /// </summary>
-        public new T Scope { get; set; }
-    }
-
     public class ScopedCode
     {
         /// <summary>

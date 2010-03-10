@@ -1,115 +1,185 @@
-﻿using NoRM.Configuration;
+﻿using System.Collections.Generic;
+using NoRM.Configuration;
+using NoRM.Protocol.SystemMessages;
+using NoRM.Protocol.SystemMessages.Request;
+using NoRM.Responses;
 
 namespace NoRM
 {
-    using System.Collections.Generic;   
-    using Protocol.SystemMessages;
-    using Protocol.SystemMessages.Request;
-    using Responses;
-
+    /// <summary>
+    /// Mongo database
+    /// </summary>
     public class MongoDatabase
     {
         private readonly IConnection _connection;
         private readonly string _databaseName;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MongoDatabase"/> class.
+        /// </summary>
+        /// <param name="databaseName">The database name.</param>
+        /// <param name="connection">The connection.</param>
         public MongoDatabase(string databaseName, IConnection connection)
         {
             _databaseName = databaseName;
-            _connection = connection;         
+            _connection = connection;
         }
 
-        public IConnection CurrentConnection {
-            get {
-                return _connection;
-            }
+        /// <summary>
+        /// Gets the current connection.
+        /// </summary>
+        public IConnection CurrentConnection
+        {
+            get { return this._connection; }
         }
 
+        /// <summary>
+        /// Gets the dtabase name.
+        /// </summary>
         public string DatabaseName
         {
-            get { return _databaseName; }
-        }
-        public MongoCollection GetCollection(string collectionName) {
-            return new MongoCollection(collectionName,this,this.CurrentConnection);
+            get { return this._databaseName; }
         }
 
+        /// <summary>
+        /// The get collection.
+        /// </summary>
+        /// <param name="collectionName">The collection name.</param>
+        /// <returns></returns>
+        public MongoCollection GetCollection(string collectionName)
+        {
+            return new MongoCollection(collectionName, this, this.CurrentConnection);
+        }
+
+        /// <summary>
+        /// Gets a collection.
+        /// </summary>
+        /// <typeparam name="T">collection type</typeparam>
+        /// <param name="collectionName">The collection name.</param>
+        /// <returns></returns>
         public MongoCollection<T> GetCollection<T>(string collectionName)
         {
-            return new MongoCollection<T>(collectionName, this, _connection);
+            return new MongoCollection<T>(collectionName, this, this._connection);
         }
 
+        /// <summary>
+        /// Gets a collection.
+        /// </summary>
+        /// <typeparam name="T">Collection type</typeparam>
+        /// <returns></returns>
         public MongoCollection<T> GetCollection<T>()
         {
-            //return new MongoCollection<T>(typeof (T).Name, this, _connection);
+            // return new MongoCollection<T>(typeof (T).Name, this, _connection);
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
 
             return GetCollection<T>(collectionName);
         }
 
+        /// <summary>
+        /// Gets all collections.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<CollectionInfo> GetAllCollections()
         {
             return GetCollection<CollectionInfo>("system.namespaces").Find();
         }
 
+        /// <summary>
+        /// Gets collection statistics.
+        /// </summary>
+        /// <param name="collectionName">The collection name.</param>
+        /// <returns></returns>
         public CollectionStatistics GetCollectionStatistics(string collectionName)
         {
             try
             {
-                return GetCollection<CollectionStatistics>("$cmd").FindOne(new CollectionStatistics {collstats = collectionName});                
+                return GetCollection<CollectionStatistics>("$cmd").FindOne(new CollectionStatistics
+                                                                               {
+                                                                                   collstats = collectionName
+                                                                               });
             }
             catch (MongoException exception)
             {
-                if (_connection.StrictMode || exception.Message != "ns not found")
+                if (this._connection.StrictMode || exception.Message != "ns not found")
                 {
                     throw;
                 }
+
                 return null;
-            }            
+            }
         }
 
+        /// <summary>
+        /// Drops a collection.
+        /// </summary>
+        /// <param name="collectionName">The collection name.</param>
+        /// <returns>The drop collection.</returns>
         public bool DropCollection(string collectionName)
         {
             try
             {
-                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new {drop = collectionName}).OK == 1;                
+                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new { drop = collectionName }).OK == 1;
             }
             catch (MongoException exception)
             {
-                if (_connection.StrictMode || exception.Message != "ns not found")
+                if (this._connection.StrictMode || exception.Message != "ns not found")
                 {
                     throw;
                 }
+
                 return false;
             }
         }
 
+        /// <summary>
+        /// Creates a collection.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <returns>The create collection.</returns>
         public bool CreateCollection(CreateCollectionOptions options)
         {
-
             try
             {
-                return GetCollection<GenericCommandResponse>("$cmd").FindOne(new CreateCollectionRequest(options)).OK == 1;                
+                return GetCollection<GenericCommandResponse>("$cmd").FindOne(new CreateCollectionRequest(options)).OK == 1;
             }
             catch (MongoException exception)
             {
-                if (_connection.StrictMode || exception.Message != "collection already exists")
+                if (this._connection.StrictMode || exception.Message != "collection already exists")
                 {
                     throw;
                 }
+
                 return false;
-            }                      
-        }
-        public SetProfileResponse SetProfileLevel(ProfileLevel level)
-        {
-            return GetCollection<SetProfileResponse>("$cmd")
-                .FindOne(new SetProfileResponse {profile = (int) level});            
+            }
         }
 
+        /// <summary>
+        /// Sets the profile level.
+        /// </summary>
+        /// <param name="level">The level.</param>
+        /// <returns></returns>
+        public SetProfileResponse SetProfileLevel(ProfileLevel level)
+        {
+            return GetCollection<SetProfileResponse>("$cmd").FindOne(new SetProfileResponse { profile = (int)level });
+        }
+
+        /// <summary>
+        /// Gets profiling information.
+        /// </summary>
+        /// <returns>
+        /// </returns>
         public IEnumerable<ProfilingInformationResponse> GetProfilingInformation()
         {
             // TODO Check this again later - it doesn't seem quite right.
             return GetCollection<ProfilingInformationResponse>("system.profile").Find();
         }
 
+        /// <summary>
+        /// Validates a collection.
+        /// </summary>
+        /// <param name="collectionName">The collection name.</param>
+        /// <param name="scanData">The scan data.</param>
+        /// <returns></returns>
         public ValidateCollectionResponse ValidateCollection(string collectionName, bool scanData)
         {
             return GetCollection<ValidateCollectionResponse>("$cmd")
@@ -117,7 +187,7 @@ namespace NoRM
                              {
                                  validate = collectionName,
                                  scandata = scanData
-                             });            
+                             });
         }
     }
 }

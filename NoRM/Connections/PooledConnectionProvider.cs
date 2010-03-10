@@ -4,32 +4,47 @@ using System.Threading;
 
 namespace NoRM
 {
+    /// <summary>
+    /// The pooled connection provider.
+    /// </summary>
     internal class PooledConnectionProvider : ConnectionProvider
     {
-        private readonly object _lock = new object();
-        private readonly int _timeout;
-        private readonly int _poolSize;
-        private readonly int _lifetime;
-        private readonly Timer _maintenanceTimer;
         private readonly ConnectionStringBuilder _builder;
         private readonly Queue<IConnection> _freeConnections = new Queue<IConnection>();
-        private readonly List<IConnection> _usedConnections = new List<IConnection>();
         private readonly List<IConnection> _invalidConnections = new List<IConnection>();
+        private readonly int _lifetime;
+        private readonly object _lock = new object();
+        private readonly Timer _maintenanceTimer;
+        private readonly int _poolSize;
+        private readonly int _timeout;
+        private readonly List<IConnection> _usedConnections = new List<IConnection>();
 
-        public override ConnectionStringBuilder ConnectionString
-        {
-            get { return _builder; }
-        }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PooledConnectionProvider"/> class.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
         public PooledConnectionProvider(ConnectionStringBuilder builder)
         {
             _builder = builder;
             _timeout = builder.Timeout * 1000;
             _poolSize = builder.PoolSize;
             _lifetime = builder.Lifetime;
-            _maintenanceTimer = new Timer(o => Cleanup(), null, 30000, 30000);            
+            _maintenanceTimer = new Timer(o => Cleanup(), null, 30000, 30000);
         }
 
+        /// <summary>
+        /// Gets ConnectionString.
+        /// </summary>
+        public override ConnectionStringBuilder ConnectionString
+        {
+            get { return _builder; }
+        }
+
+        /// <summary>
+        /// Opens the connection.
+        /// </summary>
+        /// <param name="options">Connection options.</param>
+        /// <returns></returns>
         public override IConnection Open(string options)
         {
             IConnection connection;
@@ -37,7 +52,7 @@ namespace NoRM
             {
                 if (_freeConnections.Count > 0)
                 {
-                    connection = _freeConnections.Dequeue();                    
+                    connection = _freeConnections.Dequeue();
                     _usedConnections.Add(connection);
                     return connection;
                 }
@@ -48,6 +63,7 @@ namespace NoRM
                     {
                         throw new MongoException("Connection timeout trying to get connection from connection pool");
                     }
+
                     return Open(options);
                 }
             }
@@ -57,9 +73,15 @@ namespace NoRM
             {
                 _usedConnections.Add(connection);
             }
+
             connection.LoadOptions(options);
             return connection;
         }
+
+        /// <summary>
+        /// Closes the connection.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
         public override void Close(IConnection connection)
         {
             if (!IsAlive(connection))
@@ -69,31 +91,46 @@ namespace NoRM
                     _usedConnections.Remove(connection);
                     _invalidConnections.Add(connection);
                 }
+
                 return;
             }
 
             connection.ResetOptions();
             lock (_lock)
-            {                
+            {
                 _usedConnections.Remove(connection);
                 _freeConnections.Enqueue(connection);
                 Monitor.Pulse(_lock);
             }
         }
+
+        /// <summary>
+        /// Cleans up this instance.
+        /// </summary>
+        public void Cleanup()
+        {
+            CheckFreeConnectionsAlive();
+            DisposeInvalidConnections();
+        }
+
+        /// <summary>
+        /// Determines whether the connection is alive.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <returns>True if alive; otherwise false.</returns>
         private bool IsAlive(IConnection connection)
         {
             if (_lifetime > 0 && connection.Created.AddMinutes(_lifetime) < DateTime.Now)
             {
                 return false;
-            }         
+            }
+
             return connection.IsConnected && !connection.IsInvalid;
         }
 
-        public void Cleanup()
-        {
-            CheckFreeConnectionsAlive();
-            DisposeInvalidConnections();
-        }        
+        /// <summary>
+        /// The check free connections alive.
+        /// </summary>
         private void CheckFreeConnectionsAlive()
         {
             lock (_lock)
@@ -114,6 +151,10 @@ namespace NoRM
                 }
             }
         }
+
+        /// <summary>
+        /// The dispose invalid connections.
+        /// </summary>
         private void DisposeInvalidConnections()
         {
             IConnection[] invalidConnections;

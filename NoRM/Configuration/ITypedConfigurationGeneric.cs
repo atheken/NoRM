@@ -3,11 +3,12 @@ using System.Linq.Expressions;
 
 namespace NoRM.Configuration
 {
-
     /// <summary>
     /// Type-specific type configuration
     /// </summary>
-    /// <typeparam name="T">The ype to configure</typeparam>
+    /// <typeparam name="T">
+    /// The ype to configure
+    /// </typeparam>
     public interface ITypeConfiguration<T> : ITypeConfiguration
     {
         /// <summary>

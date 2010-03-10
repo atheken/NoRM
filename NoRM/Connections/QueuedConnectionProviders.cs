@@ -2,13 +2,20 @@
 
 namespace NoRM
 {
+    /// <summary>
+    /// The queued connection provider.
+    /// </summary>
     internal class QueuedConnectionProvider : ConnectionProvider
     {
         private readonly ConnectionStringBuilder _builder;
+        private readonly Queue<IConnection> _idlePool;
 
-        // Safe as the provider factory holds a static list of providers
-        private readonly Queue<IConnection> _idlePool; 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QueuedConnectionProvider"/> class.
+        /// </summary>
+        /// <param name="builder">
+        /// The builder.
+        /// </param>
         public QueuedConnectionProvider(ConnectionStringBuilder builder)
         {
             _builder = builder;
@@ -20,11 +27,22 @@ namespace NoRM
             PreQueueConnections(builder.PoolSize);
         }
 
+        /// <summary>
+        /// Gets ConnectionString.
+        /// </summary>
         public override ConnectionStringBuilder ConnectionString
         {
             get { return _builder; }
         }
 
+        /// <summary>
+        /// Opens a connection.
+        /// </summary>
+        /// <param name="options">
+        /// Connection options.
+        /// </param>
+        /// <returns>
+        /// </returns>
         public override IConnection Open(string options)
         {
             IConnection connection = null;
@@ -40,7 +58,7 @@ namespace NoRM
             // Should make this configurable so the # of connections doesn't expand beyond a 
             // known limit.  Nice, though, to avoid throwing exception and denying the caller
             // a connection.
-            if(connection == null) 
+            if (connection == null)
             {
                 connection = CreateNewConnection();
             }
@@ -53,6 +71,12 @@ namespace NoRM
             return connection;
         }
 
+        /// <summary>
+        /// Closes a connection.
+        /// </summary>
+        /// <param name="connection">
+        /// The connection.
+        /// </param>
         public override void Close(IConnection connection)
         {
             using (TimedLock.Lock(_idlePool))
@@ -72,7 +96,9 @@ namespace NoRM
         /// Adds connections to the pool on startup so subsequent calls
         /// don't have the latency of creating a TCP connection.  
         /// </summary>
-        /// <param name="poolSize">Size of the pool.</param>
+        /// <param name="poolSize">
+        /// Size of the pool.
+        /// </param>
         private void PreQueueConnections(int poolSize)
         {
             // Lock the queue on each iteration so the queued connections don't
@@ -82,7 +108,7 @@ namespace NoRM
             // creating a Mongo instance) would cause this method to fire twice
             // in near proximity; locking per iteration keeps this pool size 
             // within bounds.
-            for(var i = 0; i < poolSize; i++)
+            for (var i = 0; i < poolSize; i++)
             {
                 using (TimedLock.Lock(_idlePool))
                 {

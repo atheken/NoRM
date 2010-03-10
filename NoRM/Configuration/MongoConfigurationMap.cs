@@ -7,6 +7,7 @@ namespace NoRM.Configuration
     /// </summary>
     public class MongoConfigurationMap : IMongoConfigurationMap
     {
+
         /// <summary>
         /// Configures properties for type T
         /// </summary>
@@ -15,8 +16,9 @@ namespace NoRM.Configuration
         public void For<T>(Action<ITypeConfiguration<T>> typeConfigurationAction)
         {
             var typeConfiguration = new MongoTypeConfiguration<T>();
-            typeConfigurationAction((ITypeConfiguration<T>)typeConfiguration);
+            typeConfigurationAction((ITypeConfiguration<T>) typeConfiguration);
         }
+
         /// <summary>
         /// Gets the property alias for a type.
         /// </summary>
@@ -30,15 +32,15 @@ namespace NoRM.Configuration
             var map = MongoTypeConfiguration.PropertyMaps;
 
             return map.ContainsKey(type) && map[type].ContainsKey(propertyName)
-                ? map[type][propertyName].Alias 
-                : propertyName;
+                       ? map[type][propertyName].Alias
+                       : propertyName;
         }
 
         /// <summary>
         /// Gets the name of the type's collection.
         /// </summary>
         /// <param name="type">The type.</param>
-        /// <returns></returns>
+        /// <returns>The get collection name.</returns>
         public string GetCollectionName(Type type)
         {
             var collections = MongoTypeConfiguration.CollectionNames;
@@ -47,11 +49,12 @@ namespace NoRM.Configuration
                        ? collections[type]
                        : type.Name;
         }
+
         /// <summary>
         /// Gets the connection string.
         /// </summary>
         /// <param name="type">The type.</param>
-        /// <returns></returns>
+        /// <returns>The get connection string.</returns>
         public string GetConnectionString(Type type)
         {
             var connections = MongoTypeConfiguration.ConnectionStrings;

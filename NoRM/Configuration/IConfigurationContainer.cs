@@ -9,12 +9,15 @@ namespace NoRM.Configuration
         /// <summary>
         /// Registers a mongo type map implicitly.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Type to configure
+        /// </typeparam>
         void AddMap<T>() where T : IMongoConfigurationMap, new();
+
         /// <summary>
         /// Gets the configuration map.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// </returns>
         IMongoConfigurationMap GetConfigurationMap();
     }
 }

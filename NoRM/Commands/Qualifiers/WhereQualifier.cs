@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
-namespace NoRM.Commands.Qualifiers {
-    public class WhereQualifier : QualifierCommand {
-        public WhereQualifier(string inExpression) {
-            this.CommandName = "$where";
-            this.ValueForCommand = inExpression;
+namespace NoRM.Commands.Qualifiers
+{
+    /// <summary>
+    /// The where qualifier.
+    /// </summary>
+    public class WhereQualifier : QualifierCommand
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WhereQualifier"/> class.
+        /// </summary>
+        /// <param name="inExpression">The in expression.</param>
+        public WhereQualifier(string inExpression) : base("$where", inExpression)
+        {
         }
     }
 }
