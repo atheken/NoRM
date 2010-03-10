@@ -1,14 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace NoRM.Protocol.SystemMessages
 {
-    public enum ProfileLevel : int
+    /// <summary>
+    /// Profiling levels.
+    /// </summary>
+    public enum ProfileLevel
     {
+        /// <summary>
+        /// Profiling off.
+        /// </summary>
         ProfilingOff = 0,
+
+        /// <summary>
+        ///Slow operations.
+        /// </summary>
         SlowOperations = 1,
+
+        /// <summary>
+        /// All operations.
+        /// </summary>
         AllOperations = 2
     }
 }

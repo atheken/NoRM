@@ -1,3 +1,4 @@
+
 namespace NoRM.Responses
 {
     /// <summary>

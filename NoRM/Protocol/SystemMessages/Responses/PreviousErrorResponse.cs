@@ -1,31 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace NoRM.Responses
 {
+    /// <summary>
+    /// The previous error response.
+    /// </summary>
     public class PreviousErrorResponse
     {
-
-        /// <summary>
-        /// Whether this response is "ok"
-        /// </summary>
         public double? OK { get; set; }
-        
-        /// <summary>
-        /// Number of errors.
-        /// </summary>
         public long? N { get; set; }
-
-        /// <summary>
-        /// The error message.
-        /// </summary>
-        public String Err { get; set; }
-
-        /// <summary>
-        /// Number of operations since these errors happened.
-        /// </summary>
+        public string Err { get; set; }
         public long? NPrev { get; set; }
     }
 }

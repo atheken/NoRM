@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace NoRM.Protocol.SystemMessages.Requests
+﻿namespace NoRM.Protocol.SystemMessages.Requests
 {
     /// <summary>
     /// A command to request the databases in a mongoDB instance.
     /// </summary>
     public class ListDatabasesRequest
     {
-        public bool listDatabases { get { return true; } }
+        /// <summary>
+        /// Gets a value indicating whether listDatabases.
+        /// </summary>
+        public bool listDatabases
+        {
+            get { return true; }
+        }
     }
 }

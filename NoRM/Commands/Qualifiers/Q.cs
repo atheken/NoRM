@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.Commands.Qualifiers;
-using System.Text.RegularExpressions;
+﻿using NoRM.Commands.Qualifiers;
 
 namespace NoRM
 {
@@ -17,14 +12,20 @@ namespace NoRM
     /// </remarks>
     public class Q
     {
-        public static WhereQualifier Where(string expression) {
+        /// <summary>
+        /// The where.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns></returns>
+        public static WhereQualifier Where(string expression)
+        {
             return new WhereQualifier(expression);
         }
-        
+
         /// <summary>
         /// Builds a $lt qualifier for the search.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">The value.</param>
         /// <returns></returns>
         public static LessThanQualifier LessThan(double value)
         {
@@ -34,7 +35,7 @@ namespace NoRM
         /// <summary>
         /// Builds a $lte qualifier for the search.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">The value.</param>
         /// <returns></returns>
         public static LessOrEqualQualifier LessOrEqual(double value)
         {
@@ -44,7 +45,7 @@ namespace NoRM
         /// <summary>
         /// Builds a $gte qualifier for the search.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">The value.</param>
         /// <returns></returns>
         public static GreaterOrEqualQualifier GreaterOrEqual(double value)
         {
@@ -54,7 +55,7 @@ namespace NoRM
         /// <summary>
         /// Builds a $gt qualifier for the search.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">The value.</param>
         /// <returns></returns>
         public static GreaterThanQualifier GreaterThan(double value)
         {
@@ -64,8 +65,8 @@ namespace NoRM
         /// <summary>
         /// Builds an $all statement
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="all"></param>
+        /// <typeparam name="T">Type to qualify</typeparam>
+        /// <param name="all">All.</param>
         /// <returns></returns>
         public static AllQualifier<T> All<T>(params T[] all)
         {
@@ -75,8 +76,8 @@ namespace NoRM
         /// <summary>
         /// Builds an $in qualifier statement.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="inSet"></param>
+        /// <typeparam name="T">Type to qualify</typeparam>
+        /// <param name="inSet">The in set.</param>
         /// <returns></returns>
         public static InQualifier<T> In<T>(params T[] inSet)
         {
@@ -86,8 +87,8 @@ namespace NoRM
         /// <summary>
         /// Builds a $ne qualifier against the value.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="test"></param>
+        /// <typeparam name="T">Type to compare for equality</typeparam>
+        /// <param name="test">The test.</param>
         /// <returns></returns>
         public static NotEqualQualifier NotEqual<T>(T test)
         {
@@ -95,11 +96,11 @@ namespace NoRM
         }
 
         /// <summary>
-        /// Passes the value straight back to you, new { Property = "value"} will 
+        /// Passes the value straight back to you, new { Property = "value"} will
         /// work just fine as a qualifier. Here for the sake of consistency.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="test"></param>
+        /// <typeparam name="T">Type to compare for equality</typeparam>
+        /// <param name="test">The test.</param>
         /// <returns></returns>
         public static T Equals<T>(T test)
         {
@@ -109,7 +110,7 @@ namespace NoRM
         /// <summary>
         /// Builds a $size qualifier.
         /// </summary>
-        /// <param name="size"></param>
+        /// <param name="size">The size.</param>
         /// <returns></returns>
         public static SizeQualifier Size(double size)
         {
@@ -119,19 +120,18 @@ namespace NoRM
         /// <summary>
         /// Builds an $nin qualifier statement.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="inSet"></param>
+        /// <typeparam name="T">Type to qualify</typeparam>
+        /// <param name="inSet">The in set.</param>
         /// <returns></returns>
         public static NotInQualifier<T> NotIn<T>(params T[] inSet)
         {
             return new NotInQualifier<T>(inSet);
         }
 
-
         /// <summary>
         /// Builds an $exists qualifier for the search.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">if set to <c>true</c> [value].</param>
         /// <returns></returns>
         public static ExistsQuallifier Exists(bool value)
         {

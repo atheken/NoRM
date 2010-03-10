@@ -1,35 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Linq.Expressions;
-using NoRM.BSON;
 using NoRM.Protocol.SystemMessages.Responses;
 
 namespace NoRM.Linq
 {
+    /// <summary>
+    /// Linq extensions.
+    /// </summary>
     public static class LinqExtensions
     {
         /// <summary>
         /// Gets the constant value.
         /// </summary>
         /// <param name="exp">The exp.</param>
-        /// <returns></returns>
+        /// <returns>The get constant value.</returns>
         public static object GetConstantValue(this Expression exp)
         {
             object result = null;
             if (exp is ConstantExpression)
             {
-                ConstantExpression c = (ConstantExpression)exp;
+                var c = (ConstantExpression) exp;
                 result = c.Value;
             }
+
             return result;
         }
 
         /// <summary>
         /// Asks Mongo for an explain plan for a query
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Type to explain</typeparam>
         /// <param name="expression">The expression.</param>
         /// <returns>Query explain plan</returns>
         public static ExplainResponse Explain<T>(this IQueryable<T> expression)

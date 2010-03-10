@@ -1,4 +1,10 @@
-﻿namespace NoRM.Responses
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="CollectionStatistics.cs" company="">
+//   
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace NoRM.Responses
 {
     /// <summary>
     /// MongoDB information related to a particular collection.

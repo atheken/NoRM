@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace NoRM.BSON
 {
@@ -13,71 +12,47 @@ namespace NoRM.BSON
     /// Ok, so this is an abuse of the term "flyweight" - sorry.
     /// </remarks>
     public class Flyweight : IFlyweight
-    {        
-        private Dictionary<String, int?> _intProps = new Dictionary<string, int?>(0, StringComparer.InvariantCultureIgnoreCase);
-        private Dictionary<String, double?> _doubleProps = new Dictionary<string, double?>(0, StringComparer.InvariantCultureIgnoreCase);
-        private Dictionary<String, long?> _longProps = new Dictionary<string, long?>(0, StringComparer.InvariantCultureIgnoreCase);
-        private Dictionary<String, bool?> _booleanProps = new Dictionary<string, bool?>(0, StringComparer.InvariantCultureIgnoreCase);
-        private Dictionary<String, String> _stringProps = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
-        private Dictionary<String, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
+    {    
+        private readonly Dictionary<string, bool?> _booleanProps = new Dictionary<string, bool?>(0, StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, double?> _doubleProps = new Dictionary<string, double?>(0, StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, int?> _intProps = new Dictionary<string, int?>(0, StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, long?> _longProps = new Dictionary<string, long?>(0, StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, string> _stringProps = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
         
-        //These props are used in the Linq provider
+        // These props are used in the Linq provider
+
+        /// <summary>
+        /// Gets or sets TypeName.
+        /// </summary>
         public string TypeName { get; set; }
+
+        /// <summary>
+        /// Gets or sets Limit.
+        /// </summary>
         public int Limit { get; set; }
+
+        /// <summary>
+        /// Gets or sets Skip.
+        /// </summary>
         public int Skip { get; set; }
+
+        /// <summary>
+        /// Gets or sets MethodCall.
+        /// </summary>
         public string MethodCall { get; set; }
+
+        /// <summary>
+        /// Gets or sets PropName.
+        /// </summary>
         public string PropName { get; set; }
-
-        /// <summary>
-        /// All the properties of this flyweight
-        /// </summary>
-        public IEnumerable<ExpandoProperty> AllProperties()
-        {
-            return this._intProps.Select(y => new ExpandoProperty(y.Key, y.Value)).Concat(
-                this._doubleProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                this._longProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                this._booleanProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                this._stringProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                this._kitchenSinkProps.Select(y => new ExpandoProperty(y.Key, y.Value)));
-
-        }
-
-        /// <summary>
-        /// Pulls the property of the specified type "T". You better know it's in there or you're going to get an exception.. just sayin'
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        public T Get<T>(String propertyName)
-        {
-            object retval;
-
-            this._kitchenSinkProps.TryGetValue(propertyName, out retval);
-            if (retval == null)
-                throw new InvalidOperationException("Can't find the property " + propertyName);
-            return (T)retval;
-        }
-
-        public bool Contains(string propertyName) {
-            return _kitchenSinkProps.ContainsKey(propertyName);
-        }
-
-        public void Delete(String propertyName)
-        {
-            this._booleanProps.Remove(propertyName);
-            this._doubleProps.Remove(propertyName);
-            this._intProps.Remove(propertyName);
-            this._kitchenSinkProps.Remove(propertyName);
-            this._longProps.Remove(propertyName);
-            this._stringProps.Remove(propertyName);
-        }
 
         /// <summary>
         /// Get or set a property of this flyweight.
         /// </summary>
-        /// <param name="propertyName"></param>
+        /// <param name="propertyName">property name</param>
         /// <returns></returns>
-        public object this[String propertyName]
+        public object this[string propertyName]
         {
             get
             {
@@ -85,62 +60,107 @@ namespace NoRM.BSON
             }
             set
             {
-                this.Delete(propertyName);
-                this._kitchenSinkProps[propertyName] = value;
+                Delete(propertyName);
+                _kitchenSinkProps[propertyName] = value;
             }
+        }
+
+        /// <summary>
+        /// All the properties of this flyweight
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ExpandoProperty> AllProperties()
+        {
+            return _intProps.Select(y => new ExpandoProperty(y.Key, y.Value)).Concat(
+                _doubleProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
+                _longProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
+                _booleanProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
+                _stringProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
+                _kitchenSinkProps.Select(y => new ExpandoProperty(y.Key, y.Value)));
+        }
+
+        /// <summary>
+        /// Pulls the property of the specified type "T". You better know it's in there or you're going to get an exception.. just sayin'
+        /// </summary>
+        /// <typeparam name="T">Type of property</typeparam>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <returns></returns>
+        public T Get<T>(string propertyName)
+        {
+            object retval;
+
+            _kitchenSinkProps.TryGetValue(propertyName, out retval);
+            if (retval == null)
+            {
+                throw new InvalidOperationException("Can't find the property " + propertyName);
+            }
+
+            return (T) retval;
+        }
+
+        /// <summary>
+        /// Whether the property name is in the kitchen sink.
+        /// </summary>
+        /// <param name="propertyName">The property name.</param>
+        /// <returns>The contains.</returns>
+        public bool Contains(string propertyName)
+        {
+            return _kitchenSinkProps.ContainsKey(propertyName);
+        }
+
+        /// <summary>
+        /// Deletes a property.
+        /// </summary>
+        /// <param name="propertyName">The property name.</param>
+        public void Delete(string propertyName)
+        {
+            _booleanProps.Remove(propertyName);
+            _doubleProps.Remove(propertyName);
+            _intProps.Remove(propertyName);
+            _kitchenSinkProps.Remove(propertyName);
+            _longProps.Remove(propertyName);
+            _stringProps.Remove(propertyName);
         }
 
         /// <summary>
         /// Sets the value on the property name you specify.
-        /// remember that this will destroy any other property of the same name 
+        /// remember that this will destroy any other property of the same name
         /// (culture and case-insensitive matching)
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="propertyName"></param>
-        /// <param name="value"></param>
-        public void Set<T>(String propertyName, T value)
+        /// <typeparam name="T">Type to set</typeparam>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="value">The value.</param>
+        public void Set<T>(string propertyName, T value)
         {
-            this.Delete(propertyName);
-            this._kitchenSinkProps[propertyName] = value;
+            Delete(propertyName);
+            _kitchenSinkProps[propertyName] = value;
         }
 
         /// <summary>
-        /// Attempts to read the value out of the flyweight, if it's not here, 
+        /// Attempts to read the value out of the flyweight, if it's not here,
         /// value is set to default(T) and the method returns false.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="propertyName"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public bool TryGet<T>(String propertyName, out T value)
+        /// <typeparam name="T">Type to try to get</typeparam>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>The try get.</returns>
+        public bool TryGet<T>(string propertyName, out T value)
         {
-            bool retval = false;
+            var retval = false;
             value = default(T);
 
             try
             {
-                value = (T)this._kitchenSinkProps[propertyName];
+                value = (T) _kitchenSinkProps[propertyName];
 
                 retval = true;
             }
-            catch { 
-                //it's fine, we don't care.
+            catch
+            {
+                // it's fine, we don't care.
             }
 
             return retval;
         }
     }
-
-    public class ExpandoProperty
-    {
-        public ExpandoProperty(String name, object value)
-        {
-            this.PropertyName = name;
-            this.Value = value;
-        }
-
-        public String PropertyName { get; private set; }
-        public Object Value { get; private set; }
-    }
-
 }

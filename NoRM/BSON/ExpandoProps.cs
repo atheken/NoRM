@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace NoRM.BSON
@@ -11,171 +10,194 @@ namespace NoRM.BSON
     /// </summary>
     public static class ExpandoProps
     {
+        private const string _lockToken = "LOCK_THREAD";
+        private static readonly ReaderWriterLock _dictionaryLock = new ReaderWriterLock();
         private static Dictionary<WeakReference, Flyweight> _expandoProps = new Dictionary<WeakReference, Flyweight>(0);
-        private static ReaderWriterLock _dictionaryLock = new ReaderWriterLock();
-        private static String _lockToken = "LOCK_THREAD";
         private static Thread _scrubExpandos;
 
+        /// <summary>
+        /// The flyweight for object.
+        /// </summary>
+        /// <typeparam name="T">Type of fluweight object</typeparam>
+        /// <param name="document">The document.</param>
+        /// <returns></returns>
         public static Flyweight FlyweightForObject<T>(T document)
         {
             Flyweight retval = null;
-            ExpandoProps._dictionaryLock.AcquireReaderLock(30000);
-            var p = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)document);
+            _dictionaryLock.AcquireReaderLock(30000);
+            var p =
+                _expandoProps.FirstOrDefault(y => y.Key.Target == (object) document);
             if (p.Value != null)
             {
                 retval = p.Value;
             }
-            ExpandoProps._dictionaryLock.ReleaseReaderLock();
+
+            _dictionaryLock.ReleaseReaderLock();
             return retval;
         }
 
         /// <summary>
         /// Set the deserialized props for the specified object into a global cache, to be cleared every 30 seconds.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="obj"></param>
-        /// <param name="addedProps"></param>
+        /// <param name="props">
+        /// The props.
+        /// </param>
         public static void SetFlyWeightObjects(IDictionary<WeakReference, Flyweight> props)
         {
-            #region Initialize expando dictionary and the clean-up thread.
-            if (ExpandoProps._scrubExpandos == null)
+            if (_scrubExpandos == null)
             {
-                lock (ExpandoProps._lockToken)
+                lock (_lockToken)
                 {
-                    if (ExpandoProps._scrubExpandos == null)
+                    if (_scrubExpandos == null)
                     {
-                        ExpandoProps._scrubExpandos = new Thread(() =>
-                        {
-                            while (true)
-                            {
-                                ExpandoProps._dictionaryLock.AcquireWriterLock(30000);
-                                //trim the dictionary of anything where the object has been collected.
-                                ExpandoProps._expandoProps = new Dictionary<WeakReference, Flyweight>(
-                                                        ExpandoProps._expandoProps.Where(y => y.Key.IsAlive)
-                                    .ToDictionary(j => j.Key, k => k.Value));
-                                ExpandoProps._dictionaryLock.ReleaseWriterLock();
+                        _scrubExpandos = new Thread(() =>
+                                                        {
+                                                            while (true)
+                                                            {
+                                                                _dictionaryLock.AcquireWriterLock(30000);
 
-                                //wait 15 seconds before attempting to clear again.
-                                Thread.Sleep(15000);
-                            }
-                        });
-                        ExpandoProps._scrubExpandos.IsBackground = true;
 
-                        ExpandoProps._scrubExpandos.Start();
+                                                                // trim the dictionary of anything where the object has been collected.
+                                                                _expandoProps = new Dictionary<WeakReference, Flyweight>
+                                                                    (
+                                                                    _expandoProps.Where(y => y.Key.IsAlive)
+                                                                        .ToDictionary(j => j.Key, k => k.Value));
+                                                                _dictionaryLock.ReleaseWriterLock();
 
+                                                                // wait 15 seconds before attempting to clear again.
+                                                                Thread.Sleep(15000);
+                                                            }
+                                                        }) 
+                                                        { IsBackground = true };
+
+                        _scrubExpandos.Start();
                     }
                 }
             }
-            #endregion
-            
-            ExpandoProps._dictionaryLock.AcquireWriterLock(30000);
+
+            _dictionaryLock.AcquireWriterLock(30000);
             foreach (var a in props)
             {
-                ExpandoProps._expandoProps[a.Key] = a.Value;
+                _expandoProps[a.Key] = a.Value;
             }
-            ExpandoProps._dictionaryLock.ReleaseWriterLock();
+
+            _dictionaryLock.ReleaseWriterLock();
         }
 
         /// <summary>
         /// Set a property on the specified flyweight
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="obj"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="property"></param>
-        public static void Set<T>(this IFlyweight obj, String propertyName, T property)
+        /// <typeparam name="T">Type to set</typeparam>
+        /// <param name="obj">The obj.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="property">The property.</param>
+        public static void Set<T>(this IFlyweight obj, string propertyName, T property)
         {
-            ExpandoProps._dictionaryLock.AcquireWriterLock(30000);
-            var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
+            _dictionaryLock.AcquireWriterLock(30000);
+            var dict = _expandoProps.FirstOrDefault(y => y.Key.Target == obj);
 
             if (dict.Key == null)
             {
                 var reference = new WeakReference(obj);
-                ExpandoProps._expandoProps[reference] = new Flyweight();
+                _expandoProps[reference] = new Flyweight();
             }
-            ExpandoProps._expandoProps[dict.Key][propertyName] = property;
-            ExpandoProps._dictionaryLock.ReleaseLock();
+
+            _expandoProps[dict.Key][propertyName] = property;
+            _dictionaryLock.ReleaseLock();
         }
 
         /// <summary>
         /// Remove a property from the dictionary.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="propertyName"></param>
-        /// <returns>True if the property was found, false otherwise.</returns>
-        public static bool DeleteProperty(this IFlyweight obj, String propertyName)
+        /// <param name="obj">The obj.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <returns>
+        /// True if the property was found, false otherwise.
+        /// </returns>
+        public static bool DeleteProperty(this IFlyweight obj, string propertyName)
         {
-            bool retval = false;
-            ExpandoProps._dictionaryLock.AcquireWriterLock(30000);
-            var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
+            const bool retval = false;
+            _dictionaryLock.AcquireWriterLock(30000);
+            var dict = _expandoProps.FirstOrDefault(y => y.Key.Target == obj);
             dict.Value.DeleteProperty(propertyName);
-            ExpandoProps._dictionaryLock.ReleaseWriterLock();
+            _dictionaryLock.ReleaseWriterLock();
+
             return retval;
         }
 
+        /// <summary>
+        /// Gets all properties.
+        /// </summary>
+        /// <param name="obj">The obj.</param>
+        /// <returns></returns>
         public static IEnumerable<ExpandoProperty> AllProperties(this IFlyweight obj)
         {
             var retval = Enumerable.Empty<ExpandoProperty>();
-            
-            ExpandoProps._dictionaryLock.AcquireReaderLock(30000);
-            var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
+
+            _dictionaryLock.AcquireReaderLock(30000);
+            var dict = _expandoProps.FirstOrDefault(y => y.Key.Target == obj);
             if (dict.Key != null && dict.Value != null)
             {
                 retval = dict.Value.AllProperties().ToArray();
             }
-            ExpandoProps._dictionaryLock.ReleaseReaderLock();
+
+            _dictionaryLock.ReleaseReaderLock();
             return retval;
         }
 
         /// <summary>
         /// Provides a lookup for a particular property.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="obj"></param>
-        /// <param name="propertyName"></param>
+        /// <typeparam name="T">Type to get</typeparam>
+        /// <param name="obj">The obj.</param>
+        /// <param name="propertyName">Name of the property.</param>
         /// <returns></returns>
-        public static T Get<T>(this IFlyweight obj, String propertyName)
+        public static T Get<T>(this IFlyweight obj, string propertyName)
         {
-            T retval = default(T);
+            var retval = default(T);
 
-            ExpandoProps._dictionaryLock.AcquireReaderLock(30000);
-            var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
+            _dictionaryLock.AcquireReaderLock(30000);
+            var dict = _expandoProps.FirstOrDefault(y => y.Key.Target == obj);
             if (dict.Key != null && dict.Value != null)
             {
                 var value = dict.Value.Get<T>(propertyName);
             }
-            ExpandoProps._dictionaryLock.ReleaseReaderLock();
+
+            _dictionaryLock.ReleaseReaderLock();
             return retval;
         }
 
         /// <summary>
         /// Attempt to read a property of the specified type.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="obj"></param>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        public static bool TryGet<T>(this IFlyweight obj, String propertyName, out T value)
+        /// <typeparam name="T">Type to try to get</typeparam>
+        /// <param name="obj">The obj.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>The try get.</returns>
+        public static bool TryGet<T>(this IFlyweight obj, string propertyName, out T value)
         {
             var retval = false;
             value = default(T);
 
-            ExpandoProps._dictionaryLock.AcquireReaderLock(30000);
+            _dictionaryLock.AcquireReaderLock(30000);
             try
             {
-                var dict = ExpandoProps._expandoProps.FirstOrDefault(y => y.Key.Target == (object)obj);
+                var dict = _expandoProps.FirstOrDefault(y => y.Key.Target == obj);
                 if (dict.Key != null && dict.Value != null)
                 {
-                    value = (T)dict.Value.Get<T>(propertyName);
+                    value = dict.Value.Get<T>(propertyName);
                 }
+
                 retval = true;
             }
-            catch { 
-                //no worries.
+            catch
+            {
+                // no worries.
             }
-            ExpandoProps._dictionaryLock.ReleaseReaderLock();
+
+            _dictionaryLock.ReleaseReaderLock();
             return retval;
         }
-
     }
 }

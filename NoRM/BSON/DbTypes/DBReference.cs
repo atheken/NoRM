@@ -8,6 +8,9 @@ namespace NoRM.BSON.DbTypes
     /// </summary>
     public class DBReference : ObjectId
     {
+        /// <summary>
+        /// Initializes static members of the <see cref="DBReference"/> class.
+        /// </summary>
         static DBReference()
         {
             MongoConfiguration.Initialize(c => c.For<DBReference>(dbr =>
@@ -21,7 +24,7 @@ namespace NoRM.BSON.DbTypes
         /// <summary>
         /// The collection in while the referenced value lives.
         /// </summary>
-        public String Collection { get; set; }
+        public string Collection { get; set; }
 
         /// <summary>
         /// The ID of the referenced object.
@@ -31,45 +34,23 @@ namespace NoRM.BSON.DbTypes
         /// <summary>
         /// The name of the db where the reference is stored.
         /// </summary>
-        public String DatabaseName { get; set; }
+        public string DatabaseName { get; set; }
 
         /// <summary>
         /// Fetches the instance of type T in the collection referenced by the DBRef $id
         /// </summary>
-        /// <typeparam name="T">Type referenced by DBRef</typeparam>
-        /// <param name="referenceCollection">The reference collection.</param>
-        /// <returns>Referenced type T</returns>
+        /// <typeparam name="T">
+        /// Type referenced by DBRef
+        /// </typeparam>
+        /// <param name="referenceCollection">
+        /// The reference collection.
+        /// </param>
+        /// <returns>
+        /// Referenced type T
+        /// </returns>
         public T Fetch<T>(Func<MongoCollection<T>> referenceCollection) where T : class, new()
         {
             return referenceCollection().FindOne(new { _id = this.ID });
         }
-
-        ///// <summary>
-        ///// Pulls the document using the connection specified.
-        ///// </summary>
-        ///// <remarks>
-        ///// This is not quite right yet....
-        ///// </remarks>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="connection"></param>
-        ///// <returns></returns>
-        //public virtual T FollowReference<T>(Mongo connection) where T : class, new()
-        //{
-        //    return connection.GetCollection<T>().FindOne(new { _id = this.ID });
-        //}
     }
-
-    /// <summary>
-    /// Represents a DB-pointer to another BSON document.
-    /// </summary>
-    /// <remarks>This is purely a convenience so that we don't have to specify
-    /// the type each time FollowReference</remarks>
-    //public class DBReference<U>  : DBReference where U : class, new()
-    //{
-    //    public override U FollowReference<U>(/*Mongo connection*/)
-    //    {
-    //        return base.FollowReference<U>(/*connection*/);
-    //    }
-        
-    //}
 }

@@ -1,17 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Commands.Qualifiers
 {
-    public class NotInQualifier<T>:QualifierCommand
+    /// <summary>
+    /// The not in qualifier.
+    /// </summary>
+    /// <typeparam name="T">No in type to qualify </typeparam>
+    public class NotInQualifier<T> : QualifierCommand
     {
-        public NotInQualifier(params T[] notInSet)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NotInQualifier{T}"/> class.
+        /// </summary>
+        /// <param name="notInSet">
+        /// The not in set.
+        /// </param>
+        public NotInQualifier(params T[] notInSet) : base("$nin", notInSet)
         {
-            this.CommandName = "$nin";
-            this.ValueForCommand = notInSet;
         }
     }
 }

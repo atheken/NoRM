@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace NoRM.Protocol
 {
     /// <summary>
@@ -17,16 +13,19 @@ namespace NoRM.Protocol
         /// this MessageLength when setting.
         /// </summary>
         public int MessageLength { get; set; }
+
         /// <summary>
         /// A client -or- database generated identifier 
         /// that identifies this request.
         /// </summary>
         public int RequestID { get; set; }
+
         /// <summary>
         /// Populated by the server, indicates which
         /// request is being fulfilled with this particlar response.
         /// </summary>
         public int ResponseTo { get; set; }
+
         /// <summary>
         /// The action that should be taken by the DB.
         /// </summary>

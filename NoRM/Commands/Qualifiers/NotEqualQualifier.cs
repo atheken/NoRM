@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
+
 
 namespace NoRM.Commands.Qualifiers
 {
+    /// <summary>
+    /// The not equal qualifier.
+    /// </summary>
     public class NotEqualQualifier : QualifierCommand
     {
-        internal NotEqualQualifier(object value)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NotEqualQualifier"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        internal NotEqualQualifier(object value) : base("$ne", value)
         {
-            this.CommandName = "$ne";
-            this.ValueForCommand = value;
         }
     }
 }

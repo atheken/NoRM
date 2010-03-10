@@ -1,5 +1,9 @@
-﻿namespace NoRM.Responses
+﻿
+namespace NoRM.Responses
 {
+    /// <summary>
+    /// The database info.
+    /// </summary>
     public class DatabaseInfo
     {
         public string Name { get; set; }

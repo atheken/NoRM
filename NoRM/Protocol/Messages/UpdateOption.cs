@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace NoRM.Protocol.Messages
 {
+    /// <summary>
+    /// Update options.
+    /// </summary>
     [Flags]
-    internal enum UpdateOption : int
+    internal enum UpdateOption
     {
         None = 0,
         Upsert = 1,

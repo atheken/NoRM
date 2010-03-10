@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace NoRM.Responses
 {
+    /// <summary>
+    /// The build info response.
+    /// </summary>
     public class BuildInfoResponse
     {
         public string Version { get; set; }

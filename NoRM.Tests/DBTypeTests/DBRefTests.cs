@@ -1,11 +1,6 @@
-﻿using System;
-using System.Linq;
-using NoRM.Attributes;
-using NoRM.BSON;
+﻿using System.Linq;
 using NoRM.BSON.DbTypes;
 using NoRM.Configuration;
-using NoRM.Linq;
-using NoRM.Responses;
 using Xunit;
 
 

@@ -1,28 +1,62 @@
+
 namespace NoRM
 {
+    /// <summary>
+    /// The map reduce options.
+    /// </summary>
     public class MapReduceOptions
     {
-        public string Map { get; set; }
-        public string Reduce { get; set; }
-        public string CollectionName { get; set; }
-        public bool Permenant { get; set; }
-        public string OutputCollectionName { get; set; }
-        public int? Limit{ get; set;}
-        public string Finalize{ get; set;}
-        public MapReduceOptions(){}
-        public MapReduceOptions(string collectionName)
-        {
-            CollectionName = collectionName;
-        }
-    }
-
-
-    public class MapReduceOptions<T> : MapReduceOptions
-    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MapReduceOptions"/> class.
+        /// </summary>
         public MapReduceOptions()
         {
-            CollectionName = typeof (T).Name;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MapReduceOptions"/> class.
+        /// </summary>
+        /// <param name="collectionName">
+        /// The collection name.
+        /// </param>
+        public MapReduceOptions(string collectionName)
+        {
+            this.CollectionName = collectionName;
+        }
+
+        /// <summary>
+        /// Gets or sets Map.
+        /// </summary>
+        public string Map { get; set; }
+
+        /// <summary>
+        /// Gets or sets Reduce.
+        /// </summary>
+        public string Reduce { get; set; }
+
+        /// <summary>
+        /// Gets or sets CollectionName.
+        /// </summary>
+        public string CollectionName { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether Permenant.
+        /// </summary>
+        public bool Permenant { get; set; }
+
+        /// <summary>
+        /// Gets or sets OutputCollectionName.
+        /// </summary>
+        public string OutputCollectionName { get; set; }
+
+        /// <summary>
+        /// Gets or sets Limit.
+        /// </summary>
+        public int? Limit { get; set; }
+
+        /// <summary>
+        /// Gets or sets Finalize.
+        /// </summary>
+        public string Finalize { get; set; }
     }
 }

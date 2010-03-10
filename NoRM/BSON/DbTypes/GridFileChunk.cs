@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace NoRM
+namespace NoRM.BSON.DbTypes
 {
     /// <summary>
     /// Represents a subset of the file.
     /// </summary>
     public class GridFileChunk
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GridFileChunk"/> class.
+        /// </summary>
         public GridFileChunk()
         {
             this._id = Guid.NewGuid();

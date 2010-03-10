@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace NoRM.Responses
 {
+    /// <summary>
+    /// The profiling information response.
+    /// </summary>
     public class ProfilingInformationResponse
     {
-        public ProfilingInformationResponse() { }
-
         public DateTime? Ts { get; set; }
         public string Info { get; set; }
         public double? Millis { get; set; }

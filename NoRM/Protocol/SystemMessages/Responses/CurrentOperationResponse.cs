@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿
 namespace NoRM.Responses
 {
-    public class CurrentOperationResponse 
+    /// <summary>
+    /// The current operation response.
+    /// </summary>
+    public class CurrentOperationResponse
     {
-        public CurrentOperationResponse() { }
-
         public double? OpID { get; set; }
         public string Op { get; set; }
         public string Ns { get; set; }

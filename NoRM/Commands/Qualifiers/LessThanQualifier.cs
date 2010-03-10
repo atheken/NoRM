@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Commands.Qualifiers
 {
+    /// <summary>
+    /// The less than qualifier.
+    /// </summary>
     public class LessThanQualifier : QualifierCommand
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="LessThanQualifier"/> class.
         /// Builds a less than qualifier, really ought to be a number (MAYBE a string)
         /// </summary>
-        /// <param name="value"></param>
-        internal LessThanQualifier(Object value)
+        /// <param name="value">The value.</param>
+        internal LessThanQualifier(object value) : base("$lt", value)
         {
-            this.CommandName = "$lt";
-            this.ValueForCommand = value;
         }
-       
     }
 }

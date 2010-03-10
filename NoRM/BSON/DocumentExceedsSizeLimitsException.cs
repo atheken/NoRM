@@ -1,15 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 namespace NoRM.BSON
 {
     /// <summary>
     /// An exception that can be thrown by MongoCollection when the document is more than the MongoDB limit of 4MB.
     /// </summary>
-    /// <typeparam name="T">The type of the document that was serialized.</typeparam>
+    /// <typeparam name="T">
+    /// The type of the document that was serialized.
+    /// </typeparam>
     public class DocumentExceedsSizeLimitsException<T> : Exception
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DocumentExceedsSizeLimitsException{T}"/> class.
+        /// </summary>
+        /// <param name="document">
+        /// The document.
+        /// </param>
+        /// <param name="size">
+        /// The size.
+        /// </param>
         public DocumentExceedsSizeLimitsException(T document, int size)
         {
             this.DocumentSize = size;
@@ -25,6 +34,5 @@ namespace NoRM.BSON
         /// The document that was serialized.
         /// </summary>
         public T Document { get; private set; }
-
     }
 }

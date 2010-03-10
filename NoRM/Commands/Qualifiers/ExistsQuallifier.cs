@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 
 namespace NoRM.Commands.Qualifiers
 {
+    /// <summary>
+    /// The exists quallifier.
+    /// </summary>
     public class ExistsQuallifier : QualifierCommand
     {
-        internal ExistsQuallifier(bool doesExist)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExistsQuallifier"/> class.
+        /// </summary>
+        /// <param name="doesExist">The does exist.</param>
+        internal ExistsQuallifier(bool doesExist) : base("$exists", doesExist)
         {
-            this.CommandName = "$exists";
-            this.ValueForCommand = doesExist;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿
-
 namespace NoRM
 {
     /// <summary>
@@ -13,5 +12,4 @@ namespace NoRM
         /// </summary>
         public new T Scope { get; set; }
     }
-
 }

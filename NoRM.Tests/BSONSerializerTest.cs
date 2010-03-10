@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace NoRM.Tests
 {
+    using System;
+    using System.Diagnostics;
     using System.Text.RegularExpressions;
     using BSON;
     using Xunit;
-    using System;
-    using System.Diagnostics;
 
     public class BSONSerializerTest
     {       

@@ -1,13 +1,11 @@
 ﻿namespace NoRM.BSON
 {
     /// <summary>
-    /// Represents the various 
-    /// types available from within
-    /// MongoDB
+    /// Represents the various  types available from within MongoDB
     /// </summary>
     public enum BSONTypes
     {
-        Double  = 1,
+        Double = 1,
         String = 2,
         Object = 3,
         Array = 4,
@@ -25,7 +23,7 @@
         Int32 = 16,
         Timestamp = 17,
         Int64 = 18,
-        //MinKey = -1,
-        //MaxKey = 127
+        // MinKey = -1,
+        // MaxKey = 127
     }
 }

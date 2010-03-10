@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using NoRM.BSON;
 
 namespace NoRM.Configuration
 {
+    /// <summary>
+    /// The mongo type configuration.
+    /// </summary>
     public class MongoTypeConfiguration
     {
-        private static readonly Dictionary<Type, Dictionary<string, PropertyMappingExpression>> _typeConfigurations =
-           new Dictionary<Type, Dictionary<string, PropertyMappingExpression>>();
-
-        private static readonly Dictionary<Type, string> _connectionStrings = new Dictionary<Type, string>();
         private static readonly Dictionary<Type, string> _collectionNames = new Dictionary<Type, string>();
+        private static readonly Dictionary<Type, string> _connectionStrings = new Dictionary<Type, string>();
+        private static readonly Dictionary<Type, Dictionary<string, PropertyMappingExpression>> _typeConfigurations =
+            new Dictionary<Type, Dictionary<string, PropertyMappingExpression>>();
 
         /// <summary>
         /// Gets the property maps.
@@ -21,6 +21,7 @@ namespace NoRM.Configuration
         {
             get { return _typeConfigurations; }
         }
+
         /// <summary>
         /// Gets the connection strings.
         /// </summary>
@@ -29,6 +30,7 @@ namespace NoRM.Configuration
         {
             get { return _connectionStrings; }
         }
+
         /// <summary>
         /// Gets the collection names.
         /// </summary>
