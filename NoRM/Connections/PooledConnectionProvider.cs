@@ -47,17 +47,15 @@ namespace NoRM
         /// <returns></returns>
         public override IConnection Open(string options)
         {
-            IConnection connection;
+            IConnection connection = null;
             lock (_lock)
             {
                 if (_freeConnections.Count > 0)
                 {
                     connection = _freeConnections.Dequeue();
-                    _usedConnections.Add(connection);
-                    return connection;
+                    _usedConnections.Add(connection);                    
                 }
-
-                if (_freeConnections.Count + _usedConnections.Count >= _poolSize)
+                else if (_freeConnections.Count + _usedConnections.Count >= _poolSize)
                 {
                     if (!Monitor.Wait(_lock, _timeout))
                     {
@@ -67,13 +65,14 @@ namespace NoRM
                     return Open(options);
                 }
             }
-
-            connection = CreateNewConnection();
-            lock (_lock)
+            if (connection == null)
             {
-                _usedConnections.Add(connection);
+                connection = CreateNewConnection();
+                lock (_lock)
+                {
+                    _usedConnections.Add(connection);
+                }
             }
-
             connection.LoadOptions(options);
             return connection;
         }
