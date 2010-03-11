@@ -47,7 +47,6 @@ namespace NoRM
             return Count(new {});
         }
 
-
         /// <summary>
         /// The document count.
         /// </summary>

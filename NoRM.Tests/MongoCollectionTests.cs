@@ -3,6 +3,7 @@ using System.Linq;
     
 namespace NoRM.Tests
 {
+
     public class MongoCollectionTests
     {
         public MongoCollectionTests()
@@ -18,7 +19,7 @@ namespace NoRM.Tests
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Save(new Address()));
-                Assert.Equal("Save can only be called on an entity with a property named Id or one marked with the MongoIdentifierAttribute", ex.Message);
+                Assert.Equal("This collection does not accept insertions/updates, this is due to the fact that the collection's type NoRM.Tests.Address does not specify an identifier property", ex.Message);
             }
         }
 
@@ -38,6 +39,7 @@ namespace NoRM.Tests
                 
             }
         }
+        
         [Fact]
         public void UpdatesEntityWithNonObjectIdKey()
         {
@@ -70,6 +72,7 @@ namespace NoRM.Tests
 
             }
         }
+        
         [Fact]
         public void UpdatesEntityWithObjectIdKey()
         {
@@ -82,6 +85,44 @@ namespace NoRM.Tests
                 Assert.Equal(1, found.Count());
                 Assert.Equal(id, found.ElementAt(0).Id);
                 Assert.Equal("Updated Prod", found.ElementAt(0).Name);
+            }
+        }
+        
+        [Fact]
+        public void SavingANewEntityWithObjectIdKeyGeneratesAKey()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            {
+                var product = new Product {Id = null};
+                mongo.GetCollection<Product>("Fake").Save(product);
+                Assert.NotNull(product.Id);
+                Assert.NotEqual(ObjectId.Empty, product.Id);
+            }
+        }
+        [Fact]
+        public void InsertingANewEntityWithObjectIdKeyGeneratesAKey()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            {
+                var product = new Product { Id = null };
+                mongo.GetCollection<Product>("Fake").Insert(product);
+                Assert.NotNull(product.Id);
+                Assert.NotEqual(ObjectId.Empty, product.Id);
+            }
+        }
+
+        [Fact]
+        public void InsertingMultipleNewEntityWithObjectIdKeyGeneratesAKey()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            {
+                var product1 = new Product { Id = null };
+                var product2 = new Product { Id = null };
+                mongo.GetCollection<Product>("Fake").Insert(new[]{product1, product2});
+                Assert.NotNull(product1.Id);
+                Assert.NotEqual(ObjectId.Empty, product1.Id);
+                Assert.NotNull(product2.Id);
+                Assert.NotEqual(ObjectId.Empty, product2.Id);
             }
         }
                 
