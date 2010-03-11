@@ -326,7 +326,13 @@ namespace NoRM
             yield break;
         }
 
-        public ExplainResponse Explain<T>(T template)
+        /// <summary>
+        /// Generates a query explain plan.
+        /// </summary>
+        /// <typeparam name="T">The type under explanation.</typeparam>
+        /// <param name="template">The document query template.</param>
+        /// <returns></returns>
+        public ExplainResponse Explain(object template)
         {
             var query = new Flyweight();
             query["$explain"] = true;
@@ -334,15 +340,6 @@ namespace NoRM
             var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
             return explainPlan.FirstOrDefault();
         }
-
-        //public ExplainResponse Explain(Flyweight template)
-        //{
-        //    var query = new Flyweight();
-        //    query["$explain"] = true;
-        //    query["$query"] = template;
-        //    var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
-        //    return explainPlan.FirstOrDefault();
-        //}
 
         /// <summary>
         /// Inserts documents

@@ -25,11 +25,10 @@ namespace NoRM.Tests
                 // Run the following command in Mongo.exe against the Product collection
                 // db.Product.ensureIndex({"Supplier.Name":1})
 
-                // Then you can run this command to see a hydrated explain plan
+                // Then you can run this command to see a detailed explain plan
                 // db.Product.find({"Supplier.Name":"abc"})
 
-                // The following is the same as runging:   db.Product.find({"Supplier.Name":"abc"}).explain()
-
+                // The following query is the same as runging: db.Product.find({"Supplier.Name":"abc"}).explain()
                 var query = new Flyweight();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
