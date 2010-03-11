@@ -5,7 +5,6 @@ using System.Linq;
 using NoRM.BSON;
 using NoRM.Protocol.Messages;
 using NoRM.Protocol.SystemMessages.Requests;
-using NoRM.Protocol.SystemMessages.Responses;
 using NoRM.Responses;
 
 namespace NoRM
