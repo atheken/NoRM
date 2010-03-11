@@ -4,6 +4,7 @@ using System.Linq;
 using NoRM.BSON;
 using NoRM.Protocol.Messages;
 using NoRM.Protocol.SystemMessages.Requests;
+using NoRM.Protocol.SystemMessages.Responses;
 using NoRM.Responses;
 
 namespace NoRM
@@ -324,6 +325,24 @@ namespace NoRM
 
             yield break;
         }
+
+        public ExplainResponse Explain<T>(T template)
+        {
+            var query = new Flyweight();
+            query["$explain"] = true;
+            query["$query"] = template;
+            var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
+            return explainPlan.FirstOrDefault();
+        }
+
+        //public ExplainResponse Explain(Flyweight template)
+        //{
+        //    var query = new Flyweight();
+        //    query["$explain"] = true;
+        //    query["$query"] = template;
+        //    var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
+        //    return explainPlan.FirstOrDefault();
+        //}
 
         /// <summary>
         /// Inserts documents

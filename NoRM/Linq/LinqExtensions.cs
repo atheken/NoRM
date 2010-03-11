@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using NoRM.Protocol.SystemMessages.Responses;
 
@@ -43,5 +44,14 @@ namespace NoRM.Linq
 
             return null;
         }
+
+        //public static ExplainResponse Explain<T>(this IEnumerable<T> expression, MongoQueryProvider queryProvider)
+        //{
+        //    var x = expression.AsQueryable().Expression.GetConstantValue();
+
+        //    var query = new MongoQuery<T>(queryProvider, expression.AsQueryable().Expression);
+        //    return query.Explain();
+        //}
+
     }
 }

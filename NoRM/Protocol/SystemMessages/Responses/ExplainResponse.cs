@@ -1,4 +1,6 @@
-﻿using NoRM.BSON;
+﻿using System.Collections.Generic;
+using System.Linq;
+using NoRM.BSON;
 
 namespace NoRM.Protocol.SystemMessages.Responses
 {
@@ -20,7 +22,39 @@ namespace NoRM.Protocol.SystemMessages.Responses
     public class Explain
     {
         public string cursor { get; set; }
-        public Flyweight startKey { get; set; }
-        public Flyweight endKey { get; set; }
+        internal Flyweight startKey { get; set; }
+        internal Flyweight endKey { get; set; }
+
+        public Dictionary<string, string> ExplainStartKey
+        {
+            get
+            {
+                var keys = new Dictionary<string, string>();
+                if (startKey != null)
+                {
+                    var properties = startKey.AllProperties();
+
+                    properties.ToList().ForEach(p => keys.Add(p.PropertyName, p.Value.ToString()));
+                }
+
+                return keys;
+            }
+        }
+
+        public Dictionary<string, string> ExplainEndKey
+        {
+            get
+            {
+                var keys = new Dictionary<string, string>();
+                if (endKey != null)
+                {
+                    var properties = endKey.AllProperties();
+                
+                    properties.ToList().ForEach(p => keys.Add(p.PropertyName, p.Value.ToString()));
+                }
+
+                return keys;
+            }
+        }
     }
 }
