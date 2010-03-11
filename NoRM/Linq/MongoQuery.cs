@@ -149,16 +149,13 @@ namespace NoRM.Linq
         /// </summary>
         /// <param name="query">The query.</param>
         /// <returns></returns>
-        internal ExplainResponse Explain(string query)
+        internal ExplainResponse Explain(Flyweight query)
         {
-            var queryFlyweight = new Flyweight
-                                     {
-                                         MethodCall = query
-                                     };
+            //var queryFlyweight = new Flyweight();
+            //queryFlyweight["$query"] = query;
 
-            // I have no idea if $query should be another flyweight, a raw string, or what.
             var explain = new Flyweight();
-            explain["$query"] = queryFlyweight;
+            explain["$query"] = query;// query.Replace("(this.", "{").Replace(")", "}");
             explain["$explain"] = true;
 
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));

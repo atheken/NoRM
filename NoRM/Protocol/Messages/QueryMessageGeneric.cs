@@ -41,17 +41,18 @@ namespace NoRM.Protocol.Messages
             NumberToTake = int.MaxValue;
         }
 
-        private U _query;
+        //private U _query;
 
         /// <summary>
         /// A BSON query.
         /// </summary>
         public U Query
         {
-            set
-            {
-                this._query = value;
-            }
+            get;// { return _query; }
+            set;
+            //{
+            //    this._query = value;
+            //}
         }
 
         /// <summary>
@@ -96,9 +97,9 @@ namespace NoRM.Protocol.Messages
 
             //append the collection name and then null-terminate it.
 
-            if (this._query != null)
+            if (this.Query != null)
             {
-                messageBytes.Add(BsonSerializer.Serialize(this._query));
+                messageBytes.Add(BsonSerializer.Serialize(this.Query));
             }
             #endregion
 

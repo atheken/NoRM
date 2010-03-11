@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NoRM.BSON;
@@ -316,14 +317,8 @@ namespace NoRM
                              NumberToSkip = skip,
                              Query = template
                          };
-            var reply = qm.Execute();
 
-            foreach (var r in reply.Results)
-            {
-                yield return r;
-            }
-
-            yield break;
+            return new MongoQueryExecutor<T, U>(qm);
         }
 
         /// <summary>
@@ -340,6 +335,7 @@ namespace NoRM
             var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
             return explainPlan.FirstOrDefault();
         }
+
 
         /// <summary>
         /// Inserts documents

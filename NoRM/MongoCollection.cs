@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using NoRM.BSON;
 using NoRM.Protocol.Messages;
 using NoRM.Responses;
@@ -196,14 +194,16 @@ namespace NoRM
                              NumberToTake = limit,
                              Query = template
                          };
-            var reply = qm.Execute();
+            return new MongoQueryExecutor<object, object>(qm);
+            
+            //var reply = qm.Execute();
 
-            foreach (var r in reply.Results)
-            {
-                yield return r;
-            }
+            //foreach (var r in reply.Results)
+            //{
+            //    yield return r;
+            //}
 
-            yield break;
+            //yield break;
         }
     }
 }

@@ -133,6 +133,8 @@
     <Compile Include="MongoAdmin.cs" />
     <Compile Include="Mongo.cs" />
     <Compile Include="MongoCollectionGeneric.cs" />
+    <Compile Include="MongoQueryExecutor.cs" />
+    <Compile Include="Protocol\Messages\IndexOption.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
     <Compile Include="Protocol\Messages\QueryMessageGeneric.cs" />
     <Compile Include="Protocol\Messages\UpdateMessage.cs">
