@@ -2,7 +2,7 @@
 using System.Linq;
 using NoRM.BSON;
 
-namespace NoRM.Protocol.SystemMessages.Responses
+namespace NoRM.Responses
 {
     /// <summary>
     /// The explain response.

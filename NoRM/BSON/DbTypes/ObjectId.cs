@@ -7,7 +7,7 @@ namespace NoRM
     /// Represents a Mongo document's ObjectId
     /// </summary>
     public class ObjectId
-    {
+    {        
         private string _string;
 
         /// <summary>

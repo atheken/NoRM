@@ -233,6 +233,10 @@ namespace NoRM.BSON
                     HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
                 var property = (name == "_id") ? typeHelper.FindIdProperty() : typeHelper.FindProperty(name);
+                if (property == null)
+                {
+                    throw new MongoException(string.Format("Deserialization failed: type {0} does not have a property named {1}", type.FullName, name));
+                }
                 var isNull = false;
                 if (storageType == BSONTypes.Object)
                 {
