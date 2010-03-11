@@ -84,8 +84,7 @@ namespace NoRM.Tests
                 Assert.Equal("Updated Prod", found.ElementAt(0).Name);
             }
         }
-
-        
+                
         private class IntId
         {
             public int Id{ get; set;}
