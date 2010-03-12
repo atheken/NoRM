@@ -1,20 +1,20 @@
 ﻿
+using NoRM.Attributes;
+using NoRM.BSON;
 using NoRM.Configuration;
-using NoRM.Protocol.SystemMessages.Request;
 
 namespace NoRM.Protocol.SystemMessages.Requests
 {
     /// <summary>
     /// Describes an index to insert into the db.
     /// </summary>
-    /// <typeparam name="U">
-    /// </typeparam>
-    public class MongoIndex<U>
+    /// <typeparam name="T">Collection type for indexing</typeparam>
+    public class MongoIndex<T> : IUpdateWithoutId
     {
         static MongoIndex()
         {
             MongoConfiguration.Initialize(c =>
-                c.For<MongoIndex<U>>(a =>
+                c.For<MongoIndex<T>>(a =>
                                                    {
                                                        a.ForProperty(auth => auth.Key).UseAlias("key");
                                                        a.ForProperty(auth => auth.Namespace).UseAlias("ns");
@@ -27,7 +27,7 @@ namespace NoRM.Protocol.SystemMessages.Requests
         /// <summary>
         /// Gets or sets the key.
         /// </summary>
-        public U Key { get; set; }
+        public Flyweight Key { get; set; }
 
         /// <summary>
         /// Gets or sets the ns.

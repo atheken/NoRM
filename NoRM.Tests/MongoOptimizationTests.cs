@@ -10,10 +10,32 @@ namespace NoRM.Tests
     public class MongoOptimizationTests
     {
         [Fact]
+        public void MongoCollectionEnsuresIndicies()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+
+                session.Add(new Product
+                {
+                    Name = "ExplainProduct",
+                    Price = 10,
+                    Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
+                });
+
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "Test", true, IndexOption.Ascending);
+            }
+        }
+
+        [Fact]
         public void MongoQueryExplainsExecutionPlansForFlyweightQueries()
         {
             using (var session = new Session())
             {
+                session.Drop<Product>();
+
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+
                 session.Add(new Product
                                 {
                                     Name = "ExplainProduct",
@@ -21,12 +43,8 @@ namespace NoRM.Tests
                                     Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                                 });
 
-                // NOTE: these unit tests aren't 100% valid since adding an index in code isn't
-                // supported yet.  In order to see meaningful results you have to manually
-                // add an index for now.
-
-                // Run the following command in Mongo.exe against the Product collection
-                // db.Product.ensureIndex({"Supplier.Name":1})
+                // To see this manually you can run the following command in Mongo.exe against 
+                //the Product collection db.Product.ensureIndex({"Supplier.Name":1})
 
                 // Then you can run this command to see a detailed explain plan
                 // db.Product.find({"Supplier.Name":"abc"})
@@ -37,7 +55,7 @@ namespace NoRM.Tests
 
                 var result = session.Provider.DB.GetCollection<Product>().Explain(query);
 
-                Assert.NotNull(result.Cursor);
+                Assert.Equal("BtreeCursor TestIndex", result.Cursor);
             }
         }
 
@@ -46,6 +64,10 @@ namespace NoRM.Tests
         {
             using (var session = new Session())
             {
+                session.Drop<Product>();
+
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Name, "TestIndex", true, IndexOption.Ascending);
+
                 session.Add(new Product
                 {
                     Name = "ExplainProduct",
@@ -56,7 +78,7 @@ namespace NoRM.Tests
 
                 var result = session.Provider.DB.GetCollection<Product>().Explain(new { Name = "ExplainProduct" });
 
-                Assert.NotNull(result.Cursor);
+                Assert.Equal("BtreeCursor TestIndex", result.Cursor);
             }
         }
 
@@ -65,6 +87,10 @@ namespace NoRM.Tests
         {
             using (var session = new Session())
             {
+                session.Drop<Product>();
+               
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+
                 session.Add(new Product
                 {
                     Name = "ExplainProduct",
@@ -72,11 +98,11 @@ namespace NoRM.Tests
                     Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                 });
 
-                var explain = session.Products
+                var result = session.Products
                     .Where(x => x.Supplier.Name == "Supplier")
                     .Explain();
 
-                Assert.NotNull(explain.Cursor);
+                Assert.Equal("BtreeCursor TestIndex", result.Cursor);
             }
         }
 
@@ -97,7 +123,9 @@ namespace NoRM.Tests
                 var query = new Flyweight();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
-                var result = session.Provider.DB.GetCollection<Product>().Find(query).Hint(p => p.Name, IndexOption.Ascending);
+                var result = session.Provider.DB.GetCollection<Product>()
+                    .Find(query)
+                    .Hint(p => p.Name, IndexOption.Ascending);
 
                 Assert.Equal(1, result.Count());
             }

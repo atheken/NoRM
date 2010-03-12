@@ -50,6 +50,8 @@ namespace NoRM.Linq
             get { return sb.ToString(); }
         }
 
+        public bool UseScopedQualifier { get; set; }
+
         /// <summary>
         /// The translate collection name.
         /// </summary>
@@ -87,6 +89,12 @@ namespace NoRM.Linq
         /// <returns>The translate.</returns>
         public string Translate(Expression exp)
         {
+            return Translate(exp, true);
+        }
+
+        public string Translate(Expression exp, bool useScopedQualifier)
+        {
+            UseScopedQualifier = useScopedQualifier;
             sb = new StringBuilder();
             sbIndexed = new StringBuilder();
             FlyWeight = new Flyweight();
@@ -108,8 +116,14 @@ namespace NoRM.Linq
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
-                sb.Append("this." + alias); // m.Member.Name);
-                lastFlyProperty = alias; // m.Member.Name;
+                
+                if(UseScopedQualifier)
+                {
+                    sb.Append("this.");
+                }
+                sb.Append(alias);
+
+                lastFlyProperty = alias; 
                 return m;
             }
             if (m.Member.DeclaringType == typeof(string))
@@ -178,7 +192,13 @@ namespace NoRM.Linq
                 }
 
                 var result = string.Join(".", fixedName);
-                sb.Append("this." + result);
+                //sb.Append("this." + result);
+                if (UseScopedQualifier)
+                {
+                    sb.Append("this.");
+                }
+                sb.Append(result);
+
                 lastFlyProperty = result;
                 return m;
             }
