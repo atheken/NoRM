@@ -13,6 +13,9 @@ using TypeHelper=NoRM.BSON.TypeHelper;
 
 namespace NoRM
 {
+    using Commands.Modifiers;
+
+
     /// <summary>
     /// Mongo typed collection.
     /// </summary>
@@ -144,6 +147,27 @@ namespace NoRM
         public T FindOne<U>(U template)
         {
             return Find(template, 1).FirstOrDefault();
+        }
+
+
+        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action)
+        {
+            UpdateWithModifier(matchDocument,action,false,false);
+
+        }
+        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action,bool updateMultiple, bool upsert)
+        {
+            var modifierExpression = new ModifierExpression<T>();
+            action(modifierExpression);
+            if (matchDocument is ObjectId)
+            {
+                Update(new { _id = matchDocument }, modifierExpression.Fly,updateMultiple,upsert);
+            }
+            else
+            {
+                Update(matchDocument, modifierExpression.Fly, updateMultiple, upsert);
+
+            }
         }
 
         /// <summary>

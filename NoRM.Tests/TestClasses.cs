@@ -153,6 +153,26 @@ namespace NoRM.Tests
         }
     }
 
+    internal class Post
+    {
+        public Post()
+        {
+            Id = ObjectId.NewObjectId();
+            Comments = new List<Comment>();
+            Tags = new List<string>();
+        }
+        public ObjectId Id { get; set; }
+        public string Title { get; set; }
+        public int Score { get; set; }
+        public IList<Comment> Comments { get; set; }
+        public IList<string> Tags { get; set; }
+    }
+
+    internal class Comment
+    {
+        public string Text { get; set; }
+    }
+
     internal class CheeseClubContact
     {
         public ObjectId Id { get; set; }
