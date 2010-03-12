@@ -18,6 +18,7 @@ namespace NoRM.Tests
                                     Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                                 });
 
+
                 // NOTE: these unit tests aren't 100% valid since adding an index in code isn't
                 // supported yet.  In order to see meaningful results you have to manually
                 // add an index for now.

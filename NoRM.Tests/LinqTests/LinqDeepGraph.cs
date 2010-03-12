@@ -1,9 +1,9 @@
-﻿namespace NoRM.Tests
-{
-    using System;
-    using System.Linq;
-    using Xunit;
+﻿using System;
+using System.Linq;
+using Xunit;
 
+namespace NoRM.Tests
+{
     public class LinqDeepGraph
     {
         [Fact]

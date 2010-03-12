@@ -1,7 +1,7 @@
+using Xunit;
+
 namespace NoRM.Tests
 {
-    using Xunit;
-
     public class NormalConnectionProviderTests
     {
         [Fact]

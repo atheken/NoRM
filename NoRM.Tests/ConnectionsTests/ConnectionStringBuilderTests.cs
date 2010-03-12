@@ -1,8 +1,8 @@
+using System;
+using Xunit;
+
 namespace NoRM.Tests
 {
-    using System;
-    using Xunit;
-
     public class CreateTests
     {
         [Fact]

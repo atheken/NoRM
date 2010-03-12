@@ -1,26 +1,11 @@
-﻿namespace NoRM.Tests
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+
+namespace NoRM.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Xunit;
-
-    public class TestClass
-    {
-        public TestClass()
-        {
-            Id = Guid.NewGuid();
-        }
-
-        [MongoIdentifier]
-        public Guid? Id { get; set; }
-
-        public double? ADouble { get; set; }
-        public string AString { get; set; }
-        public int? AInteger { get; set; }
-        public List<String> AStringArray { get; set; }
-    }
-
+    
     public class MongoSearchQualifierTests : IDisposable
     {
         private readonly MongoCollection<TestClass> _coll;

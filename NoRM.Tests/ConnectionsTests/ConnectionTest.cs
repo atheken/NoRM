@@ -1,16 +1,15 @@
+using System;
+using System.Net.Sockets;
+using Xunit;
 
 namespace NoRM.Tests
 {
-    using System;
-    using System.Net.Sockets;
-    using Xunit;
-
     public class ConnectionTest
     {
         [Fact]
         public void ThrowsExceptionIfCantConnect()
         {
-            Assert.Throws<SocketException>(() => new Connection(ConnectionStringBuilder.Create("mongodb://localhost2/test")));            
+            Assert.Throws<SocketException>(() => new Connection(ConnectionStringBuilder.Create("mongodb://localhost2/test")));
         }
         [Fact]
         public void ThrowsExceptionWhenTryingToOverridePooling()
@@ -88,14 +87,14 @@ namespace NoRM.Tests
                 Assert.Equal(true, connection.StrictMode);
                 Assert.Equal(23, connection.QueryTimeout);
                 Assert.Equal(true, connection.EnableExpandoProperties);
-                
+
                 connection.ResetOptions();
                 Assert.Equal(false, connection.StrictMode);
                 Assert.Equal(30, connection.QueryTimeout);
                 Assert.Equal(false, connection.EnableExpandoProperties);
             }
         }
-        
+
         [Fact]
         public void CreatesDigestFromNonce()
         {
@@ -104,14 +103,14 @@ namespace NoRM.Tests
                 Assert.Equal("08f11f775e2a8cf4248f0ae6126164f0", connection.Digest("1234abc"));
             }
         }
-        
+
         private class DisposableConnection : Connection, IDisposable
         {
             private bool _disposed;
-            
-            internal DisposableConnection(ConnectionStringBuilder builder) : base(builder){}
-            
-            
+
+            internal DisposableConnection(ConnectionStringBuilder builder) : base(builder) { }
+
+
             public void Dispose()
             {
                 Dispose(true);
@@ -127,7 +126,7 @@ namespace NoRM.Tests
             ~DisposableConnection()
             {
                 Dispose(false);
-            }            
+            }
         }
-    }   
+    }
 }
