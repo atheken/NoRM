@@ -273,6 +273,17 @@ namespace NoRM
             dm.Execute();
         }
 
+        public void Delete(T entity)
+        {
+            var helper = TypeHelper.GetHelperForType(typeof(T));
+            var idProperty = helper.FindIdProperty();
+            if (idProperty == null)
+            {
+                throw new MongoException(string.Format("Cannot delete {0} since it has no id property", typeof(T).FullName));
+            }
+            Delete(new{Id = idProperty.Getter(entity)});
+        }
+
         /// <summary>
         /// The find.
         /// </summary>
