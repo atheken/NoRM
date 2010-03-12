@@ -85,6 +85,19 @@ namespace NoRM
         /// <remarks>
         /// Only works when the Id property is of type ObjectId
         /// </remarks>
-        void Save(T entity);        
+        void Save(T entity);
+
+        /// <summary>
+        /// Delete the documents that mact the specified template.
+        /// </summary>
+        /// <typeparam name="U">a document that has properties
+        /// that match what you want to delete.</typeparam>
+        /// <param name="template">The template.</param>
+        void Delete<U>(U template);
+
+        /// <summary>
+        /// Delete the entity
+        /// </summary>
+        void Delete(T entity);   
     }
 }
