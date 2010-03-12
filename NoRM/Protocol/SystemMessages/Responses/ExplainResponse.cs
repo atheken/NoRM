@@ -1,4 +1,5 @@
-﻿using NoRM.BSON;
+﻿using System.Collections.Generic;
+using NoRM.BSON;
 using NoRM.Configuration;
 
 namespace NoRM.Responses
@@ -6,8 +7,10 @@ namespace NoRM.Responses
     /// <summary>
     /// The explain response.
     /// </summary>
-    public class ExplainResponse : ExplainPlan, IFlyweight
+    public class ExplainResponse : ExplainPlan, IFlyweight, IExpando
     {
+        private IDictionary<string, object> _expando;
+
         /// <summary>
         /// Explains the plan.
         /// </summary>
@@ -49,5 +52,13 @@ namespace NoRM.Responses
         /// </summary>
         /// <value>All plans.</value>
         public ExplainPlan[] AllPlans { get; internal set; }
+        /// <summary>
+        /// Bucket for additional or unexpected properties.
+        /// </summary>
+        /// <value>The expando.</value>
+        public IDictionary<string, object> Expando
+        {
+            get { if (_expando == null) { _expando = new Dictionary<string, object>(); } return _expando; }
+        }
     }
 }

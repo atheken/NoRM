@@ -374,5 +374,14 @@ namespace NoRM.Tests
             Assert.Equal(start.Name, end.Name);            
         }
         
+        [Fact]
+        public void DeserializesUnknownPropertiesToExpandoBucket()
+        {
+            var start = PrivateConstructor.Create("Darren Kopp");
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<ExpandoClass>(bytes);
+            Assert.Equal(start.Name, end.Expando["Name"]);
+        }
+        
     }
 }
