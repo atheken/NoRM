@@ -83,7 +83,7 @@ namespace NoRM
         public bool ResetLastError()
         {
             var result = this._database.GetCollection<GenericCommandResponse>("$cmd").FindOne(new { reseterror = 1d });
-            return result != null && result.OK == 1.0;
+            return result != null && result.Ok == 1.0;
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace NoRM
         public bool SetProfileLevel(int value)
         {
             var result = this._database.GetCollection<ProfileLevelResponse>("$cmd").FindOne(new { profile = value });
-            return result != null && result.OK == 1.0;
+            return result != null && result.Ok == 1.0;
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace NoRM
         public double? GetProfileLevel()
         {
             var result = this._database.GetCollection<ProfileLevelResponse>("$cmd").FindOne(new { profile = -1 });
-            return result.Was;
+            return result.PreviousLevel;
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace NoRM
         {
             var result = this._database.GetCollection<GenericCommandResponse>("$cmd")
                 .FindOne(new { repairDatabase = 1d, preserveClonedFilesOnFailure, backupOriginalFiles });
-            return result != null && result.OK == 1.0;
+            return result != null && result.Ok == 1.0;
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace NoRM
         {
             AssertConnectedToAdmin();
             var response = this._database.GetCollection<ListDatabasesResponse>("$cmd").FindOne(new ListDatabasesRequest());
-            return response != null && response.OK == 1.0 ? response.Databases : Enumerable.Empty<DatabaseInfo>();
+            return response != null && response.Ok == 1.0 ? response.Databases : Enumerable.Empty<DatabaseInfo>();
         }
 
         /// <summary>

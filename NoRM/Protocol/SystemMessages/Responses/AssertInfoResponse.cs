@@ -5,12 +5,14 @@ namespace NoRM.Responses
     /// <summary>
     /// The assert info response.
     /// </summary>
-    public class AssertInfoResponse
+    public class AssertInfoResponse : BaseStatusMessage
     {
+        /// <summary>
+        /// Initializes the <see cref="AssertInfoResponse"/> class.
+        /// </summary>
         static AssertInfoResponse()
         {
-            MongoConfiguration.Initialize(c =>
-                c.For<AssertInfoResponse>(a =>
+            MongoConfiguration.Initialize(c => c.For<AssertInfoResponse>(a =>
                                                    {
                                                        a.ForProperty(auth => auth.Ok).UseAlias("ok");
                                                        a.ForProperty(auth => auth.DatabaseAsserted).UseAlias("dbasserted");
@@ -23,11 +25,6 @@ namespace NoRM.Responses
                 );
         }
 
-        /// <summary>
-        /// Gets or sets the ok status.
-        /// </summary>
-        /// <value>The OK.</value>
-        public double? Ok { get; set; }
         /// <summary>
         /// Gets or sets the if the database asserted.
         /// </summary>

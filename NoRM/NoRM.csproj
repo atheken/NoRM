@@ -154,6 +154,7 @@
     <Compile Include="Protocol\SystemMessages\Requests\CreateCollectionRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\BaseStatusMessage.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\CurrentOperationResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DeleteIndicesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DistinctValuesResponse.cs" />

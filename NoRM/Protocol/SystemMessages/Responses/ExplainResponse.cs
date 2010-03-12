@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 using NoRM.Configuration;
 
 namespace NoRM.Responses
@@ -15,8 +13,7 @@ namespace NoRM.Responses
         /// </summary>
         static ExplainResponse()
         {
-            MongoConfiguration.Initialize(c =>
-                c.For<ExplainResponse>(a =>
+            MongoConfiguration.Initialize(c => c.For<ExplainResponse>(a =>
                                                    {
                                                        a.ForProperty(auth => auth.NumberScanned).UseAlias("nscanned");
                                                        a.ForProperty(auth => auth.Number).UseAlias("n");
