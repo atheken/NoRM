@@ -53,6 +53,7 @@
     <Compile Include="CollectionFindTests\MongoSearchQualifierTests.cs" />
     <Compile Include="CollectionFindTests\QueryTests.cs" />
     <Compile Include="CollectionFindTests\WhereQualifierTests.cs" />
+    <Compile Include="CollectionUpdateTests\UpdateModifiersTests.cs" />
     <Compile Include="CollectionUpdateTests\UpdateTests.cs" />
     <Compile Include="ConnectionsTests\AuthenticatedFixture.cs" />
     <Compile Include="BSONSerializerTest.cs" />
