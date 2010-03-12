@@ -77,5 +77,14 @@ namespace NoRM
         /// <param name="matchDocument">The match document.</param>
         /// <param name="valueDocument">The value document.</param>
         void UpdateOne<X, U>(X matchDocument, U valueDocument);
+
+        /// <summary>
+        /// Attempts to save or update an instance
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <remarks>
+        /// Only works when the Id property is of type ObjectId
+        /// </remarks>
+        void Save(T entity);        
     }
 }
