@@ -11,21 +11,17 @@ namespace NoRM
     /// </summary>
     public struct TimedLock : IDisposable
     {
-        /// <summary>
-        /// The _target.
-        /// </summary>
         private readonly object _target;
 
-        /// <summary>
-        /// The _leak detector.
-        /// </summary>
+#if DEBUG
         private readonly Sentinel _leakDetector;
+#endif
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TimedLock"/> struct.
         /// </summary>
         /// <param name="o">
-        /// The o.
+        /// The object to lock.
         /// </param>
         private TimedLock(object o)
         {
@@ -36,29 +32,21 @@ namespace NoRM
         }
 
         /// <summary>
-        /// The lock.
+        /// Lock an object.
         /// </summary>
-        /// <param name="o">
-        /// The o.
-        /// </param>
-        /// <returns>
-        /// </returns>
+        /// <param name="o">The object to lock.</param>
+        /// <returns></returns>
         public static TimedLock Lock(object o)
         {
             return Lock(o, TimeSpan.FromSeconds(10));
         }
 
         /// <summary>
-        /// The lock.
+        /// The object to lock.
         /// </summary>
-        /// <param name="o">
-        /// The o.
-        /// </param>
-        /// <param name="timeout">
-        /// The timeout.
-        /// </param>
-        /// <returns>
-        /// </returns>
+        /// <param name="o">The object to lock.</param>
+        /// <param name="timeout">The timeout.</param>
+        /// <returns></returns>
         /// <exception cref="LockTimeoutException">
         /// </exception>
         public static TimedLock Lock(object o, TimeSpan timeout)
@@ -84,7 +72,7 @@ namespace NoRM
 #if DEBUG
 
 
-// Lock acquired. Store the stack trace.
+            // Lock acquired. Store the stack trace.
             var trace = new StackTrace();
             lock (Sentinel.StackTraces)
             {
@@ -96,7 +84,7 @@ namespace NoRM
         }
 
         /// <summary>
-        /// The dispose.
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         public void Dispose()
         {
@@ -119,7 +107,7 @@ namespace NoRM
 #if DEBUG
 
 
-// (In Debug mode, we make it a class so that we can add a finalizer
+        // (In Debug mode, we make it a class so that we can add a finalizer
         // in order to detect when the object is not freed.)
         /// <summary>
         /// The sentinel.
@@ -188,9 +176,7 @@ namespace NoRM
         /// <summary>
         /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
         /// </summary>
-        /// <param name="blockingStackTrace">
-        /// The blocking stack trace.
-        /// </param>
+        /// <param name="blockingStackTrace">The blocking stack trace.</param>
         public LockTimeoutException(StackTrace blockingStackTrace)
         {
             BlockingStackTrace = blockingStackTrace;
@@ -201,12 +187,8 @@ namespace NoRM
         /// <summary>
         /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
         /// </summary>
-        /// <param name="info">
-        /// The info.
-        /// </param>
-        /// <param name="context">
-        /// The context.
-        /// </param>
+        /// <param name="info">The info.</param>
+        /// <param name="context">The context.</param>
         protected LockTimeoutException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
