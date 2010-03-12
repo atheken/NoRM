@@ -1,10 +1,10 @@
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using Xunit;
+
 namespace NoRM.Tests
 {
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Text.RegularExpressions;
-    using Xunit;
-
     public class MongoAdminTests
     {
         public MongoAdminTests()

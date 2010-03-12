@@ -1,27 +1,26 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
+using NoRM.BSON;
+using Xunit;
 
 namespace NoRM.Tests
 {
-    using System;
-    using System.Diagnostics;
-    using System.Text.RegularExpressions;
-    using BSON;
-    using Xunit;
-
     public class BSONSerializerTest
-    {       
+    {
         [Fact]
         public void DoesntSerializeIgnoredProperties()
         {
-            var o = new GeneralDTO {IgnoredProperty = 4};
+            var o = new GeneralDTO { IgnoredProperty = 4 };
             Assert.Equal(0, BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(o)).IgnoredProperty);
         }
 
         [Fact]
         public void SerializationOfEnumIsNotLossy()
         {
-            var obj1 = new GeneralDTO{ Flags32 = Flags32.FlagOn, Flags64 = Flags64.FlagOff };
+            var obj1 = new GeneralDTO { Flags32 = Flags32.FlagOn, Flags64 = Flags64.FlagOff };
             var obj2 = new GeneralDTO();
 
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
@@ -43,11 +42,11 @@ namespace NoRM.Tests
             var hydrated = BsonDeserializer.Deserialize<Flyweight>(testBytes);
             Assert.Equal(testObj["astring"], hydrated["astring"]);
         }
-        
+
         [Fact]
         public void SerializesAndDeserializesAFloat()
         {
-            var o = new GeneralDTO {AFloat = 1.4f};
+            var o = new GeneralDTO { AFloat = 1.4f };
             Assert.Equal(1.4f, BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(o)).AFloat);
         }
         [Fact]
@@ -56,7 +55,7 @@ namespace NoRM.Tests
             var dummy = new GeneralDTO { Title = "Testing" };
             Assert.NotEmpty(BsonSerializer.Serialize(dummy));
         }
-        
+
         [Fact]
         public void SerializationOfDatesHasMillisecondPrecision()
         {
@@ -201,10 +200,10 @@ namespace NoRM.Tests
         [Fact]
         public void SerializationOfInheritenceIsNotLossy()
         {
-            var obj1 = new ChildGeneralDTO {Pi = 3.14, IsOver9000 = true};
+            var obj1 = new ChildGeneralDTO { Pi = 3.14, IsOver9000 = true };
             var hydratedObj1 = BsonDeserializer.Deserialize<ChildGeneralDTO>(BsonSerializer.Serialize(obj1));
             Assert.Equal(obj1.Pi, hydratedObj1.Pi);
-            Assert.Equal(obj1.IsOver9000, hydratedObj1.IsOver9000); 
+            Assert.Equal(obj1.IsOver9000, hydratedObj1.IsOver9000);
         }
         [Fact]
         public void SerializationOfRegexIsNotLossy()
@@ -226,7 +225,7 @@ namespace NoRM.Tests
         [Fact]
         public void SerializationOfScopedCodeIsNotLossy()
         {
-            var obj1 = new GeneralDTO {Code = new ScopedCode {CodeString = "function(){return 'hello world!'}"}};
+            var obj1 = new GeneralDTO { Code = new ScopedCode { CodeString = "function(){return 'hello world!'}" } };
             var scope = new Flyweight();
             scope["$ns"] = "root";
             obj1.Code.Scope = scope;
@@ -234,7 +233,7 @@ namespace NoRM.Tests
             var obj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
 
             Assert.Equal(obj1.Code.CodeString, obj2.Code.CodeString);
-            Assert.Equal(((Flyweight)obj1.Code.Scope)["$ns"],((Flyweight)obj2.Code.Scope)["$ns"]);
+            Assert.Equal(((Flyweight)obj1.Code.Scope)["$ns"], ((Flyweight)obj2.Code.Scope)["$ns"]);
         }
         [Fact]
         public void SerializesAndDeserializesAComplexObject()
@@ -313,21 +312,21 @@ namespace NoRM.Tests
                 stopWatch.Stop();
                 Console.WriteLine(stopWatch.ElapsedMilliseconds);
             }
-        }   
+        }
 
         [Fact]
         public void SerializationOfEmptyListIsNotLossy()
         {
             var obj1Bytes = BsonSerializer.Serialize(new GeneralDTO { AList = new List<string>() });
-            BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);  
-        } 
-        
+            BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
+        }
+
         [Fact]
         public void SerializesWithPrivateSetter()
         {
             var start = new PrivateSetter(4);
             var bytes = BsonSerializer.Serialize(start);
-            var end = BsonDeserializer.Deserialize<PrivateSetter>(bytes);  
+            var end = BsonDeserializer.Deserialize<PrivateSetter>(bytes);
             Assert.Equal(start.Id, end.Id);
         }
 
@@ -353,7 +352,7 @@ namespace NoRM.Tests
             Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
             Assert.Equal(2, end.Names.ElementAt(0).Value);
         }
-       
+
         [Fact]
         public void SerializesReadonlyDictionary()
         {

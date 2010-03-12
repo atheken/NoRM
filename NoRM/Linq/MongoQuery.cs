@@ -151,11 +151,8 @@ namespace NoRM.Linq
         /// <returns></returns>
         internal ExplainResponse Explain(Flyweight query)
         {
-            //var queryFlyweight = new Flyweight();
-            //queryFlyweight["$query"] = query;
-
             var explain = new Flyweight();
-            explain["$query"] = query;// query.Replace("(this.", "{").Replace(")", "}");
+            explain["$query"] = query;
             explain["$explain"] = true;
 
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));

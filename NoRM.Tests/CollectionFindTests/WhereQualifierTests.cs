@@ -5,8 +5,7 @@ using Xunit;
 
 namespace NoRM.Tests
 {
-   
-    
+
     public class WhereQualifierTests : IDisposable
     {
         private readonly Mongo _server;

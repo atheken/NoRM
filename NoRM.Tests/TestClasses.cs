@@ -6,9 +6,49 @@ using System.Text.RegularExpressions;
 using NoRM.Attributes;
 using NoRM.Linq;
 using NoRM.Responses;
+using NoRM.BSON.DbTypes;
 
 namespace NoRM.Tests
 {
+
+    internal class ReduceProduct
+    {
+        public ObjectId Id { get; set; }
+        public float Price { get; set; }
+
+        public ReduceProduct()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+    }
+
+    public class ProductSum
+    {
+        public int Id { get; set; }
+        public int Value { get; set; }
+    }
+    public class ProductSumObjectId
+    {
+        public ObjectId Id { get; set; }
+        public int Value { get; set; }
+    }
+
+    public class TestClass
+    {
+        public TestClass()
+        {
+            Id = Guid.NewGuid();
+        }
+
+        [MongoIdentifier]
+        public Guid? Id { get; set; }
+
+        public double? ADouble { get; set; }
+        public string AString { get; set; }
+        public int? AInteger { get; set; }
+        public List<String> AStringArray { get; set; }
+    }
+
     internal class TestHelper
     {
         private static readonly string _connectionStringHost = ConfigurationManager.AppSettings["connectionStringHost"];
@@ -46,7 +86,7 @@ namespace NoRM.Tests
             }
             var host = string.IsNullOrEmpty(_connectionStringHost) ? "localhost" : _connectionStringHost;
             database = database ?? "NoRMTests";
-            return string.Format("mongodb://{0}{1}/{2}{3}", authentication, host, database, query);            
+            return string.Format("mongodb://{0}{1}/{2}{3}", authentication, host, database, query);
         }
     }
 
@@ -84,7 +124,7 @@ namespace NoRM.Tests
             T result = default(T);
             using (MapReduce mr = _provider.Server.CreateMapReduce())
             {
-                MapReduceResponse response = mr.Execute(new MapReduceOptions(typeof (T).Name) {Map = map, Reduce = reduce});
+                MapReduceResponse response = mr.Execute(new MapReduceOptions(typeof(T).Name) { Map = map, Reduce = reduce });
                 MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
                 MapReduceResult<T> r = coll.Find().FirstOrDefault();
                 result = r.Value;
@@ -104,7 +144,7 @@ namespace NoRM.Tests
 
         public void Drop<T>()
         {
-            _provider.DB.DropCollection(typeof (T).Name);
+            _provider.DB.DropCollection(typeof(T).Name);
         }
 
         public void CreateCappedCollection(string name)
@@ -125,6 +165,18 @@ namespace NoRM.Tests
         }
     }
 
+    internal class ProductReference
+    {
+        public ProductReference()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+        public DBReference[] ProductsOrdered { get; set; }
+    }
+
     internal class Person
     {
         public ObjectId Id { get; set; }
@@ -138,7 +190,7 @@ namespace NoRM.Tests
             Address = new Address();
         }
     }
-    
+
     internal class Address
     {
         public string Street { get; set; }
@@ -160,10 +212,12 @@ namespace NoRM.Tests
         public Address Address { get; set; }
     }
 
-    internal class InventoryChange {
+    internal class InventoryChange
+    {
         public int AmountChanged { get; set; }
         public DateTime CreatedOn { get; set; }
-        public InventoryChange() {
+        public InventoryChange()
+        {
             CreatedOn = DateTime.Now;
         }
     }
@@ -212,12 +266,12 @@ namespace NoRM.Tests
     {
         public ObjectId _id { get; set; }
     }
-    
+
     public class PrivateSetter
     {
-        public int Id{ get; private set;}
+        public int Id { get; private set; }
 
-        public PrivateSetter(){}
+        public PrivateSetter() { }
         public PrivateSetter(int id)
         {
             Id = id;
@@ -232,11 +286,11 @@ namespace NoRM.Tests
             {
                 if (_names == null)
                 {
-                    _names =new List<string>();
+                    _names = new List<string>();
                 }
                 return _names;
             }
-        }        
+        }
     }
     public class DictionaryObject
     {
@@ -251,7 +305,7 @@ namespace NoRM.Tests
                 }
                 return _lookup;
             }
-            set{ _lookup = value;}
+            set { _lookup = value; }
         }
     }
     public class ReadOnlyDictionary

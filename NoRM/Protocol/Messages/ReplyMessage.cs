@@ -39,7 +39,7 @@ namespace NoRM.Protocol.Messages
             // decrement the length for all the reads.
             _messageLength -= 4 + 4 + 4 + 4 + 4 + 4 + 8 + 4 + 4;
 
-            _results = new List<T>(100); // arbitrary number seems like it would be a sweet spot for many queries.
+            _results = new List<T>(10);
 
             if (HasError)
             {
