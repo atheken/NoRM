@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using NoRM.BSON;
 using NoRM.Configuration;
-using NoRM.Protocol.SystemMessages.Responses;
+using NoRM.Responses;
 
 namespace NoRM.Linq
 {

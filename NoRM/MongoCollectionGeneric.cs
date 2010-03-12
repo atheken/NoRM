@@ -104,13 +104,7 @@ namespace NoRM
         /// </exception>
         public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert)
         {
-            if (!this.Updateable)
-            {
-                throw new NotSupportedException(
-                    "This collection is not updatable, this is due to the fact that the collection's type " +
-                    typeof(T).FullName +
-                    " does not specify an identifier property");
-            }
+            AssertUpdatable();
 
             var ops = UpdateOption.None;
             if (updateMultiple)
@@ -219,15 +213,19 @@ namespace NoRM
         /// </remarks>
         public void Save(T entity)
         {
+            AssertUpdatable();
+            
             var helper = TypeHelper.GetHelperForType(typeof(T));
             var idProperty = helper.FindIdProperty();
-            if (idProperty == null)
-            {
-                throw new MongoException("Save can only be called on an entity with a property named Id or one marked with the MongoIdentifierAttribute");
-            }
-
             var id = idProperty.Getter(entity);
-            Update(new { Id = id }, entity, false, true);
+            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))            
+            {
+                Insert(entity);
+            }
+            else
+            {
+                Update(new { Id = id }, entity, false, true);             
+            }                       
         }
 
         /// <summary>
@@ -345,17 +343,6 @@ namespace NoRM
         //}
 
         /// <summary>
-        /// Inserts documents
-        /// </summary>
-        /// <param name="documentsToInsert">
-        /// The documents to insert.
-        /// </param>
-        public void Insert(params T[] documentsToInsert)
-        {
-            Insert(documentsToInsert.AsEnumerable());
-        }
-
-        /// <summary>
         /// Constructs and returns a grouping of values based on initial values
         /// </summary>
         /// <typeparam name="X">Key</typeparam>
@@ -396,20 +383,53 @@ namespace NoRM
         /// <param name="documentsToInsert">
         /// The documents to insert.
         /// </param>
+        public void Insert(params T[] documentsToInsert)
+        {
+            Insert(documentsToInsert.AsEnumerable());
+        }
+        
+        /// <summary>
+        /// Inserts documents
+        /// </summary>
+        /// <param name="documentsToInsert">
+        /// The documents to insert.
+        /// </param>
         /// <exception cref="NotSupportedException">
         /// </exception>
         public void Insert(IEnumerable<T> documentsToInsert)
         {
-            if (!this.Updateable)
-            {
-                throw new NotSupportedException(
-                    "This collection does not accept insertions, this is due to the fact that the collection's type " +
-                    typeof(T).FullName +
-                    " does not specify an identifier property");
-            }
-
+            AssertUpdatable();
+            TrySettingId(documentsToInsert);
             var insertMessage = new InsertMessage<T>(_connection, FullyQualifiedName, documentsToInsert);
             insertMessage.Execute();
+        }
+
+        private void AssertUpdatable()
+        {
+            if (!Updateable)
+            {
+                throw new MongoException("This collection does not accept insertions/updates, this is due to the fact that the collection's type " + typeof(T).FullName + " does not specify an identifier property");
+            }            
+        }
+
+
+        private static void TrySettingId(IEnumerable<T> entities)
+        {
+            var idProperty = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty();
+            if (!typeof(ObjectId).IsAssignableFrom(idProperty.Type) || idProperty.Setter == null)
+            {
+                return;
+            }
+            
+            foreach(var entity in entities)
+            {
+                var value = idProperty.Getter(entity);
+                if (value == null)
+                {
+                    idProperty.Setter(entity, ObjectId.NewObjectId());
+                }
+            }
+            return;
         }
     }
 }
