@@ -41,18 +41,13 @@ namespace NoRM.Protocol.Messages
             NumberToTake = int.MaxValue;
         }
 
-        //private U _query;
-
         /// <summary>
         /// A BSON query.
         /// </summary>
         public U Query
         {
-            get;// { return _query; }
+            get;
             set;
-            //{
-            //    this._query = value;
-            //}
         }
 
         /// <summary>
@@ -88,10 +83,6 @@ namespace NoRM.Protocol.Messages
                                                 BitConverter.GetBytes(this.NumberToSkip),
                                                 BitConverter.GetBytes(this.NumberToTake)
                                             };
-
-            #region Message Header
-
-            #endregion
 
             #region Message Body
 

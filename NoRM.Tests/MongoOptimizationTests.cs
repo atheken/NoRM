@@ -37,7 +37,7 @@ namespace NoRM.Tests
 
                 var result = session.Provider.DB.GetCollection<Product>().Explain(query);
 
-                Assert.NotNull(result.cursor);
+                Assert.NotNull(result.Cursor);
             }
         }
 
@@ -56,7 +56,7 @@ namespace NoRM.Tests
 
                 var result = session.Provider.DB.GetCollection<Product>().Explain(new { Name = "ExplainProduct" });
 
-                Assert.NotNull(result.cursor);
+                Assert.NotNull(result.Cursor);
             }
         }
 
@@ -76,7 +76,7 @@ namespace NoRM.Tests
                     .Where(x => x.Supplier.Name == "Supplier")
                     .Explain();
 
-                Assert.NotNull(explain.cursor);
+                Assert.NotNull(explain.Cursor);
             }
         }
 

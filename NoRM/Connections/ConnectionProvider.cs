@@ -60,9 +60,9 @@ namespace NoRM
                     NumberToTake = 1,
                     Query = new AuthenticationRequest
                     {
-                        user = connection.UserName,
-                        nonce = nonce.Nonce,
-                        key = connection.Digest(nonce.Nonce),
+                        User = connection.UserName,
+                        Nonce = nonce.Nonce,
+                        Key = connection.Digest(nonce.Nonce),
                     }
                 }.Execute();
 

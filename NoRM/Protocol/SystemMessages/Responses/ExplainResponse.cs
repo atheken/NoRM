@@ -1,60 +1,56 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using NoRM.BSON;
+using NoRM.Configuration;
 
 namespace NoRM.Responses
 {
     /// <summary>
     /// The explain response.
     /// </summary>
-    public class ExplainResponse : Explain, IFlyweight
+    public class ExplainResponse : ExplainPlan, IFlyweight
     {
-        public int nscanned { get; set; }
-        public int n { get; set; }
-        public int millis { get; set; }
-        public Explain oldPlan { get; set; }
-        public Explain[] allPlans { get; set; }
-    }
-
-    /// <summary>
-    /// The explain.
-    /// </summary>
-    public class Explain
-    {
-        public string cursor { get; set; }
-        internal Flyweight startKey { get; set; }
-        internal Flyweight endKey { get; set; }
-
-        public Dictionary<string, string> ExplainStartKey
+        /// <summary>
+        /// Explains the plan.
+        /// </summary>
+        static ExplainResponse()
         {
-            get
-            {
-                var keys = new Dictionary<string, string>();
-                if (startKey != null)
-                {
-                    var properties = startKey.AllProperties();
-
-                    properties.ToList().ForEach(p => keys.Add(p.PropertyName, p.Value.ToString()));
-                }
-
-                return keys;
-            }
+            MongoConfiguration.Initialize(c =>
+                c.For<ExplainResponse>(a =>
+                                                   {
+                                                       a.ForProperty(auth => auth.NumberScanned).UseAlias("nscanned");
+                                                       a.ForProperty(auth => auth.Number).UseAlias("n");
+                                                       a.ForProperty(auth => auth.Milliseconds).UseAlias("millis");
+                                                       a.ForProperty(auth => auth.OldPlan).UseAlias("oldPlan");
+                                                       a.ForProperty(auth => auth.AllPlans).UseAlias("allPlans");
+                                                   })
+                );
         }
 
-        public Dictionary<string, string> ExplainEndKey
-        {
-            get
-            {
-                var keys = new Dictionary<string, string>();
-                if (endKey != null)
-                {
-                    var properties = endKey.AllProperties();
-                
-                    properties.ToList().ForEach(p => keys.Add(p.PropertyName, p.Value.ToString()));
-                }
-
-                return keys;
-            }
-        }
+        /// <summary>
+        /// Gets or sets the number scanned.
+        /// </summary>
+        /// <value>The number scanned.</value>
+        public int NumberScanned { get; internal set; }
+        /// <summary>
+        /// Gets or sets the number.
+        /// </summary>
+        /// <value>The number.</value>
+        public int Number { get; internal set; }
+        /// <summary>
+        /// Gets or sets the milliseconds.
+        /// </summary>
+        /// <value>The milliseconds.</value>
+        public int Milliseconds { get; internal set; }
+        /// <summary>
+        /// Gets or sets the old explain plan.
+        /// </summary>
+        /// <value>The old plan.</value>
+        public ExplainPlan OldPlan { get; internal set; }
+        /// <summary>
+        /// Gets or sets all explain plans.
+        /// </summary>
+        /// <value>All plans.</value>
+        public ExplainPlan[] AllPlans { get; internal set; }
     }
 }

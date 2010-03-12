@@ -241,10 +241,10 @@ namespace NoRM
             var coll = _db.GetCollection<MongoIndex<U>>("system.indexes");
             coll.Insert(new MongoIndex<U>()
             {
-                key = indexDefinition,
-                ns = FullyQualifiedName,
-                name = indexName,
-                unique = isUnique
+                Key = indexDefinition,
+                Namespace = FullyQualifiedName,
+                Name = indexName,
+                Unique = isUnique
             });
         }
 
