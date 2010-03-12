@@ -123,7 +123,8 @@ namespace NoRM.Tests
                 var query = new Flyweight();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
-                var result = session.Provider.DB.GetCollection<Product>()
+                var result = session.Provider.DB
+                    .GetCollection<Product>()
                     .Find(query)
                     .Hint(p => p.Name, IndexOption.Ascending);
 
