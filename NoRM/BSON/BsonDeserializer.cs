@@ -1,26 +1,23 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
+
 namespace NoRM.BSON
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Reflection;
-    using System.Text;
-    using System.Text.RegularExpressions;
-
     /// <summary>
     /// BSON Deserializer
     /// </summary>
     public class BsonDeserializer
     {
-        private static readonly Type _IEnumerableType = typeof(IEnumerable);
-        private static readonly Type _IDictionaryType = typeof(IDictionary<,>);
-
         private readonly static IDictionary<BSONTypes, Type> _typeMap = new Dictionary<BSONTypes, Type>
          {
              {BSONTypes.Int32, typeof(int)}, {BSONTypes.Int64, typeof (long)}, {BSONTypes.Boolean, typeof (bool)}, {BSONTypes.String, typeof (string)},
              {BSONTypes.Double, typeof(double)}, {BSONTypes.Binary, typeof (byte[])}, {BSONTypes.Regex, typeof (Regex)}, {BSONTypes.DateTime, typeof (DateTime)},
-             {BSONTypes.MongoOID, typeof(ObjectId)}
+             {BSONTypes.MongoOID, typeof(ObjectId)}, {BSONTypes.Array, typeof(IList)}
          };
         private readonly BinaryReader _reader;
         private Document _current;
@@ -172,7 +169,7 @@ namespace NoRM.BSON
             {
                 return ReadBinary();
             }
-            if (_IEnumerableType.IsAssignableFrom(type))
+            if (typeof(IEnumerable).IsAssignableFrom(type))
             {
                 return ReadList(type, container);
             }
@@ -233,10 +230,6 @@ namespace NoRM.BSON
                     HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
                 var property = (name == "_id") ? typeHelper.FindIdProperty() : typeHelper.FindProperty(name);
-                if (property == null)
-                {
-                    throw new MongoException(string.Format("Deserialization failed: type {0} does not have a property named {1}", type.FullName, name));
-                }
                 var isNull = false;
                 if (storageType == BSONTypes.Object)
                 {
@@ -253,13 +246,22 @@ namespace NoRM.BSON
                     }                                        
                 }
                 object container = null;
-                if (property.Setter == null)
+                var propertyType = property != null ? property.Type : _typeMap.ContainsKey(storageType) ? _typeMap[storageType] : typeof(object);
+                if (property == null && typeHelper.Expando == null)
+                {
+                    throw new MongoException(string.Format("Deserialization failed: type {0} does not have a property named {1}", type.FullName, name));   
+                }
+                if (property != null && property.Setter == null)
                 {
                     var o = property.Getter(instance);
                     container = o is IList || IsDictionary(property.Type) ? o : null;
                 }
-                var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
-                if (container == null)
+                var value = isNull ? null : DeserializeValue(propertyType, storageType, container);
+                if (property == null)
+                {
+                    ((IDictionary<string, object>) typeHelper.Expando.Getter(instance))[name] = value;
+                }
+                else if (container == null)
                 {
                     property.Setter(instance, value);
                 }
@@ -320,7 +322,7 @@ namespace NoRM.BSON
         /// </returns>
         private static bool IsDictionary(Type type)
         {
-            return type.IsGenericType && _IDictionaryType.IsAssignableFrom(type.GetGenericTypeDefinition());
+            return type.IsGenericType && typeof(IDictionary<,>).IsAssignableFrom(type.GetGenericTypeDefinition());
         }
 
         /// <summary>

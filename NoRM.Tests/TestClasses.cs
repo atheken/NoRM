@@ -74,7 +74,7 @@ namespace NoRM.Tests
 
         public void Dispose()
         {
-            _provider.Server.Dispose();
+            _provider.Mongo.Dispose();
         }
 
         #endregion
@@ -82,7 +82,7 @@ namespace NoRM.Tests
         public T MapReduce<T>(string map, string reduce)
         {
             T result = default(T);
-            using (MapReduce mr = _provider.Server.CreateMapReduce())
+            using (MapReduce mr = _provider.Mongo.CreateMapReduce())
             {
                 MapReduceResponse response = mr.Execute(new MapReduceOptions(typeof (T).Name) {Map = map, Reduce = reduce});
                 MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
@@ -306,6 +306,16 @@ namespace NoRM.Tests
         public static PrivateConstructor Create(string name)
         {
             return new PrivateConstructor {Name = name};
+        }
+    }
+    
+    public class ExpandoClass : IExpando
+    {
+        private IDictionary<string, object> _expando;
+
+        public IDictionary<string, object> Expando
+        {
+            get { if (_expando == null) { _expando = new Dictionary<string, object>(); } return _expando; }
         }
     }
 }
