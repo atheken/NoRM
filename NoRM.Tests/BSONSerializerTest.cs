@@ -1,14 +1,13 @@
 using System.Collections.Generic;
+using System;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using Xunit;
+using NoRM.BSON;
 using System.Linq;
 
 namespace NoRM.Tests
 {
-    using System;
-    using System.Diagnostics;
-    using System.Text.RegularExpressions;
-    using BSON;
-    using Xunit;
-
     public class BSONSerializerTest
     {       
         [Fact]
@@ -365,5 +364,15 @@ namespace NoRM.Tests
             Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
             Assert.Equal(2, end.Names.ElementAt(0).Value);
         }
+        
+        [Fact]
+        public void WillDeserializeObjectWithPrivateConstructor()
+        {
+            var start = PrivateConstructor.Create("Darren Kopp");
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<PrivateConstructor>(bytes);
+            Assert.Equal(start.Name, end.Name);            
+        }
+        
     }
 }

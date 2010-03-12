@@ -297,4 +297,15 @@ namespace NoRM.Tests
     {
         public bool IsOver9000 { get; set; }
     }
+    
+    public class PrivateConstructor
+    {
+        public string Name{ get; set;}
+        private PrivateConstructor(){}
+
+        public static PrivateConstructor Create(string name)
+        {
+            return new PrivateConstructor {Name = name};
+        }
+    }
 }
