@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using NoRM.BSON;
 using NoRM.Configuration;
 
@@ -10,20 +9,21 @@ namespace NoRM.Responses
     /// </summary>
     public class ExplainResponse : ExplainPlan, IFlyweight
     {
+        private IDictionary<string, object> _expando;
+
         /// <summary>
         /// Explains the plan.
         /// </summary>
         static ExplainResponse()
         {
-            MongoConfiguration.Initialize(c =>
-                c.For<ExplainResponse>(a =>
-                                                   {
-                                                       a.ForProperty(auth => auth.NumberScanned).UseAlias("nscanned");
-                                                       a.ForProperty(auth => auth.Number).UseAlias("n");
-                                                       a.ForProperty(auth => auth.Milliseconds).UseAlias("millis");
-                                                       a.ForProperty(auth => auth.OldPlan).UseAlias("oldPlan");
-                                                       a.ForProperty(auth => auth.AllPlans).UseAlias("allPlans");
-                                                   })
+            MongoConfiguration.Initialize(c => c.For<ExplainResponse>(a =>
+            {
+                a.ForProperty(auth => auth.NumberScanned).UseAlias("nscanned");
+                a.ForProperty(auth => auth.Number).UseAlias("n");
+                a.ForProperty(auth => auth.Milliseconds).UseAlias("millis");
+                a.ForProperty(auth => auth.OldPlan).UseAlias("oldPlan");
+                a.ForProperty(auth => auth.AllPlans).UseAlias("allPlans");
+            })
                 );
         }
 

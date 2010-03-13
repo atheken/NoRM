@@ -123,9 +123,36 @@ namespace NoRM.Tests
                 var query = new Flyweight();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
-                var result = session.Provider.DB.GetCollection<Product>()
+                var result = session.Provider.DB
+                    .GetCollection<Product>()
                     .Find(query)
                     .Hint(p => p.Name, IndexOption.Ascending);
+
+                Assert.Equal(1, result.Count());
+            }
+        }
+
+        [Fact]
+        public void MongoQuerySupportschainingHintsForLinqQueries()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+
+                session.Add(new Product
+                {
+                    Name = "ExplainProduct",
+                    Price = 10,
+                    Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
+                });
+
+                var query = new Flyweight();
+                query["Supplier.Name"] = Q.Equals("Supplier");
+
+                var result = session.Provider.DB.GetCollection<Product>()
+                    .Find(query)
+                    .Hint(p => p.Name, IndexOption.Ascending)
+                    .Hint(p => p.Supplier.Name, IndexOption.Descending);
 
                 Assert.Equal(1, result.Count());
             }

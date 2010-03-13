@@ -95,7 +95,7 @@ namespace NoRM
             {
                 return GetCollection<CollectionStatistics>("$cmd").FindOne(new CollectionStatistics
                                                                                {
-                                                                                   collstats = collectionName
+                                                                                   CollectionStats = collectionName
                                                                                });
             }
             catch (MongoException exception)
@@ -140,7 +140,7 @@ namespace NoRM
         {
             try
             {
-                return GetCollection<GenericCommandResponse>("$cmd").FindOne(new CreateCollectionRequest(options)).OK == 1;
+                return GetCollection<GenericCommandResponse>("$cmd").FindOne(new CreateCollectionRequest(options)).Ok == 1;
             }
             catch (MongoException exception)
             {
@@ -160,7 +160,7 @@ namespace NoRM
         /// <returns></returns>
         public SetProfileResponse SetProfileLevel(ProfileLevel level)
         {
-            return GetCollection<SetProfileResponse>("$cmd").FindOne(new SetProfileResponse { profile = (int)level });
+            return GetCollection<SetProfileResponse>("$cmd").FindOne(new SetProfileResponse { Profile = (int)level });
         }
 
         /// <summary>

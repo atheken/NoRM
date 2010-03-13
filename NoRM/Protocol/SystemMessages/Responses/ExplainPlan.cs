@@ -15,8 +15,7 @@ namespace NoRM.Responses
         /// </summary>
         static ExplainPlan()
         {
-            MongoConfiguration.Initialize(c =>
-                c.For<ExplainPlan>(a =>
+            MongoConfiguration.Initialize(c => c.For<ExplainPlan>(a =>
                                                    {
                                                        a.ForProperty(auth => auth.Cursor).UseAlias("cursor");
                                                        a.ForProperty(auth => auth.StartKey).UseAlias("startKey");

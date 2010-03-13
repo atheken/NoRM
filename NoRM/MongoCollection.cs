@@ -110,10 +110,10 @@ namespace NoRM
             var result = coll.FindOne(new { deleteIndexes = _collectionName, index = indexName });
             numberDeleted = 0;
 
-            if (result != null && result.OK == 1.0)
+            if (result != null && result.Ok == 1.0)
             {
                 retval = true;
-                numberDeleted = result.NIndexesWas.Value;
+                numberDeleted = result.NumberIndexesWas.Value;
             }
 
             return retval;
