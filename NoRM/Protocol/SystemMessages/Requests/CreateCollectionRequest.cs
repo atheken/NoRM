@@ -6,7 +6,7 @@ namespace NoRM.Protocol.SystemMessages.Request
     /// <summary>
     /// The create collection request.
     /// </summary>
-    internal class CreateCollectionRequest
+    internal class CreateCollectionRequest : ISystemQuery
     {
         /// <summary>
         /// Initializes the <see cref="CreateCollectionRequest"/> class.

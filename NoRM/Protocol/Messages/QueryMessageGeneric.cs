@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using NoRM.BSON;
+using NoRM.Protocol.SystemMessages;
 
 namespace NoRM.Protocol.Messages
 {
@@ -35,7 +36,8 @@ namespace NoRM.Protocol.Messages
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <param name="fullyQualifiedCollName">Name of the fully qualified coll.</param>
-        public QueryMessage(IConnection connection, string fullyQualifiedCollName) : base(connection, fullyQualifiedCollName)
+        public QueryMessage(IConnection connection, string fullyQualifiedCollName)
+            : base(connection, fullyQualifiedCollName)
         {
             this._op = MongoOp.Query;
             NumberToTake = int.MaxValue;
@@ -50,6 +52,11 @@ namespace NoRM.Protocol.Messages
             set;
         }
 
+        public object OrderBy
+        {
+            get;
+            set;
+        }
         /// <summary>
         /// Gets or sets the number of documents to take.
         /// </summary>
@@ -72,9 +79,9 @@ namespace NoRM.Protocol.Messages
         public ReplyMessage<T> Execute()
         {
             var messageBytes = new List<byte[]>(9)
-                                            {
-                                                new byte[4],
-                                                BitConverter.GetBytes(this._requestID),
+            {
+                    new byte[4],
+                    BitConverter.GetBytes(this._requestID),
                                                 BitConverter.GetBytes(0),
                                                 BitConverter.GetBytes((int) MongoOp.Query),
                                                 BitConverter.GetBytes((int) this._queryOptions),
@@ -85,12 +92,30 @@ namespace NoRM.Protocol.Messages
                                             };
 
             #region Message Body
-
+            
             //append the collection name and then null-terminate it.
-
-            if (this.Query != null)
+            //if (this.Query != null)
+            //{
+            //    fly["$query"] = fly;
+            //}
+            //if (this.OrderBy != null)
+            //{
+            //    fly["orderby"] = this.OrderBy;
+            //}
+            if (this.Query != null && this.Query is ISystemQuery)
             {
                 messageBytes.Add(BsonSerializer.Serialize(this.Query));
+            }
+            else if (this.Query != null)
+            {
+                var fly = new Flyweight();
+                fly["query"] = this.Query;
+                if (this.OrderBy != null)
+                {
+                    fly["orderby"] = this.OrderBy;
+                }
+                //add more query options here, as needed.
+                messageBytes.Add(BsonSerializer.Serialize(fly));
             }
             #endregion
 

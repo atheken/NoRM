@@ -3,7 +3,6 @@ using System.Linq;
     
 namespace NoRM.Tests
 {
-
     public class MongoCollectionTests
     {
         public MongoCollectionTests()

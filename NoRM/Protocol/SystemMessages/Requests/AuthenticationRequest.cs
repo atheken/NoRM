@@ -5,7 +5,7 @@ namespace NoRM.Protocol.SystemMessages.Requests
     /// <summary>
     /// The authentication request.
     /// </summary>
-    internal class AuthenticationRequest
+    internal class AuthenticationRequest : ISystemQuery
     {
         /// <summary>
         /// Initializes the <see cref="AuthenticationRequest"/> class.

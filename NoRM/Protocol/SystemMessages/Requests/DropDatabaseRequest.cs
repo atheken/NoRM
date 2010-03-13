@@ -1,12 +1,11 @@
-﻿
-using NoRM.Configuration;
+﻿using NoRM.Configuration;
 
 namespace NoRM.Protocol.SystemMessages.Requests
 {
     /// <summary>
     /// The drop database request.
     /// </summary>
-    public class DropDatabaseRequest
+    internal class DropDatabaseRequest : ISystemQuery
     {
         /// <summary>
         /// Initializes the <see cref="DropDatabaseRequest"/> class.

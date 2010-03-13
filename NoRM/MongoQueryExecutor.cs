@@ -12,8 +12,8 @@ namespace NoRM
     /// and IQueryable.
     /// </summary>
     /// <typeparam name="T">The type to query</typeparam>
-    /// <typeparam name="TU">Document typlate type</typeparam>
-    public class MongoQueryExecutor<T, TU> : IEnumerable<T>
+    /// <typeparam name="U">Document template type</typeparam>
+    public class MongoQueryExecutor<T, U> : IEnumerable<T>
     {
         private readonly Flyweight _hints = new Flyweight();
 
@@ -21,7 +21,7 @@ namespace NoRM
         /// Initializes a new instance of the <see cref="MongoQueryExecutor&lt;T, U&gt;"/> class.
         /// </summary>
         /// <param name="message">The message.</param>
-        public MongoQueryExecutor(QueryMessage<T, TU> message)
+        public MongoQueryExecutor(QueryMessage<T, U> message)
         {
             Message = message;
         }
@@ -30,7 +30,7 @@ namespace NoRM
         /// Gets or sets the message.
         /// </summary>
         /// <value>The message.</value>
-        public QueryMessage<T, TU> Message { get; private set; }
+        public QueryMessage<T, U> Message { get; private set; }
 
         /// <summary>
         /// Adds a query hint.

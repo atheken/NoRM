@@ -367,7 +367,7 @@ namespace NoRM
         {
             var query = new Flyweight();
             query["$explain"] = true;
-            query["$query"] = template;
+            query["query"] = template;
             var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
             return explainPlan.FirstOrDefault();
         }

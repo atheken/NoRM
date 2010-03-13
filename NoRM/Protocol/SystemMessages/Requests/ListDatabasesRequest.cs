@@ -5,7 +5,7 @@ namespace NoRM.Protocol.SystemMessages.Requests
     /// <summary>
     /// A command to request the databases in a mongoDB instance.
     /// </summary>
-    public class ListDatabasesRequest
+    public class ListDatabasesRequest : ISystemQuery
     {
         /// <summary>
         /// Initializes the <see cref="DropDatabaseRequest"/> class.

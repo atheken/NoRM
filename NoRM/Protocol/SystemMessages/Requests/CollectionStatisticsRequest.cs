@@ -6,7 +6,7 @@ namespace NoRM.Protocol.SystemMessages.Requests
     /// <summary>
     /// The collection statistics request.
     /// </summary>
-    public class CollectionStatisticsRequest
+    internal class CollectionStatisticsRequest : ISystemQuery
     {
         /// <summary>
         /// Initializes the <see cref="CollectionStatisticsRequest"/> class.
