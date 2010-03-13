@@ -14,13 +14,12 @@ namespace NoRM.Responses
         static BuildInfoResponse()
         {
             MongoConfiguration.Initialize(c => c.For<BuildInfoResponse>(a =>
-                                                   {
-                                                       a.ForProperty(auth => auth.Ok).UseAlias("ok");
-                                                       a.ForProperty(auth => auth.Version).UseAlias("version");
-                                                       a.ForProperty(auth => auth.GitVersion).UseAlias("gitVersion");
-                                                       a.ForProperty(auth => auth.SysInfo).UseAlias("sysInfo ");
-                                                   })
-                );
+                 {
+                     a.ForProperty(auth => auth.Ok).UseAlias("ok");
+                     a.ForProperty(auth => auth.Version).UseAlias("version");
+                     a.ForProperty(auth => auth.GitVersion).UseAlias("gitVersion");
+                     a.ForProperty(auth => auth.SysInfo).UseAlias("sysInfo ");
+                 }));
         }
 
         /// <summary>
