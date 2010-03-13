@@ -2,13 +2,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using NoRM.BSON;
+using NoRM.Linq;
+using NoRM.Protocol;
 using NoRM.Protocol.Messages;
 using NoRM.Protocol.SystemMessages.Requests;
 using NoRM.Responses;
+using TypeHelper=NoRM.BSON.TypeHelper;
 
 namespace NoRM
 {
+    using Commands.Modifiers;
+
+
     /// <summary>
     /// Mongo typed collection.
     /// </summary>
@@ -47,6 +54,11 @@ namespace NoRM
         {
             get
             {
+                if (CanUpdateWithoutId(typeof(T)))
+                {
+                    return true;
+                }
+
                 if (_updateable == null)
                 {
                     _updateable = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty() != null;
@@ -137,6 +149,27 @@ namespace NoRM
             return Find(template, 1).FirstOrDefault();
         }
 
+
+        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action)
+        {
+            UpdateWithModifier(matchDocument,action,false,false);
+
+        }
+        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action,bool updateMultiple, bool upsert)
+        {
+            var modifierExpression = new ModifierExpression<T>();
+            action(modifierExpression);
+            if (matchDocument is ObjectId)
+            {
+                Update(new { _id = matchDocument }, modifierExpression.Fly,updateMultiple,upsert);
+            }
+            else
+            {
+                Update(matchDocument, modifierExpression.Fly, updateMultiple, upsert);
+
+            }
+        }
+
         /// <summary>
         /// Find objects in the collection without any qualifiers.
         /// </summary>
@@ -199,7 +232,7 @@ namespace NoRM
         /// The get collection statistics.
         /// </summary>
         /// <returns></returns>
-        public CollectionStatistics GetCollectionStatistics()
+        public new CollectionStatistics GetCollectionStatistics()
         {
             return _db.GetCollectionStatistics(_collectionName);
         }
@@ -214,37 +247,43 @@ namespace NoRM
         public void Save(T entity)
         {
             AssertUpdatable();
-            
+
             var helper = TypeHelper.GetHelperForType(typeof(T));
             var idProperty = helper.FindIdProperty();
             var id = idProperty.Getter(entity);
-            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))            
+            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))
             {
                 Insert(entity);
             }
             else
             {
-                Update(new { Id = id }, entity, false, true);             
-            }                       
+                Update(new { Id = id }, entity, false, true);
+            }
         }
 
         /// <summary>
-        /// Add an index for this collection.
+        /// Creates an index for a given collection.
         /// </summary>
-        /// <typeparam name="U">A type that has the names of the items to be indexed, with a value of 1.0d or -1.0d depending on
-        /// if you want the index to be ASC or DESC respectively.</typeparam>
-        /// <param name="indexDefinition">The index Definition.</param>
-        /// <param name="isUnique">The is Unique.</param>
+        /// <param name="index">The property to index.</param>
         /// <param name="indexName">The index Name.</param>
-        public void CreateIndex<U>(U indexDefinition, bool isUnique, string indexName)
+        /// <param name="isUnique">Unique index flag.</param>
+        /// <param name="direction">Ascending or descending.</param>
+        public void CreateIndex(Expression<Func<T, object>> index, string indexName, bool isUnique, IndexOption direction)
         {
-            var coll = _db.GetCollection<MongoIndex<U>>("system.indexes");
-            coll.Insert(new MongoIndex<U>()
+            var translator = new MongoQueryTranslator();
+            // Index values should contain the full namespace without "this."
+            var indexProperty = translator.Translate(index, false);
+
+            var key = new Flyweight();
+            key.Set(indexProperty, direction);
+
+            var collection = _db.GetCollection<MongoIndex<T>>("system.indexes");
+            collection.Insert(new MongoIndex<T>
             {
-                key = indexDefinition,
-                ns = FullyQualifiedName,
-                name = indexName,
-                unique = isUnique
+                Key = key,
+                Namespace = FullyQualifiedName,
+                Name = indexName,
+                Unique = isUnique
             });
         }
 
@@ -344,7 +383,6 @@ namespace NoRM
             return explainPlan.FirstOrDefault();
         }
 
-
         /// <summary>
         /// Constructs and returns a grouping of values based on initial values
         /// </summary>
@@ -390,7 +428,7 @@ namespace NoRM
         {
             Insert(documentsToInsert.AsEnumerable());
         }
-        
+
         /// <summary>
         /// Inserts documents
         /// </summary>
@@ -412,12 +450,20 @@ namespace NoRM
             if (!Updateable)
             {
                 throw new MongoException("This collection does not accept insertions/updates, this is due to the fact that the collection's type " + typeof(T).FullName + " does not specify an identifier property");
-            }            
+            }
         }
 
-
+        /// <summary>
+        /// Tries the setting id property.
+        /// </summary>
+        /// <param name="entities">The entities.</param>
         private static void TrySettingId(IEnumerable<T> entities)
         {
+            if(CanUpdateWithoutId(typeof(T)))
+            {
+                return;
+            }
+
             var idProperty = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty();
             if (!typeof(ObjectId).IsAssignableFrom(idProperty.Type) || idProperty.Setter == null)
             {
@@ -433,6 +479,16 @@ namespace NoRM
                 }
             }
             return;
+        }
+
+        /// <summary>
+        /// Checks whether type implements IUpdateWithoutId.
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <returns>True if implemented; otherwise false.</returns>
+        private static bool CanUpdateWithoutId(Type type)
+        {
+            return typeof(T).GetInterface("IUpdateWithoutId") != null;
         }
     }
 }

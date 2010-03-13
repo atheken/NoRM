@@ -39,7 +39,7 @@ namespace NoRM.Linq
         public static ExplainResponse Explain<T>(this IQueryable<T> expression)
         {
             var translator = new MongoQueryTranslator();
-            translator.Translate(expression.Expression);
+            translator.Translate(expression.Expression, false);
 
             if (expression is MongoQuery<T>)
             {
@@ -49,6 +49,14 @@ namespace NoRM.Linq
             return null;
         }
 
+        /// <summary>
+        /// Adds a query hint.
+        /// </summary>
+        /// <typeparam name="T">Document type</typeparam>
+        /// <param name="find">The type of document being enumerated.</param>
+        /// <param name="hint">The query hint expression.</param>
+        /// <param name="direction">Ascending or descending.</param>
+        /// <returns></returns>
         public static IEnumerable<T> Hint<T>(this IEnumerable<T> find, Expression<Func<T, object>> hint, IndexOption direction)
         {
             var translator = new MongoQueryTranslator();

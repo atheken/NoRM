@@ -1,10 +1,10 @@
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using Xunit;
+
 namespace NoRM.Tests
 {
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Text.RegularExpressions;
-    using Xunit;
-
     public class MongoAdminTests
     {
         public MongoAdminTests()
@@ -64,7 +64,7 @@ namespace NoRM.Tests
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var info = admin.BuildInfo(); 
-                Assert.Equal(1d, info.OK);
+                Assert.Equal(1d, info.Ok);
                 Assert.Equal(gitVersion, info.GitVersion);
                 Assert.Equal(version, info.Version);
             }            
@@ -85,8 +85,8 @@ namespace NoRM.Tests
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var response = admin.ForceSync(true);
-                Assert.Equal(1d, response.OK);
-                Assert.True(response.NumFiles > 0); //don't know what this is
+                Assert.Equal(1d, response.Ok);
+                Assert.True(response.NumberOfFiles > 0); //don't know what this is
             }
         }
         [Fact]

@@ -8,34 +8,11 @@ namespace NoRM.Protocol
     /// </summary>
     public class Message
     {
-        /// <summary>
-        /// The _collection.
-        /// </summary>
         protected string _collection;
-
-        /// <summary>
-        /// The _connection.
-        /// </summary>
         protected IConnection _connection;
-
-        /// <summary>
-        /// The _message length.
-        /// </summary>
         protected int _messageLength;
-
-        /// <summary>
-        /// The _op.
-        /// </summary>
         protected MongoOp _op = MongoOp.Message;
-
-        /// <summary>
-        /// The _request id.
-        /// </summary>
         protected int _requestID;
-
-        /// <summary>
-        /// The _response id.
-        /// </summary>
         protected int _responseID;
 
         /// <summary>

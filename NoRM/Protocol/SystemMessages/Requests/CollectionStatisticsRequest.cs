@@ -1,4 +1,6 @@
 ﻿
+using NoRM.Configuration;
+
 namespace NoRM.Protocol.SystemMessages.Requests
 {
     /// <summary>
@@ -7,8 +9,17 @@ namespace NoRM.Protocol.SystemMessages.Requests
     public class CollectionStatisticsRequest
     {
         /// <summary>
-        /// Gets or sets the collstats.
+        /// Initializes the <see cref="CollectionStatisticsRequest"/> class.
         /// </summary>
-        public string collstats { get; set; }
+        static CollectionStatisticsRequest()
+        {
+            MongoConfiguration.Initialize(c => 
+                c.For<CollectionStatisticsRequest>(a => a.ForProperty(auth => auth.CollectionStatistics).UseAlias("collstats")));
+        }
+
+        /// <summary>
+        /// Gets or sets the collection statistics.
+        /// </summary>
+        public string CollectionStatistics { get; set; }
     }
 }

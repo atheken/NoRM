@@ -54,16 +54,5 @@ namespace NoRM.Tests
             var server = Mongo.ParseConnection("mongodb://localhost/test");
             return server.GetCollection<Product>();
         }
-
-        public class ProductReference
-        {
-            public ProductReference()
-            {
-                Id = ObjectId.NewObjectId();
-            }
-            public ObjectId Id { get; set; }
-            public string Name { get; set; }
-            public DBReference[] ProductsOrdered { get; set; }
-        }
     }
 }
