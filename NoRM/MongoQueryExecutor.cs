@@ -63,7 +63,6 @@ namespace NoRM
                 var queryWithHint = new Flyweight();
                 queryWithHint["$query"] = query;
                 queryWithHint["$hint"] = _hints;
-
                 replyMessage = Message.Execute();
             }
 

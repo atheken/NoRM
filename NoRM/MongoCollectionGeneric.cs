@@ -347,16 +347,52 @@ namespace NoRM
         /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
         {
+            return this.Find<U,Object>(template, null, limit, skip, fullyQualifiedName);
+        }
+
+
+        /// <summary>
+        /// Locates documents that match the template, in the order specified.
+        /// </summary>
+        /// <remarks>
+        /// remember that "orderby" is the mongo notation where the following would sort by Name ascending,
+        /// then by Date descending
+        /// 
+        /// new {Name=1, Date-1}
+        /// </remarks>
+        /// <typeparam name="U"></typeparam>
+        /// <typeparam name="S"></typeparam>
+        /// <param name="template">Passing null for this means it will be ignored.</param>
+        /// <param name="orderBy">Passing null for this means it will be ignored.</param>
+        /// <param name="limit">The maximum number of documents to return.</param>
+        /// <param name="skip">The number to skip before returning any.</param>
+        /// <param name="fullyqualifiedName">The collection from which to pull the documents.</param>
+        /// <returns></returns>
+        public IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName)
+        {
             var qm = new QueryMessage<T, U>(_connection, fullyQualifiedName)
-                         {
-                             NumberToTake = limit,
-                             NumberToSkip = skip,
-                             Query = template
-                         };
+            {
+                NumberToTake = limit,
+                NumberToSkip = skip,
+                Query = template,
+                OrderBy = orderBy
+            };
 
             return new MongoQueryExecutor<T, U>(qm);
         }
 
+        /// <summary>
+        /// Finds documents that match the template, and ordered according to the orderby document.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <typeparam name="S"></typeparam>
+        /// <param name="template">The spec document</param>
+        /// <param name="orderBy">The order specification</param>
+        /// <returns>A set of documents ordered correctly and matching the spec.</returns>
+        public IEnumerable<T> Find<U, S>(U template, S orderBy)
+        {
+            return this.Find(template, orderBy, Int32.MaxValue, 0, this.FullyQualifiedName);
+        }
         /// <summary>
         /// Generates a query explain plan.
         /// </summary>

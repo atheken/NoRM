@@ -78,37 +78,27 @@ namespace NoRM.Protocol.Messages
         /// <returns></returns>
         public ReplyMessage<T> Execute()
         {
-            var messageBytes = new List<byte[]>(9)
-            {
+            var messageBytes = new List<byte[]>(9){
                     new byte[4],
                     BitConverter.GetBytes(this._requestID),
-                                                BitConverter.GetBytes(0),
-                                                BitConverter.GetBytes((int) MongoOp.Query),
-                                                BitConverter.GetBytes((int) this._queryOptions),
-                                                Encoding.UTF8.GetBytes(this._collection)
-                                                    .Concat(new byte[1]).ToArray(),
-                                                BitConverter.GetBytes(this.NumberToSkip),
-                                                BitConverter.GetBytes(this.NumberToTake)
-                                            };
+                    BitConverter.GetBytes(0),
+                    BitConverter.GetBytes((int) MongoOp.Query),
+                    BitConverter.GetBytes((int) this._queryOptions),
+                    Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray(),
+                    BitConverter.GetBytes(this.NumberToSkip),
+                    BitConverter.GetBytes(this.NumberToTake)
+            };
 
             #region Message Body
-            
             //append the collection name and then null-terminate it.
-            //if (this.Query != null)
-            //{
-            //    fly["$query"] = fly;
-            //}
-            //if (this.OrderBy != null)
-            //{
-            //    fly["orderby"] = this.OrderBy;
-            //}
             if (this.Query != null && this.Query is ISystemQuery)
             {
                 messageBytes.Add(BsonSerializer.Serialize(this.Query));
             }
-            else if (this.Query != null)
+            else
             {
                 var fly = new Flyweight();
+                //null for this is OK. needs to be here, though.
                 fly["query"] = this.Query;
                 if (this.OrderBy != null)
                 {
