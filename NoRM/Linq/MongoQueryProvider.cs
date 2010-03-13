@@ -12,7 +12,7 @@ namespace NoRM.Linq
     /// </summary>
     public class MongoQueryProvider : IQueryProvider
     {
-        private readonly Mongo _mongo;
+        private readonly Mongo _server;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQueryProvider"/> class.
@@ -40,12 +40,12 @@ namespace NoRM.Linq
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQueryProvider"/> class.
         /// </summary>
-        /// <param name="mongo">
-        /// The mongo.
+        /// <param name="server">
+        /// The server.
         /// </param>
-        public MongoQueryProvider(Mongo mongo)
+        public MongoQueryProvider(Mongo server)
         {
-            _mongo = mongo;
+            _server = server;
         }
 
         /// <summary>
@@ -53,15 +53,15 @@ namespace NoRM.Linq
         /// </summary>
         public MongoDatabase DB
         {
-            get { return _mongo.Database; }
+            get { return _server.Database; }
         }
 
         /// <summary>
         /// Gets the server.
         /// </summary>
-        public Mongo Mongo
+        public Mongo Server
         {
-            get { return _mongo; }
+            get { return _server; }
         }
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace NoRM.Linq
         private T ExecuteMR<T>(string typeName, string map, string reduce)
         {
             T result;
-            using (var mr = Mongo.CreateMapReduce())
+            using (var mr = Server.CreateMapReduce())
             {
                 var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce });
                 var coll = response.GetCollection<MapReduceResult<T>>();

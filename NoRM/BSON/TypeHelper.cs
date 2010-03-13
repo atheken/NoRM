@@ -16,21 +16,19 @@ namespace NoRM.BSON
         private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup = new Dictionary<Type, TypeHelper>();
         private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);
         private readonly IDictionary<string, MagicProperty> _properties;
-        
-        public MagicProperty Expando{ get; private set;}
+        //private readonly Type _type;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeHelper"/> class.
         /// </summary>
         /// <param name="type">The type.</param>
         public TypeHelper(Type type)
-        {            
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        {
+            //_type = type;
+            var properties =
+                type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
+                                   BindingFlags.FlattenHierarchy);
             _properties = LoadMagicProperties(properties, IdProperty(properties));
-            if (typeof(IExpando).IsAssignableFrom(type))
-            {
-                Expando = _properties["Expando"];
-            }
         }
 
         /// <summary>
@@ -46,6 +44,7 @@ namespace NoRM.BSON
                 helper = new TypeHelper(type);
                 _cachedTypeLookup[type] = helper;
             }
+
             return helper;
         }
 
@@ -159,6 +158,7 @@ namespace NoRM.BSON
                     foundSoFar = property;
                 }
             }
+
             return foundSoFar;
         }
 

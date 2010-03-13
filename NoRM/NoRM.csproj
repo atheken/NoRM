@@ -114,7 +114,6 @@
     <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
     <Compile Include="CreateCollectionOptions.cs" />
-    <Compile Include="IExpando.cs" />
     <Compile Include="IHideSystemTypes.cs" />
     <Compile Include="IMongoCollection.cs" />
     <Compile Include="IMongoCollectionGeneric.cs" />

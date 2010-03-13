@@ -1,4 +1,4 @@
-
+﻿
 using System;
 using System.Linq;
 using NoRM.Configuration;
@@ -230,7 +230,7 @@ namespace NoRM.Tests
             public T MapReduce<T>(string map, string reduce)
             {
                 var result = default(T);
-                using (var mr = _provider.Mongo.CreateMapReduce())
+                using (var mr = _provider.Server.CreateMapReduce())
                 {
                     var response = mr.Execute(new MapReduceOptions(typeof(T).Name) { Map = map, Reduce = reduce });
                     var coll = response.GetCollection<MapReduceResult<T>>();
@@ -259,7 +259,7 @@ namespace NoRM.Tests
 
             public void Dispose()
             {
-                _provider.Mongo.Dispose();
+                _provider.Server.Dispose();
             }
 
             #endregion

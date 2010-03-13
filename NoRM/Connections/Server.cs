@@ -1,8 +1,8 @@
-
+﻿
 namespace NoRM
 {
     /// <summary>
-    /// Mongo details
+    /// Server details
     /// </summary>
     public class Server
     {

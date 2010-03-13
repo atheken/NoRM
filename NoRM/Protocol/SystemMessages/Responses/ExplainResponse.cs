@@ -7,35 +7,24 @@ namespace NoRM.Responses
     /// <summary>
     /// The explain response.
     /// </summary>
-    public class ExplainResponse : Explain, IFlyweight, IExpando
+    public class ExplainResponse : Explain, IFlyweight
     {
-        private IDictionary<string, object> _expando;
-        
         public int nscanned { get; set; }
         public int n { get; set; }
         public int millis { get; set; }
         public Explain oldPlan { get; set; }
         public Explain[] allPlans { get; set; }
-        
-        public IDictionary<string, object> Expando
-        {
-            get { if (_expando == null) { _expando = new Dictionary<string, object>(); } return _expando; }
-        }
     }
 
     /// <summary>
     /// The explain.
     /// </summary>
-    public class Explain: IExpando    
+    public class Explain
     {
-        private IDictionary<string, object> _expando;
         public string cursor { get; set; }
         internal Flyweight startKey { get; set; }
         internal Flyweight endKey { get; set; }
-        public IDictionary<string, object> Expando
-        {
-            get { if (_expando == null) { _expando = new Dictionary<string, object>(); } return _expando; }
-        }
+
         public Dictionary<string, string> ExplainStartKey
         {
             get
