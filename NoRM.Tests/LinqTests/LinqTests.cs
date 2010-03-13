@@ -15,6 +15,19 @@ namespace NoRM.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportExternalParameters()
+        {
+            var external = "productName";
+            using(var session = new Session())
+            {
+                session.Add(new Product {Name = external});
+                var product = session.Products.Where(p => p.Name == external).FirstOrDefault();
+
+                Assert.NotNull(product);
+            }
+        }
+
+        [Fact]
         public void ThreeProductsShouldBeReturnedWhenThreeInDB() {
             using (var session = new Session()) {
                 session.Add(new Product { Name = "1", Price = 10 });
