@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using NoRM.BSON;
 using NoRM.Configuration;
@@ -111,7 +112,10 @@ namespace NoRM.Linq
         /// </exception>
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            //if(m.Expression.NodeType == ExpressionType.MemberAccess)
+            //{
+            //    VisitMemberAccess((MemberExpression)m.Expression);
+            //}
 
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
@@ -126,6 +130,7 @@ namespace NoRM.Linq
                 lastFlyProperty = alias; 
                 return m;
             }
+           
             if (m.Member.DeclaringType == typeof(string))
             {
                 switch (m.Member.Name)
@@ -139,6 +144,8 @@ namespace NoRM.Linq
             }
             else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset))
             {
+                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
                 // this is complex
                 IsComplex = true;
 
@@ -179,8 +186,44 @@ namespace NoRM.Linq
                         return m;
                 }
             }
+            else if (m.Expression.NodeType == ExpressionType.MemberAccess)
+            {
+                // Same as below.
+                // if this is a property NOT on the object...
+                throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
+            }
+            else if (m.Expression != null && m.Expression.NodeType == ExpressionType.Constant)
+            {
+                switch (m.Member.MemberType)
+                {
+                    case MemberTypes.Property:
+                        var propertyInfo = (PropertyInfo)m.Member;
+                        var innerMember = (MemberExpression)m.Expression;
+                        var closureFieldInfo = (FieldInfo)innerMember.Member;
+                        var obj = closureFieldInfo.GetValue(((ConstantExpression)innerMember.Expression).Value);
+                        var propertyAlias = propertyInfo.GetValue(obj, null).ToString();
+                        sb.Append(propertyAlias);
+
+                        lastFlyProperty = propertyAlias;
+                        break;
+                    case MemberTypes.Field:
+                        var fieldInfo = (FieldInfo)m.Member;
+                        var fieldAlias = fieldInfo.GetValue(((ConstantExpression)m.Expression).Value).ToString();
+                        sb.Append(fieldAlias);
+
+                        lastFlyProperty = fieldAlias;
+                        break;
+                    default:
+                        Visit(m.Expression);
+                        break;
+                }
+
+                return m;
+            }
             else
             {
+                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
                 // this supports the "deep graph" name - "Product.Address.City"
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
 

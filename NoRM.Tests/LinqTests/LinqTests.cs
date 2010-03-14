@@ -17,13 +17,28 @@ namespace NoRM.Tests
         [Fact]
         public void LinqQueriesShouldSupportExternalParameters()
         {
-            var external = "productName";
+            var external = 10;
             using(var session = new Session())
             {
-                session.Add(new Product {Name = external});
-                var product = session.Products.Where(p => p.Name == external).FirstOrDefault();
+                session.Add(new Product {Name = "test", Price = external});
+                var product = session.Products.Where(p => p.Price == external).FirstOrDefault();
 
-                Assert.NotNull(product);
+                Assert.Equal(10, product.Price);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportExternalObjectProperties()
+        {
+            // NOTE: This one fails because there's no support for parsing the object's property.
+            // This even more complex when using a nested type like a product's supplier
+            var external = new Product { Price = 10 };
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "test", Price = external.Price });
+                var product = session.Products.Where(p => p.Price == external.Price).FirstOrDefault();
+
+                Assert.Equal(10, product.Price);
             }
         }
 
