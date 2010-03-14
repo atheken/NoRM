@@ -259,7 +259,7 @@ namespace NoRM.BSON
                     container = o is IList || IsDictionary(property.Type) ? o : null;
                 }
                 var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
-                if (container == null)
+                if (container == null && value!=null)
                 {
                     property.Setter(instance, value);
                 }
