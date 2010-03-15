@@ -74,6 +74,15 @@
     <Compile Include="BSON\ListHelper.cs" />
     <Compile Include="BSON\ModifierCommand.cs" />
     <Compile Include="BSON\TypeHelper.cs" />
+    <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
+    <Compile Include="Commands\Modifiers\IModifierExpression.cs" />
+    <Compile Include="Commands\Modifiers\ModifierExpression.cs" />
+    <Compile Include="Commands\Modifiers\PopOperation.cs" />
+    <Compile Include="Commands\Modifiers\PullAllOperation.cs" />
+    <Compile Include="Commands\Modifiers\PullOperation.cs" />
+    <Compile Include="Commands\Modifiers\PushAllOperation.cs" />
+    <Compile Include="Commands\Modifiers\PushOperation.cs" />
+    <Compile Include="Commands\Modifiers\SetOperation.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />
@@ -133,6 +142,9 @@
     <Compile Include="MongoAdmin.cs" />
     <Compile Include="Mongo.cs" />
     <Compile Include="MongoCollectionGeneric.cs" />
+    <Compile Include="MongoQueryExecutor.cs" />
+    <Compile Include="Protocol\IUpdateWithoutId.cs" />
+    <Compile Include="Protocol\Messages\IndexOption.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
     <Compile Include="Protocol\Messages\QueryMessageGeneric.cs" />
     <Compile Include="Protocol\Messages\UpdateMessage.cs">
@@ -140,12 +152,15 @@
     </Compile>
     <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\CreateCollectionRequest.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\ExplainRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\BaseStatusMessage.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\CurrentOperationResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DeleteIndicesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DistinctValuesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DroppedCollectionResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ExplainPlan.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ExplainResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\LastErrorResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\MapReduceResponse.cs" />
@@ -186,6 +201,7 @@
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\SetProfileResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\ISystemQuery.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

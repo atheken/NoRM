@@ -4,10 +4,9 @@ namespace NoRM.Responses
     /// <summary>
     /// The server status response.
     /// </summary>
-    public class ServerStatusResponse
+    public class ServerStatusResponse : BaseStatusMessage
     {
         public double? Uptime { get; set; }
-        public double? OK { get; set; }
         public GlobalLockResponse GlobalLock { get; set; }
         public MemoryResponse Mem { get; set; }
     }

@@ -148,10 +148,10 @@
             using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 var response = mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.AllOperations);
-                Assert.True((response.Was == 0.0));
+                Assert.True((response.PreviousLevel == 0.0));
 
                 response = mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.ProfilingOff);
-                Assert.True((response.Was == 2.0));
+                Assert.True((response.PreviousLevel == 2.0));
             }
         }
         [Fact]

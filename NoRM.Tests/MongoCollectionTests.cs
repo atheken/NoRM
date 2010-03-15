@@ -3,7 +3,6 @@ using System.Linq;
     
 namespace NoRM.Tests
 {
-
     public class MongoCollectionTests
     {
         public MongoCollectionTests()
@@ -123,6 +122,45 @@ namespace NoRM.Tests
                 Assert.NotEqual(ObjectId.Empty, product1.Id);
                 Assert.NotNull(product2.Id);
                 Assert.NotEqual(ObjectId.Empty, product2.Id);
+            }
+        }
+        
+        [Fact]
+        public void DeletesObjectsBasedOnTemplate()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            {
+                var collection = mongo.GetCollection<Product>("Fake");
+                collection.Insert(new[] { new Product { Price = 10}, new Product { Price = 5}, new Product { Price = 1} });
+                Assert.Equal(3, collection.Count());
+                collection.Delete(new{Price = 1});
+                Assert.Equal(2, collection.Count());
+                Assert.Equal(0, collection.Count(new {Price = 1}));
+            }
+        }
+
+        [Fact]
+        public void ThrowsExceptionWhenAttemptingToDeleteIdLessEntity()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            {
+                var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Delete(new Address()));
+                Assert.Equal("Cannot delete NoRM.Tests.Address since it has no id property", ex.Message);
+            }
+        }
+        [Fact]
+        public void DeletesEntityBasedOnItsId()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            {
+                var collection = mongo.GetCollection<Product>("Fake");
+                var product1 = new Product();
+                var product2 = new Product();
+                collection.Insert(new[] { product1, product2 });
+                Assert.Equal(2, collection.Count());
+                collection.Delete(product1);
+                Assert.Equal(1, collection.Count());
+                Assert.Equal(1, collection.Count(new { Id = product2.Id }));
             }
         }
                 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using NoRM.BSON;
 using NoRM.Configuration;
@@ -50,6 +51,8 @@ namespace NoRM.Linq
             get { return sb.ToString(); }
         }
 
+        public bool UseScopedQualifier { get; set; }
+
         /// <summary>
         /// The translate collection name.
         /// </summary>
@@ -87,6 +90,12 @@ namespace NoRM.Linq
         /// <returns>The translate.</returns>
         public string Translate(Expression exp)
         {
+            return Translate(exp, true);
+        }
+
+        public string Translate(Expression exp, bool useScopedQualifier)
+        {
+            UseScopedQualifier = useScopedQualifier;
             sb = new StringBuilder();
             sbIndexed = new StringBuilder();
             FlyWeight = new Flyweight();
@@ -103,15 +112,25 @@ namespace NoRM.Linq
         /// </exception>
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            //if(m.Expression.NodeType == ExpressionType.MemberAccess)
+            //{
+            //    VisitMemberAccess((MemberExpression)m.Expression);
+            //}
 
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
-                sb.Append("this." + alias); // m.Member.Name);
-                lastFlyProperty = alias; // m.Member.Name;
+                
+                if(UseScopedQualifier)
+                {
+                    sb.Append("this.");
+                }
+                sb.Append(alias);
+
+                lastFlyProperty = alias; 
                 return m;
             }
+           
             if (m.Member.DeclaringType == typeof(string))
             {
                 switch (m.Member.Name)
@@ -125,6 +144,8 @@ namespace NoRM.Linq
             }
             else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset))
             {
+                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
                 // this is complex
                 IsComplex = true;
 
@@ -165,8 +186,44 @@ namespace NoRM.Linq
                         return m;
                 }
             }
+            //else if (m.Expression.NodeType == ExpressionType.MemberAccess)
+            //{
+            //    // Same as below.
+            //    // if this is a property NOT on the object...
+            //    throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
+            //}
+            //else if (m.Expression != null && m.Expression.NodeType == ExpressionType.Constant)
+            //{
+            //    switch (m.Member.MemberType)
+            //    {
+            //        case MemberTypes.Property:
+            //            var propertyInfo = (PropertyInfo)m.Member;
+            //            var innerMember = (MemberExpression)m.Expression;
+            //            var closureFieldInfo = (FieldInfo)innerMember.Member;
+            //            var obj = closureFieldInfo.GetValue(((ConstantExpression)innerMember.Expression).Value);
+            //            var propertyAlias = propertyInfo.GetValue(obj, null).ToString();
+            //            sb.Append(propertyAlias);
+
+            //            lastFlyProperty = propertyAlias;
+            //            break;
+            //        case MemberTypes.Field:
+            //            var fieldInfo = (FieldInfo)m.Member;
+            //            var fieldAlias = fieldInfo.GetValue(((ConstantExpression)m.Expression).Value).ToString();
+            //            sb.Append(fieldAlias);
+
+            //            lastFlyProperty = fieldAlias;
+            //            break;
+            //        default:
+            //            Visit(m.Expression);
+            //            break;
+            //    }
+
+            //    return m;
+            //}
             else
             {
+                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
                 // this supports the "deep graph" name - "Product.Address.City"
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
 
@@ -178,7 +235,13 @@ namespace NoRM.Linq
                 }
 
                 var result = string.Join(".", fixedName);
-                sb.Append("this." + result);
+                //sb.Append("this." + result);
+                if (UseScopedQualifier)
+                {
+                    sb.Append("this.");
+                }
+                sb.Append(result);
+
                 lastFlyProperty = result;
                 return m;
             }

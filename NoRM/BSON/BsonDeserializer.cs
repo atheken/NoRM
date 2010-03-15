@@ -40,7 +40,7 @@ namespace NoRM.BSON
         /// <typeparam name="T"></typeparam>
         /// <param name="objectData">The object data.</param>
         /// <returns></returns>
-        public static T Deserialize<T>(byte[] objectData) where T : class, new()
+        public static T Deserialize<T>(byte[] objectData) where T : class
         {
             IDictionary<WeakReference, Flyweight> outprops = new Dictionary<WeakReference, Flyweight>();
             return Deserialize<T>(objectData, ref outprops);
@@ -222,7 +222,7 @@ namespace NoRM.BSON
         /// <returns></returns>
         private object ReadObject(Type type)
         {
-            var instance = Activator.CreateInstance(type);
+            var instance = Activator.CreateInstance(type, true);
             var typeHelper = TypeHelper.GetHelperForType(type);
             while (true)
             {

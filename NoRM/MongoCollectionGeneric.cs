@@ -1,14 +1,21 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using NoRM.BSON;
+using NoRM.Linq;
+using NoRM.Protocol;
 using NoRM.Protocol.Messages;
 using NoRM.Protocol.SystemMessages.Requests;
-using NoRM.Protocol.SystemMessages;
 using NoRM.Responses;
+using TypeHelper=NoRM.BSON.TypeHelper;
 
 namespace NoRM
 {
+    using Commands.Modifiers;
+
+
     /// <summary>
     /// Mongo typed collection.
     /// </summary>
@@ -47,6 +54,11 @@ namespace NoRM
         {
             get
             {
+                if (CanUpdateWithoutId(typeof(T)))
+                {
+                    return true;
+                }
+
                 if (_updateable == null)
                 {
                     _updateable = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty() != null;
@@ -137,6 +149,27 @@ namespace NoRM
             return Find(template, 1).FirstOrDefault();
         }
 
+
+        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action)
+        {
+            UpdateWithModifier(matchDocument,action,false,false);
+
+        }
+        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action,bool updateMultiple, bool upsert)
+        {
+            var modifierExpression = new ModifierExpression<T>();
+            action(modifierExpression);
+            if (matchDocument is ObjectId)
+            {
+                Update(new { _id = matchDocument }, modifierExpression.Fly,updateMultiple,upsert);
+            }
+            else
+            {
+                Update(matchDocument, modifierExpression.Fly, updateMultiple, upsert);
+
+            }
+        }
+
         /// <summary>
         /// Find objects in the collection without any qualifiers.
         /// </summary>
@@ -199,7 +232,7 @@ namespace NoRM
         /// The get collection statistics.
         /// </summary>
         /// <returns></returns>
-        public CollectionStatistics GetCollectionStatistics()
+        public new CollectionStatistics GetCollectionStatistics()
         {
             return _db.GetCollectionStatistics(_collectionName);
         }
@@ -214,37 +247,43 @@ namespace NoRM
         public void Save(T entity)
         {
             AssertUpdatable();
-            
+
             var helper = TypeHelper.GetHelperForType(typeof(T));
             var idProperty = helper.FindIdProperty();
             var id = idProperty.Getter(entity);
-            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))            
+            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))
             {
                 Insert(entity);
             }
             else
             {
-                Update(new { Id = id }, entity, false, true);             
-            }                       
+                Update(new { Id = id }, entity, false, true);
+            }
         }
 
         /// <summary>
-        /// Add an index for this collection.
+        /// Creates an index for a given collection.
         /// </summary>
-        /// <typeparam name="U">A type that has the names of the items to be indexed, with a value of 1.0d or -1.0d depending on
-        /// if you want the index to be ASC or DESC respectively.</typeparam>
-        /// <param name="indexDefinition">The index Definition.</param>
-        /// <param name="isUnique">The is Unique.</param>
+        /// <param name="index">The property to index.</param>
         /// <param name="indexName">The index Name.</param>
-        public void CreateIndex<U>(U indexDefinition, bool isUnique, string indexName)
+        /// <param name="isUnique">Unique index flag.</param>
+        /// <param name="direction">Ascending or descending.</param>
+        public void CreateIndex(Expression<Func<T, object>> index, string indexName, bool isUnique, IndexOption direction)
         {
-            var coll = _db.GetCollection<MongoIndex<U>>("system.indexes");
-            coll.Insert(new MongoIndex<U>()
+            var translator = new MongoQueryTranslator();
+            // Index values should contain the full namespace without "this."
+            var indexProperty = translator.Translate(index, false);
+
+            var key = new Flyweight();
+            key.Set(indexProperty, direction);
+
+            var collection = _db.GetCollection<MongoIndex<T>>("system.indexes");
+            collection.Insert(new MongoIndex<T>
             {
-                key = indexDefinition,
-                ns = FullyQualifiedName,
-                name = indexName,
-                unique = isUnique
+                Key = key,
+                Namespace = FullyQualifiedName,
+                Name = indexName,
+                Unique = isUnique
             });
         }
 
@@ -271,6 +310,17 @@ namespace NoRM
         {
             var dm = new DeleteMessage<U>(_connection, FullyQualifiedName, template);
             dm.Execute();
+        }
+
+        public void Delete(T entity)
+        {
+            var helper = TypeHelper.GetHelperForType(typeof(T));
+            var idProperty = helper.FindIdProperty();
+            if (idProperty == null)
+            {
+                throw new MongoException(string.Format("Cannot delete {0} since it has no id property", typeof(T).FullName));
+            }
+            Delete(new{Id = idProperty.Getter(entity)});
         }
 
         /// <summary>
@@ -308,39 +358,66 @@ namespace NoRM
         /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
         {
-            var qm = new QueryMessage<T, U>(_connection, fullyQualifiedName)
-                         {
-                             NumberToTake = limit,
-                             NumberToSkip = skip,
-                             Query = template
-                         };
-            var reply = qm.Execute();
-
-            foreach (var r in reply.Results)
-            {
-                yield return r;
-            }
-
-            yield break;
+            return this.Find<U,Object>(template, null, limit, skip, fullyQualifiedName);
         }
 
-        public ExplainResponse Explain<T>(T template)
+
+        /// <summary>
+        /// Locates documents that match the template, in the order specified.
+        /// </summary>
+        /// <remarks>
+        /// remember that "orderby" is the mongo notation where the following would sort by Name ascending,
+        /// then by Date descending
+        /// 
+        /// new {Name=1, Date-1}
+        /// </remarks>
+        /// <typeparam name="U"></typeparam>
+        /// <typeparam name="S"></typeparam>
+        /// <param name="template">Passing null for this means it will be ignored.</param>
+        /// <param name="orderBy">Passing null for this means it will be ignored.</param>
+        /// <param name="limit">The maximum number of documents to return.</param>
+        /// <param name="skip">The number to skip before returning any.</param>
+        /// <param name="fullyqualifiedName">The collection from which to pull the documents.</param>
+        /// <returns></returns>
+        public IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName)
+        {
+            var qm = new QueryMessage<T, U>(_connection, fullyQualifiedName)
+            {
+                NumberToTake = limit,
+                NumberToSkip = skip,
+                Query = template,
+                OrderBy = orderBy
+            };
+
+            return new MongoQueryExecutor<T, U>(qm);
+        }
+
+        /// <summary>
+        /// Finds documents that match the template, and ordered according to the orderby document.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <typeparam name="S"></typeparam>
+        /// <param name="template">The spec document</param>
+        /// <param name="orderBy">The order specification</param>
+        /// <returns>A set of documents ordered correctly and matching the spec.</returns>
+        public IEnumerable<T> Find<U, S>(U template, S orderBy)
+        {
+            return this.Find(template, orderBy, Int32.MaxValue, 0, this.FullyQualifiedName);
+        }
+        /// <summary>
+        /// Generates a query explain plan.
+        /// </summary>
+        /// <typeparam name="T">The type under explanation.</typeparam>
+        /// <param name="template">The document query template.</param>
+        /// <returns></returns>
+        public ExplainResponse Explain(object template)
         {
             var query = new Flyweight();
             query["$explain"] = true;
-            query["$query"] = template;
+            query["query"] = template;
             var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
             return explainPlan.FirstOrDefault();
         }
-
-        //public ExplainResponse Explain(Flyweight template)
-        //{
-        //    var query = new Flyweight();
-        //    query["$explain"] = true;
-        //    query["$query"] = template;
-        //    var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
-        //    return explainPlan.FirstOrDefault();
-        //}
 
         /// <summary>
         /// Constructs and returns a grouping of values based on initial values
@@ -387,7 +464,7 @@ namespace NoRM
         {
             Insert(documentsToInsert.AsEnumerable());
         }
-        
+
         /// <summary>
         /// Inserts documents
         /// </summary>
@@ -409,12 +486,20 @@ namespace NoRM
             if (!Updateable)
             {
                 throw new MongoException("This collection does not accept insertions/updates, this is due to the fact that the collection's type " + typeof(T).FullName + " does not specify an identifier property");
-            }            
+            }
         }
 
-
+        /// <summary>
+        /// Tries the setting id property.
+        /// </summary>
+        /// <param name="entities">The entities.</param>
         private static void TrySettingId(IEnumerable<T> entities)
         {
+            if(CanUpdateWithoutId(typeof(T)))
+            {
+                return;
+            }
+
             var idProperty = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty();
             if (!typeof(ObjectId).IsAssignableFrom(idProperty.Type) || idProperty.Setter == null)
             {
@@ -430,6 +515,16 @@ namespace NoRM
                 }
             }
             return;
+        }
+
+        /// <summary>
+        /// Checks whether type implements IUpdateWithoutId.
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <returns>True if implemented; otherwise false.</returns>
+        private static bool CanUpdateWithoutId(Type type)
+        {
+            return typeof(T).GetInterface("IUpdateWithoutId") != null;
         }
     }
 }
