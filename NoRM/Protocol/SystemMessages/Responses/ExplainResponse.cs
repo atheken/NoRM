@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using NoRM.BSON;
+﻿using NoRM.BSON;
 using NoRM.Configuration;
 
 namespace NoRM.Responses
@@ -9,8 +8,6 @@ namespace NoRM.Responses
     /// </summary>
     public class ExplainResponse : ExplainPlan, IFlyweight
     {
-        private IDictionary<string, object> _expando;
-
         /// <summary>
         /// Explains the plan.
         /// </summary>
