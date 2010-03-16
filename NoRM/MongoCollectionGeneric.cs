@@ -7,6 +7,7 @@ using NoRM.BSON;
 using NoRM.Linq;
 using NoRM.Protocol;
 using NoRM.Protocol.Messages;
+using NoRM.Protocol.SystemMessages;
 using NoRM.Protocol.SystemMessages.Requests;
 using NoRM.Responses;
 using TypeHelper=NoRM.BSON.TypeHelper;
@@ -415,6 +416,7 @@ namespace NoRM
             var query = new Flyweight();
             query["$explain"] = true;
             query["query"] = template;
+            //var explain = new ExplainRequest(template);
             var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
             return explainPlan.FirstOrDefault();
         }

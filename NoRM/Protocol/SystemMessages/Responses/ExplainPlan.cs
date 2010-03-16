@@ -19,7 +19,7 @@ namespace NoRM.Responses
                                                    {
                                                        a.ForProperty(auth => auth.Cursor).UseAlias("cursor");
                                                        a.ForProperty(auth => auth.StartKey).UseAlias("startKey");
-                                                       a.ForProperty(auth => auth.EndKey).UseAlias("endKey");
+                                                       a.ForProperty(auth => auth.IndexBounds).UseAlias("indexBounds");
                                                    })
                 );
         }
@@ -39,6 +39,11 @@ namespace NoRM.Responses
         /// </summary>
         /// <value>The end key.</value>
         internal Flyweight EndKey { get; set; }
+        /// <summary>
+        /// Gets or sets the index bounds.
+        /// </summary>
+        /// <value>The index bounds.</value>
+        internal List<Flyweight[]> IndexBounds { get; set; }
 
         /// <summary>
         /// Gets the explain start key list.
@@ -77,6 +82,36 @@ namespace NoRM.Responses
                 }
 
                 return keys;
+            }
+        }
+
+        /// <summary>
+        /// Gets the index bounds.
+        /// </summary>
+        /// <value>All index bounds.</value>
+        public List<Dictionary<string, string>> ExplainIndexBounds
+        {
+            get
+            {
+                var bounds = new List<Dictionary<string, string>>();
+
+                if (IndexBounds != null)
+                {
+                    for (var i = 0; i < IndexBounds.Count; i++)
+                    {
+                        var index = IndexBounds[i];
+                        
+                        foreach(var fw in index)
+                        {
+                            var keys = new Dictionary<string, string>();
+                            var properties = fw.AllProperties();
+                            properties.ToList().ForEach(p => keys.Add(p.PropertyName, p.Value.ToString()));
+                            bounds.Add(keys);
+                        }
+                    }
+                }
+
+                return bounds;
             }
         }
     }

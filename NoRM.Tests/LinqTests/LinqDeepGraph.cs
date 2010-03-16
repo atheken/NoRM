@@ -12,9 +12,9 @@ namespace NoRM.Tests
             using (var session = new Session())
             {
                 session.Drop<Product>();
-                session.Add(new Product {Name = "Test3", Price = 10, Supplier = new Supplier {Name = "Steve"}});
-                session.Add(new Product {Name = "Test4", Price = 22});
-                session.Add(new Product {Name = "Test5", Price = 33});
+                session.Add(new Product { Name = "Test3", Price = 10, Supplier = new Supplier { Name = "Steve" } });
+                session.Add(new Product { Name = "Test4", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Supplier.Name == "Steve").ToList();
                 Assert.Equal(1, products.Count);
             }
