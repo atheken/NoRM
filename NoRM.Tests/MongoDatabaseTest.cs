@@ -165,10 +165,10 @@
                 mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.ProfilingOff);
 
                 var results = mongo.Database.GetProfilingInformation();
-                var resultsInfos = results.Select(r => r.Info).ToArray();
-                Assert.True(resultsInfos[0].StartsWith("query NoRMTests.$cmd "));
-                Assert.True(resultsInfos[1].StartsWith("insert NoRMTests.FakeObject"));
-                Assert.True(resultsInfos[2].StartsWith("query NoRMTests.FakeObject"));
+                var resultsInfos = results.Select(r => r.Info).ToArray();                
+                Assert.True(resultsInfos[0].StartsWith("insert NoRMTests.FakeObject"));
+                Assert.True(resultsInfos[1].StartsWith("query NoRMTests.FakeObject"));
+                Assert.True(resultsInfos[2].StartsWith("query NoRMTests.$cmd "));
                 Assert.Equal(3, results.Count());
             }
         }
