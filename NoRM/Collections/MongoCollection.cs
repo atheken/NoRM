@@ -6,7 +6,7 @@ using Norm.BSON;
 using Norm.Protocol.Messages;
 using Norm.Responses;
 
-namespace Norm
+namespace Norm.Collections
 {
     /// <summary>
     /// The mongo collection.

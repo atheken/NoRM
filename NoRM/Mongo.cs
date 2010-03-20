@@ -1,5 +1,6 @@
 using System;
 using Norm.Responses;
+using Norm.Collections;
 
 namespace Norm
 {

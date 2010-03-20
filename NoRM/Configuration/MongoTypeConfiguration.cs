@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Norm.Configuration
 {
     /// <summary>
-    /// The mongo type configuration.
+    /// This class holds all configuration information for type mapping.
     /// </summary>
     public class MongoTypeConfiguration
     {
@@ -20,6 +21,24 @@ namespace Norm.Configuration
         internal static Dictionary<Type, Dictionary<string, PropertyMappingExpression>> PropertyMaps
         {
             get { return _typeConfigurations; }
+        }
+
+        /// <summary>
+        /// Remove mappings for the specifed type.
+        /// </summary>
+        /// <remarks>
+        /// This is primarily defined for support of unit testing, 
+        /// you may use it for client code, but you should *NEVER* call it with types
+        /// defined in the NoRM library.
+        /// </remarks>
+        /// <typeparam name="T">The type from which to remove mappings.</typeparam>
+        internal static void RemoveMappings<T>()
+        {
+            //TODO: this should throw an exception if someone attempts to call it on one of our defined types.
+            if (_typeConfigurations.ContainsKey(typeof(T)))
+            {
+                _typeConfigurations.Remove(typeof(T));
+            }
         }
 
         /// <summary>

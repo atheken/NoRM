@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using Norm.BSON;
 using Norm.Configuration;
 using Norm.Responses;
+using Norm.Collections;
 
 namespace Norm.Linq
 {

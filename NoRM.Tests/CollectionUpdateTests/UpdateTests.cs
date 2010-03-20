@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Norm.BSON;
 using Xunit;
+using Norm.Collections;
 
 namespace Norm.Tests
 {

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Linq;
 using Norm.Configuration;
 using Norm.Linq;
@@ -10,22 +9,13 @@ namespace Norm.Tests
     public class MongoConfigutationTests
     {
 
-        [Fact]
-        public void MongoConfigurationEchoesUnmappedPropertyNames()
-        {
-            //ACTUNG! This test will only pass if User doesn't have other maps already configured, it should remain at the top of configuration tests.
-            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first"))/*.WithProfileNamed("Sample")*/);
-
-            var first = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
-            var last = MongoConfiguration.GetPropertyAlias(typeof(User), "LastName");
-
-            Assert.Equal("first", first);
-            Assert.Equal("LastName", last);
-        }
+        
 
         [Fact]
         public void MongoConfigurationMapsMergesConfigurationMaps()
         {
+            MongoConfiguration.RemoveMapFor<User>();
+
             MongoConfiguration.Initialize(r => r.AddMap<CustomMap>());
             MongoConfiguration.Initialize(r => r.AddMap<OtherMap>());
 
@@ -47,7 +37,7 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void MongoConfigurationMapsCollectionNameToAlias()
+        public void Mongo_Configuration_Maps_Collection_Name_To_Alias()
         {
             MongoConfiguration.Initialize(r => r.For<User>(user => user.UseCollectionNamed("UserCollection")));
 
@@ -65,7 +55,7 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void MongoConfigurationSupportsLambdaSyntaxRegistration()
+        public void Mongo_Configuration_Supports_Lambda_Syntax_Registration()
         {
             MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first")));
             var alias = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
@@ -73,7 +63,32 @@ namespace Norm.Tests
             Assert.Equal("first", alias);
         }
 
-        
+        [Fact]
+        public void Mongo_Configuration_Can_Remove_Mapping()
+        {
+            MongoConfiguration.Initialize(r=>r.For<User>(u=>u.ForProperty(h=>h.LastName).UseAlias("lName")));
+            //confirm that mapping was set.
+            Assert.Equal("lName", MongoConfiguration.GetPropertyAlias(typeof(User), "LastName"));
+
+            MongoConfiguration.RemoveMapFor<User>();
+            //confirm that mapping was unset.
+            Assert.Equal("LastName",  MongoConfiguration.GetPropertyAlias(typeof(User), "LastName"));
+        }
+
+        [Fact]
+        public void Mongo_Configuration_Echoes_Unmapped_Property_Names()
+        {
+            MongoConfiguration.RemoveMapFor<User>();
+            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName)
+                .UseAlias("first"))/*.WithProfileNamed("Sample")*/);
+
+            var first = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
+            var last = MongoConfiguration.GetPropertyAlias(typeof(User), "LastName");
+
+            Assert.Equal("first", first);
+            Assert.Equal("LastName", last);
+        }
+
 
         [Fact]
         public void MongoConfigurationReturnsNullForUninitializedTypeConnectionStrings()

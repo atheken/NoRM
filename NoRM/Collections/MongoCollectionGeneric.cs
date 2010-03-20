@@ -7,7 +7,7 @@ using Norm.Protocol.SystemMessages.Requests;
 using Norm.Protocol.SystemMessages;
 using Norm.Responses;
 
-namespace Norm
+namespace Norm.Collections
 {
     /// <summary>
     /// Mongo typed collection.

@@ -1,4 +1,5 @@
-﻿
+﻿using Norm.Collections;
+
 namespace Norm.Responses
 {
     /// <summary>

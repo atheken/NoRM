@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Norm.Responses;
 
-namespace Norm
+namespace Norm.Collections
 {
     /// <summary>
     /// Mongo collection.

@@ -3,6 +3,7 @@ using Norm.Configuration;
 using Norm.Protocol.SystemMessages;
 using Norm.Protocol.SystemMessages.Request;
 using Norm.Responses;
+using Norm.Collections;
 
 namespace Norm
 {

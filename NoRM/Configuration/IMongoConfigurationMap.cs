@@ -8,11 +8,20 @@ namespace Norm.Configuration
     public interface IMongoConfigurationMap : IHideObjectMembers
     {
         /// <summary>
-        /// Configures a type's property mapping.
+        /// Fluently define a configuration for the specified type. This will be merged with any existing types.
         /// </summary>
         /// <typeparam name="T">Object type under property mapping</typeparam>
         /// <param name="typeConfiguration">The type configuration.</param>
         void For<T>(Action<ITypeConfiguration<T>> typeConfiguration);
+
+
+        /// <summary>
+        /// Remove all configuration for the specified type.
+        /// </summary>
+        /// <remarks>Supports unit testing, use at your own risk!</remarks>
+        /// <typeparam name="T">The type for which to remove fluent mappings.</typeparam>
+        void RemoveFor<T>();
+        
 
         /// <summary>
         /// Gets the name of the type's collection.

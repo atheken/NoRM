@@ -3,8 +3,12 @@
 namespace Norm.Configuration
 {
     /// <summary>
-    /// Responsible for Mongo type configuration 
+    /// This is a singleton with which all property maps should be registered.
     /// </summary>
+    /// <remarks>
+    /// The BSON Serializer and LINQ-to-Mongo both use this in order to correctly map the property
+    /// name on the POCO to its correspondent field name in the database.
+    /// </remarks>
     public static class MongoConfiguration
     {
         private static readonly object _objectLock = new object();
@@ -34,7 +38,20 @@ namespace Norm.Configuration
         }
 
         /// <summary>
-        /// Initializes a mongo configuration container.
+        /// Kill a map for the specified type.
+        /// </summary>
+        /// <remarks>This is here for unit testing support, use at your own risk.</remarks>
+        /// <typeparam name="T"></typeparam>
+        public static void RemoveMapFor<T>()
+        {
+            if (_configuration != null)
+            {
+                _configuration.RemoveFor<T>();
+            }
+        }
+
+        /// <summary>
+        /// Given this singleton IConfigurationContainer, add a fluently-defined map.
         /// </summary>
         /// <param name="action">The action.</param>
         public static void Initialize(Action<IConfigurationContainer> action)
@@ -43,7 +60,8 @@ namespace Norm.Configuration
         }
 
         /// <summary>
-        /// Gets the property alias.
+        /// Given the type, and the property name,
+        /// get the alias as it has been defined by Initialization calls of "add"
         /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="propertyName">Name of the property.</param>
@@ -58,7 +76,7 @@ namespace Norm.Configuration
         }
 
         /// <summary>
-        /// Produces the mapped connection string for the type.
+        /// Given the type, get the fluently configured collection type.
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>Type's Collection name</returns>
@@ -70,9 +88,12 @@ namespace Norm.Configuration
         }
 
         /// <summary>
-        /// Gets the connection string.
+        /// Given a type, get the connection string defined for it.
         /// </summary>
-        /// <param name="type">The type.</param>
+        /// <remarks>
+        /// ATT: Not sure this is needed, should potentially be removed if possible.
+        /// </remarks>
+        /// <param name="type">The type for whicht to get the connection string.</param>
         /// <returns>
         /// The type's connection string if configured; otherwise null.
         /// </returns>

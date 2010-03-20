@@ -1,5 +1,5 @@
 
-namespace Norm
+namespace Norm.Collections
 {
     /// <summary>
     /// The create collection options.

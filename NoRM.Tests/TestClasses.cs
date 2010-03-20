@@ -7,6 +7,7 @@ using Norm.Attributes;
 using Norm.Linq;
 using Norm.Responses;
 using Norm.BSON.DbTypes;
+using Norm.Collections;
 
 namespace Norm.Tests
 {

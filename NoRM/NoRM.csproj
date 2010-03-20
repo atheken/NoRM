@@ -74,6 +74,11 @@
     <Compile Include="BSON\ListHelper.cs" />
     <Compile Include="BSON\ModifierCommand.cs" />
     <Compile Include="BSON\TypeHelper.cs" />
+    <Compile Include="Collections\CreateCollectionOptions.cs" />
+    <Compile Include="Collections\IMongoCollection.cs" />
+    <Compile Include="Collections\IMongoCollectionGeneric.cs" />
+    <Compile Include="Collections\MongoCollection.cs" />
+    <Compile Include="Collections\MongoCollectionGeneric.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />
@@ -113,10 +118,7 @@
     <Compile Include="Connections\QueuedConnectionProviders.cs" />
     <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
-    <Compile Include="CreateCollectionOptions.cs" />
     <Compile Include="IHideSystemTypes.cs" />
-    <Compile Include="IMongoCollection.cs" />
-    <Compile Include="IMongoCollectionGeneric.cs" />
     <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\IMongoQuery.cs" />
@@ -132,7 +134,6 @@
     <Compile Include="MapReduceOptionsGeneric.cs" />
     <Compile Include="MongoAdmin.cs" />
     <Compile Include="Mongo.cs" />
-    <Compile Include="MongoCollectionGeneric.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
     <Compile Include="Protocol\Messages\QueryMessageGeneric.cs" />
     <Compile Include="Protocol\Messages\UpdateMessage.cs">
@@ -164,7 +165,6 @@
     <Compile Include="Protocol\SystemMessages\Responses\GetNonceResponse.cs" />
     <Compile Include="Commands\Modifiers\IncrementOperation.cs" />
     <Compile Include="Commands\Modifiers\M.cs" />
-    <Compile Include="MongoCollection.cs" />
     <Compile Include="MongoDatabase.cs" />
     <Compile Include="MongoException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

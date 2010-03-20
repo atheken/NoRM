@@ -1,5 +1,6 @@
 using System;
 using Norm.Configuration;
+using Norm.Collections;
 
 namespace Norm.BSON.DbTypes
 {

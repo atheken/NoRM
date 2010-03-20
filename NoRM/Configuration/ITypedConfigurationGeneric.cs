@@ -11,6 +11,7 @@ namespace Norm.Configuration
     /// </typeparam>
     public interface ITypeConfiguration<T> : ITypeConfiguration
     {
+
         /// <summary>
         /// Looks up property names for use with aliases.
         /// </summary>

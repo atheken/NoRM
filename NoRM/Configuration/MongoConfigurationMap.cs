@@ -63,5 +63,18 @@ namespace Norm.Configuration
                        ? connections[type]
                        : null;
         }
+
+        /// <summary>
+        /// Removes the mapping for this type.
+        /// </summary>
+        /// <remarks>
+        /// Added to support Unit testing. Use at your own risk!
+        /// </remarks>
+        /// <typeparam name="T"></typeparam>
+        public void RemoveFor<T>()
+        {
+            MongoTypeConfiguration.RemoveMappings<T>();
+        }
+
     }
 }

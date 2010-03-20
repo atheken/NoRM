@@ -4,6 +4,7 @@ using System.IO;
 using Norm.Attributes;
 using Norm.BSON;
 using Norm.BSON.DbTypes;
+using Norm.Collections;
 
 namespace Norm
 {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Norm.BSON;
+using Norm.Collections;
 
 namespace Norm.Linq
 {
