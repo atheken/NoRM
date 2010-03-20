@@ -7,13 +7,18 @@ namespace Norm.Configuration
     public class ConfigurationContainer : MongoConfigurationMap, IConfigurationContainer
     {
         /// <summary>
-        /// Registers a mongo type map implicitly.
+        /// Registers a Mongo Configuration Map by calling the default 
+        /// constructor of T (so that's where you should add your mapping logic)
         /// </summary>
+        /// <remarks>
+        /// BY CONVENTION, the default constructor of T should register the mappings that are relevant.
+        /// </remarks>
         /// <typeparam name="T">
-        /// Type of configuration container to create.
+        /// The type of the map that should be added.
         /// </typeparam>
         public void AddMap<T>() where T : IMongoConfigurationMap, new()
         {
+            //this is semi-magical, look at remarks as to why this does anything.
             new T();
         }
 

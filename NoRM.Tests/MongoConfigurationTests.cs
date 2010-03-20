@@ -9,6 +9,20 @@ namespace Norm.Tests
 {
     public class MongoConfigutationTests
     {
+
+        [Fact]
+        public void MongoConfigurationEchoesUnmappedPropertyNames()
+        {
+            //ACTUNG! This test will only pass if User doesn't have other maps already configured, it should remain at the top of configuration tests.
+            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first"))/*.WithProfileNamed("Sample")*/);
+
+            var first = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
+            var last = MongoConfiguration.GetPropertyAlias(typeof(User), "LastName");
+
+            Assert.Equal("first", first);
+            Assert.Equal("LastName", last);
+        }
+
         [Fact]
         public void MongoConfigurationMapsMergesConfigurationMaps()
         {
@@ -40,9 +54,7 @@ namespace Norm.Tests
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<User>().Insert(new User { FirstName = "Test", LastName = "User" });
-
                 var user = mongo.GetCollection<User>().Find().First();
-
                 Assert.NotNull(user);
             }
 
@@ -61,18 +73,7 @@ namespace Norm.Tests
             Assert.Equal("first", alias);
         }
 
-        [Fact]
-        public void MongoConfigurationEchoesMissingPropertyNames()
-        {
-
-            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first"))/*.WithProfileNamed("Sample")*/);
-
-            var first = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
-            var last = MongoConfiguration.GetPropertyAlias(typeof(User), "LastName");
-
-            Assert.Equal("first", first);
-            Assert.Equal("LastName", last);
-        }
+        
 
         [Fact]
         public void MongoConfigurationReturnsNullForUninitializedTypeConnectionStrings()

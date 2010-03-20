@@ -72,7 +72,7 @@
     <Compile Include="MapReduceTests.cs" />
     <Compile Include="MongoAdminTests.cs" />
     <Compile Include="MongoCollectionTests.cs" />
-    <Compile Include="MongoConfigutationTests.cs" />
+    <Compile Include="MongoConfigurationTests.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
     <Compile Include="MongoFixture.cs" />

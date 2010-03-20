@@ -10,7 +10,6 @@ using Norm.BSON.DbTypes;
 
 namespace Norm.Tests
 {
-
     internal class ReduceProduct
     {
         public ObjectId Id { get; set; }

@@ -10,7 +10,8 @@ namespace Norm.Configuration
         /// <summary>
         /// The _field map.
         /// </summary>
-        private readonly Dictionary<string, PropertyMappingExpression> _fieldMap = new Dictionary<string, PropertyMappingExpression>();
+        private readonly Dictionary<string, PropertyMappingExpression> _fieldMap = 
+            new Dictionary<string, PropertyMappingExpression>();
 
         /// <summary>
         /// Gets the field map.
