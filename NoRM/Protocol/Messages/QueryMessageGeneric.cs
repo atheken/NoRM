@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using NoRM.BSON;
+using Norm.BSON;
 
-namespace NoRM.Protocol.Messages
+namespace Norm.Protocol.Messages
 {
     /// <summary>
     /// A query to the db.

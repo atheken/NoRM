@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// This hides the object members below for things like fluent configuration

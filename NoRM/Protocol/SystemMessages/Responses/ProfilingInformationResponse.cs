@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NoRM.Responses
+namespace Norm.Responses
 {
     /// <summary>
     /// The profiling information response.

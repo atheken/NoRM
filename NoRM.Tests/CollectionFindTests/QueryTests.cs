@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
-using NoRM.BSON;
+using Norm.BSON;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class QueryTests : IDisposable
     {
@@ -11,13 +11,13 @@ namespace NoRM.Tests
         private readonly MongoCollection<Person> _collection;
         public QueryTests()
         {
-            _server = Mongo.ParseConnection("mongodb://localhost/NoRMTests?pooling=false");
+            _server = Mongo.ParseConnection("mongodb://localhost/NormTests?pooling=false");
             _collection = _server.GetCollection<Person>("People");
         }
         public void Dispose()
         {
             _server.Database.DropCollection("People");
-            using (var admin = new MongoAdmin("mongodb://localhost/NoRMTests?pooling=false"))
+            using (var admin = new MongoAdmin("mongodb://localhost/NormTests?pooling=false"))
             {
                 admin.DropDatabase();
             }

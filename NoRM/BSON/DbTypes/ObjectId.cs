@@ -1,7 +1,7 @@
 ﻿using System;
-using NoRM.BSON.DbTypes;
+using Norm.BSON.DbTypes;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Represents a Mongo document's ObjectId

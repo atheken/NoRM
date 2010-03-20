@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM.Protocol.SystemMessages.Requests
+namespace Norm.Protocol.SystemMessages.Requests
 {
     /// <summary>
     /// Describes an index to insert into the db.

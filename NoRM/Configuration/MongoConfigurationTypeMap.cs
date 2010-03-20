@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NoRM.Configuration
+namespace Norm.Configuration
 {
     /// <summary>
     /// The mongo configuration type map.

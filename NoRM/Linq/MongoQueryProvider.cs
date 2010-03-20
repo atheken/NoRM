@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using NoRM.BSON;
+using Norm.BSON;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// The mongo query provider.

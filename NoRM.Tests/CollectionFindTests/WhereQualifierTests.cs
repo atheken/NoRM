@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
-using NoRM.BSON;
+using Norm.BSON;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
 
     public class WhereQualifierTests : IDisposable
@@ -12,13 +12,13 @@ namespace NoRM.Tests
         private readonly MongoCollection<TestClass> _collection;
         public WhereQualifierTests()
         {
-            _server = Mongo.ParseConnection("mongodb://localhost/NoRMTests?pooling=false");            
+            _server = Mongo.ParseConnection("mongodb://localhost/NormTests?pooling=false");            
             _collection = _server.GetCollection<TestClass>("TestClasses");
         }
         public void Dispose()
         {
             _server.Database.DropCollection("TestClasses");
-            using (var admin = new MongoAdmin("mongodb://localhost/NoRMTests?pooling=false"))
+            using (var admin = new MongoAdmin("mongodb://localhost/NormTests?pooling=false"))
             {
                 admin.DropDatabase();
             }

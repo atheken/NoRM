@@ -16,7 +16,7 @@ using System.Threading;
 
 #endregion
 
-namespace NoRM.Protocol.Messages
+namespace Norm.Protocol.Messages
 {
     /// <summary>
     /// Get more message.

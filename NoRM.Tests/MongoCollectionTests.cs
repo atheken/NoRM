@@ -1,7 +1,7 @@
 using Xunit;
 using System.Linq;
     
-namespace NoRM.Tests
+namespace Norm.Tests
 {
 
     public class MongoCollectionTests
@@ -19,7 +19,7 @@ namespace NoRM.Tests
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Save(new Address()));
-                Assert.Equal("This collection does not accept insertions/updates, this is due to the fact that the collection's type NoRM.Tests.Address does not specify an identifier property", ex.Message);
+                Assert.Equal("This collection does not accept insertions/updates, this is due to the fact that the collection's type Norm.Tests.Address does not specify an identifier property", ex.Message);
             }
         }
 

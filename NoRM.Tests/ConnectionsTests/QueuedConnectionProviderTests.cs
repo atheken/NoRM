@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class QueuedConnectionProviderTests
     {

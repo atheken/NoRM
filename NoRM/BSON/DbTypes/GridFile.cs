@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using NoRM.Attributes;
-using NoRM.BSON;
-using NoRM.BSON.DbTypes;
+using Norm.Attributes;
+using Norm.BSON;
+using Norm.BSON.DbTypes;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Provides a mechanism to store large files in MongoDB.

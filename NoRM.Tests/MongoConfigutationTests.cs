@@ -1,11 +1,11 @@
 ﻿
 using System;
 using System.Linq;
-using NoRM.Configuration;
-using NoRM.Linq;
+using Norm.Configuration;
+using Norm.Linq;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class MongoConfigutationTests
     {
@@ -56,7 +56,6 @@ namespace NoRM.Tests
         public void MongoConfigurationSupportsLambdaSyntaxRegistration()
         {
             MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first")));
-
             var alias = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
 
             Assert.Equal("first", alias);
@@ -65,6 +64,7 @@ namespace NoRM.Tests
         [Fact]
         public void MongoConfigurationEchoesMissingPropertyNames()
         {
+
             MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first"))/*.WithProfileNamed("Sample")*/);
 
             var first = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");

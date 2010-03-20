@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class MongoAdminTests
     {
@@ -17,7 +17,7 @@ namespace NoRM.Tests
         [Fact]
         public void ListsAllDatabases()
         {
-            var expected = new List<string> { "admin", "NoRMTests", "local" };
+            var expected = new List<string> { "admin", "NormTests", "local" };
 
             //create another database
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
@@ -116,7 +116,7 @@ namespace NoRM.Tests
             {
                 foreach (var db in admin.GetAllDatabases())
                 {
-                   Assert.NotEqual("NoRMTests", db.Name);
+                   Assert.NotEqual("NormTests", db.Name);
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿namespace NoRM.Tests
+﻿namespace Norm.Tests
 {
     using System.Collections.Generic;
     using System.Linq;    
@@ -6,7 +6,7 @@
 
     public class MongoDatabaseTest
     {
-        private const string _connectionString = "mongodb://localhost/NoRMTests?pooling=false";
+        private const string _connectionString = "mongodb://localhost/NormTests?pooling=false";
 
         public MongoDatabaseTest()
         {
@@ -54,7 +54,7 @@
         [Fact]
         public void GetsAllCollections()
         {
-            var expected = new List<string> { "NoRMTests.temp", "NoRMTests.temp2" };
+            var expected = new List<string> { "NormTests.temp", "NormTests.temp2" };
             using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 var database = mongo.Database;
@@ -111,7 +111,7 @@
         {
             using (var mongo = Mongo.ParseConnection(_connectionString))
             {
-                Assert.Equal("NoRMTests", mongo.Database.DatabaseName);
+                Assert.Equal("NormTests", mongo.Database.DatabaseName);
             }
         }
 
@@ -165,9 +165,9 @@
                 mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.ProfilingOff);
 
                 var results = mongo.Database.GetProfilingInformation();                
-                Assert.Equal("insert NoRMTests.FakeObject", results.ElementAt(0).Info);
-                Assert.Equal("query NoRMTests.FakeObject ntoreturn:1 reslen:36 nscanned:1  \nquery: { getlasterror: 1.0 }  nreturned:0 bytes:20", results.ElementAt(1).Info);
-                Assert.Equal("query NoRMTests.$cmd ntoreturn:1 command  reslen:66 bytes:50", results.ElementAt(2).Info);                
+                Assert.Equal("insert NormTests.FakeObject", results.ElementAt(0).Info);
+                Assert.Equal("query NormTests.FakeObject ntoreturn:1 reslen:36 nscanned:1  \nquery: { getlasterror: 1.0 }  nreturned:0 bytes:20", results.ElementAt(1).Info);
+                Assert.Equal("query NormTests.$cmd ntoreturn:1 command  reslen:66 bytes:50", results.ElementAt(2).Info);                
                 Assert.Equal(3, results.Count());
             }
         }

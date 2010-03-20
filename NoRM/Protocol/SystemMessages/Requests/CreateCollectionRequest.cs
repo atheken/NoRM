@@ -1,5 +1,5 @@
 
-namespace NoRM.Protocol.SystemMessages.Request
+namespace Norm.Protocol.SystemMessages.Request
 {
     /// <summary>
     /// The create collection request.

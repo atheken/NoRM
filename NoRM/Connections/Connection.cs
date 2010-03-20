@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace NoRM
+namespace Norm
 {
     //todo: cleanup, timeout, age hanlding
 

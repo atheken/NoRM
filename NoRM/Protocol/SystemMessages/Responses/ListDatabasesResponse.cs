@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NoRM.Responses
+namespace Norm.Responses
 {
     /// <summary>
     /// The structure for the response to the "listdatabases" command.

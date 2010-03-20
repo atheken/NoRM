@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using NoRM.Protocol.Messages;
-using NoRM.Protocol.SystemMessages.Requests;
-using NoRM.Responses;
+using Norm.Protocol.Messages;
+using Norm.Protocol.SystemMessages.Requests;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm
 {
     //this base class will eventually serve a purpose
 

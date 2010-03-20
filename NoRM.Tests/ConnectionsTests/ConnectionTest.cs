@@ -2,7 +2,7 @@ using System;
 using System.Net.Sockets;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class ConnectionTest
     {

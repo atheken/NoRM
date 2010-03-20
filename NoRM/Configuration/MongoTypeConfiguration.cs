@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NoRM.Configuration
+namespace Norm.Configuration
 {
     /// <summary>
     /// The mongo type configuration.

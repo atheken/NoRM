@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NoRM.Configuration
+namespace Norm.Configuration
 {
     /// <summary>
     /// Represents configuration mapping types names to database field names

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Indicates an issue with some part of the messaging between C# and the MongoDB.

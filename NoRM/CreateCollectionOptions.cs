@@ -1,5 +1,5 @@
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// The create collection options.

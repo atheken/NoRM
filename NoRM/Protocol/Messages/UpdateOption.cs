@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NoRM.Protocol.Messages
+namespace Norm.Protocol.Messages
 {
     /// <summary>
     /// Update options.

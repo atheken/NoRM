@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM.Configuration
+namespace Norm.Configuration
 {
     /// <summary>
     /// The property mapping expression.

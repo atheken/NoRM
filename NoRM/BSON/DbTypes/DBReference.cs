@@ -1,7 +1,7 @@
 using System;
-using NoRM.Configuration;
+using Norm.Configuration;
 
-namespace NoRM.BSON.DbTypes
+namespace Norm.BSON.DbTypes
 {
     /// <summary>
     /// A DB-pointer to another document.

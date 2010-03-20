@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// The pooled connection provider.

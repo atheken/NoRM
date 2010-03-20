@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// A mongo query.

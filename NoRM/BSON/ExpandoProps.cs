@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// Provides a mechanism for adding and removing arbitrary properties on objects.

@@ -1,7 +1,7 @@
-﻿using NoRM.Protocol.Messages;
-using NoRM.Responses;
+﻿using Norm.Protocol.Messages;
+using Norm.Responses;
 
-namespace NoRM.Protocol
+namespace Norm.Protocol
 {
     /// <summary>
     /// The message.

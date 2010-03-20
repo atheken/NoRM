@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NoRM.BSON.DbTypes
+namespace Norm.BSON.DbTypes
 {
     /// <summary>
     /// Represents a subset of the file.

@@ -1,11 +1,11 @@
 using System.Configuration;
 using System;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     /// <summary>
     /// For Authentication tests, you'll need:
-    ///   1- a data base with data at c:/data/NoRMAuth/
+    ///   1- a data base with data at c:/data/NormAuth/
     ///   2- use admin; 
     ///   3- db.addUser('admin', 'admin');
     ///   4- use main; 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// Type related helper methods

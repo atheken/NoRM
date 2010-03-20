@@ -1,7 +1,7 @@
 using System;
-using NoRM.Responses;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// The primary class for database connections and interaction

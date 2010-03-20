@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using NoRM.Attributes;
-using NoRM.Configuration;
+using Norm.Attributes;
+using Norm.Configuration;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// Convenience methods for type reflection.

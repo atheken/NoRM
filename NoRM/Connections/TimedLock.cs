@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Threading;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Thanks to Eric Gunnerson and Phil Haack

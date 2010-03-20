@@ -1,10 +1,10 @@
 ﻿using System.Linq;
-using NoRM.BSON.DbTypes;
-using NoRM.Configuration;
+using Norm.BSON.DbTypes;
+using Norm.Configuration;
 using Xunit;
 
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class DBRefTests
     {

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NoRM.BSON;
+using Norm.BSON;
 
-namespace NoRM.Protocol.Messages
+namespace Norm.Protocol.Messages
 {
     /// <summary>
     /// The reply message.

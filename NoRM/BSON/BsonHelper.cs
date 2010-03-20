@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// The bson helper.

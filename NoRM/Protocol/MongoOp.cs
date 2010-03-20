@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM.Protocol
+namespace Norm.Protocol
 {
     /// <summary>
     /// The mongo op.

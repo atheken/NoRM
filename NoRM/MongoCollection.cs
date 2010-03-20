@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using NoRM.BSON;
-using NoRM.Protocol.Messages;
-using NoRM.Responses;
+using Norm.BSON;
+using Norm.Protocol.Messages;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// The mongo collection.

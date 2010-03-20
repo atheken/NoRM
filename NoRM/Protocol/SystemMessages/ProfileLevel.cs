@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM.Protocol.SystemMessages
+namespace Norm.Protocol.SystemMessages
 {
     /// <summary>
     /// Profiling levels.

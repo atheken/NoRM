@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM.Protocol
+namespace Norm.Protocol
 {
     /// <summary>
     /// Provides information about how a particular 

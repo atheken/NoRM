@@ -1,4 +1,4 @@
-﻿namespace NoRM.BSON
+﻿namespace Norm.BSON
 {
     /// <summary>
     /// Represents the various  types available from within MongoDB

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reflection;
-using NoRM.Attributes;
+using Norm.Attributes;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     internal class MagicProperty
     {

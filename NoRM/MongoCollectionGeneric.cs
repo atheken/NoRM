@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NoRM.BSON;
-using NoRM.Protocol.Messages;
-using NoRM.Protocol.SystemMessages.Requests;
-using NoRM.Protocol.SystemMessages;
-using NoRM.Responses;
+using Norm.BSON;
+using Norm.Protocol.Messages;
+using Norm.Protocol.SystemMessages.Requests;
+using Norm.Protocol.SystemMessages;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Mongo typed collection.

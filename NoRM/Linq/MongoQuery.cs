@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using NoRM.BSON;
-using NoRM.Configuration;
-using NoRM.Responses;
+using Norm.BSON;
+using Norm.Configuration;
+using Norm.Responses;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// A default implementation of IQueryable for use with QueryProvider

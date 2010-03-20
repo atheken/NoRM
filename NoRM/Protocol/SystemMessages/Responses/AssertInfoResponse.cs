@@ -1,4 +1,4 @@
-﻿namespace NoRM.Responses
+﻿namespace Norm.Responses
 {
     /// <summary>
     /// The assert info response.

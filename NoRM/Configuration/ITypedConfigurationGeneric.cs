@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace NoRM.Configuration
+namespace Norm.Configuration
 {
     /// <summary>
     /// Type-specific type configuration

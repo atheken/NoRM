@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// Provides a completely blank slate for which to query objects out of the DB.

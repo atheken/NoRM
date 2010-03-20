@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// The list helper.

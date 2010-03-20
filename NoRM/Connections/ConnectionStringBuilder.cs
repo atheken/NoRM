@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Text;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// The connection string builder.

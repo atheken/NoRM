@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
-using NoRM.Attributes;
-using NoRM.Linq;
-using NoRM.Responses;
-using NoRM.BSON.DbTypes;
+using Norm.Attributes;
+using Norm.Linq;
+using Norm.Responses;
+using Norm.BSON.DbTypes;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
 
     internal class ReduceProduct
@@ -85,7 +85,7 @@ namespace NoRM.Tests
                 query = string.Concat('?', query);
             }
             var host = string.IsNullOrEmpty(_connectionStringHost) ? "localhost" : _connectionStringHost;
-            database = database ?? "NoRMTests";
+            database = database ?? "NormTests";
             return string.Format("mongodb://{0}{1}/{2}{3}", authentication, host, database, query);
         }
     }
@@ -97,7 +97,7 @@ namespace NoRM.Tests
 
         public Session()
         {
-            _provider = new MongoQueryProvider("NoRMTests");
+            _provider = new MongoQueryProvider("NormTests");
         }
 
         public MongoQueryProvider Provider

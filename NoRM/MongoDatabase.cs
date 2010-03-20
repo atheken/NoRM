@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using NoRM.Configuration;
-using NoRM.Protocol.SystemMessages;
-using NoRM.Protocol.SystemMessages.Request;
-using NoRM.Responses;
+using Norm.Configuration;
+using Norm.Protocol.SystemMessages;
+using Norm.Protocol.SystemMessages.Request;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Mongo database

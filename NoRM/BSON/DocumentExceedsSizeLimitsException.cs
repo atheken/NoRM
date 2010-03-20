@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// An exception that can be thrown by MongoCollection when the document is more than the MongoDB limit of 4MB.

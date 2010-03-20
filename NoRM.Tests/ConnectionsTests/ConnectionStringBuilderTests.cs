@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class CreateTests
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Flags a property as a Mongo identifier (_id)

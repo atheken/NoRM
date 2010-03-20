@@ -1,6 +1,6 @@
-﻿using NoRM.BSON;
+﻿using Norm.BSON;
 
-namespace NoRM.Commands
+namespace Norm.Commands
 {
     /// <summary>
     /// The increment operation.

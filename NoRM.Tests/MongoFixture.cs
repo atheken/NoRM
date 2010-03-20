@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public abstract class MongoFixture : IDisposable
     {

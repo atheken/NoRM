@@ -1,7 +1,7 @@
 using System;
 using System.Net.Sockets;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// A database connection

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using NoRM.BSON;
+using Norm.BSON;
 
-namespace NoRM.Configuration
+namespace Norm.Configuration
 {
     /// <summary>
     /// Mongo configuration for a specific type

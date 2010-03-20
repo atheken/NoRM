@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using NoRM.BSON;
-using NoRM.Configuration;
+using Norm.BSON;
+using Norm.Configuration;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// The mongo query translator.

@@ -1,5 +1,5 @@
 
-namespace NoRM.Responses
+namespace Norm.Responses
 {
     /// <summary>
     /// Indicates what the last error the MongoDB server encountered was.

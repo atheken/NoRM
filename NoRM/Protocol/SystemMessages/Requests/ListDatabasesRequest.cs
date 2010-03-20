@@ -1,4 +1,4 @@
-﻿namespace NoRM.Protocol.SystemMessages.Requests
+﻿namespace Norm.Protocol.SystemMessages.Requests
 {
     /// <summary>
     /// A command to request the databases in a mongoDB instance.

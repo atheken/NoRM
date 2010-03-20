@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using NoRM.Responses;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Mongo collection.

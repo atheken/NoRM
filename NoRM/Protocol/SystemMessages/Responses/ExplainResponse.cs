@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using NoRM.BSON;
+using Norm.BSON;
 
-namespace NoRM.Responses
+namespace Norm.Responses
 {
     /// <summary>
     /// The explain response.

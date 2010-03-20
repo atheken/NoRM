@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
-using NoRM.BSON;
+using Norm.BSON;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class BSONSerializerTest
     {

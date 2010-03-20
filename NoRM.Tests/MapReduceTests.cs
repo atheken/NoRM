@@ -1,7 +1,7 @@
 using System.Linq;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class MapReduceTests
     {

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NoRM.Protocol.SystemMessages.Requests;
-using NoRM.Responses;
+using Norm.Protocol.SystemMessages.Requests;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// This class is used to connect to the MongoDB server and send special Administrative commands to it.

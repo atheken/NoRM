@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NoRM.Configuration
+namespace Norm.Configuration
 {
     /// <summary>
     /// Responsible for Mongo type configuration 

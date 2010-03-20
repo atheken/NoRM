@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using NoRM.Protocol.Messages;
-using NoRM.Responses;
+using Norm.Protocol.Messages;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Map reduce.

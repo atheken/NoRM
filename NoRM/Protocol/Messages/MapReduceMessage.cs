@@ -1,6 +1,6 @@
-using NoRM.Attributes;
+using Norm.Attributes;
 
-namespace NoRM.Protocol.Messages
+namespace Norm.Protocol.Messages
 {
     /// <summary>
     /// The map reduce message.

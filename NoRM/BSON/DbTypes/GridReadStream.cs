@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace NoRM.BSON.DbTypes
+namespace Norm.BSON.DbTypes
 {
     /// <summary>
     /// A Mongo grid file

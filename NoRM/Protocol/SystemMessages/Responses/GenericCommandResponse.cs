@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM.Responses
+namespace Norm.Responses
 {
     /// <summary>
     /// The generic command response.

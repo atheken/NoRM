@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace NoRM.Responses
+namespace Norm.Responses
 {
     /// <summary>
     /// MongoDB information related to a particular collection.

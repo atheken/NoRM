@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM.Responses
+namespace Norm.Responses
 {
     /// <summary>
     /// Indicates the result of a demand that MongoDB flush non-file committed writes to their respective files.

@@ -1,6 +1,6 @@
-﻿using NoRM.Commands;
+﻿using Norm.Commands;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Shorthand to construct modifier operations

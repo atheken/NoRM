@@ -1,8 +1,8 @@
 ﻿using System;
-using NoRM.BSON;
+using Norm.BSON;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class MongoOptimizationTests
     {

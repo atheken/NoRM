@@ -1,4 +1,4 @@
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     using System;
     using System.Collections;

@@ -1,4 +1,4 @@
-﻿namespace NoRM.Protocol.SystemMessages.Requests
+﻿namespace Norm.Protocol.SystemMessages.Requests
 {
     /// <summary>
     /// The authentication request.

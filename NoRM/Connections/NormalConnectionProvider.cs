@@ -1,5 +1,5 @@
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// The normal connection provider.
