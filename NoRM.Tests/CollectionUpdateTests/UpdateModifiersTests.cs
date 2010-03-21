@@ -1,19 +1,24 @@
 using System;
 using Xunit;
 using Norm.Collections;
+using System.Text.RegularExpressions;
+using Norm.Responses;
 
 namespace Norm.Tests.CollectionUpdateTests
 {
     public class UpdateModifiersTests : IDisposable
     {
-
         private readonly Mongo _server;
+        private BuildInfoResponse _buildInfo = null;
         private readonly MongoCollection<Post> _collection;
+
 
         public UpdateModifiersTests()
         {
+            var admin = new MongoAdmin("mongodb://localhost/admin?pooling=false&strict=true");
             _server = Mongo.ParseConnection("mongodb://localhost/NormTests?pooling=false&strict=true");
             _collection = _server.GetCollection<Post>("Posts");
+            _buildInfo = admin.BuildInfo();
         }
         public void Dispose()
         {
@@ -31,7 +36,7 @@ namespace Norm.Tests.CollectionUpdateTests
         {
             var post = new Post { Title = "About the name", Score = 1 };
             _collection.Insert(post);
-            
+
             _collection.UpdateOne(new { _id = post.Id }, new { Score = M.Inc(2), Title = M.Set("ss") });
 
             var result = _collection.FindOne(new { _id = post.Id });
@@ -124,37 +129,48 @@ namespace Norm.Tests.CollectionUpdateTests
         }
 
 
-        [Fact(Skip = "AddToSet works only with mongoDB 1.3.3 +")]
-        public void AddingTag_NoSql_ToPostWithoutTagsWithAddToSetModifierShouldAddThatTag()
+        [Fact]
+        public void AddToSet_Should_Add_When_Element_Doesnt_Exist()
         {
+            //only works with versions 1.3.3 + 
+            var incompatible = Regex.IsMatch(_buildInfo.Version, "^([01][.][012]|[01][.]3[.][12])");
             var post = new Post { Title = "About the name 2", Score = 3 };
             _collection.Insert(post);
-
-            _collection.UpdateOne(new { _id = post.Id }, new
+            if (!incompatible)
             {
-                Tags = M.AddToSet("NoSql")
-            });
-            var result = _collection.FindOne(new { _id = post.Id });
-            Assert.Equal(1, result.Tags.Count);
-            Assert.Equal(3, result.Score);
-            Assert.Equal("About the name 2", result.Title);
+                _collection.UpdateOne(new { _id = post.Id }, new
+                {
+                    Tags = M.AddToSet("NoSql")
+                });
+                var result = _collection.FindOne(new { _id = post.Id });
+                Assert.Equal(1, result.Tags.Count);
+                Assert.Equal(3, result.Score);
+                Assert.Equal("About the name 2", result.Title);
+            }
         }
-        [Fact(Skip = "AddToSet works only with mongoDB 1.3.3 +")]
-        public void AddingTag_NoSql_ToPostWith_NoSql_TagWithAddToSetModifierShouldNotAddThatTag()
+        [Fact]
+        public void AddToSet_Should_Not_Add_When_Element_Already_Exists()
         {
+            //only works with versions 1.3.3 + 
+            var incompatible = Regex.IsMatch(_buildInfo.Version, "^([01][.][012]|[01][.]3[.][12])");
+
+            //we add these because the collection is going to get dropped on dispose.
             var post = new Post { Title = "About the name 2", Score = 3 };
             post.Tags.Add("NoSql");
             _collection.Insert(post);
 
-            _collection.UpdateOne(new { _id = post.Id }, new
+            if (!incompatible)
             {
-                Tags = M.AddToSet("NoSql")
-            });
+                _collection.UpdateOne(new { _id = post.Id }, new
+                {
+                    Tags = M.AddToSet("NoSql")
+                });
 
-            var result = _collection.FindOne(new { _id = post.Id });
-            Assert.Equal(1, result.Tags.Count);
-            Assert.Equal(3, result.Score);
-            Assert.Equal("About the name 2", result.Title);
+                var result = _collection.FindOne(new { _id = post.Id });
+                Assert.Equal(1, result.Tags.Count);
+                Assert.Equal(3, result.Score);
+                Assert.Equal("About the name 2", result.Title);
+            }
         }
 
         [Fact]
@@ -213,7 +229,7 @@ namespace Norm.Tests.CollectionUpdateTests
 
             var result = _collection.FindOne(new { _id = post.Id });
             Assert.Equal(2, result.Tags.Count);
-            Assert.DoesNotContain("mongo",result.Tags);
+            Assert.DoesNotContain("mongo", result.Tags);
             Assert.Equal(3, result.Score);
             Assert.Equal("About the name 2", result.Title);
 
@@ -244,7 +260,7 @@ namespace Norm.Tests.CollectionUpdateTests
             post.Tags.Add("ABC");
             post.Tags.Add("mongo");
             _collection.Insert(post);
-            _collection.UpdateWithModifier(post.Id, op => op.PullAll(prop => prop.Tags,"NoSql","ABC"));
+            _collection.UpdateWithModifier(post.Id, op => op.PullAll(prop => prop.Tags, "NoSql", "ABC"));
 
             var result = _collection.FindOne(new { _id = post.Id });
             Assert.Equal(1, result.Tags.Count);
