@@ -1,5 +1,6 @@
 using Xunit;
 using System.Linq;
+using Norm.Configuration;
     
 namespace Norm.Tests
 {
@@ -7,6 +8,10 @@ namespace Norm.Tests
     {
         public MongoCollectionTests()
         {
+            MongoConfiguration.RemoveMapFor<Address>();
+            MongoConfiguration.RemoveMapFor<Product>();
+            MongoConfiguration.RemoveMapFor<IntId>();
+
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("strict=false")))
             {
                 mongo.Database.DropCollection("Fake");

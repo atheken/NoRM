@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Norm.Tests
 {
-    public class MongoConfigutationTests
+    public class MongoConfigurationTests
     {
         [Fact]
         public void Mongo_Configuration_Maps_Collection_Name_To_Alias()
