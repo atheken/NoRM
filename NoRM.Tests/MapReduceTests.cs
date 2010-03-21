@@ -20,7 +20,7 @@ namespace Norm.Tests
         public void TypedMapReduceOptionSetsCollectionName()
         {
             var options = new MapReduceOptions<ReduceProduct>();
-            Assert.Equal("Product", options.CollectionName);
+            Assert.Equal(typeof(ReduceProduct).Name, options.CollectionName);
         }
 
         [Fact]
