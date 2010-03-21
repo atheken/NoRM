@@ -132,12 +132,12 @@
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\IMongoQuery.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
+    <Compile Include="Linq\LinqTypeHelper.cs" />
     <Compile Include="Linq\MapReduceResult.cs" />
     <Compile Include="Linq\MongoQuery.cs" />
     <Compile Include="Linq\MongoQueryProvider.cs" />
     <Compile Include="Linq\MongoQueryTranslator.cs" />
     <Compile Include="Linq\PartialEvaluator.cs" />
-    <Compile Include="Linq\TypeHelper.cs" />
     <Compile Include="MapReduce\MapReduce.cs" />
     <Compile Include="MapReduce\MapReduceOptions.cs" />
     <Compile Include="MapReduce\MapReduceOptionsGeneric.cs" />

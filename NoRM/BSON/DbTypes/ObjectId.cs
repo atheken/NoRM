@@ -184,10 +184,10 @@ namespace Norm
         }
 
         /// <summary>
-        /// Decodes the hex.
+        /// Decodes a HexString to bytes.
         /// </summary>
         /// <param name="val">
-        /// The val.
+        /// The hex encoding string that should be converted to bytes.
         /// </param>
         /// <returns>
         /// </returns>

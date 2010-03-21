@@ -13,7 +13,9 @@ namespace Norm.BSON
     /// </summary>
     public class TypeHelper
     {
-        private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup = new Dictionary<Type, TypeHelper>();
+        private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup =
+            new Dictionary<Type, TypeHelper>();
+
         private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);
         private readonly IDictionary<string, MagicProperty> _properties;
         //private readonly Type _type;
@@ -26,8 +28,8 @@ namespace Norm.BSON
         {
             //_type = type;
             var properties =
-                type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
-                                   BindingFlags.FlattenHierarchy);
+                type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
+                    BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
             _properties = LoadMagicProperties(properties, IdProperty(properties));
         }
 
@@ -178,6 +180,7 @@ namespace Norm.BSON
                     continue;
                 }
 
+                //HACK: this is a latent BUG, if MongoConfiguration is altered after stashing the type helper, we die.
                 var alias = MongoConfiguration.GetPropertyAlias(property.DeclaringType, property.Name);
 
                 var name = (property == idProperty && alias != "$id")

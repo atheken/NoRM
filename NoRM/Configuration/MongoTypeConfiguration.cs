@@ -40,7 +40,6 @@ namespace Norm.Configuration
                 throw new NotSupportedException("You may not remove mappings for Norm types. The type you attempted to remove was " + t.FullName);
             }
 
-            //TODO: this should throw an exception if someone attempts to call it on one of our defined types.
             if (_typeConfigurations.ContainsKey(t))
             {
                 _typeConfigurations.Remove(t);

@@ -88,7 +88,7 @@ namespace Norm.Linq
         /// </exception>
         IQueryable IQueryProvider.CreateQuery(Expression expression)
         {
-            var elementType = TypeHelper.GetElementType(expression.Type);
+            var elementType = LinqTypeHelper.GetElementType(expression.Type);
             try
             {
                 return (IQueryable)Activator.CreateInstance(typeof(MongoQuery<>).MakeGenericType(elementType), new object[] { this, expression });

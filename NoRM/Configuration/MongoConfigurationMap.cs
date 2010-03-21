@@ -1,4 +1,5 @@
 ﻿using System;
+using Norm.BSON;
 
 namespace Norm.Configuration
 {
@@ -16,12 +17,17 @@ namespace Norm.Configuration
         public void For<T>(Action<ITypeConfiguration<T>> typeConfigurationAction)
         {
             var typeConfiguration = new MongoTypeConfiguration<T>();
-            typeConfigurationAction((ITypeConfiguration<T>) typeConfiguration);
+            typeConfigurationAction((ITypeConfiguration<T>)typeConfiguration);
         }
 
         /// <summary>
         /// Gets the property alias for a type.
         /// </summary>
+        /// <remarks>
+        /// If it's the ID Property, returns "_id" regardless of additional mapping.
+        /// If it's not the ID Property, returns the mapped name if it exists.
+        /// Else return the original propertyName.
+        /// </remarks>
         /// <param name="type">The type.</param>
         /// <param name="propertyName">Name of the type's property.</param>
         /// <returns>
@@ -30,10 +36,13 @@ namespace Norm.Configuration
         public string GetPropertyAlias(Type type, string propertyName)
         {
             var map = MongoTypeConfiguration.PropertyMaps;
+            var retval = propertyName;//default to the original.
 
-            return map.ContainsKey(type) && map[type].ContainsKey(propertyName)
-                       ? map[type][propertyName].Alias
-                       : propertyName;
+            if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            {
+                retval = map[type][propertyName].Alias;
+            }
+            return retval;
         }
 
         /// <summary>
