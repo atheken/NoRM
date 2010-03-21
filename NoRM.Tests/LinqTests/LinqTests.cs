@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -11,6 +12,7 @@ namespace NoRM.Tests
             using (var session = new Session())
             {
                 session.Drop<Product>();
+                session.Drop<Post>();
             }
         }
 
@@ -398,6 +400,23 @@ namespace NoRM.Tests
                 var products = session.Products.Where(p => p.Id == targetId).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(targetId, products[0].Id);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArray()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA" }, new Comment { Text = "commentB" } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var found = session.Posts.FirstOrDefault(p => p.Comments.Any(a => a.Text == "commentA"));
+                Assert.Equal(post2.Title, found.Title);
+
             }
         }
 
