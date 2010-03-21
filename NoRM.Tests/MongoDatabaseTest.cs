@@ -1,10 +1,11 @@
-﻿namespace Norm.Tests
-{
-    using System.Collections.Generic;
-    using System.Linq;    
-    using Xunit;
-    using Norm.Collections;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+using Norm.Collections;
 
+namespace Norm.Tests
+{
+    
     public class MongoDatabaseTest
     {
         private const string _connectionString = "mongodb://localhost/NormTests?pooling=false";
@@ -149,10 +150,10 @@
             using (var mongo = Mongo.ParseConnection(_connectionString))
             {
                 var response = mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.AllOperations);
-                Assert.True((response.Was == 0.0));
+                Assert.True((response.PreviousLevel == 0.0));
 
                 response = mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.ProfilingOff);
-                Assert.True((response.Was == 2.0));
+                Assert.True((response.PreviousLevel == 2.0));
             }
         }
         [Fact]
@@ -165,10 +166,11 @@
                 mongo.GetCollection<FakeObject>().Find();
                 mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.ProfilingOff);
 
-                var results = mongo.Database.GetProfilingInformation();                
-                Assert.Equal("insert NormTests.FakeObject", results.ElementAt(0).Info);
-                Assert.Equal("query NormTests.FakeObject ntoreturn:1 reslen:36 nscanned:1  \nquery: { getlasterror: 1.0 }  nreturned:0 bytes:20", results.ElementAt(1).Info);
-                Assert.Equal("query NormTests.$cmd ntoreturn:1 command  reslen:66 bytes:50", results.ElementAt(2).Info);                
+                var results = mongo.Database.GetProfilingInformation();
+                var resultsInfos = results.Select(r => r.Info).ToArray();
+                Assert.True(resultsInfos[0].StartsWith("query NormTests.$cmd "));
+                Assert.True(resultsInfos[1].StartsWith("insert NormTests.FakeObject"));
+                Assert.True(resultsInfos[2].StartsWith("query NormTests.FakeObject"));
                 Assert.Equal(3, results.Count());
             }
         }

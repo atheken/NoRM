@@ -13,14 +13,14 @@ namespace Norm.Linq
     /// <summary>
     /// A default implementation of IQueryable for use with QueryProvider
     /// </summary>
-    /// <typeparam name="T">
-    /// </typeparam>
+    /// <typeparam name="T">Type to query; also the underlying collection type.</typeparam>
     public class MongoQuery<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable, IMongoQuery
     {
-        private MongoCollection<T> _collection;
-        private Expression _expression;
-        private MongoQueryProvider _provider;
-        private Flyweight _query;
+        //private MongoCollection<T> _collection;
+        private readonly Expression _expression;
+        private readonly MongoQueryProvider _provider;
+        //private Flyweight _query;
+        private readonly string _collectionName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQuery{T}"/> class.
@@ -42,8 +42,9 @@ namespace Norm.Linq
 
             _provider = provider;
             _expression = Expression.Constant(this);
-            _collection = provider.DB.GetCollection<T>();
-            _query = new Flyweight();
+            _collectionName = collectionName;
+            //_collection = GetCollection<T>(); //provider.DB.GetCollection<T>();
+            //_query = new Flyweight();
         }
 
         /// <summary>
@@ -150,20 +151,28 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="query">The query.</param>
         /// <returns></returns>
-        internal ExplainResponse Explain(string query)
+        internal ExplainResponse Explain(Flyweight query)
         {
-            var queryFlyweight = new Flyweight
-                                     {
-                                         MethodCall = query
-                                     };
-
-            // I have no idea if $query should be another flyweight, a raw string, or what.
             var explain = new Flyweight();
-            explain["$query"] = queryFlyweight;
+            explain["$query"] = query;
             explain["$explain"] = true;
 
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
-            return _provider.DB.GetCollection<ExplainResponse>(collectionName).FindOne(explain);
+            return GetCollection<ExplainResponse>(collectionName).FindOne(explain); _provider.DB.GetCollection<ExplainResponse>(collectionName).FindOne(explain);
+        }
+
+        private MongoCollection<TCollection> GetCollection<TCollection>()
+        {
+            var collectionName = _collectionName == string.Empty
+                ? MongoConfiguration.GetCollectionName(typeof(TCollection))
+                : _collectionName;
+
+            return GetCollection<TCollection>(collectionName);
+        }
+
+        private MongoCollection<TCollection> GetCollection<TCollection>(string collectionName)
+        {
+            return _provider.DB.GetCollection<TCollection>(collectionName);
         }
 
         /// <summary>

@@ -153,6 +153,26 @@ namespace Norm.Tests
         }
     }
 
+    internal class Post
+    {
+        public Post()
+        {
+            Id = ObjectId.NewObjectId();
+            Comments = new List<Comment>();
+            Tags = new List<string>();
+        }
+        public ObjectId Id { get; set; }
+        public string Title { get; set; }
+        public int Score { get; set; }
+        public IList<Comment> Comments { get; set; }
+        public IList<string> Tags { get; set; }
+    }
+
+    internal class Comment
+    {
+        public string Text { get; set; }
+    }
+
     internal class CheeseClubContact
     {
         public ObjectId Id { get; set; }
@@ -350,5 +370,16 @@ namespace Norm.Tests
     public class ChildGeneralDTO : GeneralDTO
     {
         public bool IsOver9000 { get; set; }
+    }
+    
+    public class PrivateConstructor
+    {
+        public string Name{ get; set;}
+        private PrivateConstructor(){}
+
+        public static PrivateConstructor Create(string name)
+        {
+            return new PrivateConstructor {Name = name};
+        }
     }
 }

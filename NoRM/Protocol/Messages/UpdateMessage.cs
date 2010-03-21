@@ -9,8 +9,8 @@ namespace Norm.Protocol.Messages
     /// <summary>
     /// The update message.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="U"></typeparam>
+    /// <typeparam name="T">Document template Type</typeparam>
+    /// <typeparam name="U">Value document type</typeparam>
     internal class UpdateMessage<T, U> : Message
     {
         private const int FOUR_MEGABYTES = 4*1024*1024;
@@ -26,8 +26,7 @@ namespace Norm.Protocol.Messages
         /// <param name="options">The options.</param>
         /// <param name="matchDocument">The match document.</param>
         /// <param name="valueDocument">The value document.</param>
-        internal UpdateMessage(IConnection connection, string collection, UpdateOption options, T matchDocument, U valueDocument) 
-            : base(connection, collection)
+        internal UpdateMessage(IConnection connection, string collection, UpdateOption options, T matchDocument, U valueDocument) : base(connection, collection)
         {
             this._options = options;
             this._matchDocument = matchDocument;

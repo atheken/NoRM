@@ -29,7 +29,7 @@ namespace Norm.Configuration
         /// <remarks>
         /// This is primarily defined for support of unit testing, 
         /// you may use it for client code, but you should *NEVER* call it with types
-        /// defined in the NoRM library.
+        /// defined in the Norm library.
         /// </remarks>
         /// <typeparam name="T">The type from which to remove mappings.</typeparam>
         internal static void RemoveMappings<T>()
@@ -37,7 +37,7 @@ namespace Norm.Configuration
             var t = typeof(T);
             if (t.Assembly == typeof(MongoTypeConfiguration).Assembly)
             {
-                throw new NotSupportedException("You may not remove mappings for NoRM types. The type you attempted to remove was " + t.FullName);
+                throw new NotSupportedException("You may not remove mappings for Norm types. The type you attempted to remove was " + t.FullName);
             }
 
             //TODO: this should throw an exception if someone attempts to call it on one of our defined types.

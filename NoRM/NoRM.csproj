@@ -8,8 +8,8 @@
     <ProjectGuid>{297A83DB-DACE-4264-B28E-769CF165D4E4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NoRM</RootNamespace>
-    <AssemblyName>NoRM</AssemblyName>
+    <RootNamespace>Norm</RootNamespace>
+    <AssemblyName>Norm</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\NoRM.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\Norm.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,7 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\NoRM.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Norm.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -79,6 +79,15 @@
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />
     <Compile Include="Collections\MongoCollectionGeneric.cs" />
+    <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
+    <Compile Include="Commands\Modifiers\IModifierExpression.cs" />
+    <Compile Include="Commands\Modifiers\ModifierExpression.cs" />
+    <Compile Include="Commands\Modifiers\PopOperation.cs" />
+    <Compile Include="Commands\Modifiers\PullAllOperation.cs" />
+    <Compile Include="Commands\Modifiers\PullOperation.cs" />
+    <Compile Include="Commands\Modifiers\PushAllOperation.cs" />
+    <Compile Include="Commands\Modifiers\PushOperation.cs" />
+    <Compile Include="Commands\Modifiers\SetOperation.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />
@@ -129,11 +138,14 @@
     <Compile Include="Linq\MongoQueryTranslator.cs" />
     <Compile Include="Linq\PartialEvaluator.cs" />
     <Compile Include="Linq\TypeHelper.cs" />
-    <Compile Include="MapReduce.cs" />
-    <Compile Include="MapReduceOptions.cs" />
-    <Compile Include="MapReduceOptionsGeneric.cs" />
+    <Compile Include="MapReduce\MapReduce.cs" />
+    <Compile Include="MapReduce\MapReduceOptions.cs" />
+    <Compile Include="MapReduce\MapReduceOptionsGeneric.cs" />
     <Compile Include="MongoAdmin.cs" />
     <Compile Include="Mongo.cs" />
+    <Compile Include="MongoQueryExecutor.cs" />
+    <Compile Include="Protocol\IUpdateWithoutId.cs" />
+    <Compile Include="Protocol\Messages\IndexOption.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
     <Compile Include="Protocol\Messages\QueryMessageGeneric.cs" />
     <Compile Include="Protocol\Messages\UpdateMessage.cs">
@@ -141,12 +153,15 @@
     </Compile>
     <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\CreateCollectionRequest.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\ExplainRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\BaseStatusMessage.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\CurrentOperationResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DeleteIndicesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DistinctValuesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\DroppedCollectionResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ExplainPlan.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ExplainResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\LastErrorResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\MapReduceResponse.cs" />
@@ -186,9 +201,7 @@
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\SetProfileResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Configuration\Norm.Configuration.cd" />
+    <Compile Include="Protocol\SystemMessages\ISystemQuery.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

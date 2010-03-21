@@ -271,7 +271,7 @@ namespace Norm.Linq
             {
                 // I'm Just ASKIN!!!
                 case "Any":
-                    result = collection.Count(fly) > 0;
+                    result = collection.Count(tranny.FlyWeight) > 0;
                     break;
                 case "Count":
                     result = collection.Count(fly);

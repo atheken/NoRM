@@ -5,13 +5,12 @@ namespace Norm.Responses
     /// <summary>
     /// The map reduce response.
     /// </summary>
-    public class MapReduceResponse
+    public class MapReduceResponse : BaseStatusMessage
     {
         private MongoDatabase _database;
         public string Result { get; set; }
         public MapReduceCount Counts { get; set; }
         public long TimeMillis { get; set; }
-        public int Ok { get; set; }
 
 
         /// <summary>

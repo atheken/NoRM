@@ -40,7 +40,7 @@ namespace Norm.BSON
         /// <typeparam name="T"></typeparam>
         /// <param name="objectData">The object data.</param>
         /// <returns></returns>
-        public static T Deserialize<T>(byte[] objectData) where T : class, new()
+        public static T Deserialize<T>(byte[] objectData) where T : class
         {
             IDictionary<WeakReference, Flyweight> outprops = new Dictionary<WeakReference, Flyweight>();
             return Deserialize<T>(objectData, ref outprops);
@@ -222,7 +222,7 @@ namespace Norm.BSON
         /// <returns></returns>
         private object ReadObject(Type type)
         {
-            var instance = Activator.CreateInstance(type);
+            var instance = Activator.CreateInstance(type, true);
             var typeHelper = TypeHelper.GetHelperForType(type);
             while (true)
             {
@@ -262,7 +262,7 @@ namespace Norm.BSON
                     container = o is IList || IsDictionary(property.Type) ? o : null;
                 }
                 var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
-                if (container == null)
+                if (container == null && value!=null)
                 {
                     property.Setter(instance, value);
                 }

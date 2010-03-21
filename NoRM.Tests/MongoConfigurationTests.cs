@@ -84,9 +84,9 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void Mongo_Configuration_Remove_Mapping_Of_NoRM_Types_Fails()
+        public void Mongo_Configuration_Remove_Mapping_Of_Norm_Types_Fails()
         {
-            //removal of maps for NoRM types is verboden.
+            //removal of maps for Norm types is verboden.
             Assert.Throws<NotSupportedException>(()=> MongoConfiguration.RemoveMapFor<MongoDatabase>());
         }
 

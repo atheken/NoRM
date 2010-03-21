@@ -50,7 +50,7 @@ namespace Norm.BSON
 
         /// <summary>
         /// Lifted from AutoMaper.  Finds a property using a lambda expression
-        /// (i.e. x => x.Name 
+        /// (i.e. x => x.Name)
         /// </summary>
         /// <param name="lambdaExpression">The lambda expression.</param>
         /// <returns>Property name</returns>
