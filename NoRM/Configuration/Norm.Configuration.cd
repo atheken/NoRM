@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Norm.Configuration.ConfigurationContainer">
+    <Position X="8.25" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAQAAAAA=</HashCode>
+      <FileName>Configuration\ConfigurationContainer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Norm.Configuration.MongoTypeConfiguration&lt;T&gt;">
+    <Position X="5.75" Y="3" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAAIAAAAAAAAQAAAAAA=</HashCode>
+      <FileName>Configuration\MongoTypeConfigurationGeneric.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Norm.Configuration.MongoConfiguration">
+    <Position X="13.25" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAIAAAAAAQAAAAAAAAgAAAAAAAAABBEAAAAAAAA=</HashCode>
+      <FileName>Configuration\MongoConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Norm.Configuration.MongoConfigurationMap">
+    <Position X="8.25" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAgAIAAAAAAABBAAAAAAAAA=</HashCode>
+      <FileName>Configuration\MongoConfigurationMap.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Norm.Configuration.MongoConfigurationTypeMap">
+    <Position X="10.75" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAQEAAAAAAAAAAAAAAAAAAAAAAAAAAACEAAAAAAAA=</HashCode>
+      <FileName>Configuration\MongoConfigurationTypeMap.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Norm.Configuration.MongoTypeConfiguration">
+    <Position X="5.75" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAABACAAAAAAAAAAAAAAAAAAAAICAIAAAAAAAA=</HashCode>
+      <FileName>Configuration\MongoTypeConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Norm.Configuration.PropertyMappingExpression" BaseTypeListCollapsed="true">
+    <Position X="10.75" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAAACAAAIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\PropertyMappingExpression.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.221" />
+  </Class>
+  <Interface Name="Norm.Configuration.IConfigurationContainer">
+    <Position X="10.75" Y="8.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAQAAAAA=</HashCode>
+      <FileName>Configuration\IConfigurationContainer.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Norm.Configuration.IMongoConfigurationMap">
+    <Position X="10.75" Y="6.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAgAIAAAAAAABBAAAAAAAAA=</HashCode>
+      <FileName>Configuration\IMongoConfigurationMap.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Norm.Configuration.IPropertyMappingExpression">
+    <Position X="13.25" Y="6.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\IPropertyMappingExpression.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Norm.Configuration.ITypeConfiguration">
+    <Position X="8.25" Y="6.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAQAAAAAA=</HashCode>
+      <FileName>Configuration\ITypeConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Norm.Configuration.ITypeConfiguration&lt;T&gt;">
+    <Position X="8.25" Y="8.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\ITypedConfigurationGeneric.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Arial" Size="8.25" />
+</ClassDiagram>
