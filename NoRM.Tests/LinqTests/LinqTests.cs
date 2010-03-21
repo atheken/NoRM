@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Norm.Configuration;
 
 namespace Norm.Tests
 {
@@ -9,6 +10,8 @@ namespace Norm.Tests
     {
         public LinqTests()
         {
+            MongoConfiguration.RemoveMapFor<Product>();
+            MongoConfiguration.RemoveMapFor<Post>();
             using (var session = new Session())
             {
                 session.Drop<Product>();
