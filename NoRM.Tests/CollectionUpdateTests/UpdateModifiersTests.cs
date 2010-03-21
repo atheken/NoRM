@@ -130,7 +130,7 @@ namespace Norm.Tests.CollectionUpdateTests
 
 
         [Fact]
-        public void AddToSet_Should_Add_When_Element_Doesnt_Exist()
+        public void AddToSet_Should_Add_When_Element_Doesnt_Exist_In_1_3_3_Or_Later()
         {
             //only works with versions 1.3.3 + 
             var incompatible = Regex.IsMatch(_buildInfo.Version, "^([01][.][012]|[01][.]3[.][12])");
@@ -149,7 +149,7 @@ namespace Norm.Tests.CollectionUpdateTests
             }
         }
         [Fact]
-        public void AddToSet_Should_Not_Add_When_Element_Already_Exists()
+        public void AddToSet_Should_Not_Add_When_Element_Already_Exists_In_1_3_3_Or_Later()
         {
             //only works with versions 1.3.3 + 
             var incompatible = Regex.IsMatch(_buildInfo.Version, "^([01][.][012]|[01][.]3[.][12])");
