@@ -8,13 +8,35 @@ namespace Norm.Tests
 {
     public class MongoConfigutationTests
     {
+        [Fact]
+        public void Mongo_Configuration_Maps_Collection_Name_To_Alias()
+        {
+            MongoConfiguration.RemoveMapFor<User2>();
+           
+            MongoConfiguration.Initialize(r => r.For<User2>(user => user.UseCollectionNamed("User2Collection")));
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            {
+                mongo.GetCollection<User2>().Insert(new User2 { FirstName = "Test", LastName = "User" });
+                var user = mongo.GetCollection<User2>().Find().First();
+                Assert.NotNull(user);
+            }
 
-        
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                admin.DropDatabase();
+            }
+        }
 
         [Fact]
-        public void MongoConfigurationMapsMergesConfigurationMaps()
+        public void Mongo_Configuration_Maps_Merges_Configuration_Maps()
         {
+            //this is not a very good test because it doesn't confirm that on of the properties is ever set.
             MongoConfiguration.RemoveMapFor<User>();
+            MongoConfiguration.RemoveMapFor<Product>();
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                admin.DropDatabase();
+            }
 
             MongoConfiguration.Initialize(r => r.AddMap<CustomMap>());
             MongoConfiguration.Initialize(r => r.AddMap<OtherMap>());
@@ -37,26 +59,10 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void Mongo_Configuration_Maps_Collection_Name_To_Alias()
-        {
-            MongoConfiguration.Initialize(r => r.For<User>(user => user.UseCollectionNamed("UserCollection")));
-
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
-            {
-                mongo.GetCollection<User>().Insert(new User { FirstName = "Test", LastName = "User" });
-                var user = mongo.GetCollection<User>().Find().First();
-                Assert.NotNull(user);
-            }
-
-            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
-            {
-                admin.DropDatabase();
-            }
-        }
-
-        [Fact]
         public void Mongo_Configuration_Supports_Lambda_Syntax_Registration()
         {
+            MongoConfiguration.RemoveMapFor<User>();
+
             MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first")));
             var alias = MongoConfiguration.GetPropertyAlias(typeof(User), "FirstName");
 
@@ -66,19 +72,29 @@ namespace Norm.Tests
         [Fact]
         public void Mongo_Configuration_Can_Remove_Mapping()
         {
-            MongoConfiguration.Initialize(r=>r.For<User>(u=>u.ForProperty(h=>h.LastName).UseAlias("lName")));
+            MongoConfiguration.RemoveMapFor<User>();
+
+            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(h => h.LastName).UseAlias("lName")));
             //confirm that mapping was set.
             Assert.Equal("lName", MongoConfiguration.GetPropertyAlias(typeof(User), "LastName"));
 
             MongoConfiguration.RemoveMapFor<User>();
             //confirm that mapping was unset.
-            Assert.Equal("LastName",  MongoConfiguration.GetPropertyAlias(typeof(User), "LastName"));
+            Assert.Equal("LastName", MongoConfiguration.GetPropertyAlias(typeof(User), "LastName"));
         }
 
         [Fact]
-        public void Mongo_Configuration_Echoes_Unmapped_Property_Names()
+        public void Mongo_Configuration_Remove_Mapping_Of_NoRM_Types_Fails()
+        {
+            //removal of maps for NoRM types is verboden.
+            Assert.Throws<NotSupportedException>(()=> MongoConfiguration.RemoveMapFor<MongoDatabase>());
+        }
+
+        [Fact]
+        public void Mongo_Configuration_Echos_Unmapped_Property_Names()
         {
             MongoConfiguration.RemoveMapFor<User>();
+
             MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName)
                 .UseAlias("first"))/*.WithProfileNamed("Sample")*/);
 
@@ -89,11 +105,12 @@ namespace Norm.Tests
             Assert.Equal("LastName", last);
         }
 
-
         [Fact]
-        public void MongoConfigurationReturnsNullForUninitializedTypeConnectionStrings()
+        public void Mongo_Configuration_Returns_Null_For_Uninitialized_Type_Connection_Strings()
         {
-            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("first"))/*.WithProfileNamed("Sample")*/);
+            MongoConfiguration.RemoveMapFor<User>();
+
+            MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("thisIsntDying")));
 
             var connection = MongoConfiguration.GetConnectionString(typeof(Product));
 
@@ -101,8 +118,12 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void MongoConfigurationWithLinqSupportsAliases()
+        public void Mongo_Configuration_With_Linq_Supports_Aliases()
         {
+            MongoConfiguration.RemoveMapFor<Shopper>();
+            MongoConfiguration.RemoveMapFor<Cart>();
+            MongoConfiguration.RemoveMapFor<Product>();
+
             MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
             using (var shoppers = new Shoppers(new MongoQueryProvider("test", "localhost", "27017", "")))
             {
@@ -143,8 +164,12 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void AreQueriesFullyLinqified()
+        public void Are_Queries_Fully_Linqified()
         {
+            MongoConfiguration.RemoveMapFor<Shopper>();
+            MongoConfiguration.RemoveMapFor<Cart>();
+            MongoConfiguration.RemoveMapFor<Product>();
+
             MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
             using (var shoppers = new Shoppers(new MongoQueryProvider("test", "localhost", "27017", "")))
             {
@@ -179,52 +204,7 @@ namespace Norm.Tests
             }
         }
 
-        public class ShopperMap : MongoConfigurationMap
-        {
-            public ShopperMap()
-            {
-                For<Shopper>(config =>
-                {
-                    config.UseCollectionNamed("MyProducts");
-                    config.ForProperty(u => u.Name).UseAlias("shopperName");
-                    config.ForProperty(u => u.Cart).UseAlias("MyCart");
-                });
-
-                For<Cart>(c =>
-                {
-                    c.UseCollectionNamed("ListOfCarts");
-                    c.ForProperty(cart => cart.Product).UseAlias("ProductsGoHere");
-                    c.ForProperty(ca => ca.Name).UseAlias("ThisCartName");
-                });
-
-                For<Product>(c => c.ForProperty(p => p.Price).UseAlias("DiscountPrice"));
-            }
-        }
-
-        internal class Shopper
-        {
-            public Shopper()
-            {
-                Id = ObjectId.NewObjectId();
-            }
-
-            public ObjectId Id { get; set; }
-            public string Name { get; set; }
-            public Cart Cart { get; set; }
-        }
-
-        internal class Cart
-        {
-            public Cart()
-            {
-                Id = ObjectId.NewObjectId();
-            }
-            public string Name { get; set; }
-            public ObjectId Id { get; set; }
-            public Product Product { get; set; }
-            public Supplier[] CartSuppliers { get; set; }
-        }
-
+        #region Test classes
         internal class Shoppers : MongoQuery<Shopper>, IDisposable
         {
             private readonly MongoQueryProvider _provider;
@@ -281,7 +261,31 @@ namespace Norm.Tests
             #endregion
         }
 
-        public class User
+        internal class Shopper
+        {
+            public Shopper()
+            {
+                Id = ObjectId.NewObjectId();
+            }
+
+            public ObjectId Id { get; set; }
+            public string Name { get; set; }
+            public Cart Cart { get; set; }
+        }
+
+        internal class Cart
+        {
+            public Cart()
+            {
+                Id = ObjectId.NewObjectId();
+            }
+            public string Name { get; set; }
+            public ObjectId Id { get; set; }
+            public Product Product { get; set; }
+            public Supplier[] CartSuppliers { get; set; }
+        }
+
+        internal class User
         {
             public User()
             {
@@ -291,6 +295,40 @@ namespace Norm.Tests
             public string FirstName { get; set; }
             public string LastName { get; set; }
         }
+
+        internal class User2
+        {
+            public User2()
+            {
+                Id = ObjectId.NewObjectId();
+            }
+            public ObjectId Id { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+        }
+        public class ShopperMap : MongoConfigurationMap
+        {
+            public ShopperMap()
+            {
+                For<Shopper>(config =>
+                {
+                    config.UseCollectionNamed("MyProducts");
+                    config.ForProperty(u => u.Name).UseAlias("shopperName");
+                    config.ForProperty(u => u.Cart).UseAlias("MyCart");
+                });
+
+                For<Cart>(c =>
+                {
+                    c.UseCollectionNamed("ListOfCarts");
+                    c.ForProperty(cart => cart.Product).UseAlias("ProductsGoHere");
+                    c.ForProperty(ca => ca.Name).UseAlias("ThisCartName");
+                });
+
+                For<Product>(c => c.ForProperty(p => p.Price).UseAlias("DiscountPrice"));
+            }
+        }
+
+
 
         public class OtherMap : MongoConfigurationMap
         {
@@ -304,7 +342,7 @@ namespace Norm.Tests
         {
             public CustomMap()
             {
-                For<User>(cfg =>
+                this.For<User>(cfg =>
                 {
                     cfg.ForProperty(u => u.FirstName).UseAlias("first");
                     cfg.ForProperty(u => u.LastName).UseAlias("last");
@@ -312,8 +350,9 @@ namespace Norm.Tests
                     cfg.UseConnectionString(TestHelper.ConnectionString());
                 });
 
-                For<Product>(cfg => cfg.ForProperty(p => p.Name).UseAlias("productname"));
+                this.For<Product>(cfg => cfg.ForProperty(p => p.Name).UseAlias("productname"));
             }
-        }
+        } 
+        #endregion
     }
 }

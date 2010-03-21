@@ -34,10 +34,24 @@ namespace Norm.Configuration
         /// <typeparam name="T">The type from which to remove mappings.</typeparam>
         internal static void RemoveMappings<T>()
         {
-            //TODO: this should throw an exception if someone attempts to call it on one of our defined types.
-            if (_typeConfigurations.ContainsKey(typeof(T)))
+            var t = typeof(T);
+            if (t.Assembly == typeof(MongoTypeConfiguration).Assembly)
             {
-                _typeConfigurations.Remove(typeof(T));
+                throw new NotSupportedException("You may not remove mappings for NoRM types. The type you attempted to remove was " + t.FullName);
+            }
+
+            //TODO: this should throw an exception if someone attempts to call it on one of our defined types.
+            if (_typeConfigurations.ContainsKey(t))
+            {
+                _typeConfigurations.Remove(t);
+            }
+            if(_collectionNames.ContainsKey(t))
+            {
+                _collectionNames.Remove(t);
+            }
+            if (_connectionStrings.ContainsKey(t))
+            {
+                _connectionStrings.Remove(t);
             }
         }
 
