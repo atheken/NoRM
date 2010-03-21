@@ -133,7 +133,7 @@ namespace Norm.Tests.CollectionUpdateTests
         public void AddToSet_Should_Add_When_Element_Doesnt_Exist_In_1_3_3_Or_Later()
         {
             //only works with versions 1.3.3 + 
-            var incompatible = Regex.IsMatch(_buildInfo.Version, "^([01][.][012]|[01][.]3[.][12])");
+            var incompatible = Regex.IsMatch(_buildInfo.Version, "^([01][.][012]|[01][.]3[.][012])");
             var post = new Post { Title = "About the name 2", Score = 3 };
             _collection.Insert(post);
             if (!incompatible)
@@ -152,7 +152,7 @@ namespace Norm.Tests.CollectionUpdateTests
         public void AddToSet_Should_Not_Add_When_Element_Already_Exists_In_1_3_3_Or_Later()
         {
             //only works with versions 1.3.3 + 
-            var incompatible = Regex.IsMatch(_buildInfo.Version, "^([01][.][012]|[01][.]3[.][12])");
+            var incompatible = Regex.IsMatch(_buildInfo.Version, "^([01][.][012]|[01][.]3[.][012])");
 
             //we add these because the collection is going to get dropped on dispose.
             var post = new Post { Title = "About the name 2", Score = 3 };

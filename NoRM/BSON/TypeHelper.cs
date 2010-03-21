@@ -11,7 +11,7 @@ namespace Norm.BSON
     /// <summary>
     /// Convenience methods for type reflection.
     /// </summary>
-    internal class TypeHelper
+    public class TypeHelper
     {
         private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup = new Dictionary<Type, TypeHelper>();
         private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);
@@ -147,13 +147,12 @@ namespace Norm.BSON
                 {
                     return property;
                 }
-
-                if (string.Compare(property.Name, "_id", true) == 0)
+                if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
                 {
                     foundSoFar = property;
                 }
-
-                if (foundSoFar == null && string.Compare(property.Name, "Id", true) == 0)
+                if (foundSoFar == null && property.Name.Equals("Id",
+                    StringComparison.InvariantCultureIgnoreCase))
                 {
                     foundSoFar = property;
                 }

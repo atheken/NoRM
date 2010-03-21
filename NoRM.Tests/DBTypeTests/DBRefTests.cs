@@ -25,7 +25,7 @@ namespace Norm.Tests
 
             using (var session = new Session())
             {
-                session.Add(new Product { Id = id, Name = "RefProduct" });
+                session.Add(new Product { _id = id, Name = "RefProduct" });
 
                 var productReference = new DBReference
                                            {
@@ -47,7 +47,7 @@ namespace Norm.Tests
             var reference = server.GetCollection<ProductReference>().Find().First();
             var product = reference.ProductsOrdered[0].Fetch(() => GetReferenceCollection());
 
-            Assert.Equal(id.Value, product.Id.Value);
+            Assert.Equal(id.Value, product._id.Value);
         }
 
         internal MongoCollection<Product> GetReferenceCollection()

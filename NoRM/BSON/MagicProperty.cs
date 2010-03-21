@@ -4,7 +4,10 @@ using Norm.Attributes;
 
 namespace Norm.BSON
 {
-    internal class MagicProperty
+    /// <summary>
+    /// A class to call Properties dynamically on an instance.
+    /// </summary>
+    public class MagicProperty
     {
         private static readonly Type _myType = typeof(MagicProperty);
         private static readonly Type _ignoredIfNullType = typeof(MongoIgnoreIfNullAttribute);

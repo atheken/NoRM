@@ -65,13 +65,13 @@ namespace Norm.Tests
             {
                 var id1 = new ObjectId("123456123456123456123456");
                 var id2 = new ObjectId("123456123456123456123457");
-                mongo.GetCollection<Product>("Fake").Save(new Product { Id = id1, Name = "Prod1" });
-                mongo.GetCollection<Product>("Fake").Save(new Product { Id = id2, Name = "Prod2" });
+                mongo.GetCollection<Product>("Fake").Save(new Product { _id = id1, Name = "Prod1" });
+                mongo.GetCollection<Product>("Fake").Save(new Product { _id = id2, Name = "Prod2" });
                 var found = mongo.GetCollection<Product>("Fake").Find();
                 Assert.Equal(2, found.Count());
-                Assert.Equal(id1, found.ElementAt(0).Id);
+                Assert.Equal(id1, found.ElementAt(0)._id);
                 Assert.Equal("Prod1", found.ElementAt(0).Name);
-                Assert.Equal(id2, found.ElementAt(1).Id);
+                Assert.Equal(id2, found.ElementAt(1)._id);
                 Assert.Equal("Prod2", found.ElementAt(1).Name);
 
             }
@@ -83,11 +83,11 @@ namespace Norm.Tests
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 var id = new ObjectId("123456123456123456123456");
-                mongo.GetCollection<Product>("Fake").Save(new Product { Id = id, Name = "Prod" });
-                mongo.GetCollection<Product>("Fake").Save(new Product { Id = id, Name = "Updated Prod" });
+                mongo.GetCollection<Product>("Fake").Save(new Product { _id = id, Name = "Prod" });
+                mongo.GetCollection<Product>("Fake").Save(new Product { _id = id, Name = "Updated Prod" });
                 var found = mongo.GetCollection<Product>("Fake").Find();
                 Assert.Equal(1, found.Count());
-                Assert.Equal(id, found.ElementAt(0).Id);
+                Assert.Equal(id, found.ElementAt(0)._id);
                 Assert.Equal("Updated Prod", found.ElementAt(0).Name);
             }
         }
@@ -97,10 +97,10 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
-                var product = new Product {Id = null};
+                var product = new Product {_id = null};
                 mongo.GetCollection<Product>("Fake").Save(product);
-                Assert.NotNull(product.Id);
-                Assert.NotEqual(ObjectId.Empty, product.Id);
+                Assert.NotNull(product._id);
+                Assert.NotEqual(ObjectId.Empty, product._id);
             }
         }
         [Fact]
@@ -108,10 +108,10 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
-                var product = new Product { Id = null };
+                var product = new Product { _id = null };
                 mongo.GetCollection<Product>("Fake").Insert(product);
-                Assert.NotNull(product.Id);
-                Assert.NotEqual(ObjectId.Empty, product.Id);
+                Assert.NotNull(product._id);
+                Assert.NotEqual(ObjectId.Empty, product._id);
             }
         }
 
@@ -120,13 +120,13 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
-                var product1 = new Product { Id = null };
-                var product2 = new Product { Id = null };
+                var product1 = new Product { _id = null };
+                var product2 = new Product { _id = null };
                 mongo.GetCollection<Product>("Fake").Insert(new[]{product1, product2});
-                Assert.NotNull(product1.Id);
-                Assert.NotEqual(ObjectId.Empty, product1.Id);
-                Assert.NotNull(product2.Id);
-                Assert.NotEqual(ObjectId.Empty, product2.Id);
+                Assert.NotNull(product1._id);
+                Assert.NotEqual(ObjectId.Empty, product1._id);
+                Assert.NotNull(product2._id);
+                Assert.NotEqual(ObjectId.Empty, product2._id);
             }
         }
         
@@ -165,7 +165,7 @@ namespace Norm.Tests
                 Assert.Equal(2, collection.Count());
                 collection.Delete(product1);
                 Assert.Equal(1, collection.Count());
-                Assert.Equal(1, collection.Count(new { Id = product2.Id }));
+                Assert.Equal(1, collection.Count(new { Id = product2._id }));
             }
         }
                 

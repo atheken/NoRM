@@ -397,12 +397,12 @@ namespace Norm.Tests
             var targetId = ObjectId.NewObjectId();
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "Test1", Price = 10, Id = targetId });
+                session.Add(new Product { Name = "Test1", Price = 10, _id = targetId });
                 session.Add(new Product { Name = "Test2", Price = 22 });
                 session.Add(new Product { Name = "Test3", Price = 33 });
-                var products = session.Products.Where(p => p.Id == targetId).ToList();
+                var products = session.Products.Where(p => p._id == targetId).ToList();
                 Assert.Equal(1, products.Count);
-                Assert.Equal(targetId, products[0].Id);
+                Assert.Equal(targetId, products[0]._id);
             }
         }
 

@@ -120,17 +120,17 @@ namespace Norm.Linq
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
-                
-                if(UseScopedQualifier)
+
+                if (UseScopedQualifier)
                 {
                     sb.Append("this.");
                 }
                 sb.Append(alias);
 
-                lastFlyProperty = alias; 
+                lastFlyProperty = alias;
                 return m;
             }
-           
+
             if (m.Member.DeclaringType == typeof(string))
             {
                 switch (m.Member.Name)
@@ -354,7 +354,17 @@ namespace Norm.Linq
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.Object:
-                        throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
+                        if (c.Value is ObjectId)
+                        {
+                            var oval = "ObjectId('" + c.Value.ToString() + "')";
+                            sb.Append(oval);
+                            SetFlyValue(c.Value);
+                        }
+                        else
+                        {
+                            throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
+                        }
+                        break;
                     default:
                         sb.Append(c.Value);
                         SetFlyValue(c.Value);
