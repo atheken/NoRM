@@ -98,8 +98,18 @@ namespace Norm.Protocol.Messages
             else
             {
                 var fly = new Flyweight();
+
+                if(this.Query is Flyweight)
+                {
+                    var properties = (this.Query as Flyweight).AllProperties();
+                    properties.ToList().ForEach(p => fly.Set(p.PropertyName, p.Value));
+                }
+                else
+                {
+                    fly["query"] = this.Query;                    
+                }
+
                 //null for this is OK. needs to be here, though.
-                fly["query"] = this.Query;
                 if (this.OrderBy != null)
                 {
                     fly["orderby"] = this.OrderBy;

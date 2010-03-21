@@ -14,7 +14,7 @@ namespace Norm.Responses
                                                    {
                                                        a.ForProperty(auth => auth.Ok).UseAlias("ok");
                                                        a.ForProperty(auth => auth.PreviousLevel).UseAlias("was");
-                                                       a.ForProperty(auth => auth.PreviousLevel).UseAlias("profile");
+                                                       a.ForProperty(auth => auth.Profile).UseAlias("profile");
                                                    })
                 );
         }

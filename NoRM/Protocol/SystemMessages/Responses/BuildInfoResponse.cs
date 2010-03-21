@@ -18,7 +18,7 @@ namespace Norm.Responses
                      a.ForProperty(auth => auth.Ok).UseAlias("ok");
                      a.ForProperty(auth => auth.Version).UseAlias("version");
                      a.ForProperty(auth => auth.GitVersion).UseAlias("gitVersion");
-                     a.ForProperty(auth => auth.SysInfo).UseAlias("sysInfo ");
+                     a.ForProperty(auth => auth.SystemInformation).UseAlias("sysInfo");
                  }));
         }
 
@@ -36,7 +36,7 @@ namespace Norm.Responses
         /// Gets or sets the sys info.
         /// </summary>
         /// <value>The sys info.</value>
-        public string SysInfo { get; set; }
-        //public int? bits { get; set; }
+        public string SystemInformation { get; set; }
+        public int? Bits { get; set; }
     }
 }

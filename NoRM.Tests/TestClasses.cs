@@ -109,6 +109,10 @@ namespace Norm.Tests
         {
             get { return new MongoQuery<Product>(_provider); }
         }
+        public IQueryable<Post> Posts
+        {
+            get { return new MongoQuery<Post>(_provider); }
+        }
 
         #region IDisposable Members
 
