@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace Norm.Configuration
 {
     /// <summary>

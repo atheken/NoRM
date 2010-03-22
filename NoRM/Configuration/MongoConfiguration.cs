@@ -8,9 +8,13 @@ namespace Norm.Configuration
     /// <remarks>
     /// The BSON Serializer and LINQ-to-Mongo both use this in order to correctly map the property
     /// name on the POCO to its correspondent field name in the database.
+    /// 
+    /// This is slightly thread-scary.
     /// </remarks>
     public static class MongoConfiguration
     {
+        internal static event Action<Type> TypeConfigurationChanged;
+
         private static readonly object _objectLock = new object();
         private static IConfigurationContainer _configuration;
 
@@ -51,6 +55,18 @@ namespace Norm.Configuration
         }
 
         /// <summary>
+        /// Allows various objects to fire type change event.
+        /// </summary>
+        /// <param name="t"></param>
+        internal static void FireTypeChangedEvent(Type t)
+        {
+            if (TypeConfigurationChanged != null)
+            {
+                MongoConfiguration.TypeConfigurationChanged(t);
+            }
+        }
+
+        /// <summary>
         /// Given this singleton IConfigurationContainer, add a fluently-defined map.
         /// </summary>
         /// <param name="action">The action.</param>
@@ -70,9 +86,7 @@ namespace Norm.Configuration
         /// </returns>
         internal static string GetPropertyAlias(Type type, string propertyName)
         {
-            return _configuration != null
-                       ? _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName)
-                       : propertyName;
+            return _configuration != null ? _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName) : propertyName;
         }
 
         /// <summary>
@@ -82,9 +96,7 @@ namespace Norm.Configuration
         /// <returns>Type's Collection name</returns>
         internal static string GetCollectionName(Type type)
         {
-            return _configuration != null
-                       ? _configuration.GetConfigurationMap().GetCollectionName(type)
-                       : type.Name;
+            return _configuration != null ? _configuration.GetConfigurationMap().GetCollectionName(type) : type.Name;
         }
 
         /// <summary>
@@ -99,9 +111,7 @@ namespace Norm.Configuration
         /// </returns>
         internal static string GetConnectionString(Type type)
         {
-            return _configuration != null
-                       ? _configuration.GetConfigurationMap().GetConnectionString(type)
-                       : null;
+            return _configuration != null ? _configuration.GetConfigurationMap().GetConnectionString(type) : null;
         }
     }
 }

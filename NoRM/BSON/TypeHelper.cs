@@ -20,6 +20,21 @@ namespace Norm.BSON
         private readonly IDictionary<string, MagicProperty> _properties;
         //private readonly Type _type;
 
+        static TypeHelper()
+        {
+            //register to be notified of type configuration changes.
+            MongoConfiguration.TypeConfigurationChanged += new Action<Type>(TypeConfigurationChanged);
+        }
+
+        static void TypeConfigurationChanged(Type theType)
+        {
+            //clear the cache to prevent TypeHelper from getting the wrong thing.
+            if (_cachedTypeLookup.ContainsKey(theType))
+            {
+                _cachedTypeLookup.Remove(theType);
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeHelper"/> class.
         /// </summary>

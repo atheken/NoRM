@@ -21,18 +21,14 @@ namespace Norm.Configuration
         public IPropertyMappingExpression ForProperty(Expression<Func<T, object>> sourcePropery)
         {
             var propertyName = TypeHelper.FindProperty(sourcePropery);
-
             var typeKey = typeof(T);
-
             if (!PropertyMaps.ContainsKey(typeKey))
             {
                 PropertyMaps.Add(typeKey, new Dictionary<string, PropertyMappingExpression>());
             }
-
             var expression = new PropertyMappingExpression { SourcePropertyName = propertyName };
-
             PropertyMaps[typeKey][propertyName] = expression;
-
+            MongoConfiguration.FireTypeChangedEvent(typeof(T));
             return expression;
         }
 
@@ -43,6 +39,7 @@ namespace Norm.Configuration
         public void UseCollectionNamed(string connectionStrings)
         {
             CollectionNames[typeof(T)] = connectionStrings;
+            MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
 
         /// <summary>
@@ -52,6 +49,7 @@ namespace Norm.Configuration
         public void UseConnectionString(string connectionString)
         {
             ConnectionStrings[typeof(T)] = connectionString;
+            MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
     }
 }

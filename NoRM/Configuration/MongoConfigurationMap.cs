@@ -53,10 +53,7 @@ namespace Norm.Configuration
         public string GetCollectionName(Type type)
         {
             var collections = MongoTypeConfiguration.CollectionNames;
-
-            return collections.ContainsKey(type)
-                       ? collections[type]
-                       : type.Name;
+            return collections.ContainsKey(type) ? collections[type] : type.Name;
         }
 
         /// <summary>
@@ -67,10 +64,7 @@ namespace Norm.Configuration
         public string GetConnectionString(Type type)
         {
             var connections = MongoTypeConfiguration.ConnectionStrings;
-
-            return connections.ContainsKey(type)
-                       ? connections[type]
-                       : null;
+            return connections.ContainsKey(type) ? connections[type] : null;
         }
 
         /// <summary>
