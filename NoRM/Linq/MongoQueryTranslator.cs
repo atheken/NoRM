@@ -20,6 +20,23 @@ namespace Norm.Linq
         private StringBuilder sb;
         private StringBuilder sbIndexed;
 
+        public String PropName
+        {
+            get;
+            set;
+        }
+        public String TypeName
+        {
+            get;
+            set;
+        }
+
+        public String MethodCall
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Gets a value indicating whether IsComplex.
         /// </summary>
@@ -42,6 +59,28 @@ namespace Norm.Linq
         /// Gets FlyWeight.
         /// </summary>
         public Flyweight FlyWeight { get; private set; }
+
+        /// <summary>
+        /// How many to skip.
+        /// </summary>
+        public int Skip { get; set; }
+
+        private int _takeCount = Int32.MaxValue;
+
+        /// <summary>
+        /// How many to take (Int32.MaxValue) by default.
+        /// </summary>
+        public int Take
+        {
+            get
+            {
+                return this._takeCount;
+            }
+            set
+            {
+                this._takeCount = value;
+            }
+        }
 
         /// <summary>
         /// Gets where expression.
@@ -227,18 +266,27 @@ namespace Norm.Linq
                 // this supports the "deep graph" name - "Product.Address.City"
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
 
-                var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
-
-                if (expressionRootType != null)
+                String result = "";
+                var constant = m.Expression as ConstantExpression;
+                if (constant != null)
                 {
-                    fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
+                    //result = constant.GetConstantValue().ToString();
                 }
-
-                var result = string.Join(".", fixedName);
-                //sb.Append("this." + result);
-                if (UseScopedQualifier)
+                else
                 {
-                    sb.Append("this.");
+                    var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
+
+                    if (expressionRootType != null)
+                    {
+                        fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
+                    }
+
+                    result = string.Join(".", fixedName);
+                    //sb.Append("this." + result);
+                    if (UseScopedQualifier)
+                    {
+                        sb.Append("this.");
+                    }
                 }
                 sb.Append(result);
 
@@ -299,8 +347,8 @@ namespace Norm.Linq
                     sb.Append(lastOperator);
                     break;
                 default:
-                    throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported",
-                                                                  b.NodeType));
+                    throw new NotSupportedException(
+                        string.Format("The binary operator '{0}' is not supported", b.NodeType));
             }
 
             Visit(b.Right);
@@ -321,7 +369,7 @@ namespace Norm.Linq
             if (q != null)
             {
                 // set the collection name
-                FlyWeight.TypeName = q.ElementType.Name;
+                this.TypeName = q.ElementType.Name;
 
                 // this is our Query wrapper - see if it has an expression
                 var qry = (IMongoQuery)c.Value;
@@ -384,9 +432,9 @@ namespace Norm.Linq
         /// </exception>
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            if (string.IsNullOrEmpty(FlyWeight.MethodCall))
+            if (string.IsNullOrEmpty(this.MethodCall))
             {
-                FlyWeight.MethodCall = m.Method.Name;
+                this.MethodCall = m.Method.Name;
             }
 
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
@@ -633,8 +681,8 @@ namespace Norm.Linq
                     Visit(m.Arguments[0]);
                     return m;
                 default:
-                    FlyWeight.Limit = 1;
-                    FlyWeight.MethodCall = m.Method.Name;
+                    this.Take = 1;
+                    this.MethodCall = m.Method.Name;
                     if (m.Arguments.Count > 1)
                     {
                         var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);

@@ -1,5 +1,7 @@
 ﻿using System;
 using Norm.BSON;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Norm.Configuration
 {
@@ -8,6 +10,7 @@ namespace Norm.Configuration
     /// </summary>
     public class MongoConfigurationMap : IMongoConfigurationMap
     {
+        private Dictionary<Type, String> _idProperties = new Dictionary<Type, string>();
 
         /// <summary>
         /// Configures properties for type T
@@ -18,6 +21,44 @@ namespace Norm.Configuration
         {
             var typeConfiguration = new MongoTypeConfiguration<T>();
             typeConfigurationAction((ITypeConfiguration<T>)typeConfiguration);
+        }
+
+        private bool IsIdPropertyForType(Type type, String propertyName)
+        {
+            bool retval = false;
+            if (!_idProperties.ContainsKey(type))
+            {
+                PropertyInfo idProp = null;
+                foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
+                    BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
+                {
+                    if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
+                    {
+                        idProp = property;
+                        break;
+                    }
+                    if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        idProp = property;
+                        break;
+                    }
+                    if (idProp == null && property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        idProp = property;
+                        break;
+                    }
+                }
+                if (idProp != null)
+                {
+                    _idProperties[type] = idProp.Name;
+                    retval = idProp.Name == propertyName;
+                }
+            }
+            else
+            {
+                retval = _idProperties[type] == propertyName;
+            }
+            return retval;
         }
 
         /// <summary>
@@ -38,7 +79,12 @@ namespace Norm.Configuration
             var map = MongoTypeConfiguration.PropertyMaps;
             var retval = propertyName;//default to the original.
 
-            if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            //if (this.IsIdPropertyForType(type, propertyName))
+            //{
+            //    retval = "_id";
+            //}
+            //else 
+                if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
             {
                 retval = map[type][propertyName].Alias;
             }

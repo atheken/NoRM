@@ -20,33 +20,6 @@ namespace Norm.BSON
         private readonly Dictionary<string, long?> _longProps = new Dictionary<string, long?>(0, StringComparer.InvariantCultureIgnoreCase);
         private readonly Dictionary<string, string> _stringProps = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
         
-        // These props are used in the Linq provider
-
-        /// <summary>
-        /// Gets or sets TypeName.
-        /// </summary>
-        public string TypeName { get; set; }
-
-        /// <summary>
-        /// Gets or sets Limit.
-        /// </summary>
-        public int Limit { get; set; }
-
-        /// <summary>
-        /// Gets or sets Skip.
-        /// </summary>
-        public int Skip { get; set; }
-
-        /// <summary>
-        /// Gets or sets MethodCall.
-        /// </summary>
-        public string MethodCall { get; set; }
-
-        /// <summary>
-        /// Gets or sets PropName.
-        /// </summary>
-        public string PropName { get; set; }
-
         /// <summary>
         /// Get or set a property of this flyweight.
         /// </summary>
