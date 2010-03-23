@@ -1,11 +1,14 @@
 using Xunit;
 using System.Linq;
 using Norm.Configuration;
-    
+using System.Collections.Generic;
+using System;
+
 namespace Norm.Tests
 {
     public class MongoCollectionTests
     {
+
         public MongoCollectionTests()
         {
             MongoConfiguration.RemoveMapFor<Address>();
@@ -17,6 +20,50 @@ namespace Norm.Tests
                 mongo.Database.DropCollection("Fake");
             }
         }
+
+
+        [Fact]
+        public void Inserting_More_Than_4MB_Batch_Of_Docs_Returns_Correct_Count()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            {
+                List<Product> junkInTheTrunk = new List<Product>();
+                for (int i = 0; i < 16000; i++)
+                {
+                    #region Initialize and add a product to the batch.
+                    junkInTheTrunk.Add(new Product()
+                                {
+                                    Available = DateTime.Now,
+                                    Inventory = new List<InventoryChange> { 
+                            new InventoryChange{ 
+                               AmountChanged=5, CreatedOn=DateTime.Now
+                            }
+                    },
+                                    Name = "Pogo Stick",
+                                    Price = 42.0,
+                                    Supplier = new Supplier()
+                                    {
+                                        Address = new Address
+                                        {
+                                            Zip = "27701",
+                                            City = "Durham",
+                                            State = "NC",
+                                            Street = "Morgan St."
+                                        },
+                                        CreatedOn = DateTime.Now,
+                                        Name = "ACME"
+                                    }
+                                }); 
+                    #endregion
+                }
+                var bytes = junkInTheTrunk.SelectMany(y => Norm.BSON.BsonSerializer.Serialize(y)).Count();
+
+                Assert.InRange(bytes, 4194304, Int32.MaxValue);
+                mongo.GetCollection<Product>("Fake").Insert(junkInTheTrunk);
+                Assert.Equal(16000, mongo.GetCollection<Product>("Fake").Find().Count());
+            }
+        }
+
         [Fact]
         public void SaveOrInsertThrowsExceptionIfTypeDoesntHaveAnId()
         {
@@ -40,10 +87,10 @@ namespace Norm.Tests
                 Assert.Equal("Test 1", found.ElementAt(0).Name);
                 Assert.Equal(5, found.ElementAt(1).Id);
                 Assert.Equal("Test 2", found.ElementAt(1).Name);
-                
+
             }
         }
-        
+
         [Fact]
         public void UpdatesEntityWithNonObjectIdKey()
         {
@@ -76,7 +123,7 @@ namespace Norm.Tests
 
             }
         }
-        
+
         [Fact]
         public void UpdatesEntityWithObjectIdKey()
         {
@@ -91,13 +138,13 @@ namespace Norm.Tests
                 Assert.Equal("Updated Prod", found.ElementAt(0).Name);
             }
         }
-        
+
         [Fact]
         public void SavingANewEntityWithObjectIdKeyGeneratesAKey()
         {
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
-                var product = new Product {_id = null};
+                var product = new Product { _id = null };
                 mongo.GetCollection<Product>("Fake").Save(product);
                 Assert.NotNull(product._id);
                 Assert.NotEqual(ObjectId.Empty, product._id);
@@ -122,25 +169,25 @@ namespace Norm.Tests
             {
                 var product1 = new Product { _id = null };
                 var product2 = new Product { _id = null };
-                mongo.GetCollection<Product>("Fake").Insert(new[]{product1, product2});
+                mongo.GetCollection<Product>("Fake").Insert(new[] { product1, product2 });
                 Assert.NotNull(product1._id);
                 Assert.NotEqual(ObjectId.Empty, product1._id);
                 Assert.NotNull(product2._id);
                 Assert.NotEqual(ObjectId.Empty, product2._id);
             }
         }
-        
+
         [Fact]
         public void DeletesObjectsBasedOnTemplate()
         {
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 var collection = mongo.GetCollection<Product>("Fake");
-                collection.Insert(new[] { new Product { Price = 10}, new Product { Price = 5}, new Product { Price = 1} });
+                collection.Insert(new[] { new Product { Price = 10 }, new Product { Price = 5 }, new Product { Price = 1 } });
                 Assert.Equal(3, collection.Count());
-                collection.Delete(new{Price = 1});
+                collection.Delete(new { Price = 1 });
                 Assert.Equal(2, collection.Count());
-                Assert.Equal(0, collection.Count(new {Price = 1}));
+                Assert.Equal(0, collection.Count(new { Price = 1 }));
             }
         }
 
@@ -168,11 +215,11 @@ namespace Norm.Tests
                 Assert.Equal(1, collection.Count(new { Id = product2._id }));
             }
         }
-                
+
         private class IntId
         {
-            public int Id{ get; set;}
-            public string Name{ get; set;}
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
     }
 }
