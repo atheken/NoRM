@@ -21,10 +21,12 @@ namespace Norm.Tests
             }
         }
 
-
         [Fact]
-        public void Inserting_More_Than_4MB_Batch_Of_Docs_Returns_Correct_Count()
+        public void Find_On_Collection_Resurning_More_Than_4MB_Of_Docs_Works()
         {
+            //this tests Cursor management in the ReplyMessage<T>, 
+            //we built NoRM so that the average user picking up the library
+            //doesn't have to think about this.
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
             {
                 List<Product> junkInTheTrunk = new List<Product>();
