@@ -404,8 +404,12 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            var oval = "ObjectId('" + c.Value.ToString() + "')";
-                            sb.Append(oval);
+                            sb.AppendFormat("ObjectId('{0}')",c.Value);
+                            SetFlyValue(c.Value);
+                        }
+                        else if (c.Value is Guid)
+                        {
+                            sb.AppendFormat("'{0}'", c.Value);
                             SetFlyValue(c.Value);
                         }
                         else

@@ -27,7 +27,6 @@ namespace Norm.Tests
             {
                 session.Add(new Product {Name = "test", Price = external});
                 var product = session.Products.Where(p => p.Price == external).FirstOrDefault();
-
                 Assert.Equal(10, product.Price);
             }
         }
@@ -403,6 +402,21 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => p._id == targetId).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(targetId, products[0]._id);
+            }
+        }
+
+        [Fact]
+        public void Filters_Based_On_Guid()
+        {
+            var targetId = Guid.NewGuid();
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10, UniqueID = targetId });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(p => p.UniqueID == targetId).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(targetId, products[0].UniqueID);
             }
         }
 

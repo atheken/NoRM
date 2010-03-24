@@ -253,9 +253,11 @@ namespace Norm.Tests
             Supplier = new Supplier();
             _id = ObjectId.NewObjectId();
             Inventory = new List<InventoryChange>();
+            this.UniqueID = Guid.NewGuid();
         }
         public List<InventoryChange> Inventory { get; set; }
         public ObjectId _id { get; set; }
+        public Guid UniqueID { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
         public Supplier Supplier { get; set; }
