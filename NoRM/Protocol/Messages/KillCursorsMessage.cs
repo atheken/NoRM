@@ -1,4 +1,5 @@
 ﻿
+using System;
 namespace Norm.Protocol.Messages
 {
     /// <summary>
@@ -17,6 +18,11 @@ namespace Norm.Protocol.Messages
         internal KillCursorsMessage(IConnection connection, string fullyQualifiedCollName, params long[] cursorsToKill) : base(connection, fullyQualifiedCollName)
         {
             _killCursors = cursorsToKill;
+        }
+
+        public void Execute()
+        {
+            throw new NotImplementedException();
         }
     }
 }

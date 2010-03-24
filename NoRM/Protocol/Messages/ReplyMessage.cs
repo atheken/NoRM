@@ -11,10 +11,10 @@ namespace Norm.Protocol.Messages
     /// </summary>
     /// <typeparam name="T">
     /// </typeparam>
-    public class ReplyMessage<T> : Message
+    public class ReplyMessage<T> : Message, IDisposable
     {
-        private readonly List<T> _results;
-
+        private List<T> _results = null;
+        private MongoOp _originalOperation;
         /// <summary>
         /// Initializes a new instance of the <see cref="ReplyMessage{T}"/> class.
         /// Processes a response stream.
@@ -22,26 +22,26 @@ namespace Norm.Protocol.Messages
         /// <param name="connection">The connection.</param>
         /// <param name="fullyQualifiedCollestionName">The fully Qualified Collestion Name.</param>
         /// <param name="reply">The reply.</param>
-        internal ReplyMessage(IConnection connection, string fullyQualifiedCollestionName, BinaryReader reply)
+        internal ReplyMessage(IConnection connection, string fullyQualifiedCollestionName, BinaryReader reply, MongoOp originalOperation)
             : base(connection, fullyQualifiedCollestionName)
         {
-            _messageLength = reply.ReadInt32();
-            _requestID = reply.ReadInt32();
-            _responseID = reply.ReadInt32();
-            _op = (MongoOp) reply.ReadInt32();
-            HasError = reply.ReadInt32() == 1 ? true : false;
-            CursorID = reply.ReadInt64();
-            CursorPosition = reply.ReadInt32();
+            this._originalOperation = originalOperation;
+            this._messageLength = reply.ReadInt32();
+            this._requestID = reply.ReadInt32();
+            this._responseID = reply.ReadInt32();
+            this._op = (MongoOp)reply.ReadInt32();
+            this.HasError = reply.ReadInt32() == 1 ? true : false;
+            this.CursorID = reply.ReadInt64();
+            this.CursorPosition = reply.ReadInt32();
 
-            // this.ResultsReturned = reply.ReadInt32();
-            var read = reply.ReadInt32();
+            var count = reply.ReadInt32();
 
             // decrement the length for all the reads.
             _messageLength -= 4 + 4 + 4 + 4 + 4 + 4 + 8 + 4 + 4;
 
-            _results = new List<T>(10);
+            _results = new List<T>(count);
 
-            if (HasError)
+            if (this.HasError)
             {
                 // TODO: load the error document.
             }
@@ -84,20 +84,42 @@ namespace Norm.Protocol.Messages
         /// </summary>
         public bool HasError { get; protected set; }
 
-        /// <summary>
-        /// The number of results returned from this request.
-        /// </summary>
-        public int Count
-        {
-            get { return this._results.Count; }
-        }
+        private ReplyMessage<T> _addedReturns = null;
 
         /// <summary>
         /// Gets enumerable results.
         /// </summary>
         public IEnumerable<T> Results
         {
-            get { return this._results.AsEnumerable(); }
+            get
+            {
+                foreach (var r in this._results)
+                {
+                    yield return r;
+                }
+                if (this.CursorID != 0 && this._results.Count > 0)
+                {
+                    this._addedReturns = new GetMoreMessage<T>(this._connection, 
+                        this._collection, this.CursorID).Execute();
+                }
+                if (this._addedReturns != null)
+                {
+                    foreach (var r in this._addedReturns.Results)
+                    {
+                        yield return r;
+                    }
+                }
+                yield break;
+            }
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            //this should kill the cursor if it exists.
+        }
+
+        #endregion
     }
 }

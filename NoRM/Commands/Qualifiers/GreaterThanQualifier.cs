@@ -1,4 +1,5 @@
 ﻿using Norm.BSON;
+using System;
 
 namespace Norm.Commands.Qualifiers
 {

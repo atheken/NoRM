@@ -67,7 +67,7 @@ namespace Norm
                     }
                 }.Execute();
 
-                return result.Count == 1 && result.Results.ElementAt(0).Ok == 1;
+                return result.Results.Count() == 1 && result.Results.ElementAt(0).Ok == 1;
             }
 
             return false;
