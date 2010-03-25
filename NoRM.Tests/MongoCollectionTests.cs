@@ -22,7 +22,7 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void Find_On_Collection_Resurning_More_Than_4MB_Of_Docs_Works()
+        public void Find_On_Collection_Returning_More_Than_4MB_Of_Docs_Works()
         {
             //this tests Cursor management in the ReplyMessage<T>, 
             //we built NoRM so that the average user picking up the library

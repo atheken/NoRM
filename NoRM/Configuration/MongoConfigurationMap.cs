@@ -79,12 +79,11 @@ namespace Norm.Configuration
             var map = MongoTypeConfiguration.PropertyMaps;
             var retval = propertyName;//default to the original.
 
-            //if (this.IsIdPropertyForType(type, propertyName))
-            //{
-            //    retval = "_id";
-            //}
-            //else 
-                if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            if (this.IsIdPropertyForType(type, propertyName))
+            {
+                retval = "_id";
+            }
+            else if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
             {
                 retval = map[type][propertyName].Alias;
             }
