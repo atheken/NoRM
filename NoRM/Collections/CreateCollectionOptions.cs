@@ -1,6 +1,8 @@
 
 namespace Norm.Collections
 {
+    using Attributes;
+
     /// <summary>
     /// The create collection options.
     /// </summary>
@@ -21,10 +23,7 @@ namespace Norm.Collections
         /// </param>
         public CreateCollectionOptions(string name)
         {
-            this.Name = name;
-            this.Capped = true;
-            this.Size = 100000;
-            this.AutoIndexId = false;
+            this.Name = name;            
         }
 
         /// <summary>
@@ -35,16 +34,18 @@ namespace Norm.Collections
         /// <summary>
         /// Gets or sets a value indicating whether Capped.
         /// </summary>
-        public bool Capped { get; set; }
+        public bool Capped { get; set;}
 
         /// <summary>
         /// Gets or sets Size.
         /// </summary>
-        public int Size { get; set; }
+        [MongoIgnoreIfNull]
+        public int? Size { get; set; }
 
         /// <summary>
         /// Gets or sets Max.
         /// </summary>
+        [MongoIgnoreIfNull]
         public long? Max { get; set; }
 
         /// <summary>
@@ -56,5 +57,7 @@ namespace Norm.Collections
         /// Gets or sets Create.
         /// </summary>
         public string Create { get; set; }
+        
+        
     }
 }
