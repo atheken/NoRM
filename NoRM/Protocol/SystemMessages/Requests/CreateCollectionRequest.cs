@@ -47,7 +47,7 @@ namespace Norm.Protocol.SystemMessages.Request
         /// <summary>
         /// Gets the size.
         /// </summary>
-        public int Size
+        public int? Size
         {
             get { return this._options.Size; }
         }
