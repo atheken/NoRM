@@ -212,7 +212,12 @@ namespace Norm
 
         public static implicit operator ObjectId(String oidString)
         {
-            return new ObjectId(oidString);
+            ObjectId retval = ObjectId.Empty;
+            if(!String.IsNullOrEmpty(oidString))
+            {
+                retval = new ObjectId(oidString);
+            }
+            return retval;
         }
     }
 }

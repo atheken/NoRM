@@ -17,6 +17,10 @@ namespace Norm.Tests
             ObjectId oid = ObjectId.NewObjectId();
             string str = oid;
             Assert.Equal(oid, (ObjectId)str);
+
+            str = null;
+            Assert.Equal(ObjectId.Empty, (ObjectId)str);
+            Assert.Equal(ObjectId.Empty, (ObjectId)"");
         }
 
         [Fact]
