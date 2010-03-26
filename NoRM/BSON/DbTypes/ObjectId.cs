@@ -204,5 +204,15 @@ namespace Norm
 
             return bytes;
         }
+
+        public static implicit operator string(ObjectId oid)
+        {
+            return oid.ToString();
+        }
+
+        public static implicit operator ObjectId(String oidString)
+        {
+            return new ObjectId(oidString);
+        }
     }
 }

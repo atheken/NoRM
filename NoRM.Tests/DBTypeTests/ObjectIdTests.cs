@@ -10,6 +10,15 @@ namespace Norm.Tests
             ObjectId objectId;
             Assert.Equal(false, ObjectId.TryParse(null, out objectId));
         }
+
+        [Fact]
+        public void ImplicitConversionOfOIDToAndFromStringWorks()
+        {
+            ObjectId oid = ObjectId.NewObjectId();
+            string str = oid;
+            Assert.Equal(oid, (ObjectId)str);
+        }
+
         [Fact]
         public void TryParseReturnsFalseIfObjectIdIsEmpty()
         {
