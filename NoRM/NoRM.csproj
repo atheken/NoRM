@@ -61,6 +61,7 @@
     <Compile Include="BSON\DbTypes\GridReadStream.cs" />
     <Compile Include="BSON\DbTypes\ObjectId.cs" />
     <Compile Include="BSON\DbTypes\DBReference.cs" />
+    <Compile Include="BSON\DbTypes\ObjectIdTypeConverter.cs" />
     <Compile Include="BSON\DbTypes\ScopedCode.cs" />
     <Compile Include="BSON\BsonSerializer.cs" />
     <Compile Include="BSON\BSONTypes.cs" />

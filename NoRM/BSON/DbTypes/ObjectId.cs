@@ -6,6 +6,7 @@ namespace Norm
     /// <summary>
     /// Represents a Mongo document's ObjectId
     /// </summary>
+    [System.ComponentModel.TypeConverter(typeof(ObjectIdTypeConverter))]
     public class ObjectId
     {        
         private string _string;
