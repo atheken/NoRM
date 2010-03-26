@@ -42,6 +42,17 @@ namespace Norm.Collections
         /// <returns></returns>
         IEnumerable<T> Find<U>(U template, int limit);
 
+
+        /// <summary>
+        /// Find using the template, but skip some and limit how many you want.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="template"></param>
+        /// <param name="limit"></param>
+        /// <param name="skip"></param>
+        /// <returns></returns>
+        IEnumerable<T> Find<U>(U template, int limit, int skip);
+
         /// <summary>
         /// Finds one document.
         /// </summary>

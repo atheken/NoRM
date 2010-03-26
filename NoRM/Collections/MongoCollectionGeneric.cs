@@ -203,6 +203,12 @@ namespace Norm.Collections
             return Find(template, limit, 0, FullyQualifiedName);
         }
 
+        public IEnumerable<T> Find<U>(U template, int limit, int skip)
+        {
+            return Find(template, limit, skip, FullyQualifiedName);
+        }
+
+
         /// <summary>
         /// The find.
         /// </summary>

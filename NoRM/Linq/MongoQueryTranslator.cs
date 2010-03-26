@@ -13,12 +13,13 @@ namespace Norm.Linq
     /// </summary>
     public class MongoQueryTranslator : ExpressionVisitor
     {
+        private int _takeCount = Int32.MaxValue;
         private Expression _expression;
-        private bool collectionSet;
-        private string lastFlyProperty = string.Empty;
-        private string lastOperator = " == ";
-        private StringBuilder sb;
-        private StringBuilder sbIndexed;
+        private bool _collectionSet;
+        private string _lastFlyProperty = string.Empty;
+        private string _lastOperator = " == ";
+        private StringBuilder _sb;
+        private StringBuilder _sbIndexed;
 
         public String PropName
         {
@@ -47,7 +48,7 @@ namespace Norm.Linq
         /// </summary>
         public string OptimizedWhere
         {
-            get { return sbIndexed.ToString(); }
+            get { return _sbIndexed.ToString(); }
         }
 
         /// <summary>
@@ -65,7 +66,6 @@ namespace Norm.Linq
         /// </summary>
         public int Skip { get; set; }
 
-        private int _takeCount = Int32.MaxValue;
 
         /// <summary>
         /// How many to take (Int32.MaxValue) by default.
@@ -87,7 +87,7 @@ namespace Norm.Linq
         /// </summary>
         public string WhereExpression
         {
-            get { return sb.ToString(); }
+            get { return _sb.ToString(); }
         }
 
         public bool UseScopedQualifier { get; set; }
@@ -135,11 +135,11 @@ namespace Norm.Linq
         public string Translate(Expression exp, bool useScopedQualifier)
         {
             UseScopedQualifier = useScopedQualifier;
-            sb = new StringBuilder();
-            sbIndexed = new StringBuilder();
+            _sb = new StringBuilder();
+            _sbIndexed = new StringBuilder();
             FlyWeight = new Flyweight();
             Visit(exp);
-            return sb.ToString();
+            return _sb.ToString();
         }
 
         /// <summary>
@@ -162,11 +162,11 @@ namespace Norm.Linq
 
                 if (UseScopedQualifier)
                 {
-                    sb.Append("this.");
+                    _sb.Append("this.");
                 }
-                sb.Append(alias);
+                _sb.Append(alias);
 
-                lastFlyProperty = alias;
+                _lastFlyProperty = alias;
                 return m;
             }
 
@@ -175,9 +175,9 @@ namespace Norm.Linq
                 switch (m.Member.Name)
                 {
                     case "Length":
-                        sb.Append("LEN(");
+                        _sb.Append("LEN(");
                         Visit(m.Expression);
-                        sb.Append(")");
+                        _sb.Append(")");
                         return m;
                 }
             }
@@ -197,31 +197,31 @@ namespace Norm.Linq
                 {
                     case "Day":
                         Visit(m.Expression);
-                        sb.Append(".getDate()");
+                        _sb.Append(".getDate()");
                         return m;
                     case "Month":
                         Visit(m.Expression);
-                        sb.Append(".getMonth()");
+                        _sb.Append(".getMonth()");
                         return m;
                     case "Year":
                         Visit(m.Expression);
-                        sb.Append(".getFullYear()");
+                        _sb.Append(".getFullYear()");
                         return m;
                     case "Hour":
                         Visit(m.Expression);
-                        sb.Append(".getHours()");
+                        _sb.Append(".getHours()");
                         return m;
                     case "Minute":
                         Visit(m.Expression);
-                        sb.Append(".getMinutes()");
+                        _sb.Append(".getMinutes()");
                         return m;
                     case "Second":
                         Visit(m.Expression);
-                        sb.Append(".getSeconds()");
+                        _sb.Append(".getSeconds()");
                         return m;
                     case "DayOfWeek":
                         Visit(m.Expression);
-                        sb.Append(".getDay()");
+                        _sb.Append(".getDay()");
                         return m;
                 }
             }
@@ -285,12 +285,12 @@ namespace Norm.Linq
                     //sb.Append("this." + result);
                     if (UseScopedQualifier)
                     {
-                        sb.Append("this.");
+                        _sb.Append("this.");
                     }
                 }
-                sb.Append(result);
+                _sb.Append(result);
 
-                lastFlyProperty = result;
+                _lastFlyProperty = result;
                 return m;
             }
 
@@ -308,43 +308,43 @@ namespace Norm.Linq
         protected override Expression VisitBinary(BinaryExpression b)
         {
             ConditionalCount++;
-            sb.Append("(");
+            _sb.Append("(");
             Visit(b.Left);
             switch (b.NodeType)
             {
                 case ExpressionType.And:
                 case ExpressionType.AndAlso:
-                    sb.Append(" && ");
+                    _sb.Append(" && ");
                     break;
 
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
                     IsComplex = true;
-                    sb.Append(" || ");
+                    _sb.Append(" || ");
                     break;
                 case ExpressionType.Equal:
-                    lastOperator = " == ";
-                    sb.Append(lastOperator);
+                    _lastOperator = " == ";
+                    _sb.Append(_lastOperator);
                     break;
                 case ExpressionType.NotEqual:
-                    lastOperator = " <> ";
-                    sb.Append(lastOperator);
+                    _lastOperator = " <> ";
+                    _sb.Append(_lastOperator);
                     break;
                 case ExpressionType.LessThan:
-                    lastOperator = " < ";
-                    sb.Append(lastOperator);
+                    _lastOperator = " < ";
+                    _sb.Append(_lastOperator);
                     break;
                 case ExpressionType.LessThanOrEqual:
-                    lastOperator = " <= ";
-                    sb.Append(lastOperator);
+                    _lastOperator = " <= ";
+                    _sb.Append(_lastOperator);
                     break;
                 case ExpressionType.GreaterThan:
-                    lastOperator = " > ";
-                    sb.Append(lastOperator);
+                    _lastOperator = " > ";
+                    _sb.Append(_lastOperator);
                     break;
                 case ExpressionType.GreaterThanOrEqual:
-                    lastOperator = " >= ";
-                    sb.Append(lastOperator);
+                    _lastOperator = " >= ";
+                    _sb.Append(_lastOperator);
                     break;
                 default:
                     throw new NotSupportedException(
@@ -352,7 +352,7 @@ namespace Norm.Linq
             }
 
             Visit(b.Right);
-            sb.Append(")");
+            _sb.Append(")");
             return b;
         }
 
@@ -381,35 +381,35 @@ namespace Norm.Linq
             }
             else if (c.Value == null)
             {
-                sb.Append("NULL");
+                _sb.Append("NULL");
             }
             else
             {
                 switch (Type.GetTypeCode(c.Value.GetType()))
                 {
                     case TypeCode.Boolean:
-                        sb.Append(((bool)c.Value) ? 1 : 0);
+                        _sb.Append(((bool)c.Value) ? 1 : 0);
                         SetFlyValue(((bool)c.Value) ? 1 : 0);
                         break;
                     case TypeCode.DateTime:
                         var val = "new Date('" + c.Value + "')";
-                        sb.Append(val);
+                        _sb.Append(val);
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.String:
                         var sval = "'" + c.Value + "'";
-                        sb.Append(sval);
+                        _sb.Append(sval);
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            sb.AppendFormat("ObjectId('{0}')",c.Value);
+                            _sb.AppendFormat("ObjectId('{0}')",c.Value);
                             SetFlyValue(c.Value);
                         }
                         else if (c.Value is Guid)
                         {
-                            sb.AppendFormat("'{0}'", c.Value);
+                            _sb.AppendFormat("'{0}'", c.Value);
                             SetFlyValue(c.Value);
                         }
                         else
@@ -418,7 +418,7 @@ namespace Norm.Linq
                         }
                         break;
                     default:
-                        sb.Append(c.Value);
+                        _sb.Append(c.Value);
                         SetFlyValue(c.Value);
                         break;
                 }
@@ -453,42 +453,42 @@ namespace Norm.Linq
                 switch (m.Method.Name)
                 {
                     case "StartsWith":
-                        sb.Append("(");
+                        _sb.Append("(");
                         Visit(m.Object);
-                        sb.Append(".indexOf(");
+                        _sb.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        sb.Append(")===0)");
+                        _sb.Append(")===0)");
                         return m;
 
                     case "Contains":
-                        sb.Append("(");
+                        _sb.Append("(");
                         Visit(m.Object);
-                        sb.Append(".indexOf(");
+                        _sb.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        sb.Append(")>0)");
+                        _sb.Append(")>0)");
                         return m;
                     case "IndexOf":
                         Visit(m.Object);
-                        sb.Append(".indexOf(");
+                        _sb.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        sb.Append(")");
+                        _sb.Append(")");
                         return m;
                     case "EndsWith":
-                        sb.Append("(");
+                        _sb.Append("(");
                         Visit(m.Object);
-                        sb.Append(".match(");
+                        _sb.Append(".match(");
                         Visit(m.Arguments[0]);
-                        sb.Append("+'$')==");
+                        _sb.Append("+'$')==");
                         Visit(m.Arguments[0]);
-                        sb.Append(")");
+                        _sb.Append(")");
                         return m;
 
                     case "IsNullOrEmpty":
-                        sb.Append("(");
+                        _sb.Append("(");
                         Visit(m.Arguments[0]);
-                        sb.Append(" == '' ||  ");
+                        _sb.Append(" == '' ||  ");
                         Visit(m.Arguments[0]);
-                        sb.Append(" == null  )");
+                        _sb.Append(" == null  )");
                         return m;
                 }
             }
@@ -606,35 +606,35 @@ namespace Norm.Linq
         {
             // if the property has already been set, we can't set it again
             // as fly uses Dictionaries. This means to BETWEEN style native queries
-            if (FlyWeight.Contains(lastFlyProperty))
+            if (FlyWeight.Contains(_lastFlyProperty))
             {
                 IsComplex = true;
                 return;
             }
 
-            if (lastOperator != " == ")
+            if (_lastOperator != " == ")
             {
                 // Can't do comparisons here unless the type is a double
                 // which is a limitation of mongo, apparently
                 // and won't work if we're doing date comparisons
                 if (value.GetType().IsAssignableFrom(typeof(double)))
                 {
-                    switch (lastOperator)
+                    switch (_lastOperator)
                     {
                         case " > ":
-                            FlyWeight[lastFlyProperty] = Q.GreaterThan((double)value);
+                            FlyWeight[_lastFlyProperty] = Q.GreaterThan((double)value);
                             break;
                         case " < ":
-                            FlyWeight[lastFlyProperty] = Q.LessThan((double)value);
+                            FlyWeight[_lastFlyProperty] = Q.LessThan((double)value);
                             break;
                         case " <= ":
-                            FlyWeight[lastFlyProperty] = Q.LessOrEqual((double)value);
+                            FlyWeight[_lastFlyProperty] = Q.LessOrEqual((double)value);
                             break;
                         case " >= ":
-                            FlyWeight[lastFlyProperty] = Q.GreaterOrEqual((double)value);
+                            FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
                             break;
                         case " <> ":
-                            FlyWeight[lastFlyProperty] = Q.NotEqual(value);
+                            FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
                             break;
                     }
                 }
@@ -646,7 +646,7 @@ namespace Norm.Linq
             }
             else
             {
-                FlyWeight[lastFlyProperty] = value;
+                FlyWeight[_lastFlyProperty] = value;
             }
         }
 
@@ -656,7 +656,7 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         private void HandleSkip(Expression exp)
         {
-            FlyWeight["$skip"] = (int)exp.GetConstantValue();
+            this.Skip = (int)exp.GetConstantValue();
         }
 
         /// <summary>
@@ -665,7 +665,7 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         private void HandleTake(Expression exp)
         {
-            FlyWeight["$limit"] = (int)exp.GetConstantValue();
+            this.Take = (int)exp.GetConstantValue();
         }
 
         /// <summary>

@@ -91,5 +91,15 @@ namespace Norm.Collections
         /// <param name="limit">The limit.</param>
         /// <returns></returns>
         IEnumerable Find(object template, int limit);
+
+
+        /// <summary>
+        /// Find some documents matching the template, but skip the top X and take the next top Y.
+        /// </summary>
+        /// <param name="template"></param>
+        /// <param name="limit"></param>
+        /// <param name="skip"></param>
+        /// <returns></returns>
+        IEnumerable Find(object template, int limit, int skip);
     }
 }

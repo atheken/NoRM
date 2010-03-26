@@ -184,6 +184,18 @@ namespace Norm.Collections
             return Find(template, null, limit, 0, this.FullyQualifiedName);
         }
 
+        /// <summary>
+        /// Find the number requested, skip some, and take some.
+        /// </summary>
+        /// <param name="template"></param>
+        /// <param name="limit"></param>
+        /// <param name="skip"></param>
+        /// <returns></returns>
+        public IEnumerable Find(object template, int limit, int skip)
+        {
+            return Find(template, null, limit, skip, this.FullyQualifiedName);
+        }
+
         public IEnumerable Find(object template, object orderby, int limit)
         {
             return this.Find(template, orderby, limit, 0, this.FullyQualifiedName);

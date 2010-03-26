@@ -175,7 +175,7 @@ namespace Norm.Linq
                 }
             }
 
-            return collection.Find(fly);
+            return collection.Find(fly, tranny.Take, tranny.Skip);
         }
 
         /// <summary>
