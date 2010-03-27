@@ -238,8 +238,8 @@ namespace Norm.Linq
                 var constant = m.Expression as ConstantExpression;
                 if (constant != null)
                 {
-                    var fi = (FieldInfo) m.Member;
-                    var val= fi.GetValue(constant.Value);
+                    var fi = (FieldInfo)m.Member;
+                    var val = fi.GetValue(constant.Value);
                     if (val is String)
                     {
                         result = String.Format("\"{0}\"", val);
@@ -248,6 +248,7 @@ namespace Norm.Linq
                     {
                         result = val.ToString();
                     }
+                    SetFlyValue(val);
                 }
                 else
                 {
