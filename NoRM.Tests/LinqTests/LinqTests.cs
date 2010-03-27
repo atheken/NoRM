@@ -23,10 +23,10 @@ namespace Norm.Tests
         public void LinqQueriesShouldSupportExternalParameters()
         {
             var external = 10;
-            using(var session = new Session())
+            using (var session = new Session())
             {
                 session.Add(new Product { Name = "test1", Price = 20 });
-                session.Add(new Product {Name = "test", Price = 10});
+                session.Add(new Product { Name = "test", Price = 10 });
                 var product = session.Products.Where(p => p.Price == external).FirstOrDefault();
                 Assert.Equal(10, product.Price);
             }
@@ -53,15 +53,19 @@ namespace Norm.Tests
             using (var session = new Session())
             {
                 session.Add(new Product { Name = "test", Price = external.Price });
-                var product = session.Products.Where(p => p.Price == external.Price).FirstOrDefault();
+                var product = session.Products
+                    .Where(p => p.Price == external.Price)
+                    .FirstOrDefault();
 
                 Assert.Equal(10, product.Price);
             }
         }
 
         [Fact]
-        public void ThreeProductsShouldBeReturnedWhenThreeInDB() {
-            using (var session = new Session()) {
+        public void ThreeProductsShouldBeReturnedWhenThreeInDB()
+        {
+            using (var session = new Session())
+            {
                 session.Add(new Product { Name = "1", Price = 10 });
                 session.Add(new Product { Name = "2", Price = 22 });
                 session.Add(new Product { Name = "3", Price = 33 });
@@ -75,30 +79,34 @@ namespace Norm.Tests
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {
             using (var session = new Session())
-            {                
-                session.Add(new Product {Name = "Test3X", Price = 10});
-                session.Add(new Product {Name = "Test4X", Price = 22});
-                session.Add(new Product {Name = "Test5", Price = 33});
-                session.Add(new Product {Name = "XTest3", Price = 10});
-                session.Add(new Product {Name = "XTest4", Price = 22});
+            {
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "Test4X", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
+                session.Add(new Product { Name = "XTest3", Price = 10 });
+                session.Add(new Product { Name = "XTest4", Price = 22 });
                 var products = session.Products.Where(x => x.Name.StartsWith("X") || x.Name.EndsWith("X")).ToList();
                 Assert.Equal(4, products.Count);
             }
         }
         [Fact]
-        public void OneProductsShouldBeReturnedWhen3InDbWithPriceEqual10() {
-            using (var session = new Session()) {
+        public void OneProductsShouldBeReturnedWhen3InDbWithPriceEqual10()
+        {
+            using (var session = new Session())
+            {
                 session.Add(new Product { Name = "Test3", Price = 10 });
                 session.Add(new Product { Name = "Test4", Price = 22 });
                 session.Add(new Product { Name = "Test5", Price = 33 });
-                var products = session.Products.Where(x => x.Price ==10).ToList();
+                var products = session.Products.Where(x => x.Price == 10).ToList();
                 Assert.Equal(1, products.Count);
             }
         }
 
         [Fact]
-        public void TwoProductsShouldBeReturnedWhen3InDbWithPriceGreaterThan10() {
-            using (var session = new Session()) {
+        public void TwoProductsShouldBeReturnedWhen3InDbWithPriceGreaterThan10()
+        {
+            using (var session = new Session())
+            {
                 session.Add(new Product { Name = "Test3", Price = 10 });
                 session.Add(new Product { Name = "Test4", Price = 22 });
                 session.Add(new Product { Name = "Test5", Price = 33 });
@@ -108,12 +116,14 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void OneProductsShouldBeReturnedWhen3InDbWithPriceEqual10AndNameTest3() {
-            using (var session = new Session()) {
+        public void OneProductsShouldBeReturnedWhen3InDbWithPriceEqual10AndNameTest3()
+        {
+            using (var session = new Session())
+            {
                 session.Add(new Product { Name = "Test3", Price = 10 });
                 session.Add(new Product { Name = "Test4", Price = 22 });
                 session.Add(new Product { Name = "Test5", Price = 33 });
-                var products = session.Products.Where(x => x.Price == 10 && x.Name=="Test3").ToList();
+                var products = session.Products.Where(x => x.Price == 10 && x.Name == "Test3").ToList();
                 Assert.Equal(1, products.Count);
             }
         }
@@ -122,9 +132,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3", Price = 10});
-                session.Add(new Product {Name = "Test4", Price = 22});
-                session.Add(new Product {Name = "Test5", Price = 33});
+                session.Add(new Product { Name = "Test3", Price = 10 });
+                session.Add(new Product { Name = "Test4", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Price > 10 && x.Price < 30).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -135,8 +145,8 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5)});
-                session.Add(new Product {Name = "Test4X", Price = 22, Available = new DateTime(2000, 2, 6)});
+                session.Add(new Product { Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5) });
+                session.Add(new Product { Name = "Test4X", Price = 22, Available = new DateTime(2000, 2, 6) });
                 var products = session.Products.Where(x => x.Available.Day == 5).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -147,13 +157,13 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now});
-                session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(1)});
-                session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(2)});
-                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(3)});
-                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(4)});
-                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(5)});
-                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(6)});
+                session.Add(new Product { Name = "Test3X", Price = 10, Available = DateTime.Now });
+                session.Add(new Product { Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(1) });
+                session.Add(new Product { Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(2) });
+                session.Add(new Product { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(3) });
+                session.Add(new Product { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(4) });
+                session.Add(new Product { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(5) });
+                session.Add(new Product { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(6) });
                 var products = session.Products.Where(x => x.Available.DayOfWeek == DayOfWeek.Monday).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -164,10 +174,10 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1)});
+                session.Add(new Product { Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1) });
+                session.Add(new Product { Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1) });
+                session.Add(new Product { Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1) });
+                session.Add(new Product { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1) });
                 var products = session.Products.Where(x => x.Available > DateTime.Now).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -178,10 +188,10 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2)});
+                session.Add(new Product { Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1) });
+                session.Add(new Product { Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1) });
+                session.Add(new Product { Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1) });
+                session.Add(new Product { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2) });
                 var products = session.Products.Where(x => x.Available > DateTime.Now.AddDays(1)).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -192,8 +202,8 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5)});
-                session.Add(new Product {Name = "Test4X", Price = 22, Available = new DateTime(2001, 3, 6)});
+                session.Add(new Product { Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5) });
+                session.Add(new Product { Name = "Test4X", Price = 22, Available = new DateTime(2001, 3, 6) });
                 var products = session.Products.Where(x => x.Available.Month == 2).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -204,8 +214,8 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5)});
-                session.Add(new Product {Name = "Test4X", Price = 22, Available = new DateTime(2001, 2, 6)});
+                session.Add(new Product { Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5) });
+                session.Add(new Product { Name = "Test4X", Price = 22, Available = new DateTime(2001, 2, 6) });
                 var products = session.Products.Where(x => x.Available.Year == 2000).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -216,11 +226,11 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10});
-                session.Add(new Product {Name = "TestX4", Price = 22});
-                session.Add(new Product {Name = "TesXt5", Price = 33});
-                session.Add(new Product {Name = "TeXst3", Price = 10});
-                session.Add(new Product {Name = "TXest4", Price = 22});
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "TestX4", Price = 22 });
+                session.Add(new Product { Name = "TesXt5", Price = 33 });
+                session.Add(new Product { Name = "TeXst3", Price = 10 });
+                session.Add(new Product { Name = "TXest4", Price = 22 });
                 var products = session.Products.Where(x => x.Name.IndexOf("X") == 2).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -231,11 +241,11 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10});
-                session.Add(new Product {Name = "Test4X", Price = 22});
-                session.Add(new Product {Name = "", Price = 33});
-                session.Add(new Product {Name = "XTest3", Price = 10});
-                session.Add(new Product {Name = "XTest4", Price = 22});
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "Test4X", Price = 22 });
+                session.Add(new Product { Name = "", Price = 33 });
+                session.Add(new Product { Name = "XTest3", Price = 10 });
+                session.Add(new Product { Name = "XTest4", Price = 22 });
                 var products = session.Products.Where(x => string.IsNullOrEmpty(x.Name)).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -246,11 +256,11 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10});
-                session.Add(new Product {Name = "Test4X", Price = 22});
-                session.Add(new Product {Price = 33});
-                session.Add(new Product {Name = "XTest3", Price = 10});
-                session.Add(new Product {Name = "XTest4", Price = 22});
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "Test4X", Price = 22 });
+                session.Add(new Product { Price = 33 });
+                session.Add(new Product { Name = "XTest3", Price = 10 });
+                session.Add(new Product { Name = "XTest4", Price = 22 });
                 var products = session.Products.Where(x => string.IsNullOrEmpty(x.Name)).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -261,11 +271,11 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10});
-                session.Add(new Product {Name = "Test4X", Price = 22});
-                session.Add(new Product {Name = "XTest5X", Price = 33});
-                session.Add(new Product {Name = "XTest3", Price = 10});
-                session.Add(new Product {Name = "XTest4", Price = 22});
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "Test4X", Price = 22 });
+                session.Add(new Product { Name = "XTest5X", Price = 33 });
+                session.Add(new Product { Name = "XTest3", Price = 10 });
+                session.Add(new Product { Name = "XTest4", Price = 22 });
                 var products = session.Products.Where(x => x.Name.StartsWith("X") && x.Name.EndsWith("X")).ToList();
                 Assert.Equal(1, products.Count);
             }
@@ -276,9 +286,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test1", Price = 10});
-                session.Add(new Product {Name = "Test2", Price = 22});
-                session.Add(new Product {Name = "Test3", Price = 33});
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
                 var products = session.Products.ToList();
                 Assert.Equal(3, products.Count);
             }
@@ -289,10 +299,10 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1)});
-                session.Add(new Product {Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1)});
+                session.Add(new Product { Name = "Test3X", Price = 10, Available = DateTime.Now.AddDays(-1) });
+                session.Add(new Product { Name = "Test4X", Price = 22, Available = DateTime.Now.AddDays(-1) });
+                session.Add(new Product { Name = "XTest3", Price = 10, Available = DateTime.Now.AddDays(-1) });
+                session.Add(new Product { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1) });
                 var products = session.Products.Where(x => x.Available < DateTime.Now).ToList();
                 Assert.Equal(3, products.Count);
             }
@@ -304,9 +314,9 @@ namespace Norm.Tests
             using (var session = new Session())
             {
                 session.CreateCappedCollection("Product"); //only capped collections return in insertion order
-                session.Add(new Product {Name = "Test1", Price = 10});
-                session.Add(new Product {Name = "Test2", Price = 22});
-                session.Add(new Product {Name = "Test3", Price = 33});
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
                 var result = session.Products.First();
                 Assert.Equal("Test1", result.Name);
             }
@@ -317,9 +327,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test1", Price = 10});
-                session.Add(new Product {Name = "Test2", Price = 22});
-                session.Add(new Product {Name = "Test3", Price = 33});
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
                 var result = session.Products.SingleOrDefault(x => x.Price == 22);
                 Assert.Equal(22, result.Price);
             }
@@ -359,9 +369,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3", Price = 10});
-                session.Add(new Product {Name = "Test4", Price = 22});
-                session.Add(new Product {Name = "Test5", Price = 33});
+                session.Add(new Product { Name = "Test3", Price = 10 });
+                session.Add(new Product { Name = "Test4", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Price > 10 || x.Price > 30).ToList();
                 Assert.Equal(2, products.Count);
             }
@@ -372,9 +382,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "TestX3", Price = 10});
-                session.Add(new Product {Name = "TestX4", Price = 22});
-                session.Add(new Product {Name = "Test5", Price = 33});
+                session.Add(new Product { Name = "TestX3", Price = 10 });
+                session.Add(new Product { Name = "TestX4", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Name.Contains("X")).ToList();
                 Assert.Equal(2, products.Count);
             }
@@ -385,9 +395,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "Test3X", Price = 10});
-                session.Add(new Product {Name = "Test4X", Price = 22});
-                session.Add(new Product {Name = "Test5", Price = 33});
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "Test4X", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Name.EndsWith("X")).ToList();
                 Assert.Equal(2, products.Count);
             }
@@ -398,17 +408,19 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product {Name = "XTest3", Price = 10});
-                session.Add(new Product {Name = "XTest4", Price = 22});
-                session.Add(new Product {Name = "Test5", Price = 33});
+                session.Add(new Product { Name = "XTest3", Price = 10 });
+                session.Add(new Product { Name = "XTest4", Price = 22 });
+                session.Add(new Product { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Name.StartsWith("X")).ToList();
                 Assert.Equal(2, products.Count);
             }
         }
 
         [Fact]
-        public void LastTwoProductsofThreeShouldBeReturnedWithSkipTake() {
-            using (var session = new Session()) {
+        public void LastTwoProductsofThreeShouldBeReturnedWithSkipTake()
+        {
+            using (var session = new Session())
+            {
                 session.Add(new Product { Name = "Test1", Price = 10 });
                 session.Add(new Product { Name = "Test2", Price = 22 });
                 session.Add(new Product { Name = "Test3", Price = 33 });

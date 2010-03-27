@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using Norm.BSON;
 using Norm.Configuration;
+using System.Collections.Generic;
 
 namespace Norm.Linq
 {
@@ -17,7 +18,7 @@ namespace Norm.Linq
         private Expression _expression;
         private bool _collectionSet;
         private string _lastFlyProperty = string.Empty;
-        private string _lastOperator = " == ";
+        private string _lastOperator = " === ";
         private StringBuilder _sb;
         private StringBuilder _sbIndexed;
 
@@ -224,7 +225,7 @@ namespace Norm.Linq
                         Visit(m.Expression);
                         _sb.Append(".getDay()");
                         return m;
-                } 
+                }
                 #endregion
             }
             else
@@ -235,9 +236,10 @@ namespace Norm.Linq
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
 
                 String result = "";
-                var constant = m.Expression as ConstantExpression;
-                if (constant != null)
+
+                if (m.Expression.NodeType == ExpressionType.Constant)
                 {
+                    var constant = m.Expression as ConstantExpression;
                     var fi = (FieldInfo)m.Member;
                     var val = fi.GetValue(constant.Value);
                     if (val is String)
@@ -249,6 +251,12 @@ namespace Norm.Linq
                         result = val.ToString();
                     }
                     SetFlyValue(val);
+                }
+                else if (m.Expression.NodeType == ExpressionType.MemberAccess)
+                {
+                    throw new NotSupportedException("This is where deep graph query of lexically scoped variables breaks.");
+                    //var ma = (MemberExpression)m.Expression;
+                    //return this.VisitMemberAccess(ma);
                 }
                 else
                 {
@@ -382,7 +390,7 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            _sb.AppendFormat("ObjectId('{0}')",c.Value);
+                            _sb.AppendFormat("ObjectId('{0}')", c.Value);
                             SetFlyValue(c.Value);
                         }
                         else if (c.Value is Guid)
@@ -492,6 +500,9 @@ namespace Norm.Linq
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
 
+        private static HashSet<String> _callableMethods = new HashSet<string>{"First","Single", "FirstOrDefault", "SingleOrDefault",
+        "Count","Sum","Average","Min","Max","Any","Take","Skip","Count"};
+
         /// <summary>
         /// Determines if it's a callable method.
         /// </summary>
@@ -499,23 +510,7 @@ namespace Norm.Linq
         /// <returns>The is callable method.</returns>
         private static bool IsCallableMethod(string methodName)
         {
-            var acceptableMethods = new[]
-                                        {
-                                            "First",
-                                            "Single",
-                                            "FirstOrDefault",
-                                            "SingleOrDefault",
-                                            "Count",
-                                            "Sum",
-                                            "Average",
-                                            "Min",
-                                            "Max",
-                                            "Any",
-                                            "Take",
-                                            "Skip",
-                                            "Count"
-                                        };
-            return acceptableMethods.Any(x => x == methodName);
+            return MongoQueryTranslator._callableMethods.Contains(methodName);
         }
 
         /// <summary>
@@ -591,7 +586,7 @@ namespace Norm.Linq
             }
 
             if (_lastOperator != " === ")
-            { 
+            {
                 // Can't do comparisons here unless the type is a double
                 // which is a limitation of mongo, apparently
                 // and won't work if we're doing date comparisons

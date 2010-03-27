@@ -287,6 +287,7 @@ namespace Norm.Tests
             Assert.Equal(obj2.Nester, hydratedObj2.Nester);
             Assert.Equal(obj2.ARex, hydratedObj2.ARex);
         }
+
         [Fact]
         public void SerializationSpeedTest()
         {
