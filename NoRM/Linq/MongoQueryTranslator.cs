@@ -186,6 +186,7 @@ namespace Norm.Linq
             }
             else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset))
             {
+                #region DateTime Magic
                 var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
                 // this is complex
@@ -226,42 +227,9 @@ namespace Norm.Linq
                         Visit(m.Expression);
                         _sb.Append(".getDay()");
                         return m;
-                }
+                } 
+                #endregion
             }
-            //else if (m.Expression.NodeType == ExpressionType.MemberAccess)
-            //{
-            //    // Same as below.
-            //    // if this is a property NOT on the object...
-            //    throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
-            //}
-            //else if (m.Expression != null && m.Expression.NodeType == ExpressionType.Constant)
-            //{
-            //    switch (m.Member.MemberType)
-            //    {
-            //        case MemberTypes.Property:
-            //            var propertyInfo = (PropertyInfo)m.Member;
-            //            var innerMember = (MemberExpression)m.Expression;
-            //            var closureFieldInfo = (FieldInfo)innerMember.Member;
-            //            var obj = closureFieldInfo.GetValue(((ConstantExpression)innerMember.Expression).Value);
-            //            var propertyAlias = propertyInfo.GetValue(obj, null).ToString();
-            //            sb.Append(propertyAlias);
-
-            //            lastFlyProperty = propertyAlias;
-            //            break;
-            //        case MemberTypes.Field:
-            //            var fieldInfo = (FieldInfo)m.Member;
-            //            var fieldAlias = fieldInfo.GetValue(((ConstantExpression)m.Expression).Value).ToString();
-            //            sb.Append(fieldAlias);
-
-            //            lastFlyProperty = fieldAlias;
-            //            break;
-            //        default:
-            //            Visit(m.Expression);
-            //            break;
-            //    }
-
-            //    return m;
-            //}
             else
             {
                 var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
@@ -273,7 +241,17 @@ namespace Norm.Linq
                 var constant = m.Expression as ConstantExpression;
                 if (constant != null)
                 {
-                    //result = constant.GetConstantValue().ToString();
+                    var fi = (FieldInfo)m.Member;
+                    var val = fi.GetValue(constant.Value);
+                    if (val is String)
+                    {
+                        result = String.Format("\"{0}\"", val);
+                    }
+                    else
+                    {
+                        result = val.ToString();
+                    }
+                    SetFlyValue(val);
                 }
                 else
                 {
@@ -326,7 +304,7 @@ namespace Norm.Linq
                     _sb.Append(" || ");
                     break;
                 case ExpressionType.Equal:
-                    _lastOperator = " == ";
+                    _lastOperator = " === ";//Should this be '===' instead? a la 'Javascript: The good parts'
                     _sb.Append(_lastOperator);
                     break;
                 case ExpressionType.NotEqual:
@@ -624,8 +602,8 @@ namespace Norm.Linq
                 return;
             }
 
-            if (_lastOperator != " == ")
-            {
+            if (_lastOperator != " === ")
+            { 
                 // Can't do comparisons here unless the type is a double
                 // which is a limitation of mongo, apparently
                 // and won't work if we're doing date comparisons

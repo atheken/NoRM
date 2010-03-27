@@ -25,14 +25,15 @@ namespace Norm.Tests
             var external = 10;
             using(var session = new Session())
             {
-                session.Add(new Product {Name = "test", Price = external});
+                session.Add(new Product { Name = "test1", Price = 20 });
+                session.Add(new Product {Name = "test", Price = 10});
                 var product = session.Products.Where(p => p.Price == external).FirstOrDefault();
                 Assert.Equal(10, product.Price);
             }
         }
 
         [Fact]
-        public void LinqQueriesShouldSupportExternalObject() {
+<<<<<<< .mine        public void LinqQueriesShouldSupportExternalObject() {
             var external = 10;
             using (var session = new Session()) {
                 session.Add(new Product { Name = "test1", Price = 20 });
@@ -43,7 +44,19 @@ namespace Norm.Tests
             }
         }
         [Fact]
-        public void LinqQueriesShouldSupportExternalObjectProperties()
+=======        public void SingleQualifierQueryIsExecutedAsANDQuery()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "test1", Price = 20 });
+                session.Add(new Product { Name = "test", Price = 10 });
+                var product = session.Products.Where(p => p.Price == 10).First();
+                Assert.Equal(10, product.Price);
+            }
+        }
+
+        [Fact]
+>>>>>>> .theirs        public void LinqQueriesShouldSupportExternalObjectProperties()
         {
             // NOTE: This one fails because there's no support for parsing the object's property.
             // This even more complex when using a nested type like a product's supplier
@@ -361,6 +374,21 @@ namespace Norm.Tests
                 session.Add(new Product {Name = "Test3", Price = 33});
                 var result = session.Products.SingleOrDefault(x => x.Price == 22);
                 Assert.Equal(22, result.Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductShouldBeReturnedUsingSimpleANDQuery()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 22 });
+                var results = session.Products.Where(x => x.Price == 22 && x.Name == "Test3").ToArray();
+                Assert.Equal(1, results.Length);
+                Assert.Equal(22, results[0].Price);
+                Assert.Equal("Test3", results[0].Name);
             }
         }
 

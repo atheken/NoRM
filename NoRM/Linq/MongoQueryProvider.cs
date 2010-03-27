@@ -223,8 +223,6 @@ namespace Norm.Linq
                     // any has a boolean lambda as a body - translate this 
                     // as normal
                     qry = tranny.Translate(m.Arguments[1]);
-
-
                     // the property name doesn't matter with Any
                 }
                 else
