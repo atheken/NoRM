@@ -32,6 +32,18 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportExternalObject() {
+            // NOTE: This one fails because there's no support for parsing the object's property.
+            // This even more complex when using a nested type like a product's supplier
+            var external = 10;
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "test", Price = 10 });
+                var product = session.Products.Where(p => p.Price == external).FirstOrDefault();
+
+                Assert.Equal(10, product.Price);
+            }
+        }
+        [Fact]
         public void LinqQueriesShouldSupportExternalObjectProperties()
         {
             // NOTE: This one fails because there's no support for parsing the object's property.
@@ -57,7 +69,48 @@ namespace Norm.Tests
             }
         }
 
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPrice() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                var products = session.Products.OrderBy(x=>x.Price).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(33, products[2].Price);
+            }
+        }
 
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPriceThenByName() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                session.Add(new Product { Name = "2", Price = 50 });
+                session.Add(new Product { Name = "1", Price = 50 });
+                var products = session.Products.OrderBy(x => x.Price).ThenBy(x=>x.Name).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(22, products[1].Price);
+                Assert.Equal(33, products[2].Price);
+                Assert.Equal(50, products[3].Price);
+                Assert.Equal(50, products[4].Price);
+                Assert.Equal("1", products[3].Name);
+                Assert.Equal("2", products[4].Name);
+            }
+        }
+
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedDewscendingByPrice() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                var products = session.Products.OrderByDescending(x => x.Price).ToList();
+                Assert.Equal(33, products[0].Price);
+                Assert.Equal(10, products[2].Price);
+            }
+        }
         [Fact]
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {

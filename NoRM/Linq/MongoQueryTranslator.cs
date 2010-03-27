@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using Norm.BSON;
 using Norm.Configuration;
+using System.Collections;
 
 namespace Norm.Linq
 {
@@ -20,7 +21,8 @@ namespace Norm.Linq
         private string _lastOperator = " == ";
         private StringBuilder _sb;
         private StringBuilder _sbIndexed;
-
+        public Flyweight SortFly { get; set; }
+        public string SortDescendingBy { get; set; }
         public String PropName
         {
             get;
@@ -138,6 +140,7 @@ namespace Norm.Linq
             _sb = new StringBuilder();
             _sbIndexed = new StringBuilder();
             FlyWeight = new Flyweight();
+            SortFly = new Flyweight();
             Visit(exp);
             return _sb.ToString();
         }
@@ -535,7 +538,11 @@ namespace Norm.Linq
                                             "Any",
                                             "Take",
                                             "Skip",
-                                            "Count"
+                                            "Count",
+                                            "OrderBy",
+                                            "OrderByDescending",
+                                            "ThenBy",
+                                            "ThenByDescending"
                                         };
             return acceptableMethods.Any(x => x == methodName);
         }
@@ -570,8 +577,13 @@ namespace Norm.Linq
 
             while (!expressionRoot)
             {
-                parentExpression = ((MemberExpression)parentExpression).Expression;
-                expressionRoot = parentExpression is ParameterExpression;
+                if (parentExpression.NodeType == ExpressionType.MemberAccess) {
+                    parentExpression = ((MemberExpression)parentExpression).Expression;
+                    expressionRoot = parentExpression is ParameterExpression;
+                } else{
+                    expressionRoot = true;
+                }
+ 
             }
 
             return (ParameterExpression)parentExpression;
@@ -668,6 +680,16 @@ namespace Norm.Linq
             this.Take = (int)exp.GetConstantValue();
         }
 
+        void HandleSort(Expression exp) {
+            var stripped = (LambdaExpression)StripQuotes(exp);
+            var member = (MemberExpression)stripped.Body;
+            this.SortFly[member.Member.Name]=1;
+        }
+        void HandleDescendingSort(Expression exp) {
+            var stripped = (LambdaExpression)StripQuotes(exp);
+            var member = (MemberExpression)stripped.Body;
+            this.SortFly[member.Member.Name] = -1;
+        }
         /// <summary>
         /// The handle method call.
         /// </summary>
@@ -677,6 +699,20 @@ namespace Norm.Linq
         {
             switch (m.Method.Name)
             {
+                case "ThenBy":
+                    HandleSort(m.Arguments[1]);
+                    Visit(m.Arguments[0]);
+                    return m;
+                case "OrderBy":
+                    HandleSort(m.Arguments[1]);
+                    return m;
+                case "ThenByDescending":
+                    HandleDescendingSort(m.Arguments[1]);
+                    Visit(m.Arguments[0]);
+                    return m;
+                case "OrderByDescending":
+                    HandleDescendingSort(m.Arguments[1]);
+                    return m;
                 case "Skip":
                     HandleSkip(m.Arguments[1]);
                     return m;
