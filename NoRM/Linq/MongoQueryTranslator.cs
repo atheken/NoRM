@@ -270,7 +270,16 @@ namespace Norm.Linq
                 var constant = m.Expression as ConstantExpression;
                 if (constant != null)
                 {
-                    //result = constant.GetConstantValue().ToString();
+                    //seriously, does this make sense, or is this totally wrong?
+                    var val = constant.Type.GetFields().First().GetValue(constant.Value);
+                    if (val is String)
+                    {
+                        result = String.Format("\"{0}\"", val);
+                    }
+                    else
+                    {
+                        result = val.ToString();
+                    }
                 }
                 else
                 {

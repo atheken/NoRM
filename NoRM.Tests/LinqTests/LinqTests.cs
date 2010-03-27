@@ -25,7 +25,8 @@ namespace Norm.Tests
             var external = 10;
             using(var session = new Session())
             {
-                session.Add(new Product {Name = "test", Price = external});
+                session.Add(new Product { Name = "test1", Price = 20 });
+                session.Add(new Product {Name = "test", Price = 10});
                 var product = session.Products.Where(p => p.Price == external).FirstOrDefault();
                 Assert.Equal(10, product.Price);
             }
