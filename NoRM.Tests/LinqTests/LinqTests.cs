@@ -368,21 +368,6 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void OneProductShouldBeReturnedUsingSimpleANDQuery()
-        {
-            using (var session = new Session())
-            {
-                session.Add(new Product { Name = "Test1", Price = 10 });
-                session.Add(new Product { Name = "Test2", Price = 22 });
-                session.Add(new Product { Name = "Test3", Price = 22 });
-                var results = session.Products.Where(x => x.Price == 22 && x.Name == "Test3").ToArray();
-                Assert.Equal(1, results.Length);
-                Assert.Equal(22, results[0].Price);
-                Assert.Equal("Test3", results[0].Name);
-            }
-        }
-
-        [Fact]
         public void OneProductShouldBeReturnedWhen3InDbWithSingleUsingVariable()
         {
             using (var session = new Session())
