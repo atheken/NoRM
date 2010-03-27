@@ -33,11 +33,10 @@ namespace Norm.Tests
 
         [Fact]
         public void LinqQueriesShouldSupportExternalObject() {
-            // NOTE: This one fails because there's no support for parsing the object's property.
-            // This even more complex when using a nested type like a product's supplier
             var external = 10;
             using (var session = new Session()) {
-                session.Add(new Product { Name = "test", Price = 10 });
+                session.Add(new Product { Name = "test1", Price = 20 });
+                session.Add(new Product { Name = "test1", Price = 10 });
                 var product = session.Products.Where(p => p.Price == external).FirstOrDefault();
 
                 Assert.Equal(10, product.Price);
