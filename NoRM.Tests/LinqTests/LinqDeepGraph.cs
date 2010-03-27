@@ -99,7 +99,7 @@ namespace Norm.Tests
                 p.Inventory.Add(new InventoryChange() { AmountChanged = 1 });
                 session.Add(p);
 
-                p = new Product() { Name = "Test1", Price = 10 };
+                p = new Product() { Name = "Test3", Price = 10 };
                 //change the inventory
                 p.Inventory.Add(new InventoryChange() { AmountChanged = 1 });
                 p.Inventory.Add(new InventoryChange() { AmountChanged = 2 });
@@ -107,11 +107,11 @@ namespace Norm.Tests
 
                 session.Add(p);
 
-                var products = session.Products.Where(x => x.Inventory.Count() > 1).ToList();
+                var products = session.Products.Where(x => x.Inventory.Count() > 2).ToArray();
+                
                 Assert.Equal(1, products.Count());
+                Assert.Equal("Test3", products[0].Name);
             }
         }
-
-
     }
 }

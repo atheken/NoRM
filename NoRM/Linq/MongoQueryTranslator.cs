@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using Norm.BSON;
 using Norm.Configuration;
+using System.Collections.Generic;
 
 namespace Norm.Linq
 {
@@ -226,7 +227,7 @@ namespace Norm.Linq
                         Visit(m.Expression);
                         _sb.Append(".getDay()");
                         return m;
-                } 
+                }
                 #endregion
             }
             else
@@ -384,7 +385,7 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            _sb.AppendFormat("ObjectId('{0}')",c.Value);
+                            _sb.AppendFormat("ObjectId('{0}')", c.Value);
                             SetFlyValue(c.Value);
                         }
                         else if (c.Value is Guid)
@@ -487,12 +488,24 @@ namespace Norm.Linq
                 // Subquery - Count() or Sum()
                 if (IsCallableMethod(m.Method.Name))
                 {
+                    //do something useful here.
+                    if (m.Method.Name == "Count")
+                    {
+                        this.VisitMemberAccess((MemberExpression)m.Arguments[0]);
+                        _sb.AppendFormat(".length");
+                        this.IsComplex = true;
+                        return m;
+                    }
                 }
             }
 
             // for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
+
+        private static HashSet<String> _callableMethods = new HashSet<string>(){
+            "First","Single","FirstOrDefault","SingleOrDefault","Count",
+            "Sum","Average","Min","Max","Any","Take","Skip","Count"};
 
         /// <summary>
         /// Determines if it's a callable method.
@@ -501,23 +514,7 @@ namespace Norm.Linq
         /// <returns>The is callable method.</returns>
         private static bool IsCallableMethod(string methodName)
         {
-            var acceptableMethods = new[]
-                                        {
-                                            "First",
-                                            "Single",
-                                            "FirstOrDefault",
-                                            "SingleOrDefault",
-                                            "Count",
-                                            "Sum",
-                                            "Average",
-                                            "Min",
-                                            "Max",
-                                            "Any",
-                                            "Take",
-                                            "Skip",
-                                            "Count"
-                                        };
-            return acceptableMethods.Any(x => x == methodName);
+            return _callableMethods.Contains(methodName);
         }
 
         /// <summary>
@@ -550,13 +547,16 @@ namespace Norm.Linq
 
             while (!expressionRoot)
             {
-                if (parentExpression.NodeType == ExpressionType.MemberAccess) {
+                if (parentExpression.NodeType == ExpressionType.MemberAccess)
+                {
                     parentExpression = ((MemberExpression)parentExpression).Expression;
                     expressionRoot = parentExpression is ParameterExpression;
-                } else{
+                }
+                else
+                {
                     expressionRoot = true;
                 }
- 
+
             }
 
             return (ParameterExpression)parentExpression;
@@ -598,7 +598,7 @@ namespace Norm.Linq
             }
 
             if (_lastOperator != " === ")
-            { 
+            {
                 // Can't do comparisons here unless the type is a double
                 // which is a limitation of mongo, apparently
                 // and won't work if we're doing date comparisons
@@ -653,12 +653,14 @@ namespace Norm.Linq
             this.Take = (int)exp.GetConstantValue();
         }
 
-        void HandleSort(Expression exp) {
+        void HandleSort(Expression exp)
+        {
             var stripped = (LambdaExpression)StripQuotes(exp);
             var member = (MemberExpression)stripped.Body;
-            this.SortFly[member.Member.Name]=1;
+            this.SortFly[member.Member.Name] = 1;
         }
-        void HandleDescendingSort(Expression exp) {
+        void HandleDescendingSort(Expression exp)
+        {
             var stripped = (LambdaExpression)StripQuotes(exp);
             var member = (MemberExpression)stripped.Body;
             this.SortFly[member.Member.Name] = -1;
