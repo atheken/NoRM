@@ -20,4 +20,3 @@ It would also be useful to read what we have on the [wiki](http://wiki.github.co
 
 * The NoRM.dll can connect to MongoDB using a trusted connection, this is the workhorse of NoRM, and all you really need to get started.
 * The NoRM.Tests.dll are nunit tests for NoRM, We are much more likely to accept patches that have corresponding tests.
-* BSONHarness is just a nice entry point to see how the NoRM library is functioning, this will probably go away soon, since you can do most of this via tests.
