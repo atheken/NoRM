@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoRM", "NoRM\NoRM.csproj", "{297A83DB-DACE-4264-B28E-769CF165D4E4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoRM.Tests", "NoRM.Tests\NoRM.Tests.csproj", "{505E617D-1F40-40AF-BDF0-730EFBC5BA95}"
