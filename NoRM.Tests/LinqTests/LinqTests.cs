@@ -33,18 +33,7 @@ namespace Norm.Tests
         }
 
         [Fact]
-<<<<<<< .mine        public void LinqQueriesShouldSupportExternalObject() {
-            var external = 10;
-            using (var session = new Session()) {
-                session.Add(new Product { Name = "test1", Price = 20 });
-                session.Add(new Product { Name = "test1", Price = 10 });
-                var product = session.Products.Where(p => p.Price == external).FirstOrDefault();
-
-                Assert.Equal(10, product.Price);
-            }
-        }
-        [Fact]
-=======        public void SingleQualifierQueryIsExecutedAsANDQuery()
+        public void SingleQualifierQueryIsExecutedAsANDQuery()
         {
             using (var session = new Session())
             {
@@ -56,7 +45,7 @@ namespace Norm.Tests
         }
 
         [Fact]
->>>>>>> .theirs        public void LinqQueriesShouldSupportExternalObjectProperties()
+        public void LinqQueriesShouldSupportExternalObjectProperties()
         {
             // NOTE: This one fails because there's no support for parsing the object's property.
             // This even more complex when using a nested type like a product's supplier
@@ -80,7 +69,17 @@ namespace Norm.Tests
                 Assert.Equal(3, products.Count);
             }
         }
-
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhere() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                var products = session.Products.Where(x => x.Price > 10);
+                var result = products.Where(x => x.Price < 30);
+                Assert.Equal(22,result.SingleOrDefault().Price);
+            }
+        }
         [Fact]
         public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPrice() {
             using (var session = new Session()) {
@@ -510,9 +509,8 @@ namespace Norm.Tests
 
                 session.Add(post1);
                 session.Add(post2);
-
-                var found = session.Posts.FirstOrDefault(p => p.Comments.Any(a => a.Text == "commentA"));
-                Assert.Equal(post2.Title, found.Title);
+                var found = session.Posts.Where(p => p.Comments.Any(a => a.Text == "commentA")).SingleOrDefault();
+                Assert.Equal("Second", found.Title);
 
             }
         }
