@@ -447,7 +447,7 @@ namespace Norm.Linq
                         Visit(m.Object);
                         _sb.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        _sb.Append(")>0)");
+                        _sb.Append(")>-1)");
                         return m;
                     case "IndexOf":
                         Visit(m.Object);
