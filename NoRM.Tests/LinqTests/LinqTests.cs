@@ -44,6 +44,7 @@ namespace Norm.Tests
             }
         }
 
+
         [Fact]
         public void LinqQueriesShouldSupportExternalObjectProperties()
         {
@@ -74,7 +75,48 @@ namespace Norm.Tests
             }
         }
 
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPrice() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                var products = session.Products.OrderBy(x=>x.Price).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(33, products[2].Price);
+            }
+        }
 
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPriceThenByName() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                session.Add(new Product { Name = "2", Price = 50 });
+                session.Add(new Product { Name = "1", Price = 50 });
+                var products = session.Products.OrderBy(x => x.Price).ThenBy(x=>x.Name).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(22, products[1].Price);
+                Assert.Equal(33, products[2].Price);
+                Assert.Equal(50, products[3].Price);
+                Assert.Equal(50, products[4].Price);
+                Assert.Equal("1", products[3].Name);
+                Assert.Equal("2", products[4].Name);
+            }
+        }
+
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedDewscendingByPrice() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                var products = session.Products.OrderByDescending(x => x.Price).ToList();
+                Assert.Equal(33, products[0].Price);
+                Assert.Equal(10, products[2].Price);
+            }
+        }
         [Fact]
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {
@@ -332,21 +374,6 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "Test3", Price = 33 });
                 var result = session.Products.SingleOrDefault(x => x.Price == 22);
                 Assert.Equal(22, result.Price);
-            }
-        }
-
-        [Fact]
-        public void OneProductShouldBeReturnedUsingSimpleANDQuery()
-        {
-            using (var session = new Session())
-            {
-                session.Add(new Product { Name = "Test1", Price = 10 });
-                session.Add(new Product { Name = "Test2", Price = 22 });
-                session.Add(new Product { Name = "Test3", Price = 22 });
-                var results = session.Products.Where(x => x.Price == 22 && x.Name == "Test3").ToArray();
-                Assert.Equal(1, results.Length);
-                Assert.Equal(22, results[0].Price);
-                Assert.Equal("Test3", results[0].Name);
             }
         }
 

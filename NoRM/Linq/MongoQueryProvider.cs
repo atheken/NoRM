@@ -175,7 +175,15 @@ namespace Norm.Linq
                 }
             }
 
-            return collection.Find(fly, tranny.Take, tranny.Skip);
+            IEnumerable<T> result;
+            if (tranny.SortFly.AllProperties().Count()>0) {
+                tranny.SortFly.ReverseKitchen();
+                result = collection.Find(fly, tranny.SortFly, tranny.Take, tranny.Skip, collection.FullyQualifiedName);
+            } else {
+                result=collection.Find(fly, tranny.Take, tranny.Skip);
+            }
+
+            return result;
         }
 
         /// <summary>

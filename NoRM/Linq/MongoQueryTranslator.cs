@@ -21,7 +21,8 @@ namespace Norm.Linq
         private string _lastOperator = " === ";
         private StringBuilder _sb;
         private StringBuilder _sbIndexed;
-
+        public Flyweight SortFly { get; set; }
+        public string SortDescendingBy { get; set; }
         public String PropName
         {
             get;
@@ -139,6 +140,7 @@ namespace Norm.Linq
             _sb = new StringBuilder();
             _sbIndexed = new StringBuilder();
             FlyWeight = new Flyweight();
+            SortFly = new Flyweight();
             Visit(exp);
             return _sb.ToString();
         }
@@ -251,12 +253,6 @@ namespace Norm.Linq
                         result = val.ToString();
                     }
                     SetFlyValue(val);
-                }
-                else if (m.Expression.NodeType == ExpressionType.MemberAccess)
-                {
-                    throw new NotSupportedException("This is where deep graph query of lexically scoped variables breaks.");
-                    //var ma = (MemberExpression)m.Expression;
-                    //return this.VisitMemberAccess(ma);
                 }
                 else
                 {
@@ -493,6 +489,14 @@ namespace Norm.Linq
                 // Subquery - Count() or Sum()
                 if (IsCallableMethod(m.Method.Name))
                 {
+                    //do something useful here.
+                    if (m.Method.Name == "Count")
+                    {
+                        this.VisitMemberAccess((MemberExpression)m.Arguments[0]);
+                        _sb.AppendFormat(".length");
+                        this.IsComplex = true;
+                        return m;
+                    }
                 }
             }
 
@@ -500,8 +504,10 @@ namespace Norm.Linq
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
 
-        private static HashSet<String> _callableMethods = new HashSet<string>{"First","Single", "FirstOrDefault", "SingleOrDefault",
-        "Count","Sum","Average","Min","Max","Any","Take","Skip","Count"};
+        private static HashSet<String> _callableMethods = new HashSet<string>(){
+            "First","Single","FirstOrDefault","SingleOrDefault","Count",
+            "Sum","Average","Min","Max","Any","Take","Skip","Count", 
+            "OrderBy","ThenBy", "OrderByDescending"};
 
         /// <summary>
         /// Determines if it's a callable method.
@@ -543,8 +549,16 @@ namespace Norm.Linq
 
             while (!expressionRoot)
             {
-                parentExpression = ((MemberExpression)parentExpression).Expression;
-                expressionRoot = parentExpression is ParameterExpression;
+                if (parentExpression.NodeType == ExpressionType.MemberAccess)
+                {
+                    parentExpression = ((MemberExpression)parentExpression).Expression;
+                    expressionRoot = parentExpression is ParameterExpression;
+                }
+                else
+                {
+                    expressionRoot = true;
+                }
+
             }
 
             return (ParameterExpression)parentExpression;
@@ -641,6 +655,18 @@ namespace Norm.Linq
             this.Take = (int)exp.GetConstantValue();
         }
 
+        void HandleSort(Expression exp)
+        {
+            var stripped = (LambdaExpression)StripQuotes(exp);
+            var member = (MemberExpression)stripped.Body;
+            this.SortFly[member.Member.Name] = 1;
+        }
+        void HandleDescendingSort(Expression exp)
+        {
+            var stripped = (LambdaExpression)StripQuotes(exp);
+            var member = (MemberExpression)stripped.Body;
+            this.SortFly[member.Member.Name] = -1;
+        }
         /// <summary>
         /// The handle method call.
         /// </summary>
@@ -650,6 +676,20 @@ namespace Norm.Linq
         {
             switch (m.Method.Name)
             {
+                case "ThenBy":
+                    HandleSort(m.Arguments[1]);
+                    Visit(m.Arguments[0]);
+                    return m;
+                case "OrderBy":
+                    HandleSort(m.Arguments[1]);
+                    return m;
+                case "ThenByDescending":
+                    HandleDescendingSort(m.Arguments[1]);
+                    Visit(m.Arguments[0]);
+                    return m;
+                case "OrderByDescending":
+                    HandleDescendingSort(m.Arguments[1]);
+                    return m;
                 case "Skip":
                     HandleSkip(m.Arguments[1]);
                     return m;
