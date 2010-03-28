@@ -57,8 +57,7 @@
     <Compile Include="BSON\BsonDeserializer.cs" />
     <Compile Include="BSON\BsonHelper.cs" />
     <Compile Include="BSON\Command.cs" />
-    <Compile Include="BSON\DbTypes\GridFileChunk.cs" />
-    <Compile Include="BSON\DbTypes\GridReadStream.cs" />
+    <Compile Include="BSON\DbTypes\GridFile.cs" />
     <Compile Include="BSON\DbTypes\ObjectId.cs" />
     <Compile Include="BSON\DbTypes\DBReference.cs" />
     <Compile Include="BSON\DbTypes\ObjectIdTypeConverter.cs" />
@@ -102,7 +101,6 @@
     <Compile Include="BSON\ExpandoProps.cs" />
     <Compile Include="BSON\IFlyweight.cs" />
     <Compile Include="BSON\Flyweight.cs" />
-    <Compile Include="BSON\DbTypes\GridFile.cs" />
     <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
     <Compile Include="Configuration\ConfigurationContainer.cs" />
     <Compile Include="Configuration\IConfigurationContainer.cs" />
