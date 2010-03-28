@@ -174,7 +174,7 @@ namespace Norm
         /// </returns>
         public LastErrorResponse LastError()
         {
-            return this._database.GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });
+            return this._database.LastError();
         }
 
         /// <summary>

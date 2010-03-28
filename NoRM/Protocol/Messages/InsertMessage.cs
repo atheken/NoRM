@@ -60,11 +60,6 @@ namespace Norm.Protocol.Messages
 
             var bytes = message.SelectMany(y => y).ToArray();
             _connection.Write(bytes, 0, size);
-
-            if (_connection.StrictMode)
-            {
-                AssertHasNotError();
-            }
         }
     }
 }
