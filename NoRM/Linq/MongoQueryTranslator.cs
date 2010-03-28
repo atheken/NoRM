@@ -309,7 +309,7 @@ namespace Norm.Linq
                     _sb.Append(_lastOperator);
                     break;
                 case ExpressionType.NotEqual:
-                    _lastOperator = " <> ";
+                    _lastOperator = " != ";
                     _sb.Append(_lastOperator);
                     break;
                 case ExpressionType.LessThan:
@@ -620,7 +620,7 @@ namespace Norm.Linq
                         case " >= ":
                             FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
                             break;
-                        case " <> ":
+                        case " != ":
                             FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
                             break;
                     }
