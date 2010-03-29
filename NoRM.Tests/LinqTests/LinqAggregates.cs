@@ -89,6 +89,20 @@ namespace Norm.Tests
             }
         }
 
+        [Fact]
+        public void AvgShouldReturn500Point5WhenSumOfAllNumbersUpTo1000()
+        {
+            using (var session = new Session())
+            {
+                for (var i = 0; i < 1000; i++)
+                {
+                    session.Add(new Product { Name = i.ToString(), Price = i + 1 });
+                }
+
+                var result = session.Products.Average(x => x.Price);
+                Assert.Equal(500.5, result);
+            }
+        }
 
         [Fact]
         public void MinShouldReturn10WhenThreeProductsInDBWIthSumPrice60AndLowestIs10()

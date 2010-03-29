@@ -259,16 +259,17 @@ namespace Norm.Linq
             // This is the mapping function (javascript. Yummy).
             // It defines our collection that we'll iterate (reduce) over
             // James, you're an animal.
-            var averyMap = "function(){emit(0, " + tranny.PropName + ")};";
+            var averyMap = "function(){emit(0, {val: " + tranny.PropName + ",tSize:1} )};";
 
             // if they pass in a query (Where()), we need to graft that on
             // to our Mapping. You can thank Avery for this one.
             if (!string.IsNullOrEmpty(qry))
             {
-                averyMap = "function(){if" + qry + "{emit(0, " + tranny.PropName + ")};}";
+                averyMap = "function(){if" + qry + "{emit(0, {val: " + tranny.PropName + ",tSize:1} )};}";
             }
 
             var reduce = string.Empty;
+            var finalize = "function(key, res){ return res.val; }";
             object result = null;
 
             // Whachoo SAY!
@@ -282,23 +283,23 @@ namespace Norm.Linq
                     result = collection.Count(fly);
                     break;
                 case "Sum":
-                    reduce = "function(key, values){var sum = 0;for(var i in values){ sum+=values[i];} return sum;}";
-                    result = ExecuteMR<long>(tranny.TypeName, averyMap, reduce);
+                    reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){ sum+=values[i].val;} return {val:sum};}";
+                    result = ExecuteMR<float>(tranny.TypeName, averyMap, reduce, finalize);
                     break;
                 case "Average":
-                    reduce =
-                        "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){sum += values[i]} return sum/values.length;}";
-                    result = ExecuteMR<long>(tranny.TypeName, averyMap, reduce);
+                    reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; ++i){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
+                    finalize = "function(key, res){ return res.val / res.tSize; }";
+                    result = ExecuteMR<float>(tranny.TypeName, averyMap, reduce, finalize);
                     break;
                 case "Min":
                     reduce =
-                        "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least > values[i]){least=values[i];}} return least;}";
-                    result = ExecuteMR<long>(tranny.TypeName, averyMap, reduce);
+                        "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
+                    result = ExecuteMR<float>(tranny.TypeName, averyMap, reduce, finalize);
                     break;
                 case "Max":
                     reduce =
-                        "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least < values[i]){least=values[i];}} return least;}";
-                    result = ExecuteMR<long>(tranny.TypeName, averyMap, reduce);
+                        "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
+                    result = ExecuteMR<float>(tranny.TypeName, averyMap, reduce, finalize);
                     break;
                 default:
                     break;
@@ -314,19 +315,25 @@ namespace Norm.Linq
         /// <param name="typeName">Name of the type.</param>
         /// <param name="map">The map.</param>
         /// <param name="reduce">The reduce.</param>
+        /// <param name="finalize">The finalize.</param>
         /// <returns></returns>
-        private T ExecuteMR<T>(string typeName, string map, string reduce)
+        private T ExecuteMR<T>(string typeName, string map, string reduce, string finalize)
         {
             T result;
             using (var mr = Server.CreateMapReduce())
             {
-                var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce });
+                var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce, Finalize = finalize });
                 var coll = response.GetCollection<MapReduceResult<T>>();
                 var r = coll.Find().FirstOrDefault();
                 result = r.Value;
             }
 
             return result;
+        }
+        
+        private T ExecuteMR<T>(string typeName, string map, string reduce)
+        {
+            return ExecuteMR<T>(typeName, map, reduce, null);
         }
     }
 }
