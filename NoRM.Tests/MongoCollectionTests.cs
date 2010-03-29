@@ -94,6 +94,18 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void InsertThrowsExcpetionOnDuplicateKeyAndStrictMode()
+        {
+            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("strict=true")))
+            {
+                mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test 1" });
+                var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test 2" }));
+
+
+            }
+        }
+
+        [Fact]
         public void UpdatesEntityWithNonObjectIdKey()
         {
             using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))

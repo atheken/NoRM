@@ -29,18 +29,5 @@ namespace Norm.Protocol
             _connection = connection;
             _collection = fullyQualifiedCollName;
         }
-
-        // todo: not crazy about having this here, think I'm going to move this to MongoCollection        
-        /// <summary>
-        /// The assert has not error.
-        /// </summary>
-        protected void AssertHasNotError()
-        {
-            new QueryMessage<GenericCommandResponse, object>(_connection, _collection)
-                {
-                    NumberToTake = 1,
-                    Query = new {getlasterror = 1d},
-                }.Execute();
-        }
     }
 }

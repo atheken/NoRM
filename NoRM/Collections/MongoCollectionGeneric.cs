@@ -482,6 +482,14 @@ namespace Norm.Collections
             TrySettingId(documentsToInsert);
             var insertMessage = new InsertMessage<T>(_connection, FullyQualifiedName, documentsToInsert);
             insertMessage.Execute();
+            if (_connection.StrictMode)
+            {
+                var error = _db.LastError();
+                if (error.Code > 0)
+                {
+                    throw new MongoException(error.Error);                    
+                }
+            }
         }
 
         private void AssertUpdatable()

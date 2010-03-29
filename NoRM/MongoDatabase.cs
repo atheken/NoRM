@@ -190,5 +190,10 @@ namespace Norm
                                  scandata = scanData
                              });
         }
+
+        public LastErrorResponse LastError()
+        {
+            return GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });
+        }
     }
 }
