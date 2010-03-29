@@ -123,7 +123,11 @@ namespace Norm.Linq
                     if (tranny.IsComplex)
                     {
                         fly = new Flyweight();
-                        fly["$where"] = " function(){return " + qry + "; }";
+                        if (qry.StartsWith("function")) {
+                            fly["$where"] = qry;
+                        } else {
+                            fly["$where"] = " function(){return " + qry + "; }";
+                        }
                     }
                 }
 
@@ -164,14 +168,18 @@ namespace Norm.Linq
 
 
             // execute
-            if (!string.IsNullOrEmpty(qry))
+            if (!string.IsNullOrEmpty(qry) || tranny.IsComplex)
             {
                 if (tranny.IsComplex)
                 {
                     // reset - need to use the where statement generated
                     // instead of the props set on the internal flyweight
                     fly = new Flyweight();
-                    fly["$where"] = " function(){return " + qry + "; }";
+                    if(qry.StartsWith("function")){
+                        fly["$where"] = qry;
+                    }else{
+                        fly["$where"] = " function(){return " + qry + "; }";
+                    }
                 }
             }
 

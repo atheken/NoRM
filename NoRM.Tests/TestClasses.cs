@@ -207,7 +207,7 @@ namespace Norm.Tests
         public string Name { get; set; }
         public Address Address { get; set; }
         public DateTime LastContact { get; set; }
-
+        public List<String> Relatives { get; set; }
         public Person()
         {
             Id = ObjectId.NewObjectId();

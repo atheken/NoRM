@@ -23,6 +23,7 @@ namespace Norm.Linq
         private StringBuilder _sbIndexed;
         public Flyweight SortFly { get; set; }
         public string SortDescendingBy { get; set; }
+        bool _whereWritten = false;
         public String PropName
         {
             get;
@@ -280,6 +281,51 @@ namespace Norm.Linq
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
         }
 
+
+        string GetBinaryOperator(BinaryExpression b) {
+            var result = "";
+            switch (b.NodeType) {
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                    result =" && ";
+                    break;
+
+                case ExpressionType.Or:
+                case ExpressionType.OrElse:
+                    IsComplex = true;
+                    result =" || ";
+                    break;
+                case ExpressionType.Equal:
+                    _lastOperator = " === ";//Should this be '===' instead? a la 'Javascript: The good parts'
+                    result =_lastOperator;
+                    break;
+                case ExpressionType.NotEqual:
+                    _lastOperator = " <> ";
+                    result =_lastOperator;
+                    break;
+                case ExpressionType.LessThan:
+                    _lastOperator = " < ";
+                    result = _lastOperator;
+                    break;
+                case ExpressionType.LessThanOrEqual:
+                    _lastOperator = " <= ";
+                    result = _lastOperator;
+                    break;
+                case ExpressionType.GreaterThan:
+                    _lastOperator = " > ";
+                    result = _lastOperator;
+                    break;
+                case ExpressionType.GreaterThanOrEqual:
+                    _lastOperator = " >= ";
+                    result = _lastOperator;
+                    break;
+                default:
+                    throw new NotSupportedException(
+                        string.Format("The binary operator '{0}' is not supported", b.NodeType));
+
+            }
+            return result;
+        }
         /// <summary>
         /// Visits a binary expression.
         /// </summary>
@@ -289,55 +335,24 @@ namespace Norm.Linq
         /// </exception>
         protected override Expression VisitBinary(BinaryExpression b)
         {
+
+            //specific for "chained" Where() calls, where a Where() is appended
+            //to an IQueryable on top of another IQueryable
+            if (_whereWritten) {
+                _sb.Append(" && ");
+            }
             ConditionalCount++;
             _sb.Append("(");
             Visit(b.Left);
-            switch (b.NodeType)
-            {
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                    _sb.Append(" && ");
-                    break;
-
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
-                    IsComplex = true;
-                    _sb.Append(" || ");
-                    break;
-                case ExpressionType.Equal:
-                    _lastOperator = " === ";//Should this be '===' instead? a la 'Javascript: The good parts'
-                    _sb.Append(_lastOperator);
-                    break;
-                case ExpressionType.NotEqual:
-                    _lastOperator = " <> ";
-                    _sb.Append(_lastOperator);
-                    break;
-                case ExpressionType.LessThan:
-                    _lastOperator = " < ";
-                    _sb.Append(_lastOperator);
-                    break;
-                case ExpressionType.LessThanOrEqual:
-                    _lastOperator = " <= ";
-                    _sb.Append(_lastOperator);
-                    break;
-                case ExpressionType.GreaterThan:
-                    _lastOperator = " > ";
-                    _sb.Append(_lastOperator);
-                    break;
-                case ExpressionType.GreaterThanOrEqual:
-                    _lastOperator = " >= ";
-                    _sb.Append(_lastOperator);
-                    break;
-                default:
-                    throw new NotSupportedException(
-                        string.Format("The binary operator '{0}' is not supported", b.NodeType));
-            }
+            _sb.Append(GetBinaryOperator(b));
 
             Visit(b.Right);
             _sb.Append(")");
             return b;
         }
+        void VisitRight(Expression exp) {
 
+        }
         /// <summary>
         /// Visits a constant.
         /// </summary>
@@ -427,6 +442,8 @@ namespace Norm.Linq
             {
                 var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 Visit(lambda.Body);
+                _whereWritten = true;
+                Visit(m.Arguments[0]);
                 return m;
             }
             if (m.Method.DeclaringType == typeof(string))
@@ -489,14 +506,7 @@ namespace Norm.Linq
                 // Subquery - Count() or Sum()
                 if (IsCallableMethod(m.Method.Name))
                 {
-                    //do something useful here.
-                    if (m.Method.Name == "Count")
-                    {
-                        this.VisitMemberAccess((MemberExpression)m.Arguments[0]);
-                        _sb.AppendFormat(".length");
-                        this.IsComplex = true;
-                        return m;
-                    }
+                    return HandleMethodCall(m);
                 }
             }
 
@@ -507,7 +517,7 @@ namespace Norm.Linq
         private static HashSet<String> _callableMethods = new HashSet<string>(){
             "First","Single","FirstOrDefault","SingleOrDefault","Count",
             "Sum","Average","Min","Max","Any","Take","Skip","Count", 
-            "OrderBy","ThenBy", "OrderByDescending"};
+            "OrderBy","ThenBy", "OrderByDescending","ThenByDescending"};
 
         /// <summary>
         /// Determines if it's a callable method.
@@ -667,6 +677,18 @@ namespace Norm.Linq
             var member = (MemberExpression)stripped.Body;
             this.SortFly[member.Member.Name] = -1;
         }
+
+        void HandleAny(MethodCallExpression exp) {
+            var member = (MemberExpression)exp.Arguments[0];
+            var lambda = (LambdaExpression)exp.Arguments[1];
+            var stripped = (BinaryExpression)StripQuotes(lambda.Body);
+            var subMember = (MemberExpression)stripped.Left;
+            var subValue = (ConstantExpression)stripped.Right;
+            var op = GetBinaryOperator(stripped);
+            this.IsComplex = true;
+            var result = "function(){for(var i in this." + member.Member.Name + "){if(this." + member.Member.Name + "[i]." + subMember.Member.Name + " === '" + subValue.Value + "') return true;}}";
+            _sb.Append(result);
+        }
         /// <summary>
         /// The handle method call.
         /// </summary>
@@ -696,6 +718,9 @@ namespace Norm.Linq
                 case "Take":
                     HandleTake(m.Arguments[1]);
                     Visit(m.Arguments[0]);
+                    return m;
+                case "Any":
+                    HandleAny(m);
                     return m;
                 default:
                     this.Take = 1;
