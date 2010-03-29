@@ -163,7 +163,11 @@ namespace Norm.Linq
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
-
+                var id = TypeHelper.GetHelperForType(m.Expression.Type).FindIdProperty();
+                if (id != null && id.Name == alias)
+                {
+                    alias = "_id";
+                }
                 if (UseScopedQualifier)
                 {
                     _sb.Append("this.");
