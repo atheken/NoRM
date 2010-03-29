@@ -61,19 +61,6 @@ namespace Norm.Tests
                 Assert.Equal(10, product.Price);
             }
         }
-
-        [Fact]
-        public void ThreeProductsShouldBeReturnedWhenThreeInDB()
-        {
-            using (var session = new Session())
-            {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 22 });
-                session.Add(new Product { Name = "3", Price = 33 });
-                var products = session.Products.ToList();
-                Assert.Equal(3, products.Count);
-            }
-        }
         [Fact]
         public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhere() {
             using (var session = new Session()) {
@@ -494,6 +481,21 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => p._id == targetId).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(targetId, products[0]._id);
+            }
+        }
+
+        [Fact]
+        public void FiltersBasedOnMagicObjectId()
+        {
+            var targetId = ObjectId.NewObjectId();
+            using (var session = new Session())
+            {
+                session.Add(new Post { Id = targetId });
+                session.Add(new Post());
+                session.Add(new Post());
+                var posts = session.Posts.Where(p => p.Id == targetId).ToList();
+                Assert.Equal(1, posts.Count);
+                Assert.Equal(targetId, posts[0].Id);
             }
         }
 

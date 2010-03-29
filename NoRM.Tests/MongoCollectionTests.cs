@@ -15,7 +15,7 @@ namespace Norm.Tests
             MongoConfiguration.RemoveMapFor<Product>();
             MongoConfiguration.RemoveMapFor<IntId>();
 
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("strict=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("strict=false")))
             {
                 mongo.Database.DropCollection("Fake");
             }
@@ -27,7 +27,7 @@ namespace Norm.Tests
             //this tests Cursor management in the ReplyMessage<T>, 
             //we built NoRM so that the average user picking up the library
             //doesn't have to think about this.
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 List<Product> junkInTheTrunk = new List<Product>();
                 for (int i = 0; i < 16000; i++)
@@ -69,7 +69,7 @@ namespace Norm.Tests
         [Fact]
         public void SaveOrInsertThrowsExceptionIfTypeDoesntHaveAnId()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Save(new Address()));
                 Assert.Equal("This collection does not accept insertions/updates, this is due to the fact that the collection's type Norm.Tests.Address does not specify an identifier property", ex.Message);
@@ -79,7 +79,7 @@ namespace Norm.Tests
         [Fact]
         public void InsertsNewEntityWithNonObjectIdKey()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 4, Name = "Test 1" });
                 mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 5, Name = "Test 2" });
@@ -96,7 +96,7 @@ namespace Norm.Tests
         [Fact]
         public void InsertThrowsExcpetionOnDuplicateKeyAndStrictMode()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("strict=true")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("strict=true")))
             {
                 mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test 1" });
                 var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test 2" }));
@@ -108,7 +108,7 @@ namespace Norm.Tests
         [Fact]
         public void UpdatesEntityWithNonObjectIdKey()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 4, Name = "Test" });
                 mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 4, Name = "Updated" });
@@ -122,7 +122,7 @@ namespace Norm.Tests
         [Fact]
         public void InsertsNewEntityWithObjectIdKey()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var id1 = new ObjectId("123456123456123456123456");
                 var id2 = new ObjectId("123456123456123456123457");
@@ -141,7 +141,7 @@ namespace Norm.Tests
         [Fact]
         public void UpdatesEntityWithObjectIdKey()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var id = new ObjectId("123456123456123456123456");
                 mongo.GetCollection<Product>("Fake").Save(new Product { _id = id, Name = "Prod" });
@@ -156,7 +156,7 @@ namespace Norm.Tests
         [Fact]
         public void SavingANewEntityWithObjectIdKeyGeneratesAKey()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var product = new Product { _id = null };
                 mongo.GetCollection<Product>("Fake").Save(product);
@@ -167,7 +167,7 @@ namespace Norm.Tests
         [Fact]
         public void InsertingANewEntityWithObjectIdKeyGeneratesAKey()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var product = new Product { _id = null };
                 mongo.GetCollection<Product>("Fake").Insert(product);
@@ -179,7 +179,7 @@ namespace Norm.Tests
         [Fact]
         public void InsertingMultipleNewEntityWithObjectIdKeyGeneratesAKey()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var product1 = new Product { _id = null };
                 var product2 = new Product { _id = null };
@@ -194,7 +194,7 @@ namespace Norm.Tests
         [Fact]
         public void DeletesObjectsBasedOnTemplate()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var collection = mongo.GetCollection<Product>("Fake");
                 collection.Insert(new[] { new Product { Price = 10 }, new Product { Price = 5 }, new Product { Price = 1 } });
@@ -208,7 +208,7 @@ namespace Norm.Tests
         [Fact]
         public void ThrowsExceptionWhenAttemptingToDeleteIdLessEntity()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Delete(new Address()));
                 Assert.Equal("Cannot delete Norm.Tests.Address since it has no id property", ex.Message);
@@ -217,7 +217,7 @@ namespace Norm.Tests
         [Fact]
         public void DeletesEntityBasedOnItsId()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var collection = mongo.GetCollection<Product>("Fake");
                 var product1 = new Product();

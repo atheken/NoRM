@@ -10,7 +10,7 @@ namespace Norm.Tests
 
         public MapReduceTests()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false&strict=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false&strict=false")))
             {
                 mongo.Database.DropCollection("ReduceProduct");
             }
@@ -26,7 +26,7 @@ namespace Norm.Tests
         [Fact]
         public void MapReduceCreatesACollection()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
                 var mr = mongo.CreateMapReduce();
@@ -48,14 +48,14 @@ namespace Norm.Tests
         public void TemporaryCollectionIsCleanedUpWhenConnectionIsClosed()
         {
             string name;
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
                 var mr = mongo.CreateMapReduce();
                 name = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce }).Result;
             }
 
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 foreach (var c in mongo.Database.GetAllCollections())
                 {
@@ -67,7 +67,7 @@ namespace Norm.Tests
         [Fact]
         public void TemporaryCollectionIsCleanedUpWhenDisposed()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
                 string name;
@@ -86,7 +86,7 @@ namespace Norm.Tests
         public void PermenantCollectionsArentCleanedUp()
         {
             string name;
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });                            
                 using (var mr = mongo.CreateMapReduce())
@@ -95,7 +95,7 @@ namespace Norm.Tests
                 }
             }
 
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 var found = false;
                 foreach (var c in mongo.Database.GetAllCollections())
@@ -113,7 +113,7 @@ namespace Norm.Tests
         [Fact]
         public void CreatesACollectionWithTheSpecifiedOutputName()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
                 using (var mr = mongo.CreateMapReduce())
@@ -127,7 +127,7 @@ namespace Norm.Tests
         [Fact]
         public void ActuallydoesAMapAndReduce()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 using (var mr = mongo.CreateMapReduce())
@@ -144,7 +144,7 @@ namespace Norm.Tests
         [Fact]
         public void SettingLimitLimitsTheNumberOfResults()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 using (var mr = mongo.CreateMapReduce())
@@ -159,7 +159,7 @@ namespace Norm.Tests
         [Fact]
         public void NotSettingLimitDoesntLimitTheNumberOfResults()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 using (var mr = mongo.CreateMapReduce())
@@ -174,7 +174,7 @@ namespace Norm.Tests
         [Fact]
         public void FinalizesTheResults()
         {
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 using (var mr = mongo.CreateMapReduce())
