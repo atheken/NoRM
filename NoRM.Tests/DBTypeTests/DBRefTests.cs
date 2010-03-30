@@ -43,7 +43,7 @@ namespace Norm.Tests
             }
 
 
-			var server = Mongo.ParseConnection("mongodb://localhost/NormTests");
+			var server = Mongo.Create("mongodb://localhost/NormTests");
             var reference = server.GetCollection<ProductReference>().Find().First();
             var product = reference.ProductsOrdered[0].Fetch(() => GetReferenceCollection());
 
@@ -52,7 +52,7 @@ namespace Norm.Tests
 
         internal MongoCollection<Product> GetReferenceCollection()
         {
-			var server = Mongo.ParseConnection("mongodb://localhost/NormTests");
+			var server = Mongo.Create("mongodb://localhost/NormTests");
             return server.GetCollection<Product>();
         }
     }

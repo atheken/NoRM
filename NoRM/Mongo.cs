@@ -111,9 +111,9 @@ namespace Norm
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
         /// <returns></returns>
-        public static Mongo ParseConnection(string connectionString)
+        public static Mongo Create(string connectionString)
         {
-            return ParseConnection(connectionString, string.Empty);
+            return Create(connectionString, string.Empty);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Norm
         /// <param name="connectionString">The connection string.</param>
         /// <param name="options">The options.</param>
         /// <returns></returns>
-        public static Mongo ParseConnection(string connectionString, string options)
+        public static Mongo Create(string connectionString, string options)
         {
             return new Mongo(ConnectionProviderFactory.Create(connectionString), options);
         }
@@ -174,7 +174,7 @@ namespace Norm
         /// </returns>
         public LastErrorResponse LastError()
         {
-            return this._database.GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });
+            return this._database.LastError();
         }
 
         /// <summary>

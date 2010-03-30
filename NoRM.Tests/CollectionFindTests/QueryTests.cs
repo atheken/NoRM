@@ -3,6 +3,7 @@ using System.Linq;
 using Norm.BSON;
 using Xunit;
 using Norm.Collections;
+using System.Collections.Generic;
 
 namespace Norm.Tests
 {
@@ -12,7 +13,7 @@ namespace Norm.Tests
         private readonly MongoCollection<Person> _collection;
         public QueryTests()
         {
-            _server = Mongo.ParseConnection("mongodb://localhost/NormTests?pooling=false");
+            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
             _collection = _server.GetCollection<Person>("People");
         }
         public void Dispose()
@@ -82,6 +83,61 @@ namespace Norm.Tests
 
             var results = _collection.Find(query);
             Assert.Equal(2, results.Count());
+        }
+        [Fact]
+        public void QueryWithinEmbeddedArray() {
+            using (var session = new Session()) {
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA" }, new Comment { Text = "commentB" } } };
+                var posts = _server.Database.GetCollection<Post>();
+                posts.Delete(new Object());
+                posts.Insert(post1);
+                posts.Insert(post2);
+
+                var fun = @"function(){for(var i in this.Comments){if(i.Text === 'commentA') return true;}}";
+
+                var query = new Flyweight();
+                query["$where"] = fun;
+                var results = posts.Find(query);
+                Assert.Equal("Second",results.First().Title);
+
+            }
+        }
+
+        [Fact]
+        public void FindCanQueryEmbeddedArray() {
+            _collection.Delete(new { });
+            var person1 = new Person {
+                Name = "Joe Cool",
+                Address = {
+                    Street = "123 Main St",
+                    City = "Anytown",
+                    State = "CO",
+                    Zip = "45123"
+                }
+
+            };
+            var person2 = new Person {
+                Name = "Sam Cool",
+                Address = {
+                    Street = "300 Main St",
+                    City = "Anytown",
+                    State = "CO",
+                    Zip = "45123"
+                },
+                Relatives = new List<string>(){ "Emma","Bruce","Charlie"
+                }
+            };
+            _collection.Insert(person1);
+            _collection.Insert(person2);
+
+            var elem = new Flyweight();
+            elem["this.Relatives"] = "Charlie";
+            var query = new Flyweight();
+            query["$elemMatch"] = elem;
+
+            var a = _collection.Find(query).ToArray();
+            Assert.Equal(1, a.Length);
         }
     }
 }

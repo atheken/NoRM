@@ -41,6 +41,19 @@ namespace Norm.Tests
             }
         }
         [Fact]
+        public void CountShouldReturn2WhenThreeProductsInDBAndWhereIdMatches()
+        {
+            var target = ObjectId.NewObjectId();
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "1", Price = 10, _id = target });
+                session.Add(new Product { Name = "2", Price = 22, _id = ObjectId.NewObjectId() });
+                session.Add(new Product { Name = "3", Price = 33, _id = ObjectId.NewObjectId() });
+                var result = session.Products.Where(x => x._id == target).Count();
+                Assert.Equal(1, result);
+            }
+        }        
+        [Fact]
         public void SumShouldReturn60WhenThreeProductsInDBWIthSumPrice60()
         {
             using (var session = new Session())

@@ -61,23 +61,24 @@ namespace Norm.Tests
                 Assert.Equal(10, product.Price);
             }
         }
-
         [Fact]
-        public void ThreeProductsShouldBeReturnedWhenThreeInDB()
+        public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhere()
         {
             using (var session = new Session())
             {
                 session.Add(new Product { Name = "1", Price = 10 });
                 session.Add(new Product { Name = "2", Price = 22 });
                 session.Add(new Product { Name = "3", Price = 33 });
-                var products = session.Products.ToList();
-                Assert.Equal(3, products.Count);
+                var products = session.Products.Where(x => x.Price > 10);
+                var result = products.Where(x => x.Price < 30);
+                Assert.Equal(22, result.SingleOrDefault().Price);
             }
         }
-
         [Fact]
-        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPrice() {
-            using (var session = new Session()) {
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPrice()
+        {
+            using (var session = new Session())
+            {
                 session.Add(new Product { Name = "1", Price = 40 });
                 session.Add(new Product { Name = "2", Price = 22 });
                 session.Add(new Product { Name = "3", Price = 33 });
@@ -88,8 +89,10 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPriceThenByName() {
-            using (var session = new Session()) {
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPriceThenByName()
+        {
+            using (var session = new Session())
+            {
                 session.Add(new Product { Name = "1", Price = 10 });
                 session.Add(new Product { Name = "2", Price = 22 });
                 session.Add(new Product { Name = "3", Price = 33 });
@@ -412,6 +415,21 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void OneProductShouldBeReturnedUsingSimpleANDQuery()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 22 });
+                var results = session.Products.Where(x => x.Price == 22 && x.Name == "Test3").ToArray();
+                Assert.Equal(1, results.Length);
+                Assert.Equal(22, results[0].Price);
+                Assert.Equal("Test3", results[0].Name);
+            }
+        }
+
+        [Fact]
         public void OneProductShouldBeReturnedWhen3InDbWithSingleUsingVariable()
         {
             using (var session = new Session())
@@ -507,6 +525,21 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void FiltersBasedOnMagicObjectId()
+        {
+            var targetId = ObjectId.NewObjectId();
+            using (var session = new Session())
+            {
+                session.Add(new Post { Id = targetId });
+                session.Add(new Post());
+                session.Add(new Post());
+                var posts = session.Posts.Where(p => p.Id == targetId).ToList();
+                Assert.Equal(1, posts.Count);
+                Assert.Equal(targetId, posts[0].Id);
+            }
+        }
+
+        [Fact]
         public void Filters_Based_On_Guid()
         {
             var targetId = Guid.NewGuid();
@@ -531,9 +564,8 @@ namespace Norm.Tests
 
                 session.Add(post1);
                 session.Add(post2);
-
-                var found = session.Posts.FirstOrDefault(p => p.Comments.Any(a => a.Text == "commentA"));
-                Assert.Equal(post2.Title, found.Title);
+                var found = session.Posts.Where(p => p.Comments.Any(a => a.Text == "commentA")).SingleOrDefault();
+                Assert.Equal("Second", found.Title);
 
             }
         }
