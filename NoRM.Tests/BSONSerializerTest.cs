@@ -341,6 +341,18 @@ namespace Norm.Tests
             Assert.Equal(1, end.Names.Count);
             Assert.Equal("Duncan Idaho", end.Names[0]);
         }
+        [Fact]
+        public void SerializesReadonlyICollection()
+        {
+            var start = new HashSetList();
+            start.Names.Add("Duncan");
+            start.Names.Add("Idaho");
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<HashSetList>(bytes);
+            Assert.Equal(2, end.Names.Count);
+            Assert.Equal("Duncan", end.Names.ElementAt(0));
+            Assert.Equal("Idaho", end.Names.ElementAt(1));
+        }
 
         [Fact]
         public void SerializesDictionary()

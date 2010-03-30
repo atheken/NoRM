@@ -322,6 +322,21 @@ namespace Norm.Tests
             }
         }
     }
+    public class HashSetList
+    {
+        private HashSet<string> _names;
+        public ICollection<string> Names
+        {
+            get
+            {
+                if (_names == null)
+                {
+                    _names = new HashSet<string>();
+                }
+                return _names;
+            }
+        }
+    }
     public class DictionaryObject
     {
         private IDictionary<string, int> _lookup;
