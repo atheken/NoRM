@@ -109,10 +109,6 @@ namespace Norm.Tests
         {
             get { return new MongoQuery<Product>(_provider); }
         }
-        public IQueryable<Thread> Threads
-        {
-            get { return new MongoQuery<Thread>(_provider); }
-        }
         public IQueryable<Post> Posts
         {
             get { return new MongoQuery<Post>(_provider); }
@@ -391,14 +387,5 @@ namespace Norm.Tests
         {
             return new PrivateConstructor {Name = name};
         }
-    }
-    
-    public class Forum
-    {
-        public ObjectId Id{ get; set;}
-    }
-    public class Thread
-    {
-        public ObjectId ForumId{ get; set;}   
     }
 }
