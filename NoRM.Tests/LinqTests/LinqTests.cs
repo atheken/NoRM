@@ -483,6 +483,21 @@ namespace Norm.Tests
                 Assert.Equal(targetId, products[0]._id);
             }
         }
+        [Fact]
+        public void FiltersBasedOnObjectIdWhenMemberAccess()
+        {
+            var targetId = ObjectId.NewObjectId();
+            using (var session = new Session())
+            {
+                session.Add(new Forum{Id = targetId});
+                session.Add(new Forum());
+                session.Add(new Forum());
+                
+                var threads = session.Threads.Where(t => t.ForumId == targetId).ToList();
+                Assert.Equal(1, threads.Count);
+                Assert.Equal(targetId, threads[0].ForumId);
+            }                        
+        }
 
         [Fact]
         public void FiltersBasedOnMagicObjectId()
