@@ -374,7 +374,7 @@ namespace Norm.Linq
                         SetFlyValue(((bool)c.Value) ? 1 : 0);
                         break;
                     case TypeCode.DateTime:
-                        var val = "new Date('" + c.Value + "')";
+                        var val = "new Date(" + (long)((DateTime)c.Value).Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
                         _sb.Append(val);
                         SetFlyValue(c.Value);
                         break;
