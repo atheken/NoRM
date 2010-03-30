@@ -506,8 +506,8 @@ namespace Norm.Linq
 
         private static HashSet<String> _callableMethods = new HashSet<string>(){
             "First","Single","FirstOrDefault","SingleOrDefault","Count",
-            "Sum","Average","Min","Max","Any","Take","Skip","Count", 
-            "OrderBy","ThenBy", "OrderByDescending"};
+            "Sum","Average","Min","Max","Any","Take","Skip", 
+            "OrderBy","ThenBy", "OrderByDescending", "ThenByDescending"};
 
         /// <summary>
         /// Determines if it's a callable method.
