@@ -144,6 +144,12 @@ namespace Norm.BSON
             var typeHelper = TypeHelper.GetHelperForType(document.GetType());
             var idProperty = typeHelper.FindIdProperty();
             var documentType = document.GetType();
+			var discriminator = typeHelper.GetTypeDiscriminator();
+
+			if (String.IsNullOrEmpty(discriminator) == false)
+			{
+				SerializeMember("__type", discriminator);
+			}
 
             foreach (var property in typeHelper.GetProperties())
             {

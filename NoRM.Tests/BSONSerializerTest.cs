@@ -195,16 +195,25 @@ namespace Norm.Tests
 
             Assert.Equal(obj1.AGuid, hydratedObj1.AGuid);
             Assert.Equal(null, hydratedObj2.AGuid);
-        }
+		}
 
-        [Fact]
-        public void SerializationOfInheritenceIsNotLossy()
-        {
-            var obj1 = new ChildGeneralDTO {Pi = 3.14, IsOver9000 = true};
-            var hydratedObj1 = BsonDeserializer.Deserialize<ChildGeneralDTO>(BsonSerializer.Serialize(obj1));
-            Assert.Equal(obj1.Pi, hydratedObj1.Pi);
-            Assert.Equal(obj1.IsOver9000, hydratedObj1.IsOver9000); 
-        }
+		[Fact]
+		public void SerializationOfInheritenceIsNotLossy()
+		{
+			var obj1 = new ChildGeneralDTO { Pi = 3.14, IsOver9000 = true };
+			var hydratedObj1 = BsonDeserializer.Deserialize<ChildGeneralDTO>(BsonSerializer.Serialize(obj1));
+			Assert.Equal(obj1.Pi, hydratedObj1.Pi);
+			Assert.Equal(obj1.IsOver9000, hydratedObj1.IsOver9000);
+		}
+
+		[Fact]
+		public void SerializationOfInheritenceIsNotLossy_EvenWhenWeAskForTheBaseType()
+		{
+			var obj1 = new ChildGeneralDTO { Pi = 3.14, IsOver9000 = true };
+			var hydratedObj1 = (ChildGeneralDTO) BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
+			Assert.Equal(obj1.Pi, hydratedObj1.Pi);
+			Assert.Equal(obj1.IsOver9000, hydratedObj1.IsOver9000);
+		}
         [Fact]
         public void SerializationOfRegexIsNotLossy()
         {
@@ -387,5 +396,10 @@ namespace Norm.Tests
             Assert.Equal(start.Name, end.Name);            
         }
         
+		[Fact]
+		public void WillSerializeObjectWithDiscriminator()
+		{
+			
+		}
     }
 }

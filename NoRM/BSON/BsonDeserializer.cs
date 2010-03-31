@@ -232,6 +232,16 @@ namespace Norm.BSON
                 {
                     HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
+
+				if(name == "__type")
+				{
+					var typeName = ReadString();
+					type = Type.GetType(typeName, true);
+					typeHelper = TypeHelper.GetHelperForType(type);
+					instance = Activator.CreateInstance(type, true);
+					
+					continue;
+				}
                 
                 var property = (name == "_id") ? typeHelper.FindIdProperty() :
                     typeHelper.FindProperty(name);
@@ -252,13 +262,13 @@ namespace Norm.BSON
                     }
                     else
                     {
-                        NewDocument(length);    
-                    }                                        
+                        NewDocument(length);
+                    }
                 }
                 object container = null;
                 if (property.Setter == null)
                 {
-                    container = property.Getter(instance);                    
+                    container = property.Getter(instance);
                 }
                 var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
                 if (container == null && value!=null)
