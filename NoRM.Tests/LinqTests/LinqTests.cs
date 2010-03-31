@@ -511,7 +511,17 @@ namespace Norm.Tests
                 Assert.Equal(2, products.Count);
             }
         }
-
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPrice() {
+            using (var session = new Session()) {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                var products = session.Products.OrderBy(x => x.Price).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(33, products[2].Price);
+            }
+        }
         [Fact]
         public void FiltersBasedOnObjectId()
         {
