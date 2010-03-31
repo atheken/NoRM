@@ -108,7 +108,7 @@ namespace Norm.Tests
             }
 
             // Simply wait - don't need to join monitor callbacks this simplistic unit test.
-            Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(1000);
             Assert.Equal(10, idList.Count);
 
             // Count could be more than the pool size since new connections are created

@@ -510,14 +510,7 @@ namespace Norm.Linq
                 // Subquery - Count() or Sum()
                 if (IsCallableMethod(m.Method.Name))
                 {
-                    //do something useful here.
-                    if (m.Method.Name == "Count")
-                    {
-                        this.VisitMemberAccess((MemberExpression)m.Arguments[0]);
-                        _sb.AppendFormat(".length");
-                        this.IsComplex = true;
-                        return m;
-                    }
+                    return HandleMethodCall(m);
                 }
             }
 
@@ -527,8 +520,8 @@ namespace Norm.Linq
 
         private static HashSet<String> _callableMethods = new HashSet<string>(){
             "First","Single","FirstOrDefault","SingleOrDefault","Count",
-            "Sum","Average","Min","Max","Any","Take","Skip", 
-            "OrderBy","ThenBy", "OrderByDescending", "ThenByDescending"};
+            "Sum","Average","Min","Max","Any","Take","Skip","Count", 
+            "OrderBy","ThenBy", "OrderByDescending","ThenByDescending"};
 
         /// <summary>
         /// Determines if it's a callable method.
