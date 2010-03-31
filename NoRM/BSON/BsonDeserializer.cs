@@ -99,7 +99,7 @@ namespace Norm.BSON
         /// Determines whether there is more to read.
         /// </summary>
         /// <returns>
-        /// 	<c>true</c> if this instance is read; otherwise, <c>false</c>.
+        ///     <c>true</c> if this instance is read; otherwise, <c>false</c>.
         /// </returns>
         private bool IsDone()
         {
@@ -233,15 +233,15 @@ namespace Norm.BSON
                     HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
 
-				if(name == "__type")
-				{
-					var typeName = ReadString();
-					type = Type.GetType(typeName, true);
-					typeHelper = TypeHelper.GetHelperForType(type);
-					instance = Activator.CreateInstance(type, true);
-					
-					continue;
-				}
+                if(name == "__type")
+                {
+                    var typeName = ReadString();
+                    type = Type.GetType(typeName, true);
+                    typeHelper = TypeHelper.GetHelperForType(type);
+                    instance = Activator.CreateInstance(type, true);
+                    
+                    continue;
+                }
                 
                 var property = (name == "_id") ? typeHelper.FindIdProperty() :
                     typeHelper.FindProperty(name);
@@ -321,7 +321,7 @@ namespace Norm.BSON
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>
-        /// 	<c>true</c> if the specified type is a dictionary; otherwise, <c>false</c>.
+        ///     <c>true</c> if the specified type is a dictionary; otherwise, <c>false</c>.
         /// </returns>
         private static bool IsDictionary(Type type)
         {

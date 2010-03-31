@@ -391,10 +391,15 @@ namespace Norm.Tests
         public int IgnoredProperty { get; set; }
     }
 
-
     public class ChildGeneralDTO : GeneralDTO
     {
         public bool IsOver9000 { get; set; }
+    }
+
+    [MongoDiscriminated]
+    public class DiscriminatedChildGeneralDTO : GeneralDTO
+    {
+        public bool IsUnder9000 { get; set; }
     }
     
     public class PrivateConstructor

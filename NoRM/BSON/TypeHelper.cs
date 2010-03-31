@@ -18,7 +18,7 @@ namespace Norm.BSON
 
         private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);
         private readonly IDictionary<string, MagicProperty> _properties;
-    	private readonly Type _type;
+        private readonly Type _type;
 
         static TypeHelper()
         {
@@ -207,13 +207,16 @@ namespace Norm.BSON
             return magic;
         }
 
-		/// <summary>
-		/// Determines the discriminator to use when serialising the type
-		/// </summary>
-		/// <returns></returns>
-    	public string GetTypeDiscriminator()
-    	{
-    		return _type.AssemblyQualifiedName;
-    	}
+        /// <summary>
+        /// Determines the discriminator to use when serialising the type
+        /// </summary>
+        /// <returns></returns>
+        public string GetTypeDiscriminator()
+        {
+            if (_type.GetCustomAttributes(BsonHelper.MongoDiscriminatedAttribute, true).Length > 0)
+                return _type.AssemblyQualifiedName;
+
+            return null;
+        }
     }
 }
