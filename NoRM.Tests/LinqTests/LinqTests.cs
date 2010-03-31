@@ -62,25 +62,27 @@ namespace Norm.Tests
             }
         }
         [Fact]
-        public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhere() {
-            using (var session = new Session()) {
+        public void ThreeProductsShouldBeReturnedWhenThreeInDB()
+        {
+            using (var session = new Session())
+            {
                 session.Add(new Product { Name = "1", Price = 10 });
                 session.Add(new Product { Name = "2", Price = 22 });
                 session.Add(new Product { Name = "3", Price = 33 });
-                var products = session.Products.Where(x => x.Price > 10);
-                var result = products.Where(x => x.Price < 30);
-                Assert.Equal(22,result.SingleOrDefault().Price);
+                var products = session.Products.ToList();
+                Assert.Equal(3, products.Count);
             }
         }
+
         [Fact]
         public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPrice() {
             using (var session = new Session()) {
-                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "1", Price = 40 });
                 session.Add(new Product { Name = "2", Price = 22 });
                 session.Add(new Product { Name = "3", Price = 33 });
                 var products = session.Products.OrderBy(x=>x.Price).ToList();
-                Assert.Equal(10, products[0].Price);
-                Assert.Equal(33, products[2].Price);
+                Assert.Equal(22, products[0].Price);
+                Assert.Equal(40, products[2].Price);
             }
         }
 
@@ -100,6 +102,27 @@ namespace Norm.Tests
                 Assert.Equal(50, products[4].Price);
                 Assert.Equal("1", products[3].Name);
                 Assert.Equal("2", products[4].Name);
+            }
+        }
+
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPriceThenByNameDescending()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                session.Add(new Product { Name = "2", Price = 50 });
+                session.Add(new Product { Name = "1", Price = 50 });
+                var products = session.Products.OrderBy(x => x.Price).ThenByDescending(x => x.Name).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(22, products[1].Price);
+                Assert.Equal(33, products[2].Price);
+                Assert.Equal(50, products[3].Price);
+                Assert.Equal(50, products[4].Price);
+                Assert.Equal("2", products[3].Name);
+                Assert.Equal("1", products[4].Name);
             }
         }
 
@@ -188,6 +211,19 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "Test4X", Price = 22, Available = new DateTime(2000, 2, 6) });
                 var products = session.Products.Where(x => x.Available.Day == 5).ToList();
                 Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenAvailableDateIsSameAsRequired()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test3X", Price = 10, Available = new DateTime(2000, 2, 5) });
+                session.Add(new Product { Name = "Test4X", Price = 22, Available = new DateTime(2000, 2, 6) });
+                var products = session.Products.Where(x => x.Available == new DateTime(2000, 2, 5)).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal("Test3X", products[0].Name);
             }
         }
 

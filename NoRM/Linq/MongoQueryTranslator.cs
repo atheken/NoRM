@@ -393,7 +393,7 @@ namespace Norm.Linq
                         SetFlyValue(((bool)c.Value) ? 1 : 0);
                         break;
                     case TypeCode.DateTime:
-                        var val = "new Date('" + c.Value + "')";
+                        var val = "new Date(" + (long)((DateTime)c.Value).Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
                         _sb.Append(val);
                         SetFlyValue(c.Value);
                         break;
@@ -510,7 +510,14 @@ namespace Norm.Linq
                 // Subquery - Count() or Sum()
                 if (IsCallableMethod(m.Method.Name))
                 {
-                    return HandleMethodCall(m);
+                    //do something useful here.
+                    if (m.Method.Name == "Count")
+                    {
+                        this.VisitMemberAccess((MemberExpression)m.Arguments[0]);
+                        _sb.AppendFormat(".length");
+                        this.IsComplex = true;
+                        return m;
+                    }
                 }
             }
 
@@ -520,8 +527,8 @@ namespace Norm.Linq
 
         private static HashSet<String> _callableMethods = new HashSet<string>(){
             "First","Single","FirstOrDefault","SingleOrDefault","Count",
-            "Sum","Average","Min","Max","Any","Take","Skip","Count", 
-            "OrderBy","ThenBy", "OrderByDescending","ThenByDescending"};
+            "Sum","Average","Min","Max","Any","Take","Skip", 
+            "OrderBy","ThenBy", "OrderByDescending", "ThenByDescending"};
 
         /// <summary>
         /// Determines if it's a callable method.
