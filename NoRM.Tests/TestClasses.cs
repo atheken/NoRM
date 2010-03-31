@@ -339,6 +339,22 @@ namespace Norm.Tests
     }
     public class DictionaryObject
     {
+        private Dictionary<string, int> _lookup;
+        public Dictionary<string, int> Names
+        {
+            get
+            {
+                if (_lookup == null)
+                {
+                    _lookup = new Dictionary<string, int>();
+                }
+                return _lookup;
+            }
+            set { _lookup = value; }
+        }
+    }
+    public class IDictionaryObject
+    {
         private IDictionary<string, int> _lookup;
         public IDictionary<string, int> Names
         {
