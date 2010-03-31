@@ -496,16 +496,19 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void LastTwoProductsofThreeShouldBeReturnedWithSkipTake()
+        public void TwoProductsofFourShouldBeReturnedWithSkipTake()
         {
             using (var session = new Session())
             {
+                
                 session.Add(new Product { Name = "Test1", Price = 10 });
                 session.Add(new Product { Name = "Test2", Price = 22 });
                 session.Add(new Product { Name = "Test3", Price = 33 });
+                session.Add(new Product { Name = "Test4", Price = 44 });
                 var products = session.Products.Skip(1).Take(2).ToList();
                 Assert.Equal(22.0, products[0].Price);
                 Assert.Equal(33.0, products[1].Price);
+                Assert.Equal(2, products.Count);
             }
         }
 
