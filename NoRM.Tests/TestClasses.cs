@@ -176,6 +176,22 @@ namespace Norm.Tests
         public IList<string> Tags { get; set; }
     }
 
+    internal class Post2
+    {
+        public Post2()
+        {
+            Id = ObjectId.NewObjectId();
+            Comments = new List<Comment>();
+            Tags = new List<string>();
+        }
+        public ObjectId Id { get; set; }
+        public string Title { get; set; }
+        public int Score { get; set; }
+        public IList<Comment> Comments { get; set; }
+        public IList<string> Tags { get; set; }
+    }
+
+
     internal class Comment
     {
         public string Text { get; set; }
