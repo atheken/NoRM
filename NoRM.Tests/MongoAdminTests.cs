@@ -20,7 +20,7 @@ namespace Norm.Tests
             var expected = new List<string> { "admin", "NormTests", "local" };
 
             //create another database
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject());
             }
@@ -103,7 +103,7 @@ namespace Norm.Tests
         public void DropsDatabase()
         {
             //create another database
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject());                
             }

@@ -15,6 +15,7 @@ namespace Norm.Protocol.Messages
     internal class GetMoreMessage<T> : Message
     {
         private long _cursorId;
+        private int _limit;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetMoreMessage{T}"/> class.
@@ -29,11 +30,12 @@ namespace Norm.Protocol.Messages
         /// The cursor id.
         /// </param>
         internal GetMoreMessage(IConnection connection,
-            string fullyQualifiedCollectionName, long cursorID) :
+            string fullyQualifiedCollectionName, long cursorID, int limit) :
             base(connection, fullyQualifiedCollectionName)
         {
             _op = MongoOp.GetMore;
             _cursorId = cursorID;
+            _limit = limit;
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace Norm.Protocol.Messages
                                            _connection.QueryTimeout.ToString());
             }
 
-            return new ReplyMessage<T>(_connection, _collection, new BinaryReader(new BufferedStream(stream)), this._op);
+            return new ReplyMessage<T>(_connection, _collection, new BinaryReader(new BufferedStream(stream)), this._op, this._limit);
         }
     }
 }

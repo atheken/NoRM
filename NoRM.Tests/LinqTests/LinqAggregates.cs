@@ -40,6 +40,20 @@ namespace Norm.Tests
                 Assert.Equal(2, result);
             }
         }
+   
+        [Fact]
+        public void Count_Should_Return_One_When_Id_Matches()
+        {
+            var target = ObjectId.NewObjectId();
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "1", Price = 40, _id = target });
+                session.Add(new Product { Name = "2", Price = 22, _id = ObjectId.NewObjectId() });
+                session.Add(new Product { Name = "3", Price = 33, _id = ObjectId.NewObjectId() });
+                var result = session.Products.Where(x => x._id == target).Count();
+                Assert.Equal(1, result);
+            }
+        }        
         [Fact]
         public void SumShouldReturn60WhenThreeProductsInDBWIthSumPrice60()
         {
@@ -89,6 +103,20 @@ namespace Norm.Tests
             }
         }
 
+        [Fact]
+        public void AvgShouldReturn500Point5WhenSumOfAllNumbersUpTo1000()
+        {
+            using (var session = new Session())
+            {
+                for (var i = 0; i < 1000; i++)
+                {
+                    session.Add(new Product { Name = i.ToString(), Price = i + 1 });
+                }
+
+                var result = session.Products.Average(x => x.Price);
+                Assert.Equal(500.5, result);
+            }
+        }
 
         [Fact]
         public void MinShouldReturn10WhenThreeProductsInDBWIthSumPrice60AndLowestIs10()

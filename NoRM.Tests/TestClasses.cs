@@ -109,6 +109,10 @@ namespace Norm.Tests
         {
             get { return new MongoQuery<Product>(_provider); }
         }
+        public IQueryable<Thread> Threads
+        {
+            get { return new MongoQuery<Thread>(_provider); }
+        }
         public IQueryable<Post> Posts
         {
             get { return new MongoQuery<Post>(_provider); }
@@ -214,7 +218,7 @@ namespace Norm.Tests
 
         public ObjectId Id { get; set; }
         public string Name { get; set; }
-        public DBReference[] ProductsOrdered { get; set; }
+        public DBReference<Product>[] ProductsOrdered { get; set; }
     }
 
     internal class Person
@@ -223,14 +227,12 @@ namespace Norm.Tests
         public string Name { get; set; }
         public Address Address { get; set; }
         public DateTime LastContact { get; set; }
-
+        public List<String> Relatives { get; set; }
         public Person()
         {
             Id = ObjectId.NewObjectId();
             Address = new Address();
         }
-
-        public List<String> Relatives { get; set; }
     }
 
     internal class Address
@@ -336,6 +338,21 @@ namespace Norm.Tests
             }
         }
     }
+    public class HashSetList
+    {
+        private HashSet<string> _names;
+        public ICollection<string> Names
+        {
+            get
+            {
+                if (_names == null)
+                {
+                    _names = new HashSet<string>();
+                }
+                return _names;
+            }
+        }
+    }
     public class DictionaryObject
     {
         private IDictionary<string, int> _lookup;
@@ -405,5 +422,14 @@ namespace Norm.Tests
         {
             return new PrivateConstructor {Name = name};
         }
+    }
+    
+    public class Forum
+    {
+        public ObjectId Id{ get; set;}
+    }
+    public class Thread
+    {
+        public ObjectId ForumId{ get; set;}   
     }
 }

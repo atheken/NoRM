@@ -104,10 +104,8 @@ namespace Norm.Protocol.Messages
                     var properties = (this.Query as Flyweight).AllProperties();
                     properties.ToList().ForEach(p => fly.Set(p.PropertyName, p.Value));
                 }
-                else
-                {
-                    fly["query"] = this.Query;                    
-                }
+
+                fly["query"] = this.Query;
 
                 //null for this is OK. needs to be here, though.
                 if (this.OrderBy != null)
@@ -139,7 +137,7 @@ namespace Norm.Protocol.Messages
             {
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + conn.QueryTimeout.ToString());
             }
-            return new ReplyMessage<T>(conn, this._collection, new BinaryReader(new BufferedStream(stream)), this._op);
+            return new ReplyMessage<T>(conn, this._collection, new BinaryReader(new BufferedStream(stream)), this._op, this.NumberToTake);
         }
     }
 }

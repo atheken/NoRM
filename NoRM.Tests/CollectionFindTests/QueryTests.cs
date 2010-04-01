@@ -14,7 +14,7 @@ namespace Norm.Tests
         private readonly MongoCollection<Person> _collection;
         public QueryTests()
         {
-            _server = Mongo.ParseConnection("mongodb://localhost/NormTests?pooling=false");
+            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
             _collection = _server.GetCollection<Person>("People");
         }
         public void Dispose()
@@ -25,6 +25,31 @@ namespace Norm.Tests
                 admin.DropDatabase();
             }
             _server.Dispose();
+        }
+
+        [Fact]
+        public void FindUsesLimit()
+        {
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { }, 3 ).ToArray();
+            Assert.Equal(3, result.Length);
+        }
+
+        [Fact]
+        public void FindUsesLimitAndSkip()
+        {
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { }, 1, 1).ToArray();
+            Assert.Equal(1, result.Length);
+            Assert.Equal("CCC", result[0].Name);
         }
 
         [Fact]
@@ -124,8 +149,28 @@ namespace Norm.Tests
 
             var query = new Flyweight();
             query["Address.City"] = Q.Equals<string>("Anytown");
+
             var results = _collection.Find(query);
             Assert.Equal(2, results.Count());
+        }
+        [Fact]
+        public void QueryWithinEmbeddedArray() {
+            using (var session = new Session()) {
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA" }, new Comment { Text = "commentB" } } };
+                var posts = _server.Database.GetCollection<Post>();
+                posts.Delete(new Object());
+                posts.Insert(post1);
+                posts.Insert(post2);
+
+                var fun = @"function(){for(var i in this.Comments){if(i.Text === 'commentA') return true;}}";
+
+                var query = new Flyweight();
+                query["$where"] = fun;
+                var results = posts.Find(query);
+                Assert.Equal("Second",results.First().Title);
+
+            }
         }
     }
 }

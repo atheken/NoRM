@@ -13,7 +13,7 @@ namespace Norm.Tests
         private readonly MongoCollection<TestClass> _collection;
         public WhereQualifierTests()
         {
-            _server = Mongo.ParseConnection("mongodb://localhost/NormTests?pooling=false");            
+            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");            
             _collection = _server.GetCollection<TestClass>("TestClasses");
         }
         public void Dispose()
