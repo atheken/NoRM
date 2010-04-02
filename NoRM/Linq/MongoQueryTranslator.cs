@@ -339,12 +339,6 @@ namespace Norm.Linq
         /// </exception>
         protected override Expression VisitBinary(BinaryExpression b)
         {
-
-            //specific for "chained" Where() calls, where a Where() is appended
-            //to an IQueryable on top of another IQueryable
-            if (_whereWritten) {
-                _sb.Append(" && ");
-            }
             ConditionalCount++;
             _sb.Append("(");
             Visit(b.Left);
@@ -445,11 +439,17 @@ namespace Norm.Linq
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
                 var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                //specific for "chained" Where() calls, where a Where() is appended
+                //to an IQueryable on top of another IQueryable
+                if (_whereWritten) {
+                    _sb.Append(" && ");
+                }
                 Visit(lambda.Body);
                 _whereWritten = true;
                 Visit(m.Arguments[0]);
                 return m;
             }
+            _whereWritten = false;
             if (m.Method.DeclaringType == typeof(string))
             {
                 IsComplex = true;
