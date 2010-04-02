@@ -391,6 +391,19 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void TwoProductsShouldBeReturnedWhenNotEqualsOne()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var result = session.Products.Where(x => x.Price != 22);
+                Assert.Equal(2, result.Count());
+            }
+        }
+
+        [Fact]
         public void OneProductShouldBeReturnedWhen3InDbWithFirst()
         {
             using (var session = new Session())
@@ -469,6 +482,19 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Name.Contains("X")).ToList();
                 Assert.Equal(2, products.Count);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenContainsMatchesFirstCharacter()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "ATest", Price = 10 });
+                session.Add(new Product { Name = "BTest", Price = 22 });
+                session.Add(new Product { Name = "CTest", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Contains("B")).ToList();
+                Assert.Equal(1, products.Count);
             }
         }
 
