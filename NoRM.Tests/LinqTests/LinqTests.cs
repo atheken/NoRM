@@ -567,6 +567,21 @@ namespace Norm.Tests
                 Assert.Equal(targetId, products[0]._id);
             }
         }
+        [Fact]
+        public void FiltersBasedOnObjectIdExclusionInComplexQuery()
+        {
+            var targetId = ObjectId.NewObjectId();
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10, Available = new DateTime(2000, 2, 5) });
+                session.Add(new Product { Name = "Test2", Price = 22, Available = new DateTime(2000, 2, 5), _id = targetId });
+                session.Add(new Product { Name = "Test3", Price = 33, Available = new DateTime(2000, 2, 5) });
+                var products = session.Products.Where(p => p._id != targetId && p.Available.Day == 5).ToList();
+                Assert.Equal(2, products.Count);
+                Assert.NotEqual(targetId, products[0]._id);
+                Assert.NotEqual(targetId, products[1]._id);
+            }
+        }
 
         [Fact]
         public void FiltersBasedOnMagicObjectId()

@@ -399,7 +399,11 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            _sb.AppendFormat("ObjectId('{0}')", c.Value);
+                            if (_lastOperator == " === ")
+                            {
+                                _sb.Remove(_sb.Length - 2, 1);
+                            }
+                            _sb.AppendFormat("'{0}'", c.Value);
                             SetFlyValue(c.Value);
                         }
                         else if (c.Value is Guid)

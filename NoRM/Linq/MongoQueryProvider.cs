@@ -172,9 +172,6 @@ namespace Norm.Linq
             {
                 if (tranny.IsComplex)
                 {
-                    ///HACK: convert " === ObjectId('123')" to " == '123'"
-                    qry = System.Text.RegularExpressions.Regex.Replace(qry, @" === ObjectId\('([a-f0-9]+)'\)", " == '$1'");
-
                     // reset - need to use the where statement generated
                     // instead of the props set on the internal flyweight
                     fly = new Flyweight();
