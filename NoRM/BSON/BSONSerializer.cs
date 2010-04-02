@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Norm.BSON.DbTypes;
 using Norm.Configuration;
 
 namespace Norm.BSON
@@ -148,6 +149,8 @@ namespace Norm.BSON
             foreach (var property in typeHelper.GetProperties())
             {
                 var name = property == idProperty
+                           && property.DeclaringType.GetGenericTypeDefinition() != typeof (DbReference<>)
+                           && property.DeclaringType.GetGenericTypeDefinition() != typeof (DbReference<,>)
                                ? "_id"
                                : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
 
