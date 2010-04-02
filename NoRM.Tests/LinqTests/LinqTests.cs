@@ -71,6 +71,7 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "3", Price = 33 });
                 var products = session.Products.Where(x => x.Price > 10);
                 var result = products.Where(x => x.Price < 30);
+                result = result.Where(x => x.Name.Contains("2"));
                 Assert.Equal(22, result.SingleOrDefault().Price);
             }
         }
