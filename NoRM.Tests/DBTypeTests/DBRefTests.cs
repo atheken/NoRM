@@ -1,9 +1,6 @@
 ﻿using System.Linq;
 using Norm.BSON.DbTypes;
-using Norm.Configuration;
 using Xunit;
-using Norm.Collections;
-
 
 namespace Norm.Tests
 {
@@ -21,19 +18,14 @@ namespace Norm.Tests
         [Fact]
         public void DBRefMapsToOtherDocumentsByOid()
         {
-            string databaseName = "NormTests";
+            const string databaseName = "NormTests";
             var id = ObjectId.NewObjectId();
 
             using (var session = new Session())
             {
                 session.Add(new Product { _id = id, Name = "RefProduct" });
 
-                var productReference = new DBReference<Product>
-                    {
-                        Collection = MongoConfiguration.GetCollectionName(typeof(Product)),
-                        DatabaseName = databaseName,
-                        ID = id,
-                    };
+            	var productReference = new DBReference<Product>(id);
 
                 session.Add(new ProductReference
                     {

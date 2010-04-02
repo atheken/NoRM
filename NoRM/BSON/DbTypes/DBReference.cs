@@ -7,7 +7,7 @@ namespace Norm.BSON.DbTypes
     /// <summary>
     /// A DB-pointer to another document.
     /// </summary>
-	public class DBReference<T> : ObjectId where T : class, new()
+    public class DBReference<T> : ObjectId where T : class, new()
     {
         /// <summary>
         /// Initializes static members of the <see cref="DBReference"/> class.
@@ -20,6 +20,23 @@ namespace Norm.BSON.DbTypes
                                                                           dbr.ForProperty(d => d.DatabaseName).UseAlias("$db");
                                                                           dbr.ForProperty(d => d.ID).UseAlias("$id");
                                                                       }));
+        }
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public DBReference()
+        {
+        }
+
+        /// <summary>
+        /// Constructor for easier instantiation of db references.
+        /// </summary>
+        /// <param name="id">The id of the referenced document.</param>
+        public DBReference(ObjectId id)
+        {
+            ID = id;
+            Collection = MongoConfiguration.GetCollectionName(typeof(T));
         }
 
         /// <summary>
@@ -51,24 +68,24 @@ namespace Norm.BSON.DbTypes
         /// </returns>
         public T Fetch(Func<MongoCollection<T>> referenceCollection)
         {
-            return referenceCollection().FindOne(new { _id = this.ID });
+            return referenceCollection().FindOne(new { _id = ID });
         }
 
-		/// <summary>
-		/// Fetches the instance of type T in the collection referenced by the DBRef $id
-		/// </summary>
-		/// <typeparam name="T">
-		/// Type referenced by DBRef
-		/// </typeparam>
-		/// <param name="server">
-		/// A function that returns an instance of the Mongo server connection.
-		/// </param>
-		/// <returns>
-		/// Referenced type T
-		/// </returns>
-		public T Fetch(Func<Mongo> server)
-		{
-			return Fetch(() => server().GetCollection<T>());
-		}
+        /// <summary>
+        /// Fetches the instance of type T in the collection referenced by the DBRef $id
+        /// </summary>
+        /// <typeparam name="T">
+        /// Type referenced by DBRef
+        /// </typeparam>
+        /// <param name="server">
+        /// A function that returns an instance of the Mongo server connection.
+        /// </param>
+        /// <returns>
+        /// Referenced type T
+        /// </returns>
+        public T Fetch(Func<Mongo> server)
+        {
+            return Fetch(() => server().GetCollection<T>());
+        }
     }
 }
