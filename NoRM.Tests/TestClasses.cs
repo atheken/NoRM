@@ -218,7 +218,7 @@ namespace Norm.Tests
 
         public ObjectId Id { get; set; }
         public string Name { get; set; }
-        public DBReference<Product>[] ProductsOrdered { get; set; }
+        public DbReference<Product>[] ProductsOrdered { get; set; }
     }
 
     internal class Person

@@ -7,25 +7,25 @@ namespace Norm.BSON.DbTypes
     /// <summary>
     /// A DB-pointer to another document.
     /// </summary>
-    public class DBReference<T> : ObjectId where T : class, new()
+    public class DbReference<T> : ObjectId where T : class, new()
     {
         /// <summary>
-        /// Initializes static members of the <see cref="DBReference"/> class.
+        /// Initializes static members of the <see cref="DbReference{T}"/> class.
         /// </summary>
-        static DBReference()
+        static DbReference()
         {
-            MongoConfiguration.Initialize(c => c.For<DBReference<T>>(dbr =>
+            MongoConfiguration.Initialize(c => c.For<DbReference<T>>(dbr =>
                                                                       {
                                                                           dbr.ForProperty(d => d.Collection).UseAlias("$ref");
                                                                           dbr.ForProperty(d => d.DatabaseName).UseAlias("$db");
-                                                                          dbr.ForProperty(d => d.ID).UseAlias("$id");
+                                                                          dbr.ForProperty(d => d.Id).UseAlias("$id");
                                                                       }));
         }
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public DBReference()
+        public DbReference()
         {
         }
 
@@ -33,9 +33,9 @@ namespace Norm.BSON.DbTypes
         /// Constructor for easier instantiation of db references.
         /// </summary>
         /// <param name="id">The id of the referenced document.</param>
-        public DBReference(ObjectId id)
+        public DbReference(ObjectId id)
         {
-            ID = id;
+            Id = id;
             Collection = MongoConfiguration.GetCollectionName(typeof(T));
         }
 
@@ -47,7 +47,7 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// The ID of the referenced object.
         /// </summary>
-        public ObjectId ID { get; set; }
+        public ObjectId Id { get; set; }
 
         /// <summary>
         /// The name of the db where the reference is stored.
@@ -68,7 +68,7 @@ namespace Norm.BSON.DbTypes
         /// </returns>
         public T Fetch(Func<MongoCollection<T>> referenceCollection)
         {
-            return referenceCollection().FindOne(new { _id = ID });
+            return referenceCollection().FindOne(new { _id = Id });
         }
 
         /// <summary>

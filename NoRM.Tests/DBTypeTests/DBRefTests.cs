@@ -4,9 +4,9 @@ using Xunit;
 
 namespace Norm.Tests
 {
-    public class DBRefTests
+    public class DbRefTests
     {
-        public DBRefTests()
+        public DbRefTests()
         {
             using (var session = new Session())
             {
@@ -16,7 +16,7 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void DBRefMapsToOtherDocumentsByOid()
+        public void DbRefMapsToOtherDocumentsByOid()
         {
             const string databaseName = "NormTests";
             var id = ObjectId.NewObjectId();
@@ -25,7 +25,7 @@ namespace Norm.Tests
             {
                 session.Add(new Product { _id = id, Name = "RefProduct" });
 
-            	var productReference = new DBReference<Product>(id);
+            	var productReference = new DbReference<Product>(id);
 
                 session.Add(new ProductReference
                     {
