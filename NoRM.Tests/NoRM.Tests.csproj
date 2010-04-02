@@ -87,6 +87,7 @@
     <Compile Include="ConnectionsTests\PooledConnectionProviderTests.cs" />
     <Compile Include="ConnectionsTests\QueuedConnectionProviderTests.cs" />
     <Compile Include="DBTypeTests\DBRefTests.cs" />
+    <Compile Include="DBTypeTests\GridFSTests.cs" />
     <Compile Include="DBTypeTests\ObjectIdTests.cs" />
     <Compile Include="LinqTests\LinqAggregates.cs" />
     <Compile Include="LinqTests\LinqDeepGraph.cs" />

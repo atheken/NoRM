@@ -10,7 +10,7 @@ namespace Norm
     internal class PooledConnectionProvider : ConnectionProvider
     {
         private readonly ConnectionStringBuilder _builder;
-        private readonly Queue<IConnection> _freeConnections = new Queue<IConnection>();
+        private readonly Stack<IConnection> _freeConnections = new Stack<IConnection>();
         private readonly List<IConnection> _invalidConnections = new List<IConnection>();
         private readonly int _lifetime;
         private readonly object _lock = new object();
@@ -52,7 +52,7 @@ namespace Norm
             {
                 if (_freeConnections.Count > 0)
                 {
-                    connection = _freeConnections.Dequeue();
+                    connection = _freeConnections.Pop();
                     _usedConnections.Add(connection);                    
                 }
                 else if (_freeConnections.Count + _usedConnections.Count >= _poolSize)
@@ -98,7 +98,7 @@ namespace Norm
             lock (_lock)
             {
                 _usedConnections.Remove(connection);
-                _freeConnections.Enqueue(connection);
+                _freeConnections.Push(connection);
                 Monitor.Pulse(_lock);
             }
         }
@@ -141,7 +141,7 @@ namespace Norm
                 {
                     if (IsAlive(freeConnection))
                     {
-                        _freeConnections.Enqueue(freeConnection);
+                        _freeConnections.Push(freeConnection);
                     }
                     else
                     {

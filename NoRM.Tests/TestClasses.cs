@@ -109,6 +109,10 @@ namespace Norm.Tests
         {
             get { return new MongoQuery<Product>(_provider); }
         }
+        public IQueryable<Thread> Threads
+        {
+            get { return new MongoQuery<Thread>(_provider); }
+        }
         public IQueryable<Post> Posts
         {
             get { return new MongoQuery<Post>(_provider); }
@@ -172,6 +176,22 @@ namespace Norm.Tests
         public IList<string> Tags { get; set; }
     }
 
+    internal class Post2
+    {
+        public Post2()
+        {
+            Id = ObjectId.NewObjectId();
+            Comments = new List<Comment>();
+            Tags = new List<string>();
+        }
+        public ObjectId Id { get; set; }
+        public string Title { get; set; }
+        public int Score { get; set; }
+        public IList<Comment> Comments { get; set; }
+        public IList<string> Tags { get; set; }
+    }
+
+
     internal class Comment
     {
         public string Text { get; set; }
@@ -198,7 +218,7 @@ namespace Norm.Tests
 
         public ObjectId Id { get; set; }
         public string Name { get; set; }
-        public DBReference[] ProductsOrdered { get; set; }
+        public DBReference<Product>[] ProductsOrdered { get; set; }
     }
 
     internal class Person
@@ -207,7 +227,7 @@ namespace Norm.Tests
         public string Name { get; set; }
         public Address Address { get; set; }
         public DateTime LastContact { get; set; }
-
+        public List<String> Relatives { get; set; }
         public Person()
         {
             Id = ObjectId.NewObjectId();
@@ -318,7 +338,38 @@ namespace Norm.Tests
             }
         }
     }
+    public class HashSetList
+    {
+        private HashSet<string> _names;
+        public ICollection<string> Names
+        {
+            get
+            {
+                if (_names == null)
+                {
+                    _names = new HashSet<string>();
+                }
+                return _names;
+            }
+        }
+    }
     public class DictionaryObject
+    {
+        private Dictionary<string, int> _lookup;
+        public Dictionary<string, int> Names
+        {
+            get
+            {
+                if (_lookup == null)
+                {
+                    _lookup = new Dictionary<string, int>();
+                }
+                return _lookup;
+            }
+            set { _lookup = value; }
+        }
+    }
+    public class IDictionaryObject
     {
         private IDictionary<string, int> _lookup;
         public IDictionary<string, int> Names
@@ -387,5 +438,14 @@ namespace Norm.Tests
         {
             return new PrivateConstructor {Name = name};
         }
+    }
+    
+    public class Forum
+    {
+        public ObjectId Id{ get; set;}
+    }
+    public class Thread
+    {
+        public ObjectId ForumId{ get; set;}   
     }
 }

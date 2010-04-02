@@ -12,7 +12,7 @@ namespace Norm.Tests
         private readonly MongoCollection<CheeseClubContact> _collection;
         public UpdateTests()
         {
-            _server = Mongo.ParseConnection("mongodb://localhost/NormTests?pooling=false");
+            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
             _collection = _server.GetCollection<CheeseClubContact>("CheeseClubContacts");
         }
         public void Dispose()

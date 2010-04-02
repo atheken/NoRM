@@ -51,7 +51,7 @@ namespace Norm.Tests
         public void Mongo_Configuration_Maps_Collection_Name_To_Alias()
         {
             MongoConfiguration.Initialize(r => r.For<User2>(user => user.UseCollectionNamed("User2Collection")));
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<User2>().Insert(new User2 { FirstName = "Test", LastName = "User" });
                 var user = mongo.GetCollection<User2>().Find().First();
@@ -66,7 +66,7 @@ namespace Norm.Tests
             MongoConfiguration.Initialize(r => r.AddMap<CustomMap>());
             MongoConfiguration.Initialize(r => r.AddMap<OtherMap>());
 
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<User>().Insert(new User { FirstName = "Test", LastName = "User" });
 

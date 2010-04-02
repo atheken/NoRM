@@ -14,6 +14,7 @@ namespace Norm.Protocol.Messages
     public class ReplyMessage<T> : Message, IDisposable
     {
         private List<T> _results = null;
+        private int _limit;
         private MongoOp _originalOperation;
         /// <summary>
         /// Initializes a new instance of the <see cref="ReplyMessage{T}"/> class.
@@ -22,7 +23,7 @@ namespace Norm.Protocol.Messages
         /// <param name="connection">The connection.</param>
         /// <param name="fullyQualifiedCollestionName">The fully Qualified Collestion Name.</param>
         /// <param name="reply">The reply.</param>
-        internal ReplyMessage(IConnection connection, string fullyQualifiedCollestionName, BinaryReader reply, MongoOp originalOperation)
+        internal ReplyMessage(IConnection connection, string fullyQualifiedCollestionName, BinaryReader reply, MongoOp originalOperation, int limit)
             : base(connection, fullyQualifiedCollestionName)
         {
             this._originalOperation = originalOperation;
@@ -30,6 +31,7 @@ namespace Norm.Protocol.Messages
             this._requestID = reply.ReadInt32();
             this._responseID = reply.ReadInt32();
             this._op = (MongoOp)reply.ReadInt32();
+            this._limit = limit;
             this.HasError = reply.ReadInt32() == 1 ? true : false;
             this.CursorID = reply.ReadInt64();
             this.CursorPosition = reply.ReadInt32();
@@ -97,10 +99,10 @@ namespace Norm.Protocol.Messages
                 {
                     yield return r;
                 }
-                if (this.CursorID != 0 && this._results.Count > 0)
+                if (this.CursorID != 0 && this._results.Count > 0 && this._limit - this._results.Count > 0)
                 {
                     this._addedReturns = new GetMoreMessage<T>(this._connection, 
-                        this._collection, this.CursorID).Execute();
+                        this._collection, this.CursorID, this._limit - this._results.Count).Execute();
                 }
                 if (this._addedReturns != null)
                 {

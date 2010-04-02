@@ -258,8 +258,7 @@ namespace Norm.BSON
                 object container = null;
                 if (property.Setter == null)
                 {
-                    var o = property.Getter(instance);
-                    container = o is IList || IsDictionary(property.Type) ? o : null;
+                    container = property.Getter(instance);                    
                 }
                 var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
                 if (container == null && value!=null)
@@ -288,30 +287,23 @@ namespace Norm.BSON
             }
 
             NewDocument(_reader.ReadInt32());
-            var isReadonly = false;
             var itemType = ListHelper.GetListItemType(listType);
-            var container = existingContainer == null ? ListHelper.CreateContainer(listType, itemType, out isReadonly) : (IList)existingContainer;
+            var isObject = typeof(object) == itemType;
+            var wrapper = BaseWrapper.Create(listType, itemType, existingContainer);
+
             while (!IsDone())
             {
                 var storageType = ReadType();
-
                 ReadName();
                 if (storageType == BSONTypes.Object)
                 {
                     NewDocument(_reader.ReadInt32());
                 }
-                var value = DeserializeValue(itemType, storageType);
-                container.Add(value);
+                var specificItemType = isObject ? _typeMap[storageType] : itemType;
+                var value = DeserializeValue(specificItemType, storageType);
+                wrapper.Add(value);
             }
-            if (listType.IsArray)
-            {
-                return ListHelper.ToArray((List<object>)container, itemType);
-            }
-            if (isReadonly)
-            {
-                return listType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, new[] { container.GetType() }, null).Invoke(new object[] { container });
-            }
-            return container;
+            return wrapper.Collection;
         }
 
         /// <summary>
@@ -323,7 +315,16 @@ namespace Norm.BSON
         /// </returns>
         private static bool IsDictionary(Type type)
         {
-            return type.IsGenericType && _IDictionaryType.IsAssignableFrom(type.GetGenericTypeDefinition());
+            var types = new List<Type>(type.GetInterfaces());
+            types.Insert(0, type);
+            foreach (var interfaceType in types)
+            {
+                if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                {
+                    return true;
+                }
+            }
+            return false; 
         }
 
         /// <summary>

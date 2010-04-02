@@ -16,7 +16,7 @@ namespace Norm.Tests.CollectionUpdateTests
         public UpdateModifiersTests()
         {
             var admin = new MongoAdmin("mongodb://localhost/admin?pooling=false&strict=true");
-            _server = Mongo.ParseConnection("mongodb://localhost/NormTests?pooling=false&strict=true");
+            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false&strict=true");
             _collection = _server.GetCollection<Post>("Posts");
             _buildInfo = admin.BuildInfo();
         }
