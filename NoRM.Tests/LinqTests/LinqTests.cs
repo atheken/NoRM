@@ -554,6 +554,21 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void FiltersBasedOnObjectIdInComplexQuery()
+        {
+            var targetId = ObjectId.NewObjectId();
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10, Available = new DateTime(2000, 2, 5) });
+                session.Add(new Product { Name = "Test2", Price = 22, Available = new DateTime(2000, 2, 6), _id = targetId });
+                session.Add(new Product { Name = "Test3", Price = 33, Available = new DateTime(2000, 2, 7) });
+                var products = session.Products.Where(p => p._id == targetId && p.Available.Day == 6).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(targetId, products[0]._id);
+            }
+        }
+
+        [Fact]
         public void FiltersBasedOnMagicObjectId()
         {
             var targetId = ObjectId.NewObjectId();
@@ -598,6 +613,5 @@ namespace Norm.Tests
 
             }
         }
-
     }
 }
