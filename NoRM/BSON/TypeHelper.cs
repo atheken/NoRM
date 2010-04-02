@@ -201,7 +201,7 @@ namespace Norm.BSON
                 var name = (property == idProperty && alias != "$id")
                                ? "$_id"
                                : alias;
-                magic.Add(name, new MagicProperty(property));
+                magic.Add(name, new MagicProperty(property, property.DeclaringType));
             }
 
             return magic;

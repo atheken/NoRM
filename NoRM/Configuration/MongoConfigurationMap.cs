@@ -79,7 +79,9 @@ namespace Norm.Configuration
             var map = MongoTypeConfiguration.PropertyMaps;
             var retval = propertyName;//default to the original.
 
-            if (this.IsIdPropertyForType(type, propertyName))
+            if (IsIdPropertyForType(type, propertyName)
+                && type.GetGenericTypeDefinition() != typeof(BSON.DbTypes.DbReference<>)
+                && type.GetGenericTypeDefinition() != typeof(BSON.DbTypes.DbReference<,>))
             {
                 retval = "_id";
             }

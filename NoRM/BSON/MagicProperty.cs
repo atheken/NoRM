@@ -18,13 +18,19 @@ namespace Norm.BSON
         /// Initializes a new instance of the <see cref="MagicProperty"/> class.
         /// </summary>
         /// <param name="property">The property.</param>
-        public MagicProperty(PropertyInfo property)
+        public MagicProperty(PropertyInfo property, Type declaringType)
         {
             _property = property;
             _ignoreIfNull = property.GetCustomAttributes(_ignoredIfNullType, true).Length > 0;
             Getter = CreateGetterMethod(property);
             Setter = CreateSetterMethod(property);
+            DeclaringType = declaringType;
         }
+
+        /// <summary>
+        /// The object that declared this property.
+        /// </summary>
+        public Type DeclaringType { get; private set; }
 
         /// <summary>
         /// Gets the property's underlying type.
