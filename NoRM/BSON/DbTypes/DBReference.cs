@@ -7,14 +7,51 @@ namespace Norm.BSON.DbTypes
     /// <summary>
     /// A DB-pointer to another document.
     /// </summary>
-    public class DbReference<T> : ObjectId where T : class, new()
+    /// <typeparam name="T">The type of document being referenced.</typeparam>
+    public class DbReference<T> : DbReference<T, ObjectId> where T : class, new()
     {
         /// <summary>
-        /// Initializes static members of the <see cref="DbReference{T}"/> class.
+        /// Initializes static members of the <see cref="DbReference{T,TId}"/> class.
         /// </summary>
         static DbReference()
         {
             MongoConfiguration.Initialize(c => c.For<DbReference<T>>(dbr =>
+            {
+                dbr.ForProperty(d => d.Collection).UseAlias("$ref");
+                dbr.ForProperty(d => d.DatabaseName).UseAlias("$db");
+                dbr.ForProperty(d => d.Id).UseAlias("$id");
+            }));
+        }
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public DbReference()
+        {
+        }
+
+        /// <summary>
+        /// Constructor for easier instantiation of db references.
+        /// </summary>
+        /// <param name="id">The id of the referenced document.</param>
+        public DbReference(ObjectId id) : base(id)
+        {
+        }
+    }
+
+    /// <summary>
+    /// A DB-pointer to another document.
+    /// </summary>
+    /// <typeparam name="T">The type of document being referenced.</typeparam>
+    /// <typeparam name="TId">The type of ID used by the document being referenced.</typeparam>
+    public class DbReference<T,TId> : ObjectId where T : class, new()
+    {
+        /// <summary>
+        /// Initializes static members of the <see cref="DbReference{T,TId}"/> class.
+        /// </summary>
+        static DbReference()
+        {
+            MongoConfiguration.Initialize(c => c.For<DbReference<T,TId>>(dbr =>
                                                                       {
                                                                           dbr.ForProperty(d => d.Collection).UseAlias("$ref");
                                                                           dbr.ForProperty(d => d.DatabaseName).UseAlias("$db");
@@ -33,7 +70,7 @@ namespace Norm.BSON.DbTypes
         /// Constructor for easier instantiation of db references.
         /// </summary>
         /// <param name="id">The id of the referenced document.</param>
-        public DbReference(ObjectId id)
+        public DbReference(TId id)
         {
             Id = id;
             Collection = MongoConfiguration.GetCollectionName(typeof(T));
@@ -47,7 +84,7 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// The ID of the referenced object.
         /// </summary>
-        public ObjectId Id { get; set; }
+        public TId Id { get; set; }
 
         /// <summary>
         /// The name of the db where the reference is stored.
