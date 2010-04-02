@@ -137,7 +137,7 @@ namespace Norm.Protocol.Messages
             {
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + conn.QueryTimeout.ToString());
             }
-            return new ReplyMessage<T>(conn, this._collection, new BinaryReader(new BufferedStream(stream)), this._op);
+            return new ReplyMessage<T>(conn, this._collection, new BinaryReader(new BufferedStream(stream)), this._op, this.NumberToTake);
         }
     }
 }

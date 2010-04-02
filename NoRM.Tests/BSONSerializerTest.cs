@@ -375,6 +375,17 @@ namespace Norm.Tests
             Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
             Assert.Equal(2, end.Names.ElementAt(0).Value);
         }
+        [Fact]
+        public void SerializesIDictionary()
+        {
+            var start = new IDictionaryObject();
+            start.Names.Add("Duncan Idaho", 2);
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<IDictionaryObject>(bytes);
+            Assert.Equal(1, end.Names.Count);
+            Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
+            Assert.Equal(2, end.Names.ElementAt(0).Value);
+        }
        
         [Fact]
         public void SerializesReadonlyDictionary()
