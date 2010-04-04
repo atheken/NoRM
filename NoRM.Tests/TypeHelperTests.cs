@@ -28,5 +28,21 @@ namespace Norm.Tests
 
 			Assert.Equal("Norm.Tests.InterfaceDiscriminatedClass, NoRM.Tests", helper.GetTypeDiscriminator());
 		}
+
+		[Fact]
+		public void Can_get_id_property_for_type()
+		{
+			var helper = TypeHelper.GetHelperForType(typeof(SuperClassObject));
+
+			Assert.NotNull(helper.FindIdProperty());
+		}
+
+		[Fact]
+		public void Can_get_id_property_for_type_when_the_identifier_attribute_is_declared_on_an_interface_and_property_does_not_have_default_name()
+		{
+			var helper = TypeHelper.GetHelperForType(typeof(DtoWithNonDefaultIdClass));
+
+			Assert.NotNull(helper.FindIdProperty());
+		}
 	}
 }

@@ -42,9 +42,8 @@ namespace Norm.BSON
         public TypeHelper(Type type)
         {
             _type = type;
-            var properties =
-                type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
-                    BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
+                                                BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
             _properties = LoadMagicProperties(properties, IdProperty(properties));
         }
 
@@ -213,10 +212,10 @@ namespace Norm.BSON
         /// <returns></returns>
         public string GetTypeDiscriminator()
         {
-        	var discriminatingType = MongoDiscriminatedAttribute.GetDiscriminatingTypeFor(_type);
+            var discriminatingType = MongoDiscriminatedAttribute.GetDiscriminatingTypeFor(_type);
             if (discriminatingType != null)
             {
-            	return String.Join(",", _type.AssemblyQualifiedName.Split(','), 0, 2);
+                return String.Join(",", _type.AssemblyQualifiedName.Split(','), 0, 2);
             }
 
             return null;

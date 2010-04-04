@@ -255,7 +255,7 @@ namespace Norm.BSON
                 }
 
                 if(instance == null)
-                    throw new MongoException("Could not find the type to instantiate in the document, and " + type.Name + " is an interface or abstract type.");
+                    throw new MongoException("Could not find the type to instantiate in the document, and " + type.Name + " is an interface or abstract type. Add a MongoDiscriminatedAttribute to the type or base type, or try to work with a concrete type next time.");
 
                 processedNonTypeProperties = true;
 

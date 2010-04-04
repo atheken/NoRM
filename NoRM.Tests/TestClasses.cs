@@ -468,6 +468,22 @@ namespace Norm.Tests
 
         public Guid Id { get; protected set; }
     }
+
+    internal interface IDTOWithNonDefaultId
+    {
+        [MongoIdentifier]
+        Guid MyId { get; }
+    }
+
+    internal class DtoWithNonDefaultIdClass : IDTOWithNonDefaultId
+    {
+        public DtoWithNonDefaultIdClass()
+        {
+            MyId = Guid.NewGuid();
+        }
+
+        public Guid MyId { get; protected set; }
+    }
     
     public class PrivateConstructor
     {
