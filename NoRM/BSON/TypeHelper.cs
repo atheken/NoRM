@@ -146,7 +146,11 @@ namespace Norm.BSON
         /// <returns></returns>
         public MagicProperty FindIdProperty()
         {
-            return _properties.ContainsKey("$_id") ? _properties["$_id"] : null;
+            return _properties.ContainsKey("$_id")
+                    ? _properties["$_id"]
+                    : _properties.ContainsKey("$id")
+                        ? _properties["$id"]
+                        : null;
         }
 
         /// <summary>
@@ -200,7 +204,7 @@ namespace Norm.BSON
                 var name = (property == idProperty && alias != "$id")
                                ? "$_id"
                                : alias;
-                magic.Add(name, new MagicProperty(property));
+                magic.Add(name, new MagicProperty(property, property.DeclaringType));
             }
 
             return magic;

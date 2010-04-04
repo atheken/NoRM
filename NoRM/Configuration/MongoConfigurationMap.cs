@@ -2,6 +2,7 @@
 using Norm.BSON;
 using System.Collections.Generic;
 using System.Reflection;
+using Norm.BSON.DbTypes;
 
 namespace Norm.Configuration
 {
@@ -62,6 +63,20 @@ namespace Norm.Configuration
         }
 
         /// <summary>
+        /// Checks to see if the object is a DbReference. If it is, we won't want to override $id to _id.
+        /// </summary>
+        /// <param name="type">The type of the object being serialized.</param>
+        /// <returns>True if the object is a DbReference, false otherwise.</returns>
+        private static bool IsDbReference(Type type)
+        {
+            return type.IsGenericType &&
+                   (
+                    type.GetGenericTypeDefinition() == typeof(DbReference<>) ||
+                    type.GetGenericTypeDefinition() == typeof(DbReference<,>)
+                   );
+        }
+
+        /// <summary>
         /// Gets the property alias for a type.
         /// </summary>
         /// <remarks>
@@ -79,7 +94,7 @@ namespace Norm.Configuration
             var map = MongoTypeConfiguration.PropertyMaps;
             var retval = propertyName;//default to the original.
 
-            if (this.IsIdPropertyForType(type, propertyName))
+            if (IsIdPropertyForType(type, propertyName) && !IsDbReference(type))
             {
                 retval = "_id";
             }

@@ -99,7 +99,7 @@ namespace Norm.BSON
         /// Determines whether there is more to read.
         /// </summary>
         /// <returns>
-        ///     <c>true</c> if this instance is read; otherwise, <c>false</c>.
+        /// 	<c>true</c> if this instance is read; otherwise, <c>false</c>.
         /// </returns>
         private bool IsDone()
         {
@@ -222,15 +222,8 @@ namespace Norm.BSON
         /// <returns></returns>
         private object ReadObject(Type type)
         {
-            bool processedNonTypeProperties = false;
-            object instance = null;
-            TypeHelper typeHelper = null;
-
-            if (type.IsInterface == false && type.IsAbstract == false)
-            {
-                instance = Activator.CreateInstance(type, true);
-                typeHelper = TypeHelper.GetHelperForType(type);
-            }
+            var instance = Activator.CreateInstance(type, true);
+            var typeHelper = TypeHelper.GetHelperForType(type);
             while (true)
             {
                 var storageType = ReadType();
@@ -239,29 +232,10 @@ namespace Norm.BSON
                 {
                     HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
-
-                // This should work, because the serializer always serialises this property first
-                if(name == "__type")
-                {
-                    if(processedNonTypeProperties)
-                        throw new MongoException("Found type declaration after processing properties - data loss would occur - the object has been incorrectly serialized");
-
-                    var typeName = ReadString();
-                    type = Type.GetType(typeName, true);
-                    typeHelper = TypeHelper.GetHelperForType(type);
-                    instance = Activator.CreateInstance(type, true);
-
-                    continue;
-                }
-
-                if(instance == null)
-                    throw new MongoException("Could not find the type to instantiate in the document, and " + type.Name + " is an interface or abstract type. Add a MongoDiscriminatedAttribute to the type or base type, or try to work with a concrete type next time.");
-
-                processedNonTypeProperties = true;
-
-                var property = (name == "_id")
-                                   ? typeHelper.FindIdProperty()
-                                   : typeHelper.FindProperty(name);
+                
+                var property = (name == "_id" || name == "$id")
+                    ? typeHelper.FindIdProperty()
+                    : typeHelper.FindProperty(name);
                
                 if (property == null)
                 {
@@ -279,13 +253,13 @@ namespace Norm.BSON
                     }
                     else
                     {
-                        NewDocument(length);
-                    }
+                        NewDocument(length);    
+                    }                                        
                 }
                 object container = null;
                 if (property.Setter == null)
                 {
-                    container = property.Getter(instance);
+                    container = property.Getter(instance);                    
                 }
                 var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
                 if (container == null && value!=null)
@@ -338,7 +312,7 @@ namespace Norm.BSON
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>
-        ///     <c>true</c> if the specified type is a dictionary; otherwise, <c>false</c>.
+        /// 	<c>true</c> if the specified type is a dictionary; otherwise, <c>false</c>.
         /// </returns>
         private static bool IsDictionary(Type type)
         {

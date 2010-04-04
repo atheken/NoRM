@@ -224,7 +224,19 @@ namespace Norm.Tests
 
         public ObjectId Id { get; set; }
         public string Name { get; set; }
-        public DBReference<Product>[] ProductsOrdered { get; set; }
+        public DbReference<Product>[] ProductsOrdered { get; set; }
+    }
+
+    internal class User
+    {
+        public string Id{ get; set; }
+        public string EmailAddress{ get; set; }
+    }
+
+    internal class Role
+    {
+        public string Id{ get; set; }
+        public List<DbReference<User,string>> Users{ get; set; }
     }
 
     internal class Person
