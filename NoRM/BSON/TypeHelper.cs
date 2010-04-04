@@ -213,8 +213,11 @@ namespace Norm.BSON
         /// <returns></returns>
         public string GetTypeDiscriminator()
         {
-            if (_type.GetCustomAttributes(BsonHelper.MongoDiscriminatedAttribute, true).Length > 0)
-                return _type.AssemblyQualifiedName;
+        	var discriminatingType = MongoDiscriminatedAttribute.GetDiscriminatingTypeFor(_type);
+            if (discriminatingType != null)
+            {
+            	return String.Join(",", _type.AssemblyQualifiedName.Split(','), 0, 2);
+            }
 
             return null;
         }

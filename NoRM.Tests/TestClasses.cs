@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Norm.Attributes;
+using Norm.Configuration;
 using Norm.Linq;
 using Norm.Responses;
 using Norm.BSON.DbTypes;
@@ -132,7 +133,12 @@ namespace Norm.Tests
             T result = default(T);
             using (MapReduce mr = _provider.Server.CreateMapReduce())
             {
-                MapReduceResponse response = mr.Execute(new MapReduceOptions(typeof(T).Name) { Map = map, Reduce = reduce });
+                MapReduceResponse response =
+                    mr.Execute(new MapReduceOptions(MongoConfiguration.GetCollectionName(typeof (T)))
+                                   {
+                                       Map = map,
+                                       Reduce = reduce
+                                   });
                 MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
                 MapReduceResult<T> r = coll.Find().FirstOrDefault();
                 result = r.Value;
@@ -152,7 +158,7 @@ namespace Norm.Tests
 
         public void Drop<T>()
         {
-            _provider.DB.DropCollection(typeof(T).Name);
+            _provider.DB.DropCollection(MongoConfiguration.GetCollectionName(typeof(T)));
         }
 
         public void CreateCappedCollection(string name)
@@ -429,9 +435,38 @@ namespace Norm.Tests
     }
 
     [MongoDiscriminated]
-    public class DiscriminatedChildGeneralDTO : GeneralDTO
+    public class SuperClassObject
     {
-        public bool IsUnder9000 { get; set; }
+        public SuperClassObject()
+        {
+            Id = Guid.NewGuid();
+        }
+
+        [MongoIdentifier]
+        public Guid Id { get; protected set; }
+        public string Title { get; set; }
+    }
+
+    public class SubClassedObject : SuperClassObject
+    {
+        public bool ABool { get; set; }
+    }
+
+    [MongoDiscriminated]
+    internal interface IDiscriminated
+    {
+        [MongoIdentifier]
+        Guid Id { get; }
+    }
+
+    internal class InterfaceDiscriminatedClass : IDiscriminated
+    {
+        public InterfaceDiscriminatedClass()
+        {
+            Id = Guid.NewGuid();
+        }
+
+        public Guid Id { get; protected set; }
     }
     
     public class PrivateConstructor
@@ -449,8 +484,9 @@ namespace Norm.Tests
     {
         public ObjectId Id{ get; set;}
     }
+
     public class Thread
     {
-        public ObjectId ForumId{ get; set;}   
+        public ObjectId ForumId{ get; set; }
     }
 }
