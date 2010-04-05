@@ -40,13 +40,14 @@ namespace Norm.Tests
                 Assert.Equal(2, result);
             }
         }
+   
         [Fact]
-        public void CountShouldReturn2WhenThreeProductsInDBAndWhereIdMatches()
+        public void Count_Should_Return_One_When_Id_Matches()
         {
             var target = ObjectId.NewObjectId();
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10, _id = target });
+                session.Add(new Product { Name = "1", Price = 40, _id = target });
                 session.Add(new Product { Name = "2", Price = 22, _id = ObjectId.NewObjectId() });
                 session.Add(new Product { Name = "3", Price = 33, _id = ObjectId.NewObjectId() });
                 var result = session.Products.Where(x => x._id == target).Count();

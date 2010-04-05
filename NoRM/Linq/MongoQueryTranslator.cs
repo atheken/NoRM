@@ -511,8 +511,8 @@ namespace Norm.Linq
                 if (IsCallableMethod(m.Method.Name))
                 {
                     return HandleMethodCall(m);
-                    }
                 }
+            }
 
             // for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));

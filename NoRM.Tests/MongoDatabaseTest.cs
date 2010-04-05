@@ -157,6 +157,7 @@ namespace Norm.Tests
         [Fact]
         public void GetProfilingInformation()
         {
+            //this seems to vary a lot from version to version and who knows what else
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 mongo.Database.SetProfileLevel(Protocol.SystemMessages.ProfileLevel.AllOperations);
