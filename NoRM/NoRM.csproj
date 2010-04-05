@@ -72,6 +72,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\MongoDiscriminatedAttribute.cs" />
     <Compile Include="Attributes\MongoIdentifierAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreIfNullAttribute.cs" />
@@ -80,7 +81,7 @@
     <Compile Include="BSON\Command.cs" />
     <Compile Include="BSON\DbTypes\GridFile.cs" />
     <Compile Include="BSON\DbTypes\ObjectId.cs" />
-    <Compile Include="BSON\DbTypes\DBReference.cs" />
+    <Compile Include="BSON\DbTypes\DbReference.cs" />
     <Compile Include="BSON\DbTypes\ObjectIdTypeConverter.cs" />
     <Compile Include="BSON\DbTypes\ScopedCode.cs" />
     <Compile Include="BSON\BsonSerializer.cs" />

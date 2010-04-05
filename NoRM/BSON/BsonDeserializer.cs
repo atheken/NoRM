@@ -233,8 +233,9 @@ namespace Norm.BSON
                     HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
                 
-                var property = (name == "_id") ? typeHelper.FindIdProperty() :
-                    typeHelper.FindProperty(name);
+                var property = (name == "_id" || name == "$id")
+                    ? typeHelper.FindIdProperty()
+                    : typeHelper.FindProperty(name);
                
                 if (property == null)
                 {

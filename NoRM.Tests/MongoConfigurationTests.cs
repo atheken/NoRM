@@ -208,7 +208,32 @@ namespace Norm.Tests
             }
         }
 
+        [Fact]
+        public void Can_correctly_determine_collection_name()
+        {
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(SuperClassObject));
+
+            Assert.Equal("SuperClassObject", collectionName);
+        }
+
+        [Fact]
+        public void Can_correctly_determine_collection_name_from_discriminated_sub_class()
+        {
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(SubClassedObject));
+
+            Assert.Equal("SuperClassObject", collectionName);
+        }
+
+        [Fact]
+        public void Can_correctly_determine_collection_name_when_discriminator_is_on_an_interface()
+        {
+			var collectionName = MongoConfiguration.GetCollectionName(typeof(InterfaceDiscriminatedClass));
+
+            Assert.Equal("IDiscriminated", collectionName);
+        }
+
         #region Test classes
+
         internal class Shoppers : MongoQuery<Shopper>, IDisposable
         {
             private readonly MongoQueryProvider _provider;
@@ -310,6 +335,7 @@ namespace Norm.Tests
             public string FirstName { get; set; }
             public string LastName { get; set; }
         }
+
         public class ShopperMap : MongoConfigurationMap
         {
             public ShopperMap()
@@ -381,6 +407,7 @@ namespace Norm.Tests
                 this.For<Product>(cfg => cfg.ForProperty(p => p.Name).UseAlias("productname"));
             }
         }
+
         #endregion
     }
 }

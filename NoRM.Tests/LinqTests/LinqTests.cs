@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Norm.Linq;
 using Xunit;
 using Norm.Configuration;
 
@@ -642,8 +643,80 @@ namespace Norm.Tests
                 session.Add(post1);
                 session.Add(post2);
                 var found = session.Posts.Where(p => p.Comments.Any(a => a.Text == "commentA")).SingleOrDefault();
+                
                 Assert.Equal("Second", found.Title);
+            }
+        }
 
+        [Fact]
+        public void CanQueryAndReturnSubClassedObjects()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<SuperClassObject>();
+
+                session.Add<SuperClassObject>(new SubClassedObject { Title = "Find This", ABool = true });
+                session.Add<SuperClassObject>(new SubClassedObject { Title = "Don't Find This", ABool = false });
+
+                var query = new MongoQuery<SuperClassObject>(session.Provider);
+
+                var dtos = query.Where(dto => dto.Title == "Find This").ToList();
+
+                Assert.Equal(1, dtos.Count);
+                Assert.Equal("Find This", dtos[0].Title);
+            }
+        }
+
+        [Fact]
+        public void CanQueryAndReturnSubClassedObjects_EvenWhenAddedBySubClass()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<SuperClassObject>();
+
+                session.Add(new SubClassedObject());
+
+                var query = new MongoQuery<SuperClassObject>(session.Provider);
+
+                var dtos = query.ToList();
+
+                Assert.Equal(1, dtos.Count);
+            }
+        }
+
+        [Fact]
+        public void CanQueryAndReturnSubClassedObjects_EvenWhenQueriedBySubClass()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<SuperClassObject>();
+
+                session.Add(new SubClassedObject());
+
+                var query = new MongoQuery<SubClassedObject>(session.Provider);
+
+                var dtos = query.ToList();
+
+                Assert.Equal(1, dtos.Count);
+            }
+        }
+
+        [Fact]
+        public void CanQueryAndReturnSubClassedObjects_EvenWhenQueriedByInterface()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<IDiscriminated>();
+
+                var obj = new InterfaceDiscriminatedClass();
+                session.Add(obj);
+
+                var query = new MongoQuery<IDiscriminated>(session.Provider);
+
+                var dtos = query.ToList();
+
+                Assert.Equal(1, dtos.Count);
+                Assert.Equal(obj.Id, dtos.Single().Id);
             }
         }
     }
