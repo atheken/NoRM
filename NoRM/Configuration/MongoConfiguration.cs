@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using Norm.BSON;
 
 namespace Norm.Configuration
 {
@@ -96,7 +98,13 @@ namespace Norm.Configuration
         /// <returns>Type's Collection name</returns>
         internal static string GetCollectionName(Type type)
         {
-            return _configuration != null ? _configuration.GetConfigurationMap().GetCollectionName(type) : type.Name;
+        	var discriminatingType = MongoDiscriminatedAttribute.GetDiscriminatingTypeFor(type);
+            if (discriminatingType != null)
+                return discriminatingType.Name;
+
+            return _configuration != null
+                       ? _configuration.GetConfigurationMap().GetCollectionName(type)
+                       : type.Name;
         }
 
         /// <summary>

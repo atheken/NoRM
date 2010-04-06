@@ -233,8 +233,9 @@ namespace Norm.BSON
                     HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
                 
-                var property = (name == "_id") ? typeHelper.FindIdProperty() :
-                    typeHelper.FindProperty(name);
+                var property = (name == "_id" || name == "$id")
+                    ? typeHelper.FindIdProperty()
+                    : typeHelper.FindProperty(name);
                
                 if (property == null)
                 {
@@ -315,7 +316,16 @@ namespace Norm.BSON
         /// </returns>
         private static bool IsDictionary(Type type)
         {
-            return type.IsGenericType && _IDictionaryType.IsAssignableFrom(type.GetGenericTypeDefinition());
+            var types = new List<Type>(type.GetInterfaces());
+            types.Insert(0, type);
+            foreach (var interfaceType in types)
+            {
+                if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                {
+                    return true;
+                }
+            }
+            return false; 
         }
 
         /// <summary>

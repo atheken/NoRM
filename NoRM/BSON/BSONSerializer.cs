@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Norm.BSON.DbTypes;
 using Norm.Configuration;
 
 namespace Norm.BSON
@@ -136,6 +137,20 @@ namespace Norm.BSON
         }
 
         /// <summary>
+        /// Checks to see if the object is a DbReference. If it is, we won't want to override $id to _id.
+        /// </summary>
+        /// <param name="type">The type of the object being serialized.</param>
+        /// <returns>True if the object is a DbReference, false otherwise.</returns>
+        private static bool IsDbReference(Type type)
+        {
+            return type.IsGenericType &&
+                   (
+                    type.GetGenericTypeDefinition() == typeof (DbReference<>) ||
+                    type.GetGenericTypeDefinition() == typeof (DbReference<,>)
+                   );
+        }
+
+        /// <summary>
         /// Actually write the property bytes.
         /// </summary>
         /// <param name="document">The document.</param>
@@ -144,10 +159,16 @@ namespace Norm.BSON
             var typeHelper = TypeHelper.GetHelperForType(document.GetType());
             var idProperty = typeHelper.FindIdProperty();
             var documentType = document.GetType();
+            var discriminator = typeHelper.GetTypeDiscriminator();
+
+            if (String.IsNullOrEmpty(discriminator) == false)
+            {
+                SerializeMember("__type", discriminator);
+            }
 
             foreach (var property in typeHelper.GetProperties())
             {
-                var name = property == idProperty
+                var name = property == idProperty && !IsDbReference(property.DeclaringType)
                                ? "_id"
                                : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
 

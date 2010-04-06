@@ -11,6 +11,7 @@ using Norm.Protocol.SystemMessages.Requests;
 using Norm.Responses;
 using TypeHelper=Norm.BSON.TypeHelper;
 using Norm.Commands.Modifiers;
+
 namespace Norm.Collections
 {
     /// <summary>
@@ -380,7 +381,7 @@ namespace Norm.Collections
         /// <param name="orderBy">Passing null for this means it will be ignored.</param>
         /// <param name="limit">The maximum number of documents to return.</param>
         /// <param name="skip">The number to skip before returning any.</param>
-        /// <param name="fullyqualifiedName">The collection from which to pull the documents.</param>
+        /// <param name="fullyQualifiedName">The collection from which to pull the documents.</param>
         /// <returns></returns>
         public IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName)
         {

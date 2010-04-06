@@ -18,7 +18,7 @@ namespace Norm.BSON
 
         private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);
         private readonly IDictionary<string, MagicProperty> _properties;
-        //private readonly Type _type;
+        private readonly Type _type;
 
         static TypeHelper()
         {
@@ -41,10 +41,9 @@ namespace Norm.BSON
         /// <param name="type">The type.</param>
         public TypeHelper(Type type)
         {
-            //_type = type;
-            var properties =
-                type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
-                    BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+            _type = type;
+            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
+                                                BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
             _properties = LoadMagicProperties(properties, IdProperty(properties));
         }
 
@@ -147,7 +146,11 @@ namespace Norm.BSON
         /// <returns></returns>
         public MagicProperty FindIdProperty()
         {
-            return _properties.ContainsKey("$_id") ? _properties["$_id"] : null;
+            return _properties.ContainsKey("$_id")
+                    ? _properties["$_id"]
+                    : _properties.ContainsKey("$id")
+                        ? _properties["$id"]
+                        : null;
         }
 
         /// <summary>
@@ -201,10 +204,25 @@ namespace Norm.BSON
                 var name = (property == idProperty && alias != "$id")
                                ? "$_id"
                                : alias;
-                magic.Add(name, new MagicProperty(property));
+                magic.Add(name, new MagicProperty(property, property.DeclaringType));
             }
 
             return magic;
+        }
+
+        /// <summary>
+        /// Determines the discriminator to use when serialising the type
+        /// </summary>
+        /// <returns></returns>
+        public string GetTypeDiscriminator()
+        {
+            var discriminatingType = MongoDiscriminatedAttribute.GetDiscriminatingTypeFor(_type);
+            if (discriminatingType != null)
+            {
+                return String.Join(",", _type.AssemblyQualifiedName.Split(','), 0, 2);
+            }
+
+            return null;
         }
     }
 }

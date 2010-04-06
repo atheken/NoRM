@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Norm.Linq.ExpressionVisitor">
+    <Position X="5.5" Y="5.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>IEAABACAAAYwBAQAAAAAISDAAAAEAgACAFAAAAgEQAA=</HashCode>
+      <FileName>Linq\ExpressionVisitor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Norm.Linq.MongoQueryTranslator">
+    <Position X="11.5" Y="5.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AABABAABAAQhEAAChAAEASAACAgAABAAABAEgwwAAEA=</HashCode>
+      <FileName>Linq\MongoQueryTranslator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Norm.Linq.LinqExtensions">
+    <Position X="3.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAAAAAAAgAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Linq\LinqExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Norm.Linq.MapReduceResult&lt;T&gt;">
+    <Position X="8" Y="0.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Linq\MapReduceResult.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Norm.Linq.MongoQuery&lt;T&gt;" BaseTypeListCollapsed="true">
+    <Position X="11.5" Y="1.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAaAAAAAAAAAhAEAAAAAAAABAAAABAEAAAAgEAAgAA=</HashCode>
+      <FileName>Linq\MongoQuery.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Norm.Linq.MongoQueryProvider" BaseTypeListCollapsed="true">
+    <Position X="8" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAASAAQAQAAAAAAAAAAAIAAAAAAAAgAAABA=</HashCode>
+      <FileName>Linq\MongoQueryProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Norm.Linq.PartialEvaluator">
+    <Position X="3.75" Y="0.75" Width="1.5" />
+    <NestedTypes>
+      <Class Name="Norm.Linq.PartialEvaluator.Nominator" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Linq\PartialEvaluator.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Norm.Linq.PartialEvaluator.SubtreeEvaluator" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Linq\PartialEvaluator.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Linq\PartialEvaluator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Norm.Linq.LinqTypeHelper">
+    <Position X="5.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ggAAAAAAAAAAAAAAgAAAAAAAAAQAAAAEAAAAAACQAAA=</HashCode>
+      <FileName>Linq\LinqTypeHelper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Norm.Linq.IMongoQuery">
+    <Position X="1.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Linq\IMongoQuery.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Arial" Size="8.25" />
+</ClassDiagram>

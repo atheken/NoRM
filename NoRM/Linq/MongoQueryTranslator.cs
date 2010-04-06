@@ -304,7 +304,7 @@ namespace Norm.Linq
                     result =_lastOperator;
                     break;
                 case ExpressionType.NotEqual:
-                    _lastOperator = " <> ";
+                    _lastOperator = " != ";
                     result =_lastOperator;
                     break;
                 case ExpressionType.LessThan:
@@ -339,12 +339,6 @@ namespace Norm.Linq
         /// </exception>
         protected override Expression VisitBinary(BinaryExpression b)
         {
-
-            //specific for "chained" Where() calls, where a Where() is appended
-            //to an IQueryable on top of another IQueryable
-            if (_whereWritten) {
-                _sb.Append(" && ");
-            }
             ConditionalCount++;
             _sb.Append("(");
             Visit(b.Left);
@@ -405,7 +399,11 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            _sb.AppendFormat("ObjectId('{0}')", c.Value);
+                            if (_lastOperator == " === ")
+                            {
+                                _sb.Remove(_sb.Length - 2, 1);
+                            }
+                            _sb.AppendFormat("'{0}'", c.Value);
                             SetFlyValue(c.Value);
                         }
                         else if (c.Value is Guid)
@@ -445,11 +443,17 @@ namespace Norm.Linq
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
                 var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                //specific for "chained" Where() calls, where a Where() is appended
+                //to an IQueryable on top of another IQueryable
+                if (_whereWritten) {
+                    _sb.Append(" && ");
+                }
                 Visit(lambda.Body);
                 _whereWritten = true;
                 Visit(m.Arguments[0]);
                 return m;
             }
+            _whereWritten = false;
             if (m.Method.DeclaringType == typeof(string))
             {
                 IsComplex = true;
@@ -468,7 +472,7 @@ namespace Norm.Linq
                         Visit(m.Object);
                         _sb.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        _sb.Append(")>0)");
+                        _sb.Append(")>-1)");
                         return m;
                     case "IndexOf":
                         Visit(m.Object);
@@ -511,8 +515,8 @@ namespace Norm.Linq
                 if (IsCallableMethod(m.Method.Name))
                 {
                     return HandleMethodCall(m);
-                    }
                 }
+            }
 
             // for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
@@ -634,7 +638,7 @@ namespace Norm.Linq
                         case " >= ":
                             FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
                             break;
-                        case " <> ":
+                        case " != ":
                             FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
                             break;
                     }

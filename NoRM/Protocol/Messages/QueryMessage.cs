@@ -1,4 +1,6 @@
 ﻿
+using Norm.Configuration;
+
 namespace Norm.Protocol.Messages
 {
     /// <summary>
@@ -15,7 +17,7 @@ namespace Norm.Protocol.Messages
         /// <param name="connection">
         /// The connection.
         /// </param>
-        public QueryMessage(IConnection connection) : base(connection, typeof(T).Name)
+        public QueryMessage(IConnection connection) : base(connection, MongoConfiguration.GetCollectionName(typeof(T)))
         {
         }
 

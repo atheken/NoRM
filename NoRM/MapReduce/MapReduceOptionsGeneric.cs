@@ -1,4 +1,6 @@
 ﻿
+using Norm.Configuration;
+
 namespace Norm
 {
     /// <summary>
@@ -12,7 +14,7 @@ namespace Norm
         /// </summary>
         public MapReduceOptions()
         {
-            CollectionName = typeof(T).Name;
+            CollectionName = MongoConfiguration.GetCollectionName(typeof(T));
         }
     }
 }

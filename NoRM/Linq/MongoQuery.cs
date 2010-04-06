@@ -53,7 +53,8 @@ namespace Norm.Linq
         /// <param name="provider">
         /// The provider.
         /// </param>
-        public MongoQuery(MongoQueryProvider provider) : this(provider, typeof(T).Name)
+        public MongoQuery(MongoQueryProvider provider)
+			: this(provider, MongoConfiguration.GetCollectionName(typeof(T)))
         {
         }
 
