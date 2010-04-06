@@ -708,28 +708,25 @@ namespace Norm.Linq
             {
                 case "ThenBy":
                     HandleSort(m.Arguments[1]);
-                    Visit(m.Arguments[0]);
-                    return m;
+                    break;
                 case "OrderBy":
                     HandleSort(m.Arguments[1]);
-                    return m;
+                    break;
                 case "ThenByDescending":
                     HandleDescendingSort(m.Arguments[1]);
-                    Visit(m.Arguments[0]);
-                    return m;
+                    break;
                 case "OrderByDescending":
                     HandleDescendingSort(m.Arguments[1]);
-                    return m;
+                    break;
                 case "Skip":
                     HandleSkip(m.Arguments[1]);
-                    return m;
+                    break;
                 case "Take":
                     HandleTake(m.Arguments[1]);
-                    Visit(m.Arguments[0]);
-                    return m;
+                    break;    
                 case "Any":
                     HandleAny(m);
-                    return m;
+                    break; 
                 default:
                     this.Take = 1;
                     this.MethodCall = m.Method.Name;
@@ -751,6 +748,8 @@ namespace Norm.Linq
                     }
                     break;
             }
+
+            Visit(m.Arguments[0]);
 
             return m;
         }

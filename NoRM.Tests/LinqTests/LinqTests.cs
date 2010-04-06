@@ -133,7 +133,7 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void OneProductsShouldBeReturnedWhenFiveInDBOrderedByPriceThenSkipThreeAndTakeOne()
+        public void OneProductShouldBeReturnedWhenFiveInDBOrderedByPriceThenSkipThreeAndTakeOne()
         {
             using (var session = new Session())
             {
@@ -144,6 +144,23 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "1", Price = 50 });
                 var products = session.Products.OrderByDescending(x => x.Price).Skip(3).Take(1).ToList();
                 Assert.Equal(22, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
+        public void OneProductShouldBeReturnedWhenFiveInDBOrderedByPriceAndWhereThenSkipTwoAndTakeOne()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 10 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                session.Add(new Product { Name = "6", Price = 50 });
+                session.Add(new Product { Name = "5", Price = 50 });
+                var products = session.Products.OrderBy(x => x.Price).ThenByDescending(x => x.Name).Where(x => x.Price == 50).Skip(1).Take(1).ToList();
+                Assert.Equal(50, products[0].Price);
+                Assert.Equal("5", products[0].Name);
                 Assert.Equal(1, products.Count);
             }
         }
@@ -555,6 +572,22 @@ namespace Norm.Tests
                 Assert.Equal(22.0, products[0].Price);
                 Assert.Equal(33.0, products[1].Price);
                 Assert.Equal(2, products.Count);
+            }
+        }
+
+        [Fact]
+        public void TwoProductsofFourShouldBeReturnedWithSkipTakeAndWhere()
+        {
+            using (var session = new Session())
+            {
+
+                session.Add(new Product { Name = "Test", Price = 10 });
+                session.Add(new Product { Name = "Test1", Price = 22 });
+                session.Add(new Product { Name = "Test", Price = 33 });
+                session.Add(new Product { Name = "Test", Price = 44 });
+                var products = session.Products.Where(x => x.Name == "Test").Skip(1).Take(2).ToList();
+                Assert.Equal(33, products[0].Price);
+                Assert.Equal(44, products[1].Price);
                 Assert.Equal(2, products.Count);
             }
         }
