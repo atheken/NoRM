@@ -222,8 +222,15 @@ namespace Norm.BSON
         /// <returns></returns>
         private object ReadObject(Type type)
         {
-            var instance = Activator.CreateInstance(type, true);
-            var typeHelper = TypeHelper.GetHelperForType(type);
+            bool processedNonTypeProperties = false;
+            object instance = null;
+            TypeHelper typeHelper = null;
+
+            if (type.IsInterface == false && type.IsAbstract == false)
+            {
+                instance = Activator.CreateInstance(type, true);
+                typeHelper = TypeHelper.GetHelperForType(type);
+            }
             while (true)
             {
                 var storageType = ReadType();
@@ -232,6 +239,25 @@ namespace Norm.BSON
                 {
                     HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
+
+                // This should work, because the serializer always serialises this property first
+                if (name == "__type")
+                {
+                    if (processedNonTypeProperties)
+                        throw new MongoException("Found type declaration after processing properties - data loss would occur - the object has been incorrectly serialized");
+
+                    var typeName = ReadString();
+                    type = Type.GetType(typeName, true);
+                    typeHelper = TypeHelper.GetHelperForType(type);
+                    instance = Activator.CreateInstance(type, true);
+
+                    continue;
+                }
+
+                if (instance == null)
+                    throw new MongoException("Could not find the type to instantiate in the document, and " + type.Name + " is an interface or abstract type. Add a MongoDiscriminatedAttribute to the type or base type, or try to work with a concrete type next time.");
+
+                processedNonTypeProperties = true;
                 
                 var property = (name == "_id" || name == "$id")
                     ? typeHelper.FindIdProperty()
