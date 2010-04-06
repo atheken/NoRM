@@ -18,6 +18,7 @@ namespace Norm.BSON
         /// Initializes a new instance of the <see cref="MagicProperty"/> class.
         /// </summary>
         /// <param name="property">The property.</param>
+        /// <param name="declaringType"></param>
         public MagicProperty(PropertyInfo property, Type declaringType)
         {
             _property = property;

@@ -14,27 +14,51 @@ namespace Norm.Linq
     /// </summary>
     public class MongoQueryTranslator : ExpressionVisitor
     {
+        /// <summary>TODO::Description.</summary>
         private int _takeCount = Int32.MaxValue;
+
+        /// <summary>TODO::Description.</summary>
         private Expression _expression;
+
+        /// <summary>TODO::Description.</summary>
         private bool _collectionSet;
+
+        /// <summary>TODO::Description.</summary>
         private string _lastFlyProperty = string.Empty;
+
+        /// <summary>TODO::Description.</summary>
         private string _lastOperator = " === ";
+
+        /// <summary>TODO::Description.</summary>
         private StringBuilder _sb;
+
+        /// <summary>TODO::Description.</summary>
         private StringBuilder _sbIndexed;
+
+        /// <summary>TODO::Description.</summary>
         public Flyweight SortFly { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string SortDescendingBy { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         bool _whereWritten = false;
+
+        /// <summary>TODO::Description.</summary>
         public String PropName
         {
             get;
             set;
         }
+
+        /// <summary>TODO::Description.</summary>
         public String TypeName
         {
             get;
             set;
         }
 
+        /// <summary>TODO::Description.</summary>
         public String MethodCall
         {
             get;
@@ -93,6 +117,7 @@ namespace Norm.Linq
             get { return _sb.ToString(); }
         }
 
+        /// <summary>TODO::Description.</summary>
         public bool UseScopedQualifier { get; set; }
 
         /// <summary>
@@ -135,6 +160,7 @@ namespace Norm.Linq
             return Translate(exp, true);
         }
 
+        /// <summary>TODO::Description.</summary>
         public string Translate(Expression exp, bool useScopedQualifier)
         {
             UseScopedQualifier = useScopedQualifier;
@@ -285,7 +311,7 @@ namespace Norm.Linq
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
         }
 
-
+        /// <summary>TODO::Description.</summary>
         string GetBinaryOperator(BinaryExpression b) {
             var result = "";
             switch (b.NodeType) {
@@ -348,9 +374,12 @@ namespace Norm.Linq
             _sb.Append(")");
             return b;
         }
+
+        /// <summary>TODO::Description.</summary>
         void VisitRight(Expression exp) {
 
         }
+
         /// <summary>
         /// Visits a constant.
         /// </summary>

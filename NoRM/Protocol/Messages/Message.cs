@@ -8,11 +8,22 @@ namespace Norm.Protocol
     /// </summary>
     public class Message
     {
+        /// <summary>TODO::Description.</summary>
         protected string _collection;
+
+        /// <summary>TODO::Description.</summary>
         protected IConnection _connection;
+
+        /// <summary>TODO::Description.</summary>
         protected int _messageLength;
+
+        /// <summary>TODO::Description.</summary>
         protected MongoOp _op = MongoOp.Message;
+
+        /// <summary>TODO::Description.</summary>
         protected int _requestID;
+
+        /// <summary>TODO::Description.</summary>
         protected int _responseID;
 
         /// <summary>

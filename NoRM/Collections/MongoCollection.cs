@@ -11,8 +11,14 @@ namespace Norm.Collections
     /// </summary>
     public class MongoCollection : IMongoCollection
     {
+
+        /// <summary>TODO::Description.</summary>
         protected string _collectionName;
+
+        /// <summary>TODO::Description.</summary>
         protected IConnection _connection;
+
+        /// <summary>TODO::Description.</summary>
         protected MongoDatabase _db;
 
         /// <summary>
@@ -168,6 +174,7 @@ namespace Norm.Collections
             return Find(template, Int32.MaxValue);
         }
 
+        /// <summary>TODO::Description.</summary>
         public IEnumerable Find(object template, object orderby)
         {
             return this.Find(template, orderby, Int32.MaxValue, 0, FullyQualifiedName);
@@ -196,6 +203,7 @@ namespace Norm.Collections
             return Find(template, null, limit, skip, this.FullyQualifiedName);
         }
 
+        /// <summary>TODO::Description.</summary>
         public IEnumerable Find(object template, object orderby, int limit)
         {
             return this.Find(template, orderby, limit, 0, this.FullyQualifiedName);
@@ -213,11 +221,13 @@ namespace Norm.Collections
             return this.Find(template, null, limit, 0, fullyQualifiedName);
         }
 
+        /// <summary>TODO::Description.</summary>
         public IEnumerable Find(object template, object orderBy, int limit, string fullyQualifiedName)
         {
             return this.Find(template, orderBy, limit, 0, fullyQualifiedName);
         }
 
+        /// <summary>TODO::Description.</summary>
         public IEnumerable Find(object template, object orderBy, int limit, int skip, string fullyQualifiedName)
         {
             var qm = new QueryMessage<object, object>(this._db.CurrentConnection, fullyQualifiedName)

@@ -159,9 +159,12 @@ namespace Norm.Linq
             explain["$explain"] = true;
 
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
-            return GetCollection<ExplainResponse>(collectionName).FindOne(explain); _provider.DB.GetCollection<ExplainResponse>(collectionName).FindOne(explain);
+            return GetCollection<ExplainResponse>(collectionName).FindOne(explain); 
+            
+            _provider.DB.GetCollection<ExplainResponse>(collectionName).FindOne(explain);
         }
 
+        /// <summary>TODO::Description.</summary>
         private MongoCollection<TCollection> GetCollection<TCollection>()
         {
             var collectionName = _collectionName == string.Empty
@@ -171,6 +174,7 @@ namespace Norm.Linq
             return GetCollection<TCollection>(collectionName);
         }
 
+        /// <summary>TODO::Description.</summary>
         private MongoCollection<TCollection> GetCollection<TCollection>(string collectionName)
         {
             return _provider.DB.GetCollection<TCollection>(collectionName);
