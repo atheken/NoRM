@@ -16,7 +16,7 @@ namespace Norm.Responses
             MongoConfiguration.Initialize(c => c.For<DeleteIndicesResponse>(a =>
                                                    {
                                                        a.ForProperty(auth => auth.Ok).UseAlias("ok");
-                                                       a.ForProperty(auth => auth.NumberIndexesWas).UseAlias("nIndexesWas ");
+                                                       a.ForProperty(auth => auth.NumberIndexesWas).UseAlias("nIndexesWas");
                                                        a.ForProperty(auth => auth.Message).UseAlias("msg");
                                                        a.ForProperty(auth => auth.Namespace).UseAlias("ns ");
                                                    })

@@ -347,7 +347,8 @@ namespace Norm.Tests
         public void SerializationOfEmptyListIsNotLossy()
         {
             var obj1Bytes = BsonSerializer.Serialize(new GeneralDTO { AList = new List<string>() });
-            BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);  
+            var obj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
+            Assert.True(obj2.AList != null);
         } 
         
         [Fact]
@@ -429,7 +430,7 @@ namespace Norm.Tests
         [Fact]
         public void WillSerializeObjectWithDiscriminator()
         {
-            
+            throw new NotImplementedException();
         }
     }
 }

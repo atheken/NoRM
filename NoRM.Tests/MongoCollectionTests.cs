@@ -3,6 +3,7 @@ using System.Linq;
 using Norm.Configuration;
 using System.Collections.Generic;
 using System;
+using Norm.Protocol.Messages;
 
 namespace Norm.Tests
 {
@@ -101,6 +102,29 @@ namespace Norm.Tests
                 mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test 1" });
                 var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test 2" }));
 
+
+            }
+        }
+
+        [Fact]
+        public void MongoCollectionEnsuresDeleteIndices()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+                session.Add(new Product
+                {
+                    Name = "ExplainProduct",
+                    Price = 10,
+                    Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
+                });
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+
+                int i;
+                session.Provider.DB.GetCollection<Product>().DeleteIndices(out i);
+
+                //it's TWO because there's always an index on _id by default.
+                Assert.Equal(2,i);
 
             }
         }
