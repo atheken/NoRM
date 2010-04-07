@@ -16,6 +16,9 @@ namespace Norm.Tests
         {
             _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
             _collection = _server.GetCollection<Person>("People");
+            //cause the collection to exist on the server by inserting, then deleting some things.
+            _collection.Insert(new Person());
+            _collection.Delete(new { });
         }
         public void Dispose()
         {
@@ -78,7 +81,7 @@ namespace Norm.Tests
                     State = "CO",
                     Zip = "45123"
                 },
-                Relatives = new List<string>(){"Emma","Bruce","Charlie"}
+                Relatives = new List<string>() { "Emma", "Bruce", "Charlie" }
             };
             _collection.Insert(person1);
             _collection.Insert(person2);
@@ -152,14 +155,14 @@ namespace Norm.Tests
         [Fact]
         public void QueryWithinEmbeddedArray()
         {
-           
-                var post1 = new Person { Name = "First", Relatives = new List<String> {"comment1", "comment2"  } };
-                var post2 = new Person { Name = "Second", Relatives = new List<String> { "commentA", "commentB" } };
-                _collection.Insert(post1);
-                _collection.Insert(post2);
 
-                var results = _collection.Find(new { Relatives = "commentA" });
-                Assert.Equal("Second", results.First().Name);
+            var post1 = new Person { Name = "First", Relatives = new List<String> { "comment1", "comment2" } };
+            var post2 = new Person { Name = "Second", Relatives = new List<String> { "commentA", "commentB" } };
+            _collection.Insert(post1);
+            _collection.Insert(post2);
+
+            var results = _collection.Find(new { Relatives = "commentA" });
+            Assert.Equal("Second", results.First().Name);
         }
     }
 }
