@@ -466,7 +466,6 @@ namespace Norm.Linq
                         Visit(m.Arguments[0]);
                         _sb.Append(")===0)");
                         return m;
-
                     case "Contains":
                         _sb.Append("(");
                         Visit(m.Object);
@@ -489,13 +488,22 @@ namespace Norm.Linq
                         Visit(m.Arguments[0]);
                         _sb.Append(")");
                         return m;
-
                     case "IsNullOrEmpty":
                         _sb.Append("(");
                         Visit(m.Arguments[0]);
                         _sb.Append(" == '' ||  ");
                         Visit(m.Arguments[0]);
                         _sb.Append(" == null  )");
+                        return m;
+                    case "ToLower":
+                    case "ToLowerInvariant":
+                        Visit(m.Object);
+                        _sb.Append(".toLowerCase()");
+                        return m;
+                    case "ToUpper":
+                    case "ToUpperInvariant":
+                        Visit(m.Object);
+                        _sb.Append(".toUpperCase()");
                         return m;
                 }
             }

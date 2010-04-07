@@ -178,6 +178,76 @@ namespace Norm.Tests
                 Assert.Equal(10, products[2].Price);
             }
         }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToLower()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToLower() == "test2").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(22, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToLowerInvariant()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToLowerInvariant() == "test2").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(22, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToUpper()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToUpper() == "TEST3").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToUpperInvariant()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToUpperInvariant() == "TEST3").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToUpperAndContains()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test", Price = 10 });
+                session.Add(new Product { Name = "Test", Price = 22 });
+                session.Add(new Product { Name = "Test1", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToUpper().Contains("EST")).ToList();
+                Assert.Equal(3, products.Count);
+            }
+        }
+
         [Fact]
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {
@@ -192,6 +262,7 @@ namespace Norm.Tests
                 Assert.Equal(4, products.Count);
             }
         }
+
         [Fact]
         public void OneProductsShouldBeReturnedWhen3InDbWithPriceEqual10()
         {
