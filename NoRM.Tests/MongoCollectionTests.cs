@@ -129,6 +129,32 @@ namespace Norm.Tests
             }
         }
 
+
+        [Fact]
+        public void MongoCollectionEnsuresDeletIndexByName()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+                session.Add(new Product
+                {
+                    Name = "ExplainProduct",
+                    Price = 10,
+                    Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
+                });
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Available, "TestIndex1", false, IndexOption.Ascending);
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Name, "TestIndex2", false, IndexOption.Ascending);
+
+                int i, j;
+                session.Provider.DB.GetCollection<Product>().DeleteIndex("TestIndex1", out i);
+                session.Provider.DB.GetCollection<Product>().DeleteIndex("TestIndex2", out j);
+
+                Assert.Equal(4, i);
+                Assert.Equal(3, j);
+            }
+        }
+
         [Fact]
         public void UpdatesEntityWithNonObjectIdKey()
         {
