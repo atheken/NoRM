@@ -133,6 +133,16 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void SerializationOfIEnumerableTIsNotLossy()
+        {
+            var gto = new GeneralDTO{ AnIEnumerable = new List<Person>(){ new Person(), new Person()}};
+            var bytes = BsonSerializer.Serialize(gto);
+        
+            var gto2 = BsonDeserializer.Deserialize<GeneralDTO>(bytes);
+            Assert.Equal(2, gto2.AnIEnumerable.Count());
+        }
+
+        [Fact]
         public void SerializationOfIntsAreNotLossy()
         {
             var obj1 = new GeneralDTO { AnInt = 100 };
