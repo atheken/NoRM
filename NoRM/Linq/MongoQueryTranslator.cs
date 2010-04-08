@@ -479,6 +479,12 @@ namespace Norm.Linq
                         Visit(m.Arguments[0]);
                         _sb.Append(")");
                         return m;
+                    case "LastIndexOf":
+                        Visit(m.Object);
+                        _sb.Append(".lastIndexOf(");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(")");
+                        return m;
                     case "EndsWith":
                         _sb.Append("(");
                         Visit(m.Object);
@@ -504,6 +510,25 @@ namespace Norm.Linq
                     case "ToUpperInvariant":
                         Visit(m.Object);
                         _sb.Append(".toUpperCase()");
+                        return m;
+                    case "Substring":
+                        Visit(m.Object);
+                        _sb.Append(".substr(");
+                        Visit(m.Arguments[0]);
+                        if (m.Arguments.Count == 2)
+                        {
+                            _sb.Append(",");
+                            Visit(m.Arguments[1]);
+                        }
+                        _sb.Append(")");
+                        return m;
+                    case "Replace":
+                        Visit(m.Object);
+                        _sb.Append(".replace(new RegExp(");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(",'g'),");
+                        Visit(m.Arguments[1]);
+                        _sb.Append(")");
                         return m;
                 }
             }
