@@ -13,8 +13,8 @@ namespace Norm.BSON
     /// </summary>
     public class TypeHelper
     {
-        private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup =
-            new Dictionary<Type, TypeHelper>();
+        private static readonly object _lock = new object();
+        private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup = new Dictionary<Type, TypeHelper>();
 
         private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);
         private readonly IDictionary<string, MagicProperty> _properties;
@@ -57,10 +57,15 @@ namespace Norm.BSON
             TypeHelper helper;
             if (!_cachedTypeLookup.TryGetValue(type, out helper))
             {
-                helper = new TypeHelper(type);
-                _cachedTypeLookup[type] = helper;
+                lock (_lock)
+                {
+                    if (!_cachedTypeLookup.TryGetValue(type, out helper))
+                    {
+                        helper = new TypeHelper(type);
+                        _cachedTypeLookup[type] = helper;
+                    }
+                }
             }
-
             return helper;
         }
 
