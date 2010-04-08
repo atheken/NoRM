@@ -25,7 +25,7 @@ namespace Norm.BSON
             {
                 var types = new List<Type>(type.GetInterfaces()
                     .Select(h => h.IsGenericType ? h.GetGenericTypeDefinition() : h));
-                types.Insert(0, type);
+                types.Insert(0, type.IsGenericType ? type.GetGenericTypeDefinition() : type);
 
                 if (types.Any(i => typeof(IList<>).IsAssignableFrom(i) || typeof(IList).IsAssignableFrom(i)))
                 {
