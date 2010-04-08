@@ -178,6 +178,103 @@ namespace Norm.Tests
                 Assert.Equal(10, products[2].Price);
             }
         }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToLower()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToLower() == "test2").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(22, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToLowerInvariant()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToLowerInvariant() == "test2").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(22, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToUpper()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToUpper() == "TEST3").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToUpperInvariant()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToUpperInvariant() == "TEST3").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToUpperAndContains()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test", Price = 10 });
+                session.Add(new Product { Name = "Test", Price = 22 });
+                session.Add(new Product { Name = "Test1", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToUpper().Contains("EST")).ToList();
+                Assert.Equal(3, products.Count);
+            }
+        }
+       
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenSubstringUsedWithLength()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "TestName1", Price = 10 });
+                session.Add(new Product { Name = "TestName2", Price = 22 });
+                session.Add(new Product { Name = "TestName3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Substring(2,4) == "stNa").ToList();
+                Assert.Equal(3, products.Count);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenSubstringUsedWithOutLength()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "TestName1", Price = 10 });
+                session.Add(new Product { Name = "TestName2", Price = 22 });
+                session.Add(new Product { Name = "TestName3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Substring(2) == "stName2").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(22, products[0].Price);
+            }
+        }
+
         [Fact]
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {
@@ -192,6 +289,7 @@ namespace Norm.Tests
                 Assert.Equal(4, products.Count);
             }
         }
+
         [Fact]
         public void OneProductsShouldBeReturnedWhen3InDbWithPriceEqual10()
         {
@@ -349,6 +447,38 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "TXest4", Price = 22 });
                 var products = session.Products.Where(x => x.Name.IndexOf("X") == 2).ToList();
                 Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenLastIndexOfXEqual6()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "TestX4", Price = 22 });
+                session.Add(new Product { Name = "TXest5X", Price = 33 });
+                session.Add(new Product { Name = "TeXst3", Price = 10 });
+                session.Add(new Product { Name = "TXest4", Price = 22 });
+                var products = session.Products.Where(x => x.Name.LastIndexOf("X") == 6).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenReplaceOfXWithY()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "TestX4", Price = 22 });
+                session.Add(new Product { Name = "TXesXt5", Price = 33 });
+                session.Add(new Product { Name = "TeXst3", Price = 10 });
+                session.Add(new Product { Name = "TXest4", Price = 22 });
+                var products = session.Products.Where(x => x.Name.Replace("X","Y") == "TYesYt5").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
             }
         }
 
