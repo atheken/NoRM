@@ -71,7 +71,7 @@ namespace Norm
         /// </returns>
         public IEnumerable<CurrentOperationResponse> GetCurrentOperations()
         {
-            return this._database.GetCollection<CurrentOperationResponse>("$cmd.sys.inprog").Find();
+            return this._database.GetCollection<CurrentOperationContainer>("$cmd.sys.inprog").FindOne(new object()).Responses;
         }
 
         /// <summary>

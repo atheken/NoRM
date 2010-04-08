@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Xunit;
+using System.Linq;
 
 namespace Norm.Tests
 {
@@ -129,5 +130,16 @@ namespace Norm.Tests
                 var status = admin.ServerStatus();
             }            
         } 
+        
+        [Fact]
+        public void ReturnsEmptyInProcessResponse()
+        {
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
+            {
+                var response = admin.GetCurrentOperations();
+                Assert.Equal(0, response.Count());
+            }
+        }
+
     }
 }
