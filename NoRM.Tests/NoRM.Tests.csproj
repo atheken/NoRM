@@ -89,7 +89,6 @@
     <Compile Include="DBTypeTests\DBRefTests.cs" />
     <Compile Include="DBTypeTests\GridFSTests.cs" />
     <Compile Include="DBTypeTests\ObjectIdTests.cs" />
-    <Compile Include="GetCurrentOperationsTests.cs" />
     <Compile Include="LinqTests\LinqAggregates.cs" />
     <Compile Include="LinqTests\LinqDeepGraph.cs" />
     <Compile Include="LinqTests\LinqTests.cs" />
