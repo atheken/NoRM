@@ -4,7 +4,7 @@ using NoRM.Attributes;
 
 namespace NoRM.BSON
 {
-    internal class MagicProperty
+    public class MagicProperty
     {
         private static readonly Type _myType = typeof(MagicProperty);
         private static readonly Type _ignoredIfNullType = typeof(MongoIgnoreIfNullAttribute);

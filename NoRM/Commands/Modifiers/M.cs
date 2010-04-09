@@ -21,5 +21,15 @@ namespace NoRM
         {
             return new IncrementOperation(amountToIncrementBy);
         }
+
+        /// <summary>
+        /// Creates a $inc operation to be applied to a field using the update command.
+        /// </summary>
+        /// <param name="amountToIncrementBy">The amount to increment by.</param>
+        /// <returns></returns>
+        public static SetOperation Set(object value)
+        {
+            return new SetOperation(value);
+        }
     }
 }

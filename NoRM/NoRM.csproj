@@ -74,6 +74,7 @@
     <Compile Include="BSON\ListHelper.cs" />
     <Compile Include="BSON\ModifierCommand.cs" />
     <Compile Include="BSON\TypeHelper.cs" />
+    <Compile Include="Commands\Modifiers\SetOperation.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />

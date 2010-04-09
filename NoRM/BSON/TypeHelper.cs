@@ -11,7 +11,7 @@ namespace NoRM.BSON
     /// <summary>
     /// Convenience methods for type reflection.
     /// </summary>
-    internal class TypeHelper
+    public class TypeHelper
     {
         private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup = new Dictionary<Type, TypeHelper>();
         private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);

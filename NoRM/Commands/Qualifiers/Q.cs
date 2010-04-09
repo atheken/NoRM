@@ -1,4 +1,5 @@
-﻿using NoRM.Commands.Qualifiers;
+﻿using System;
+using NoRM.Commands.Qualifiers;
 
 namespace NoRM
 {
@@ -58,6 +59,16 @@ namespace NoRM
         /// <param name="value">The value.</param>
         /// <returns></returns>
         public static GreaterThanQualifier GreaterThan(double value)
+        {
+            return new GreaterThanQualifier(value);
+        }
+
+        /// <summary>
+        /// Builds a $gt qualifier for the search.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public static GreaterThanQualifier GreaterThan(DateTime value)
         {
             return new GreaterThanQualifier(value);
         }
