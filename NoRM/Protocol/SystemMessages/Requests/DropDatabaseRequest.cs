@@ -1,15 +1,24 @@
-﻿
-namespace NoRM.Protocol.SystemMessages.Requests
+﻿using Norm.Configuration;
+
+namespace Norm.Protocol.SystemMessages.Requests
 {
     /// <summary>
     /// The drop database request.
     /// </summary>
-    public class DropDatabaseRequest
+    internal class DropDatabaseRequest : ISystemQuery
     {
+        /// <summary>
+        /// Initializes the <see cref="DropDatabaseRequest"/> class.
+        /// </summary>
+        static DropDatabaseRequest()
+        {
+            MongoConfiguration.Initialize(c =>
+                c.For<DropDatabaseRequest>(a => a.ForProperty(auth => auth.DropDatabase).UseAlias("dropDatabase")));
+        }
         /// <summary>
         /// Drop database.
         /// </summary>
-        public double dropDatabase
+        public double DropDatabase
         {
             get { return 1d; }
         }

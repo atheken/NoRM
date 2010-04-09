@@ -1,7 +1,7 @@
-namespace NoRM.Tests
-{
-    using Xunit;
+using Xunit;
 
+namespace Norm.Tests
+{
     public class NormalConnectionProviderTests
     {
         [Fact]

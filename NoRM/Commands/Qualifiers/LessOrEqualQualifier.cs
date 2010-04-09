@@ -1,6 +1,6 @@
-﻿using NoRM.BSON;
+﻿using Norm.BSON;
 
-namespace NoRM.Commands.Qualifiers
+namespace Norm.Commands.Qualifiers
 {
     /// <summary>
     /// The less or equal qualifier.

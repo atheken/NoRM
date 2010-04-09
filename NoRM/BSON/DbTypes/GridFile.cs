@@ -1,151 +1,140 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using NoRM.Attributes;
-using NoRM.BSON;
-using NoRM.BSON.DbTypes;
+using System.Linq;
+using System.Text;
+using Norm.Collections;
+using Norm.Configuration;
 
-namespace NoRM
+namespace Norm.BSON.DbTypes
 {
     /// <summary>
-    /// Provides a mechanism to store large files in MongoDB.
+    /// Allows for the saving of filestreams into the DB with meta data.
     /// </summary>
     public class GridFile
     {
-        private const int DEFAULT_CHUNK_SIZE = 256*1024; // 256k
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="GridFile"/> class.
+        /// Opens a file from the default namespace "fs"
         /// </summary>
-        public GridFile()
+        /// <param name="db"></param>
+        /// <returns></returns>
+        public static GridFile OpenFile(Mongo db, ObjectId fileKey)
         {
-            _id = Guid.NewGuid();
-            chunkSize = DEFAULT_CHUNK_SIZE;
+            return GridFile.OpenFile(db.GetCollection<Object>("fs"), fileKey);
         }
 
         /// <summary>
-        /// The ID used to reference this file by the chunks.
+        /// 
         /// </summary>
-        // [MongoName("_id")]
-        public Guid? _id { get; set; }
-
-        /// <summary>
-        /// The original name of this file.
-        /// </summary>
-        // [MongoName("filename")]
-        public string filename { get; set; }
-
-        /// <summary>
-        /// A valide MIME type for this file.
-        /// </summary>
-        // [MongoName("contentType")]
-        public string contentType { get; set; }
-
-        /// <summary>
-        /// How bit is this file in total?
-        /// </summary>
-        // [MongoName("length")]
-        public long? length { get; set; }
-
-        /// <summary>
-        /// How big is each piece of this file in bytes?
-        /// </summary>
-        // [MongoName("chunkSize")]
-        public int? chunkSize { get; set; }
-
-        /// <summary>
-        /// Gets or sets ParentCollection.
-        /// </summary>
-        [MongoIgnore]
-        public MongoCollection<GridFile> ParentCollection { get; internal set; }
-
-        /// <summary>
-        /// Gets NumberOfChunks.
-        /// </summary>
-        [MongoIgnore]
-        public int NumberOfChunks
+        /// <param name="db"></param>
+        /// <param name="fileKey"></param>
+        /// <returns></returns>
+        public static GridFile OpenFile(IMongoCollection collection, ObjectId fileKey)
         {
-            get { return (int) Math.Ceiling((length ?? 0)/(double) (chunkSize ?? 1)); }
+            GridFile retval = new GridFile(collection, fileKey);
+            return retval;
         }
 
         /// <summary>
-        /// When was this file added?
+        /// Construct a file from the db.
         /// </summary>
-        // [MongoName("uploadDate")]
-        public DateTime? uploadDate { get; set; }
-
-        /// <summary>
-        /// Other names for this file.
-        /// </summary>
-        public List<string> aliases { get; set; }
-
-        /// <summary>
-        /// Additional info about this file, can be empty
-        /// </summary>
-        public Flyweight metadata { get; set; }
-
-        // [MongoName("md5")]
-        /// <summary>
-        /// Gets or sets md5.
-        /// </summary>
-        public string md5 { get; set; }
-
-        /// <summary>
-        /// Writes the stream to the server as chunks.
-        /// </summary>
-        /// <param name="stream">
-        /// File stream
-        /// </param>
-        /// <param name="overwrite">
-        /// if set to <c>true</c> [overwrite].
-        /// </param>
-        /// <remarks>
-        /// Remember to call "save" on this file after writing the bytes to the server.
-        /// </remarks>
-        public void WriteToServer(Stream stream, bool overwrite)
+        /// <param name="db"></param>
+        /// <returns></returns>
+        public static GridFile CreateFile(Mongo db)
         {
-            length = stream.Length;
-            var chunks = ParentCollection.GetChildCollection<GridFileChunk>("chunks");
-            var read = 0;
-            length = 0;
-            var i = -1;
-            var buffer = new byte[chunkSize.Value];
-            do
-            {
-                var chunk = new GridFileChunk {file_id = _id, n = i};
-                read = stream.Read(buffer, 0, chunkSize.Value);
-                chunk.data = buffer;
-                length += read;
-
-                if (read <= 0)
-                {
-                    continue;
-                }
-
-                i++;
-                chunks.Insert(chunk);
-            }
-            while (read > 0);
+            GridFile retval = new GridFile(db.GetCollection<Object>("fs"));
+            return retval;
         }
 
         /// <summary>
-        /// Put save this file into the db - you should call this after 
-        /// you have set the length, or you have written the stream to the db.
+        /// Open a grid file from the collection
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="fileKey"></param>
+        private GridFile(IMongoCollection collection, ObjectId fileKey)
+        {
+
+        }
+
+        private GridFile(IMongoCollection collection)
+        {
+
+        }
+
+        /// <summary>
+        /// Writes the information to the file stream.
         /// </summary>
         public void Save()
         {
-            // Upsert this into the database.
-            this.ParentCollection.GetChildCollection<GridFile>("files").Update(new {_id = this._id}, this, false, true);
+
         }
 
-        /// <summary>
-        /// Opens a stream from the server for this file.
-        /// </summary>
-        /// <returns>
-        /// </returns>
-        public GridReadStream GetFileStream()
+
+        protected class FileChunk
         {
-            return new GridReadStream(this, this.ParentCollection);
+            /// <summary>
+            /// Causes the property mapping to kick in.
+            /// </summary>
+            static FileChunk()
+            {
+                MongoConfiguration.Initialize(cfg =>
+                    cfg.For<FileChunk>(j =>
+                    {
+                        j.UseCollectionNamed("chunks");
+                        j.ForProperty(k => k.SequenceID).UseAlias("n");
+                        j.ForProperty(k => k.FileID).UseAlias("files_id");
+                        j.ForProperty(k => k.Payload).UseAlias("data");
+                    })
+                );
+            }
+            /// <summary>
+            /// The unique id for this chunk.
+            /// </summary>
+            public ObjectId ID { get; set; }
+
+            /// <summary>
+            /// The order of this chunk with relation to it's siblings.
+            /// </summary>
+            public int SequenceID { get; set; }
+
+            /// <summary>
+            /// Indicates the file to which this chunk belongs.
+            /// </summary>
+            public ObjectId FileID { get; set; }
+
+            /// <summary>
+            /// The binary data in this chunk.
+            /// </summary>
+            public byte[] Payload { get; set; }
+        }
+
+        protected class FileMetadata
+        {
+            static FileMetadata()
+            {
+                MongoConfiguration.Initialize(cfg =>
+                   cfg.For<FileMetadata>(f =>
+                   {
+                       f.UseCollectionNamed("files");
+                       f.ForProperty(j => j.FileName).UseAlias("filename");
+                       f.ForProperty(j => j.ContentType).UseAlias("contentType");
+                       f.ForProperty(j => j.Length).UseAlias("length");
+                       f.ForProperty(j => j.ChunkSize).UseAlias("chunkSize");
+                       f.ForProperty(j => j.UploadDate).UseAlias("uploadDate");
+                       f.ForProperty(j => j.Aliases).UseAlias("aliases");
+                       f.ForProperty(j => j.MetaData).UseAlias("metadata");
+                       f.ForProperty(j => j.MD5Checksum).UseAlias("md5");
+                   }));
+            }
+
+            public ObjectId ID { get; set; }
+            public String FileName { get; set; }
+            public String ContentType { get; set; }
+            public long Length { get; set; }
+            public int ChunkSize { get; set; }
+            public DateTime UploadDate { get; set; }
+            public List<String> Aliases { get; set; }
+            public Object MetaData { get; set; }
+            public String MD5Checksum { get; set; }
         }
     }
 }

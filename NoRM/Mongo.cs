@@ -1,7 +1,8 @@
 using System;
-using NoRM.Responses;
+using Norm.Responses;
+using Norm.Collections;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// The primary class for database connections and interaction
@@ -110,9 +111,9 @@ namespace NoRM
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
         /// <returns></returns>
-        public static Mongo ParseConnection(string connectionString)
+        public static Mongo Create(string connectionString)
         {
-            return ParseConnection(connectionString, string.Empty);
+            return Create(connectionString, string.Empty);
         }
 
         /// <summary>
@@ -121,7 +122,7 @@ namespace NoRM
         /// <param name="connectionString">The connection string.</param>
         /// <param name="options">The options.</param>
         /// <returns></returns>
-        public static Mongo ParseConnection(string connectionString, string options)
+        public static Mongo Create(string connectionString, string options)
         {
             return new Mongo(ConnectionProviderFactory.Create(connectionString), options);
         }
@@ -173,7 +174,7 @@ namespace NoRM
         /// </returns>
         public LastErrorResponse LastError()
         {
-            return this._database.GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });
+            return this._database.LastError();
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     using System;
     using System.Collections;
@@ -40,7 +40,7 @@ namespace NoRM.BSON
         /// <typeparam name="T"></typeparam>
         /// <param name="objectData">The object data.</param>
         /// <returns></returns>
-        public static T Deserialize<T>(byte[] objectData) where T : class, new()
+        public static T Deserialize<T>(byte[] objectData) where T : class
         {
             IDictionary<WeakReference, Flyweight> outprops = new Dictionary<WeakReference, Flyweight>();
             return Deserialize<T>(objectData, ref outprops);
@@ -222,7 +222,7 @@ namespace NoRM.BSON
         /// <returns></returns>
         private object ReadObject(Type type)
         {
-            var instance = Activator.CreateInstance(type);
+            var instance = Activator.CreateInstance(type, true);
             var typeHelper = TypeHelper.GetHelperForType(type);
             while (true)
             {
@@ -232,7 +232,10 @@ namespace NoRM.BSON
                 {
                     HandleError((string)DeserializeValue(typeof(string), BSONTypes.String));
                 }
-                var property = (name == "_id") ? typeHelper.FindIdProperty() : typeHelper.FindProperty(name);
+                
+                var property = (name == "_id") ? typeHelper.FindIdProperty() :
+                    typeHelper.FindProperty(name);
+               
                 if (property == null)
                 {
                     throw new MongoException(string.Format("Deserialization failed: type {0} does not have a property named {1}", type.FullName, name));
@@ -255,11 +258,10 @@ namespace NoRM.BSON
                 object container = null;
                 if (property.Setter == null)
                 {
-                    var o = property.Getter(instance);
-                    container = o is IList || IsDictionary(property.Type) ? o : null;
+                    container = property.Getter(instance);                    
                 }
                 var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
-                if (container == null)
+                if (container == null && value!=null)
                 {
                     property.Setter(instance, value);
                 }
@@ -285,30 +287,23 @@ namespace NoRM.BSON
             }
 
             NewDocument(_reader.ReadInt32());
-            var isReadonly = false;
             var itemType = ListHelper.GetListItemType(listType);
-            var container = existingContainer == null ? ListHelper.CreateContainer(listType, itemType, out isReadonly) : (IList)existingContainer;
+            var isObject = typeof(object) == itemType;
+            var wrapper = BaseWrapper.Create(listType, itemType, existingContainer);
+
             while (!IsDone())
             {
                 var storageType = ReadType();
-
                 ReadName();
                 if (storageType == BSONTypes.Object)
                 {
                     NewDocument(_reader.ReadInt32());
                 }
-                var value = DeserializeValue(itemType, storageType);
-                container.Add(value);
+                var specificItemType = isObject ? _typeMap[storageType] : itemType;
+                var value = DeserializeValue(specificItemType, storageType);
+                wrapper.Add(value);
             }
-            if (listType.IsArray)
-            {
-                return ListHelper.ToArray((List<object>)container, itemType);
-            }
-            if (isReadonly)
-            {
-                return listType.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, new[] { container.GetType() }, null).Invoke(new object[] { container });
-            }
-            return container;
+            return wrapper.Collection;
         }
 
         /// <summary>
@@ -320,7 +315,16 @@ namespace NoRM.BSON
         /// </returns>
         private static bool IsDictionary(Type type)
         {
-            return type.IsGenericType && _IDictionaryType.IsAssignableFrom(type.GetGenericTypeDefinition());
+            var types = new List<Type>(type.GetInterfaces());
+            types.Insert(0, type);
+            foreach (var interfaceType in types)
+            {
+                if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                {
+                    return true;
+                }
+            }
+            return false; 
         }
 
         /// <summary>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// The expression visitor.

@@ -1,11 +1,12 @@
 ﻿using System;
-using NoRM.BSON.DbTypes;
+using Norm.BSON.DbTypes;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Represents a Mongo document's ObjectId
     /// </summary>
+    [System.ComponentModel.TypeConverter(typeof(ObjectIdTypeConverter))]
     public class ObjectId
     {        
         private string _string;
@@ -184,10 +185,10 @@ namespace NoRM
         }
 
         /// <summary>
-        /// Decodes the hex.
+        /// Decodes a HexString to bytes.
         /// </summary>
         /// <param name="val">
-        /// The val.
+        /// The hex encoding string that should be converted to bytes.
         /// </param>
         /// <returns>
         /// </returns>
@@ -203,6 +204,21 @@ namespace NoRM
             }
 
             return bytes;
+        }
+
+        public static implicit operator string(ObjectId oid)
+        {
+            return oid.ToString();
+        }
+
+        public static implicit operator ObjectId(String oidString)
+        {
+            ObjectId retval = ObjectId.Empty;
+            if(!String.IsNullOrEmpty(oidString))
+            {
+                retval = new ObjectId(oidString);
+            }
+            return retval;
         }
     }
 }

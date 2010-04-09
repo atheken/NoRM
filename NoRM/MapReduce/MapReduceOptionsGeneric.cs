@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Map/reduce options for a given type

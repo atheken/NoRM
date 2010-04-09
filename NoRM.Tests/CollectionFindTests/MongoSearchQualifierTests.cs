@@ -1,26 +1,12 @@
-﻿namespace NoRM.Tests
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
+using Norm.Collections;
+
+namespace Norm.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Xunit;
-
-    public class TestClass
-    {
-        public TestClass()
-        {
-            Id = Guid.NewGuid();
-        }
-
-        [MongoIdentifier]
-        public Guid? Id { get; set; }
-
-        public double? ADouble { get; set; }
-        public string AString { get; set; }
-        public int? AInteger { get; set; }
-        public List<String> AStringArray { get; set; }
-    }
-
+    
     public class MongoSearchQualifierTests : IDisposable
     {
         private readonly MongoCollection<TestClass> _coll;
@@ -28,7 +14,7 @@
 
         public MongoSearchQualifierTests()
         {
-            _server = Mongo.ParseConnection(TestHelper.ConnectionString("pooling=false"));
+            _server = Mongo.Create(TestHelper.ConnectionString("pooling=false"));
             _coll = _server.GetCollection<TestClass>("TestClasses");
         }
 

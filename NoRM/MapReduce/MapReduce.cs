@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using NoRM.Protocol.Messages;
-using NoRM.Responses;
+using Norm.Protocol.Messages;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Map reduce.
@@ -44,13 +44,13 @@ namespace NoRM
         {
             var response = this._database.GetCollection<MapReduceResponse>("$cmd").FindOne(new MapReduceMessage
                            {
-                                  map = options.Map,
-                                  reduce = options.Reduce,
-                                  mapreduce = options.CollectionName,
-                                  keeptemp = options.Permenant,
-                                  @out = options.OutputCollectionName,
-                                  limit = options.Limit,
-                                  finalize = options.Finalize,
+                                  Map = options.Map,
+                                  Reduce = options.Reduce,
+                                  MapReduce = options.CollectionName,
+                                  KeepTemp = options.Permenant,
+                                  Out = options.OutputCollectionName,
+                                  Limit = options.Limit,
+                                  Finalize = options.Finalize,
                             });
 
             if (!options.Permenant && !string.IsNullOrEmpty(response.Result))

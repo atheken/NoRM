@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// The map reduce result.

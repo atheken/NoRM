@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// A class that represents code with scoping - will be serialized to

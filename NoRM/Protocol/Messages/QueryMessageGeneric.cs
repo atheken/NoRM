@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using NoRM.BSON;
+using Norm.BSON;
+using Norm.Protocol.SystemMessages;
 
-namespace NoRM.Protocol.Messages
+namespace Norm.Protocol.Messages
 {
     /// <summary>
     /// A query to the db.
@@ -35,25 +36,27 @@ namespace NoRM.Protocol.Messages
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <param name="fullyQualifiedCollName">Name of the fully qualified coll.</param>
-        public QueryMessage(IConnection connection, string fullyQualifiedCollName) : base(connection, fullyQualifiedCollName)
+        public QueryMessage(IConnection connection, string fullyQualifiedCollName)
+            : base(connection, fullyQualifiedCollName)
         {
             this._op = MongoOp.Query;
             NumberToTake = int.MaxValue;
         }
-
-        private U _query;
 
         /// <summary>
         /// A BSON query.
         /// </summary>
         public U Query
         {
-            set
-            {
-                this._query = value;
-            }
+            get;
+            set;
         }
 
+        public object OrderBy
+        {
+            get;
+            set;
+        }
         /// <summary>
         /// Gets or sets the number of documents to take.
         /// </summary>
@@ -75,30 +78,42 @@ namespace NoRM.Protocol.Messages
         /// <returns></returns>
         public ReplyMessage<T> Execute()
         {
-            var messageBytes = new List<byte[]>(9)
-                                            {
-                                                new byte[4],
-                                                BitConverter.GetBytes(this._requestID),
-                                                BitConverter.GetBytes(0),
-                                                BitConverter.GetBytes((int) MongoOp.Query),
-                                                BitConverter.GetBytes((int) this._queryOptions),
-                                                Encoding.UTF8.GetBytes(this._collection)
-                                                    .Concat(new byte[1]).ToArray(),
-                                                BitConverter.GetBytes(this.NumberToSkip),
-                                                BitConverter.GetBytes(this.NumberToTake)
-                                            };
-
-            #region Message Header
-
-            #endregion
+            var messageBytes = new List<byte[]>(9){
+                    new byte[4],
+                    BitConverter.GetBytes(this._requestID),
+                    BitConverter.GetBytes(0),
+                    BitConverter.GetBytes((int) MongoOp.Query),
+                    BitConverter.GetBytes((int) this._queryOptions),
+                    Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray(),
+                    BitConverter.GetBytes(this.NumberToSkip),
+                    BitConverter.GetBytes(this.NumberToTake)
+            };
 
             #region Message Body
-
             //append the collection name and then null-terminate it.
-
-            if (this._query != null)
+            if (this.Query != null && this.Query is ISystemQuery)
             {
-                messageBytes.Add(BsonSerializer.Serialize(this._query));
+                messageBytes.Add(BsonSerializer.Serialize(this.Query));
+            }
+            else
+            {
+                var fly = new Flyweight();
+
+                if(this.Query is Flyweight)
+                {
+                    var properties = (this.Query as Flyweight).AllProperties();
+                    properties.ToList().ForEach(p => fly.Set(p.PropertyName, p.Value));
+                }
+
+                fly["query"] = this.Query;
+
+                //null for this is OK. needs to be here, though.
+                if (this.OrderBy != null)
+                {
+                    fly["orderby"] = this.OrderBy;
+                }
+                //add more query options here, as needed.
+                messageBytes.Add(BsonSerializer.Serialize(fly));
             }
             #endregion
 
@@ -122,7 +137,7 @@ namespace NoRM.Protocol.Messages
             {
                 throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + conn.QueryTimeout.ToString());
             }
-            return new ReplyMessage<T>(conn, this._collection, new BinaryReader(new BufferedStream(stream)));
+            return new ReplyMessage<T>(conn, this._collection, new BinaryReader(new BufferedStream(stream)), this._op, this.NumberToTake);
         }
     }
 }

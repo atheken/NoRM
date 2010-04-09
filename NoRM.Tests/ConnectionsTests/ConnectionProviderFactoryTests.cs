@@ -1,7 +1,7 @@
-namespace NoRM.Tests
-{
-    using Xunit;
+using Xunit;
 
+namespace Norm.Tests
+{
     public class ConnectionProviderFactoryTests
     {
         [Fact]
@@ -31,18 +31,18 @@ namespace NoRM.Tests
         [Fact]
         public void ConnectionProviderSupportsConfigFileValues()
         {
-            var provider = ConnectionProviderFactory.Create("NoRMTests");
+            var provider = ConnectionProviderFactory.Create("NormTests");
             Assert.NotNull(provider);
         }
         [Fact]
         public void ConnectionProviderConfigFileValuesMatchConnectionStringGrammar()
         {
-            Assert.Throws<MongoException>(() => ConnectionProviderFactory.Create("NoRMTestsFail"));
+            Assert.Throws<MongoException>(() => ConnectionProviderFactory.Create("NormTestsFail"));
         }
         [Fact]
         public void ConnectionProviderConfigFailsForMissingConnectionString()
         {
-            Assert.Throws<MongoException>(() =>  ConnectionProviderFactory.Create("NoRMTestsFail") );
+            Assert.Throws<MongoException>(() =>  ConnectionProviderFactory.Create("NormTestsFail") );
         }
     }
 }

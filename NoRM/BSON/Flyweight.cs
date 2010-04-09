@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// Provides a completely blank slate for which to query objects out of the DB.
@@ -16,37 +16,10 @@ namespace NoRM.BSON
         private readonly Dictionary<string, bool?> _booleanProps = new Dictionary<string, bool?>(0, StringComparer.InvariantCultureIgnoreCase);
         private readonly Dictionary<string, double?> _doubleProps = new Dictionary<string, double?>(0, StringComparer.InvariantCultureIgnoreCase);
         private readonly Dictionary<string, int?> _intProps = new Dictionary<string, int?>(0, StringComparer.InvariantCultureIgnoreCase);
-        private readonly Dictionary<string, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
+        private Dictionary<string, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
         private readonly Dictionary<string, long?> _longProps = new Dictionary<string, long?>(0, StringComparer.InvariantCultureIgnoreCase);
         private readonly Dictionary<string, string> _stringProps = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
         
-        // These props are used in the Linq provider
-
-        /// <summary>
-        /// Gets or sets TypeName.
-        /// </summary>
-        public string TypeName { get; set; }
-
-        /// <summary>
-        /// Gets or sets Limit.
-        /// </summary>
-        public int Limit { get; set; }
-
-        /// <summary>
-        /// Gets or sets Skip.
-        /// </summary>
-        public int Skip { get; set; }
-
-        /// <summary>
-        /// Gets or sets MethodCall.
-        /// </summary>
-        public string MethodCall { get; set; }
-
-        /// <summary>
-        /// Gets or sets PropName.
-        /// </summary>
-        public string PropName { get; set; }
-
         /// <summary>
         /// Get or set a property of this flyweight.
         /// </summary>
@@ -79,6 +52,14 @@ namespace NoRM.BSON
                 _kitchenSinkProps.Select(y => new ExpandoProperty(y.Key, y.Value)));
         }
 
+        public void ReverseKitchen() {
+            var reversed = _kitchenSinkProps.Reverse();
+            var newKitchen = new Dictionary<string, object>();
+            foreach (var item in reversed) {
+                newKitchen[item.Key] = item.Value;
+            }
+            _kitchenSinkProps = newKitchen;
+        }
         /// <summary>
         /// Pulls the property of the specified type "T". You better know it's in there or you're going to get an exception.. just sayin'
         /// </summary>

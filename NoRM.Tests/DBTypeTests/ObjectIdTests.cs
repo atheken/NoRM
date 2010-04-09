@@ -1,7 +1,8 @@
-namespace NoRM.Tests
-{
-    using Xunit;
+using Xunit;
+using System.ComponentModel;
 
+namespace Norm.Tests
+{
     public class ObjectIdTests
     {
         [Fact]
@@ -10,6 +11,19 @@ namespace NoRM.Tests
             ObjectId objectId;
             Assert.Equal(false, ObjectId.TryParse(null, out objectId));
         }
+
+        [Fact]
+        public void ImplicitConversionOfOIDToAndFromStringWorks()
+        {
+            ObjectId oid = ObjectId.NewObjectId();
+            string str = oid;
+            Assert.Equal(oid, (ObjectId)str);
+
+            str = null;
+            Assert.Equal(ObjectId.Empty, (ObjectId)str);
+            Assert.Equal(ObjectId.Empty, (ObjectId)"");
+        }
+
         [Fact]
         public void TryParseReturnsFalseIfObjectIdIsEmpty()
         {
@@ -57,6 +71,16 @@ namespace NoRM.Tests
             var b = new ObjectId("4b883faad657000000002666");
             Assert.NotEqual(a, b);
             Assert.True(a != b);
+        }
+        [Fact]
+        public void ConversionFromStringToOIDUsingTypeConverterWorks()
+        {
+            TypeConverter converter = TypeDescriptor.GetConverter(typeof(ObjectId));
+            Assert.True(converter.CanConvertFrom(typeof(string)));
+            string value = "4b883faad657000000002665";
+            ObjectId objectId = converter.ConvertFrom(value) as ObjectId;
+            Assert.NotNull(objectId);
+            Assert.Equal(value, objectId.ToString());
         }
     }
 }

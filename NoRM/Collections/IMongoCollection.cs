@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using NoRM.Responses;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm.Collections
 {
     /// <summary>
     /// Mongo collection.
@@ -91,5 +91,15 @@ namespace NoRM
         /// <param name="limit">The limit.</param>
         /// <returns></returns>
         IEnumerable Find(object template, int limit);
+
+
+        /// <summary>
+        /// Find some documents matching the template, but skip the top X and take the next top Y.
+        /// </summary>
+        /// <param name="template"></param>
+        /// <param name="limit"></param>
+        /// <param name="skip"></param>
+        /// <returns></returns>
+        IEnumerable Find(object template, int limit, int skip);
     }
 }

@@ -1,8 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
-using NoRM.Responses;
+using Norm.BSON;
+using Norm.Protocol.Messages;
+using Norm.Responses;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// Linq extensions.
@@ -27,21 +31,40 @@ namespace NoRM.Linq
         }
 
         /// <summary>
-        /// Asks Mongo for an explain plan for a query
+        /// Asks Mongo for an explain plan for a linq query.
         /// </summary>
         /// <typeparam name="T">Type to explain</typeparam>
         /// <param name="expression">The expression.</param>
         /// <returns>Query explain plan</returns>
         public static ExplainResponse Explain<T>(this IQueryable<T> expression)
         {
-            var query = new MongoQueryTranslator().Translate(expression.Expression);
+            var translator = new MongoQueryTranslator();
+            translator.Translate(expression.Expression, false);
 
             if (expression is MongoQuery<T>)
             {
-                return (expression as MongoQuery<T>).Explain(query);
+                return (expression as MongoQuery<T>).Explain(translator.FlyWeight);
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Adds a query hint.
+        /// </summary>
+        /// <typeparam name="T">Document type</typeparam>
+        /// <param name="find">The type of document being enumerated.</param>
+        /// <param name="hint">The query hint expression.</param>
+        /// <param name="direction">Ascending or descending.</param>
+        /// <returns></returns>
+        public static IEnumerable<T> Hint<T>(this IEnumerable<T> find, Expression<Func<T, object>> hint, IndexOption direction)
+        {
+            var translator = new MongoQueryTranslator();
+            var index = translator.Translate(hint);
+
+            var proxy = (MongoQueryExecutor<T, Flyweight>)find;
+            proxy.AddHint(index, direction);
+            return find;
         }
     }
 }

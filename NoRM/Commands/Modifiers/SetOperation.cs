@@ -1,19 +1,13 @@
-﻿using NoRM.BSON;
-
-namespace NoRM.Commands
+namespace Norm.Commands.Modifiers
 {
-    /// <summary>
-    /// The increment operation.
-    /// </summary>
-    public class SetOperation : ModifierCommand
+    using BSON;
+
+
+    public class SetOperation<T> : ModifierCommand
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IncrementOperation"/> class.
-        /// </summary>
-        /// <param name="value">The value to set.</param>
-        public SetOperation(object value)
-            : base("$set", value)
+        public SetOperation(T setValue):base("$set",setValue)
         {
+
         }
     }
 }

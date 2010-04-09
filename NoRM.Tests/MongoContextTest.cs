@@ -1,5 +1,5 @@
 /*
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     [TestFixture]
     [Category("Hits MongoDB")]

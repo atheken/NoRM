@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
-using NoRM.Configuration;
-using NoRM.Protocol.SystemMessages;
-using NoRM.Protocol.SystemMessages.Request;
-using NoRM.Responses;
+using Norm.Configuration;
+using Norm.Protocol.SystemMessages;
+using Norm.Protocol.SystemMessages.Request;
+using Norm.Responses;
+using Norm.Collections;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Mongo database
@@ -95,7 +96,7 @@ namespace NoRM
             {
                 return GetCollection<CollectionStatistics>("$cmd").FindOne(new CollectionStatistics
                                                                                {
-                                                                                   collstats = collectionName
+                                                                                   CollectionStats = collectionName
                                                                                });
             }
             catch (MongoException exception)
@@ -140,7 +141,7 @@ namespace NoRM
         {
             try
             {
-                return GetCollection<GenericCommandResponse>("$cmd").FindOne(new CreateCollectionRequest(options)).OK == 1;
+                return GetCollection<GenericCommandResponse>("$cmd").FindOne(new CreateCollectionRequest(options)).Ok == 1;
             }
             catch (MongoException exception)
             {
@@ -160,7 +161,7 @@ namespace NoRM
         /// <returns></returns>
         public SetProfileResponse SetProfileLevel(ProfileLevel level)
         {
-            return GetCollection<SetProfileResponse>("$cmd").FindOne(new SetProfileResponse { profile = (int)level });
+            return GetCollection<SetProfileResponse>("$cmd").FindOne(new SetProfileResponse { Profile = (int)level });
         }
 
         /// <summary>
@@ -188,6 +189,11 @@ namespace NoRM
                                  validate = collectionName,
                                  scandata = scanData
                              });
+        }
+
+        public LastErrorResponse LastError()
+        {
+            return GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });
         }
     }
 }

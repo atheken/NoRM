@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NoRM.BSON;
+using Norm.BSON;
 
-namespace NoRM.Protocol.Messages
+namespace Norm.Protocol.Messages
 {
     /// <summary>
     /// Insert message.
@@ -60,11 +60,6 @@ namespace NoRM.Protocol.Messages
 
             var bytes = message.SelectMany(y => y).ToArray();
             _connection.Write(bytes, 0, size);
-
-            if (_connection.StrictMode)
-            {
-                AssertHasNotError();
-            }
         }
     }
 }

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// Type related helper methods
     /// </summary>
-    public static class TypeHelper
+    public static class LinqTypeHelper
     {
         /// <summary>
         /// Find IEnumerable.

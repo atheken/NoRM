@@ -1,14 +1,13 @@
 using System.Collections.Generic;
+using System;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using Xunit;
+using Norm.BSON;
 using System.Linq;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
-    using System;
-    using System.Diagnostics;
-    using System.Text.RegularExpressions;
-    using BSON;
-    using Xunit;
-
     public class BSONSerializerTest
     {       
         [Fact]
@@ -288,6 +287,7 @@ namespace NoRM.Tests
             Assert.Equal(obj2.Nester, hydratedObj2.Nester);
             Assert.Equal(obj2.ARex, hydratedObj2.ARex);
         }
+
         [Fact]
         public void SerializationSpeedTest()
         {
@@ -341,6 +341,18 @@ namespace NoRM.Tests
             Assert.Equal(1, end.Names.Count);
             Assert.Equal("Duncan Idaho", end.Names[0]);
         }
+        [Fact]
+        public void SerializesReadonlyICollection()
+        {
+            var start = new HashSetList();
+            start.Names.Add("Duncan");
+            start.Names.Add("Idaho");
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<HashSetList>(bytes);
+            Assert.Equal(2, end.Names.Count);
+            Assert.Equal("Duncan", end.Names.ElementAt(0));
+            Assert.Equal("Idaho", end.Names.ElementAt(1));
+        }
 
         [Fact]
         public void SerializesDictionary()
@@ -349,6 +361,17 @@ namespace NoRM.Tests
             start.Names.Add("Duncan Idaho", 2);
             var bytes = BsonSerializer.Serialize(start);
             var end = BsonDeserializer.Deserialize<DictionaryObject>(bytes);
+            Assert.Equal(1, end.Names.Count);
+            Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
+            Assert.Equal(2, end.Names.ElementAt(0).Value);
+        }
+        [Fact]
+        public void SerializesIDictionary()
+        {
+            var start = new IDictionaryObject();
+            start.Names.Add("Duncan Idaho", 2);
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<IDictionaryObject>(bytes);
             Assert.Equal(1, end.Names.Count);
             Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
             Assert.Equal(2, end.Names.ElementAt(0).Value);
@@ -365,5 +388,15 @@ namespace NoRM.Tests
             Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
             Assert.Equal(2, end.Names.ElementAt(0).Value);
         }
+        
+        [Fact]
+        public void WillDeserializeObjectWithPrivateConstructor()
+        {
+            var start = PrivateConstructor.Create("Darren Kopp");
+            var bytes = BsonSerializer.Serialize(start);
+            var end = BsonDeserializer.Deserialize<PrivateConstructor>(bytes);
+            Assert.Equal(start.Name, end.Name);            
+        }
+        
     }
 }

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// The connection provider factory.

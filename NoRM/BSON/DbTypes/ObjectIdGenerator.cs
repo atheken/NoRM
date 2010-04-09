@@ -4,7 +4,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace NoRM.BSON.DbTypes
+namespace Norm.BSON.DbTypes
 {
     /// <summary>
     /// Shameless-ly ripped off, then slightly altered from samus' implementation on GitHub

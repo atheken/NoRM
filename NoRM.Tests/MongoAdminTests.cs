@@ -1,10 +1,10 @@
-namespace NoRM.Tests
-{
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Text.RegularExpressions;
-    using Xunit;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using Xunit;
 
+namespace Norm.Tests
+{
     public class MongoAdminTests
     {
         public MongoAdminTests()
@@ -17,10 +17,10 @@ namespace NoRM.Tests
         [Fact]
         public void ListsAllDatabases()
         {
-            var expected = new List<string> { "admin", "NoRMTests", "local" };
+            var expected = new List<string> { "admin", "NormTests", "local" };
 
             //create another database
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject());
             }
@@ -64,7 +64,7 @@ namespace NoRM.Tests
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var info = admin.BuildInfo(); 
-                Assert.Equal(1d, info.OK);
+                Assert.Equal(1d, info.Ok);
                 Assert.Equal(gitVersion, info.GitVersion);
                 Assert.Equal(version, info.Version);
             }            
@@ -85,8 +85,8 @@ namespace NoRM.Tests
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var response = admin.ForceSync(true);
-                Assert.Equal(1d, response.OK);
-                Assert.True(response.NumFiles > 0); //don't know what this is
+                Assert.Equal(1d, response.Ok);
+                Assert.True(response.NumberOfFiles > 0); //don't know what this is
             }
         }
         [Fact]
@@ -103,7 +103,7 @@ namespace NoRM.Tests
         public void DropsDatabase()
         {
             //create another database
-            using (var mongo = Mongo.ParseConnection(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 mongo.GetCollection<FakeObject>().Insert(new FakeObject());                
             }
@@ -116,7 +116,7 @@ namespace NoRM.Tests
             {
                 foreach (var db in admin.GetAllDatabases())
                 {
-                   Assert.NotEqual("NoRMTests", db.Name);
+                   Assert.NotEqual("NormTests", db.Name);
                 }
             }
         }

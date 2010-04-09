@@ -1,8 +1,8 @@
-namespace NoRM.Tests
-{
-    using System;
-    using System.Diagnostics;
+using System;
+using System.Diagnostics;
 
+namespace Norm.Tests
+{
     public abstract class MongoFixture : IDisposable
     {
         private readonly Process _process;
@@ -49,7 +49,8 @@ namespace NoRM.Tests
                   StartInfo = new ProcessStartInfo
                           {
                               FileName = "mongod",
-                              Arguments = string.Format("--port {0} --dbpath {1} --smallfiles {2}", Port, DataPath, Arguments),
+                              Arguments = string.Format("--port {0} --dbpath {1} --smallfiles {2}",
+                                this.Port, this.DataPath, this.Arguments),
                           },
               };
             _process.Start();

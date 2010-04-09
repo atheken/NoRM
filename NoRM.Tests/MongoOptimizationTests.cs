@@ -1,27 +1,160 @@
-﻿using System.Linq;
-using NoRM.Linq;
+﻿using System;
+using System.Linq;
+using Norm.BSON;
+using Norm.Linq;
+using Norm.Protocol.Messages;
 using Xunit;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class MongoOptimizationTests
     {
         [Fact]
-        public void MongoQueryExplainsExecutionPlans()
+        public void MongoCollectionEnsuresIndicies()
         {
-            using(var session = new Session())
+            using (var session = new Session())
             {
+                session.Drop<Product>();
+
+                session.Add(new Product
+                {
+                    Name = "ExplainProduct",
+                    Price = 10,
+                    Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
+                });
+
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "Test", true, IndexOption.Ascending);
+            }
+        }
+
+        [Fact]
+        public void MongoQueryExplainsExecutionPlansForFlyweightQueries()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+
                 session.Add(new Product
                                 {
                                     Name = "ExplainProduct",
-                                    Price = 10, 
-                                    Supplier = new Supplier { Name = "Supplier" }
+                                    Price = 10,
+                                    Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                                 });
 
-                // CreateIndex doesn't work yet.  You'll have to add it manually if you don't want empty startKey and endKey values
-                //session.Provider.DB.GetCollection<Product>().CreateIndex(new Product(), false, "productindex");
+                // To see this manually you can run the following command in Mongo.exe against 
+                //the Product collection db.Product.ensureIndex({"Supplier.Name":1})
 
-                var explainPlan = session.Products.Where(x => x.Supplier.Name == "test").Explain();
+                // Then you can run this command to see a detailed explain plan
+                // db.Product.find({"Supplier.Name":"abc"})
+
+                // The following query is the same as runging: db.Product.find({"Supplier.Name":"abc"}).explain()
+                var query = new Flyweight();
+                query["Supplier.Name"] = Q.Equals("Supplier");
+
+                var result = session.Provider.DB.GetCollection<Product>().Explain(query);
+
+                Assert.Equal("BtreeCursor TestIndex", result.Cursor);
+            }
+        }
+
+        [Fact]
+        public void MongoQueryExplainsExecutionPlans()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Name, "TestIndex", true, IndexOption.Ascending);
+
+                session.Add(new Product
+                {
+                    Name = "ExplainProduct",
+                    Price = 10,
+                    Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
+                });
+
+
+                var result = session.Provider.DB.GetCollection<Product>().Explain(new { Name = "ExplainProduct" });
+
+                Assert.Equal("BtreeCursor TestIndex", result.Cursor);
+            }
+        }
+
+        [Fact]
+        public void MongoQueryExplainsLinqExecutionPlans()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+               
+                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+
+                session.Add(new Product
+                {
+                    Name = "ExplainProduct",
+                    Price = 10,
+                    Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
+                });
+
+                var result = session.Products
+                    .Where(x => x.Supplier.Name == "Supplier")
+                    .Explain();
+
+                Assert.Equal("BtreeCursor TestIndex", result.Cursor);
+            }
+        }
+
+        [Fact]
+        public void MongoQuerySupportsHintsForLinqQueries()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+
+                session.Add(new Product
+                                {
+                                    Name = "ExplainProduct",
+                                    Price = 10,
+                                    Supplier = new Supplier {Name = "Supplier", CreatedOn = DateTime.Now}
+                                });
+
+                var query = new Flyweight();
+                query["Supplier.Name"] = Q.Equals("Supplier");
+
+                var result = session.Provider.DB
+                    .GetCollection<Product>()
+                    .Find(query)
+                    .Hint(p => p.Name, IndexOption.Ascending);
+
+                Assert.Equal(1, result.Count());
+            }
+        }
+
+        [Fact]
+        public void MongoQuerySupportschainingHintsForLinqQueries()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<Product>();
+
+                session.Add(new Product
+                {
+                    Name = "ExplainProduct",
+                    Price = 10,
+                    Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
+                });
+
+                var query = new Flyweight();
+                query["Supplier.Name"] = Q.Equals("Supplier");
+
+                var result = session.Provider.DB.GetCollection<Product>()
+                    .Find(query)
+                    .Hint(p => p.Name, IndexOption.Ascending)
+                    .Hint(p => p.Supplier.Name, IndexOption.Descending);
+
+                Assert.Equal(1, result.Count());
             }
         }
     }

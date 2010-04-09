@@ -1,25 +1,24 @@
 using System;
 using System.Linq;
-using NoRM.BSON;
+using Norm.BSON;
 using Xunit;
+using Norm.Collections;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
-
-    
     public class UpdateTests : IDisposable
     {
         private readonly Mongo _server;
         private readonly MongoCollection<CheeseClubContact> _collection;
         public UpdateTests()
         {
-            _server = Mongo.ParseConnection("mongodb://localhost/NoRMTests?pooling=false");
+            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
             _collection = _server.GetCollection<CheeseClubContact>("CheeseClubContacts");
         }
         public void Dispose()
         {
             _server.Database.DropCollection("CheeseClubContacts");
-            using (var admin = new MongoAdmin("mongodb://localhost/NoRMTests?pooling=false"))
+            using (var admin = new MongoAdmin("mongodb://localhost/NormTests?pooling=false"))
             {
                 admin.DropDatabase();
             }

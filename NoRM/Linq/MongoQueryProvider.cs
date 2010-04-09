@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using NoRM.BSON;
+using Norm.BSON;
+using Norm.Collections;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// The mongo query provider.
@@ -87,7 +88,7 @@ namespace NoRM.Linq
         /// </exception>
         IQueryable IQueryProvider.CreateQuery(Expression expression)
         {
-            var elementType = TypeHelper.GetElementType(expression.Type);
+            var elementType = LinqTypeHelper.GetElementType(expression.Type);
             try
             {
                 return (IQueryable)Activator.CreateInstance(typeof(MongoQuery<>).MakeGenericType(elementType), new object[] { this, expression });
@@ -119,11 +120,14 @@ namespace NoRM.Linq
 
                 if (!string.IsNullOrEmpty(qry))
                 {
-                    fly.Limit = 1;
                     if (tranny.IsComplex)
                     {
                         fly = new Flyweight();
-                        fly["$where"] = " function(){return " + qry + "; }";
+                        if (qry.StartsWith("function")) {
+                            fly["$where"] = qry;
+                        } else {
+                            fly["$where"] = " function(){return " + qry + "; }";
+                        }
                     }
                 }
 
@@ -164,18 +168,30 @@ namespace NoRM.Linq
 
 
             // execute
-            if (!string.IsNullOrEmpty(qry))
+            if (!string.IsNullOrEmpty(qry) || tranny.IsComplex)
             {
                 if (tranny.IsComplex)
                 {
                     // reset - need to use the where statement generated
                     // instead of the props set on the internal flyweight
                     fly = new Flyweight();
-                    fly["$where"] = " function(){return " + qry + "; }";
+                    if(qry.StartsWith("function")){
+                        fly["$where"] = qry;
+                    }else{
+                        fly["$where"] = " function(){return " + qry + "; }";
+                    }
                 }
             }
 
-            return collection.Find(fly);
+            IEnumerable<T> result;
+            if (tranny.SortFly.AllProperties().Count()>0) {
+                tranny.SortFly.ReverseKitchen();
+                result = collection.Find(fly, tranny.SortFly, tranny.Take, tranny.Skip, collection.FullyQualifiedName);
+            } else {
+                result=collection.Find(fly, tranny.Take, tranny.Skip);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -204,40 +220,38 @@ namespace NoRM.Linq
             var fly = tranny.FlyWeight;
 
             // set the method call to the Method name. Yeehaa.
-            fly.MethodCall = m.Method.Name;
+            tranny.MethodCall = m.Method.Name;
 
             // if it's here, we need it - the last arg is the lambda passed in as an argument to the method
             // this will give us the prop name for our mapreduce action
             if (m.Arguments.Count > 1)
             {
-                if (fly.MethodCall == "Any")
+                if (tranny.MethodCall == "Any")
                 {
                     // any has a boolean lambda as a body - translate this 
                     // as normal
                     qry = tranny.Translate(m.Arguments[1]);
-
-
                     // the property name doesn't matter with Any
                 }
                 else
                 {
-                    fly.PropName = tranny.Translate(m.Arguments[1]);
+                    tranny.PropName = tranny.Translate(m.Arguments[1]);
                 }
             }
             else
             {
                 // it's a straight query call - grab from first
-                fly.PropName = tranny.Translate(m.Arguments[0]);
+                tranny.PropName = tranny.Translate(m.Arguments[0]);
             }
 
             // the type we're dealing with is a ConstantExpression, hanging off the 
             // first argument. Need to set it so our little fly guy
             // knows what collection to use
-            fly.TypeName = tranny.TranslateCollectionName(m.Arguments[0]);
+            tranny.TypeName = tranny.TranslateCollectionName(m.Arguments[0]);
 
 
             // This is the actual Query mechanism...
-            var collection = new MongoCollection(fly.TypeName, DB, DB.CurrentConnection);
+            var collection = new MongoCollection(tranny.TypeName, DB, DB.CurrentConnection);
 
             // if a query comes back, create a $where. We'll use this for Count() 
             // and Group in the future.
@@ -253,46 +267,47 @@ namespace NoRM.Linq
             // This is the mapping function (javascript. Yummy).
             // It defines our collection that we'll iterate (reduce) over
             // James, you're an animal.
-            var averyMap = "function(){emit(0, " + fly.PropName + ")};";
+            var averyMap = "function(){emit(0, {val: " + tranny.PropName + ",tSize:1} )};";
 
             // if they pass in a query (Where()), we need to graft that on
             // to our Mapping. You can thank Avery for this one.
             if (!string.IsNullOrEmpty(qry))
             {
-                averyMap = "function(){if" + qry + "{emit(0, " + fly.PropName + ")};}";
+                averyMap = "function(){if" + qry + "{emit(0, {val: " + tranny.PropName + ",tSize:1} )};}";
             }
 
             var reduce = string.Empty;
+            var finalize = "function(key, res){ return res.val; }";
             object result = null;
 
             // Whachoo SAY!
-            switch (fly.MethodCall)
+            switch (tranny.MethodCall)
             {
                 // I'm Just ASKIN!!!
                 case "Any":
-                    result = collection.Count(fly) > 0;
+                    result = collection.Count(tranny.FlyWeight) > 0;
                     break;
                 case "Count":
                     result = collection.Count(fly);
                     break;
                 case "Sum":
-                    reduce = "function(key, values){var sum = 0;for(var i in values){ sum+=values[i];} return sum;}";
-                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
+                    reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){ sum+=values[i].val;} return {val:sum};}";
+                    result = ExecuteMR<float>(tranny.TypeName, averyMap, reduce, finalize);
                     break;
                 case "Average":
-                    reduce =
-                        "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){sum += values[i]} return sum/values.length;}";
-                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
+                    reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; ++i){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
+                    finalize = "function(key, res){ return res.val / res.tSize; }";
+                    result = ExecuteMR<float>(tranny.TypeName, averyMap, reduce, finalize);
                     break;
                 case "Min":
                     reduce =
-                        "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least > values[i]){least=values[i];}} return least;}";
-                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
+                        "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
+                    result = ExecuteMR<float>(tranny.TypeName, averyMap, reduce, finalize);
                     break;
                 case "Max":
                     reduce =
-                        "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least < values[i]){least=values[i];}} return least;}";
-                    result = ExecuteMR<long>(fly.TypeName, averyMap, reduce);
+                        "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
+                    result = ExecuteMR<float>(tranny.TypeName, averyMap, reduce, finalize);
                     break;
                 default:
                     break;
@@ -308,19 +323,25 @@ namespace NoRM.Linq
         /// <param name="typeName">Name of the type.</param>
         /// <param name="map">The map.</param>
         /// <param name="reduce">The reduce.</param>
+        /// <param name="finalize">The finalize.</param>
         /// <returns></returns>
-        private T ExecuteMR<T>(string typeName, string map, string reduce)
+        private T ExecuteMR<T>(string typeName, string map, string reduce, string finalize)
         {
             T result;
             using (var mr = Server.CreateMapReduce())
             {
-                var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce });
+                var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce, Finalize = finalize });
                 var coll = response.GetCollection<MapReduceResult<T>>();
                 var r = coll.Find().FirstOrDefault();
                 result = r.Value;
             }
 
             return result;
+        }
+        
+        private T ExecuteMR<T>(string typeName, string map, string reduce)
+        {
+            return ExecuteMR<T>(typeName, map, reduce, null);
         }
     }
 }

@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using NoRM.Configuration;
+using Norm.Configuration;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// The bson serializer.

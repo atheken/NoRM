@@ -1,5 +1,5 @@
 ﻿
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// This is a marker interface that allows 

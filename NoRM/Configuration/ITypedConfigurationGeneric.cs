@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace NoRM.Configuration
+namespace Norm.Configuration
 {
     /// <summary>
     /// Type-specific type configuration
@@ -11,6 +11,7 @@ namespace NoRM.Configuration
     /// </typeparam>
     public interface ITypeConfiguration<T> : ITypeConfiguration
     {
+
         /// <summary>
         /// Looks up property names for use with aliases.
         /// </summary>

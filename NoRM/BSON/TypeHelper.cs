@@ -3,20 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using NoRM.Attributes;
-using NoRM.Configuration;
+using Norm.Attributes;
+using Norm.Configuration;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
     /// <summary>
     /// Convenience methods for type reflection.
     /// </summary>
     public class TypeHelper
     {
-        private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup = new Dictionary<Type, TypeHelper>();
+        private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup =
+            new Dictionary<Type, TypeHelper>();
+
         private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);
         private readonly IDictionary<string, MagicProperty> _properties;
         //private readonly Type _type;
+
+        static TypeHelper()
+        {
+            //register to be notified of type configuration changes.
+            MongoConfiguration.TypeConfigurationChanged += new Action<Type>(TypeConfigurationChanged);
+        }
+
+        static void TypeConfigurationChanged(Type theType)
+        {
+            //clear the cache to prevent TypeHelper from getting the wrong thing.
+            if (_cachedTypeLookup.ContainsKey(theType))
+            {
+                _cachedTypeLookup.Remove(theType);
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeHelper"/> class.
@@ -26,8 +43,8 @@ namespace NoRM.BSON
         {
             //_type = type;
             var properties =
-                type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
-                                   BindingFlags.FlattenHierarchy);
+                type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
+                    BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
             _properties = LoadMagicProperties(properties, IdProperty(properties));
         }
 
@@ -50,7 +67,7 @@ namespace NoRM.BSON
 
         /// <summary>
         /// Lifted from AutoMaper.  Finds a property using a lambda expression
-        /// (i.e. x => x.Name 
+        /// (i.e. x => x.Name)
         /// </summary>
         /// <param name="lambdaExpression">The lambda expression.</param>
         /// <returns>Property name</returns>
@@ -147,13 +164,12 @@ namespace NoRM.BSON
                 {
                     return property;
                 }
-
-                if (string.Compare(property.Name, "_id", true) == 0)
+                if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
                 {
                     foundSoFar = property;
                 }
-
-                if (foundSoFar == null && string.Compare(property.Name, "Id", true) == 0)
+                if (foundSoFar == null && property.Name.Equals("Id",
+                    StringComparison.InvariantCultureIgnoreCase))
                 {
                     foundSoFar = property;
                 }
@@ -179,6 +195,7 @@ namespace NoRM.BSON
                     continue;
                 }
 
+                //HACK: this is a latent BUG, if MongoConfiguration is altered after stashing the type helper, we die.
                 var alias = MongoConfiguration.GetPropertyAlias(property.DeclaringType, property.Name);
 
                 var name = (property == idProperty && alias != "$id")

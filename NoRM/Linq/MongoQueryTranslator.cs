@@ -1,23 +1,45 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
-using NoRM.BSON;
-using NoRM.Configuration;
+using Norm.BSON;
+using Norm.Configuration;
+using System.Collections.Generic;
 
-namespace NoRM.Linq
+namespace Norm.Linq
 {
     /// <summary>
     /// The mongo query translator.
     /// </summary>
     public class MongoQueryTranslator : ExpressionVisitor
     {
+        private int _takeCount = Int32.MaxValue;
         private Expression _expression;
-        private bool collectionSet;
-        private string lastFlyProperty = string.Empty;
-        private string lastOperator = " == ";
-        private StringBuilder sb;
-        private StringBuilder sbIndexed;
+        private bool _collectionSet;
+        private string _lastFlyProperty = string.Empty;
+        private string _lastOperator = " === ";
+        private StringBuilder _sb;
+        private StringBuilder _sbIndexed;
+        public Flyweight SortFly { get; set; }
+        public string SortDescendingBy { get; set; }
+        bool _whereWritten = false;
+        public String PropName
+        {
+            get;
+            set;
+        }
+        public String TypeName
+        {
+            get;
+            set;
+        }
+
+        public String MethodCall
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets a value indicating whether IsComplex.
@@ -29,7 +51,7 @@ namespace NoRM.Linq
         /// </summary>
         public string OptimizedWhere
         {
-            get { return sbIndexed.ToString(); }
+            get { return _sbIndexed.ToString(); }
         }
 
         /// <summary>
@@ -43,12 +65,35 @@ namespace NoRM.Linq
         public Flyweight FlyWeight { get; private set; }
 
         /// <summary>
+        /// How many to skip.
+        /// </summary>
+        public int Skip { get; set; }
+
+
+        /// <summary>
+        /// How many to take (Int32.MaxValue) by default.
+        /// </summary>
+        public int Take
+        {
+            get
+            {
+                return this._takeCount;
+            }
+            set
+            {
+                this._takeCount = value;
+            }
+        }
+
+        /// <summary>
         /// Gets where expression.
         /// </summary>
         public string WhereExpression
         {
-            get { return sb.ToString(); }
+            get { return _sb.ToString(); }
         }
+
+        public bool UseScopedQualifier { get; set; }
 
         /// <summary>
         /// The translate collection name.
@@ -87,11 +132,18 @@ namespace NoRM.Linq
         /// <returns>The translate.</returns>
         public string Translate(Expression exp)
         {
-            sb = new StringBuilder();
-            sbIndexed = new StringBuilder();
+            return Translate(exp, true);
+        }
+
+        public string Translate(Expression exp, bool useScopedQualifier)
+        {
+            UseScopedQualifier = useScopedQualifier;
+            _sb = new StringBuilder();
+            _sbIndexed = new StringBuilder();
             FlyWeight = new Flyweight();
+            SortFly = new Flyweight();
             Visit(exp);
-            return sb.ToString();
+            return _sb.ToString();
         }
 
         /// <summary>
@@ -103,28 +155,45 @@ namespace NoRM.Linq
         /// </exception>
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            //if(m.Expression.NodeType == ExpressionType.MemberAccess)
+            //{
+            //    VisitMemberAccess((MemberExpression)m.Expression);
+            //}
 
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
-                sb.Append("this." + alias); // m.Member.Name);
-                lastFlyProperty = alias; // m.Member.Name;
+                var id = TypeHelper.GetHelperForType(m.Expression.Type).FindIdProperty();
+                if (id != null && id.Name == alias)
+                {
+                    alias = "_id";
+                }
+                if (UseScopedQualifier)
+                {
+                    _sb.Append("this.");
+                }
+                _sb.Append(alias);
+
+                _lastFlyProperty = alias;
                 return m;
             }
+
             if (m.Member.DeclaringType == typeof(string))
             {
                 switch (m.Member.Name)
                 {
                     case "Length":
-                        sb.Append("LEN(");
+                        _sb.Append("LEN(");
                         Visit(m.Expression);
-                        sb.Append(")");
+                        _sb.Append(")");
                         return m;
                 }
             }
             else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset))
             {
+                #region DateTime Magic
+                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
                 // this is complex
                 IsComplex = true;
 
@@ -137,49 +206,78 @@ namespace NoRM.Linq
                 {
                     case "Day":
                         Visit(m.Expression);
-                        sb.Append(".getDate()");
+                        _sb.Append(".getDate()");
                         return m;
                     case "Month":
                         Visit(m.Expression);
-                        sb.Append(".getMonth()");
+                        _sb.Append(".getMonth()");
                         return m;
                     case "Year":
                         Visit(m.Expression);
-                        sb.Append(".getFullYear()");
+                        _sb.Append(".getFullYear()");
                         return m;
                     case "Hour":
                         Visit(m.Expression);
-                        sb.Append(".getHours()");
+                        _sb.Append(".getHours()");
                         return m;
                     case "Minute":
                         Visit(m.Expression);
-                        sb.Append(".getMinutes()");
+                        _sb.Append(".getMinutes()");
                         return m;
                     case "Second":
                         Visit(m.Expression);
-                        sb.Append(".getSeconds()");
+                        _sb.Append(".getSeconds()");
                         return m;
                     case "DayOfWeek":
                         Visit(m.Expression);
-                        sb.Append(".getDay()");
+                        _sb.Append(".getDay()");
                         return m;
                 }
+                #endregion
             }
             else
             {
+                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
                 // this supports the "deep graph" name - "Product.Address.City"
                 var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
 
-                var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
+                String result = "";
 
-                if (expressionRootType != null)
+                if (m.Expression.NodeType == ExpressionType.Constant)
                 {
-                    fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
+                    var constant = m.Expression as ConstantExpression;
+                    var fi = (FieldInfo)m.Member;
+                    var val = fi.GetValue(constant.Value);
+                    if (val is String)
+                    {
+                        result = String.Format("\"{0}\"", val);
+                    }
+                    else
+                    {
+                        result = val.ToString();
+                    }
+                    SetFlyValue(val);
                 }
+                else
+                {
+                    var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
 
-                var result = string.Join(".", fixedName);
-                sb.Append("this." + result);
-                lastFlyProperty = result;
+                    if (expressionRootType != null)
+                    {
+                        fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
+                    }
+
+                    result = string.Join(".", fixedName);
+                    //sb.Append("this." + result);
+                    if (UseScopedQualifier)
+                    {
+                        _sb.Append("this.");
+                    }
+                }
+                _sb.Append(result);
+
+                _lastFlyProperty = result;
                 return m;
             }
 
@@ -187,6 +285,51 @@ namespace NoRM.Linq
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
         }
 
+
+        string GetBinaryOperator(BinaryExpression b) {
+            var result = "";
+            switch (b.NodeType) {
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                    result =" && ";
+                    break;
+
+                case ExpressionType.Or:
+                case ExpressionType.OrElse:
+                    IsComplex = true;
+                    result =" || ";
+                    break;
+                case ExpressionType.Equal:
+                    _lastOperator = " === ";//Should this be '===' instead? a la 'Javascript: The good parts'
+                    result =_lastOperator;
+                    break;
+                case ExpressionType.NotEqual:
+                    _lastOperator = " <> ";
+                    result =_lastOperator;
+                    break;
+                case ExpressionType.LessThan:
+                    _lastOperator = " < ";
+                    result = _lastOperator;
+                    break;
+                case ExpressionType.LessThanOrEqual:
+                    _lastOperator = " <= ";
+                    result = _lastOperator;
+                    break;
+                case ExpressionType.GreaterThan:
+                    _lastOperator = " > ";
+                    result = _lastOperator;
+                    break;
+                case ExpressionType.GreaterThanOrEqual:
+                    _lastOperator = " >= ";
+                    result = _lastOperator;
+                    break;
+                default:
+                    throw new NotSupportedException(
+                        string.Format("The binary operator '{0}' is not supported", b.NodeType));
+
+            }
+            return result;
+        }
         /// <summary>
         /// Visits a binary expression.
         /// </summary>
@@ -196,55 +339,24 @@ namespace NoRM.Linq
         /// </exception>
         protected override Expression VisitBinary(BinaryExpression b)
         {
-            ConditionalCount++;
-            sb.Append("(");
-            Visit(b.Left);
-            switch (b.NodeType)
-            {
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                    sb.Append(" && ");
-                    break;
 
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
-                    IsComplex = true;
-                    sb.Append(" || ");
-                    break;
-                case ExpressionType.Equal:
-                    lastOperator = " == ";
-                    sb.Append(lastOperator);
-                    break;
-                case ExpressionType.NotEqual:
-                    lastOperator = " <> ";
-                    sb.Append(lastOperator);
-                    break;
-                case ExpressionType.LessThan:
-                    lastOperator = " < ";
-                    sb.Append(lastOperator);
-                    break;
-                case ExpressionType.LessThanOrEqual:
-                    lastOperator = " <= ";
-                    sb.Append(lastOperator);
-                    break;
-                case ExpressionType.GreaterThan:
-                    lastOperator = " > ";
-                    sb.Append(lastOperator);
-                    break;
-                case ExpressionType.GreaterThanOrEqual:
-                    lastOperator = " >= ";
-                    sb.Append(lastOperator);
-                    break;
-                default:
-                    throw new NotSupportedException(string.Format("The binary operator '{0}' is not supported",
-                                                                  b.NodeType));
+            //specific for "chained" Where() calls, where a Where() is appended
+            //to an IQueryable on top of another IQueryable
+            if (_whereWritten) {
+                _sb.Append(" && ");
             }
+            ConditionalCount++;
+            _sb.Append("(");
+            Visit(b.Left);
+            _sb.Append(GetBinaryOperator(b));
 
             Visit(b.Right);
-            sb.Append(")");
+            _sb.Append(")");
             return b;
         }
+        void VisitRight(Expression exp) {
 
+        }
         /// <summary>
         /// Visits a constant.
         /// </summary>
@@ -258,7 +370,7 @@ namespace NoRM.Linq
             if (q != null)
             {
                 // set the collection name
-                FlyWeight.TypeName = q.ElementType.Name;
+                this.TypeName = q.ElementType.Name;
 
                 // this is our Query wrapper - see if it has an expression
                 var qry = (IMongoQuery)c.Value;
@@ -270,30 +382,44 @@ namespace NoRM.Linq
             }
             else if (c.Value == null)
             {
-                sb.Append("NULL");
+                _sb.Append("NULL");
             }
             else
             {
                 switch (Type.GetTypeCode(c.Value.GetType()))
                 {
                     case TypeCode.Boolean:
-                        sb.Append(((bool)c.Value) ? 1 : 0);
+                        _sb.Append(((bool)c.Value) ? 1 : 0);
                         SetFlyValue(((bool)c.Value) ? 1 : 0);
                         break;
                     case TypeCode.DateTime:
-                        var val = "new Date('" + c.Value + "')";
-                        sb.Append(val);
+                        var val = "new Date(" + (long)((DateTime)c.Value).Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
+                        _sb.Append(val);
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.String:
                         var sval = "'" + c.Value + "'";
-                        sb.Append(sval);
+                        _sb.Append(sval);
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.Object:
-                        throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
+                        if (c.Value is ObjectId)
+                        {
+                            _sb.AppendFormat("ObjectId('{0}')", c.Value);
+                            SetFlyValue(c.Value);
+                        }
+                        else if (c.Value is Guid)
+                        {
+                            _sb.AppendFormat("'{0}'", c.Value);
+                            SetFlyValue(c.Value);
+                        }
+                        else
+                        {
+                            throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
+                        }
+                        break;
                     default:
-                        sb.Append(c.Value);
+                        _sb.Append(c.Value);
                         SetFlyValue(c.Value);
                         break;
                 }
@@ -311,15 +437,17 @@ namespace NoRM.Linq
         /// </exception>
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            if (string.IsNullOrEmpty(FlyWeight.MethodCall))
+            if (string.IsNullOrEmpty(this.MethodCall))
             {
-                FlyWeight.MethodCall = m.Method.Name;
+                this.MethodCall = m.Method.Name;
             }
 
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
                 var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
                 Visit(lambda.Body);
+                _whereWritten = true;
+                Visit(m.Arguments[0]);
                 return m;
             }
             if (m.Method.DeclaringType == typeof(string))
@@ -328,42 +456,42 @@ namespace NoRM.Linq
                 switch (m.Method.Name)
                 {
                     case "StartsWith":
-                        sb.Append("(");
+                        _sb.Append("(");
                         Visit(m.Object);
-                        sb.Append(".indexOf(");
+                        _sb.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        sb.Append(")===0)");
+                        _sb.Append(")===0)");
                         return m;
 
                     case "Contains":
-                        sb.Append("(");
+                        _sb.Append("(");
                         Visit(m.Object);
-                        sb.Append(".indexOf(");
+                        _sb.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        sb.Append(")>0)");
+                        _sb.Append(")>0)");
                         return m;
                     case "IndexOf":
                         Visit(m.Object);
-                        sb.Append(".indexOf(");
+                        _sb.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        sb.Append(")");
+                        _sb.Append(")");
                         return m;
                     case "EndsWith":
-                        sb.Append("(");
+                        _sb.Append("(");
                         Visit(m.Object);
-                        sb.Append(".match(");
+                        _sb.Append(".match(");
                         Visit(m.Arguments[0]);
-                        sb.Append("+'$')==");
+                        _sb.Append("+'$')==");
                         Visit(m.Arguments[0]);
-                        sb.Append(")");
+                        _sb.Append(")");
                         return m;
 
                     case "IsNullOrEmpty":
-                        sb.Append("(");
+                        _sb.Append("(");
                         Visit(m.Arguments[0]);
-                        sb.Append(" == '' ||  ");
+                        _sb.Append(" == '' ||  ");
                         Visit(m.Arguments[0]);
-                        sb.Append(" == null  )");
+                        _sb.Append(" == null  )");
                         return m;
                 }
             }
@@ -382,12 +510,18 @@ namespace NoRM.Linq
                 // Subquery - Count() or Sum()
                 if (IsCallableMethod(m.Method.Name))
                 {
+                    return HandleMethodCall(m);
                 }
             }
 
             // for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
+
+        private static HashSet<String> _callableMethods = new HashSet<string>(){
+            "First","Single","FirstOrDefault","SingleOrDefault","Count",
+            "Sum","Average","Min","Max","Any","Take","Skip", 
+            "OrderBy","ThenBy", "OrderByDescending", "ThenByDescending"};
 
         /// <summary>
         /// Determines if it's a callable method.
@@ -396,23 +530,7 @@ namespace NoRM.Linq
         /// <returns>The is callable method.</returns>
         private static bool IsCallableMethod(string methodName)
         {
-            var acceptableMethods = new[]
-                                        {
-                                            "First",
-                                            "Single",
-                                            "FirstOrDefault",
-                                            "SingleOrDefault",
-                                            "Count",
-                                            "Sum",
-                                            "Average",
-                                            "Min",
-                                            "Max",
-                                            "Any",
-                                            "Take",
-                                            "Skip",
-                                            "Count"
-                                        };
-            return acceptableMethods.Any(x => x == methodName);
+            return MongoQueryTranslator._callableMethods.Contains(methodName);
         }
 
         /// <summary>
@@ -445,8 +563,16 @@ namespace NoRM.Linq
 
             while (!expressionRoot)
             {
-                parentExpression = ((MemberExpression)parentExpression).Expression;
-                expressionRoot = parentExpression is ParameterExpression;
+                if (parentExpression.NodeType == ExpressionType.MemberAccess)
+                {
+                    parentExpression = ((MemberExpression)parentExpression).Expression;
+                    expressionRoot = parentExpression is ParameterExpression;
+                }
+                else
+                {
+                    expressionRoot = true;
+                }
+
             }
 
             return (ParameterExpression)parentExpression;
@@ -481,35 +607,35 @@ namespace NoRM.Linq
         {
             // if the property has already been set, we can't set it again
             // as fly uses Dictionaries. This means to BETWEEN style native queries
-            if (FlyWeight.Contains(lastFlyProperty))
+            if (FlyWeight.Contains(_lastFlyProperty))
             {
                 IsComplex = true;
                 return;
             }
 
-            if (lastOperator != " == ")
+            if (_lastOperator != " === ")
             {
                 // Can't do comparisons here unless the type is a double
                 // which is a limitation of mongo, apparently
                 // and won't work if we're doing date comparisons
                 if (value.GetType().IsAssignableFrom(typeof(double)))
                 {
-                    switch (lastOperator)
+                    switch (_lastOperator)
                     {
                         case " > ":
-                            FlyWeight[lastFlyProperty] = Q.GreaterThan((double)value);
+                            FlyWeight[_lastFlyProperty] = Q.GreaterThan((double)value);
                             break;
                         case " < ":
-                            FlyWeight[lastFlyProperty] = Q.LessThan((double)value);
+                            FlyWeight[_lastFlyProperty] = Q.LessThan((double)value);
                             break;
                         case " <= ":
-                            FlyWeight[lastFlyProperty] = Q.LessOrEqual((double)value);
+                            FlyWeight[_lastFlyProperty] = Q.LessOrEqual((double)value);
                             break;
                         case " >= ":
-                            FlyWeight[lastFlyProperty] = Q.GreaterOrEqual((double)value);
+                            FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
                             break;
                         case " <> ":
-                            FlyWeight[lastFlyProperty] = Q.NotEqual(value);
+                            FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
                             break;
                     }
                 }
@@ -521,7 +647,7 @@ namespace NoRM.Linq
             }
             else
             {
-                FlyWeight[lastFlyProperty] = value;
+                FlyWeight[_lastFlyProperty] = value;
             }
         }
 
@@ -531,7 +657,7 @@ namespace NoRM.Linq
         /// <param name="exp">The expression.</param>
         private void HandleSkip(Expression exp)
         {
-            FlyWeight["$skip"] = (int)exp.GetConstantValue();
+            this.Skip = (int)exp.GetConstantValue();
         }
 
         /// <summary>
@@ -540,9 +666,33 @@ namespace NoRM.Linq
         /// <param name="exp">The expression.</param>
         private void HandleTake(Expression exp)
         {
-            FlyWeight["$limit"] = (int)exp.GetConstantValue();
+            this.Take = (int)exp.GetConstantValue();
         }
 
+        void HandleSort(Expression exp)
+        {
+            var stripped = (LambdaExpression)StripQuotes(exp);
+            var member = (MemberExpression)stripped.Body;
+            this.SortFly[member.Member.Name] = 1;
+        }
+        void HandleDescendingSort(Expression exp)
+        {
+            var stripped = (LambdaExpression)StripQuotes(exp);
+            var member = (MemberExpression)stripped.Body;
+            this.SortFly[member.Member.Name] = -1;
+        }
+
+        void HandleAny(MethodCallExpression exp) {
+            var member = (MemberExpression)exp.Arguments[0];
+            var lambda = (LambdaExpression)exp.Arguments[1];
+            var stripped = (BinaryExpression)StripQuotes(lambda.Body);
+            var subMember = (MemberExpression)stripped.Left;
+            var subValue = (ConstantExpression)stripped.Right;
+            var op = GetBinaryOperator(stripped);
+            this.IsComplex = true;
+            var result = "function(){for(var i in this." + member.Member.Name + "){if(this." + member.Member.Name + "[i]." + subMember.Member.Name + " === '" + subValue.Value + "') return true;}}";
+            _sb.Append(result);
+        }
         /// <summary>
         /// The handle method call.
         /// </summary>
@@ -552,6 +702,20 @@ namespace NoRM.Linq
         {
             switch (m.Method.Name)
             {
+                case "ThenBy":
+                    HandleSort(m.Arguments[1]);
+                    Visit(m.Arguments[0]);
+                    return m;
+                case "OrderBy":
+                    HandleSort(m.Arguments[1]);
+                    return m;
+                case "ThenByDescending":
+                    HandleDescendingSort(m.Arguments[1]);
+                    Visit(m.Arguments[0]);
+                    return m;
+                case "OrderByDescending":
+                    HandleDescendingSort(m.Arguments[1]);
+                    return m;
                 case "Skip":
                     HandleSkip(m.Arguments[1]);
                     return m;
@@ -559,9 +723,12 @@ namespace NoRM.Linq
                     HandleTake(m.Arguments[1]);
                     Visit(m.Arguments[0]);
                     return m;
+                case "Any":
+                    HandleAny(m);
+                    return m;
                 default:
-                    FlyWeight.Limit = 1;
-                    FlyWeight.MethodCall = m.Method.Name;
+                    this.Take = 1;
+                    this.MethodCall = m.Method.Name;
                     if (m.Arguments.Count > 1)
                     {
                         var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);

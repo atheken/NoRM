@@ -1,4 +1,4 @@
-namespace NoRM
+namespace Norm
 {
     /// <summary>
     /// Options container.

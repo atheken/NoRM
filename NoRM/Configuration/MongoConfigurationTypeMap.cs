@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NoRM.Configuration
+namespace Norm.Configuration
 {
     /// <summary>
     /// The mongo configuration type map.
@@ -10,7 +10,8 @@ namespace NoRM.Configuration
         /// <summary>
         /// The _field map.
         /// </summary>
-        private readonly Dictionary<string, PropertyMappingExpression> _fieldMap = new Dictionary<string, PropertyMappingExpression>();
+        private readonly Dictionary<string, PropertyMappingExpression> _fieldMap = 
+            new Dictionary<string, PropertyMappingExpression>();
 
         /// <summary>
         /// Gets the field map.

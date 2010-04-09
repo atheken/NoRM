@@ -1,10 +1,11 @@
 ﻿using System.Linq;
-using NoRM.BSON.DbTypes;
-using NoRM.Configuration;
+using Norm.BSON.DbTypes;
+using Norm.Configuration;
 using Xunit;
+using Norm.Collections;
 
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     public class DBRefTests
     {
@@ -20,50 +21,33 @@ namespace NoRM.Tests
         [Fact]
         public void DBRefMapsToOtherDocumentsByOid()
         {
+            string databaseName = "NormTests";
             var id = ObjectId.NewObjectId();
 
             using (var session = new Session())
             {
-                session.Add(new Product { Id = id, Name = "RefProduct" });
+                session.Add(new Product { _id = id, Name = "RefProduct" });
 
-                var productReference = new DBReference
-                                           {
-                                               Collection = MongoConfiguration.GetCollectionName(typeof(Product)),
-                                               DatabaseName = "test",
-                                               ID = id,
-                                           };
+                var productReference = new DBReference<Product>
+                    {
+                        Collection = MongoConfiguration.GetCollectionName(typeof(Product)),
+                        DatabaseName = databaseName,
+                        ID = id,
+                    };
 
                 session.Add(new ProductReference
-                                {
-                                    Id = ObjectId.NewObjectId(),
-                                    Name = "FullCart",
-                                    ProductsOrdered = new[] { productReference }
-                                });
+                    {
+                        Id = ObjectId.NewObjectId(),
+                        Name = "FullCart",
+                        ProductsOrdered = new[] { productReference }
+                    });
             }
 
-
-            var server = Mongo.ParseConnection("mongodb://localhost/test");
+            var server = Mongo.Create("mongodb://localhost/" + databaseName);
             var reference = server.GetCollection<ProductReference>().Find().First();
-            var product = reference.ProductsOrdered[0].Fetch(() => GetReferenceCollection());
+            var product = reference.ProductsOrdered[0].Fetch(() => server);
 
-            Assert.Equal(id.Value, product.Id.Value);
-        }
-
-        internal MongoCollection<Product> GetReferenceCollection()
-        {
-            var server = Mongo.ParseConnection("mongodb://localhost/test");
-            return server.GetCollection<Product>();
-        }
-
-        public class ProductReference
-        {
-            public ProductReference()
-            {
-                Id = ObjectId.NewObjectId();
-            }
-            public ObjectId Id { get; set; }
-            public string Name { get; set; }
-            public DBReference[] ProductsOrdered { get; set; }
+            Assert.Equal(id.Value, product._id.Value);
         }
     }
 }

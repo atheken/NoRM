@@ -1,5 +1,6 @@
-﻿
-namespace NoRM.Configuration
+﻿using System;
+
+namespace Norm.Configuration
 {
     /// <summary>
     /// Defines access for configuration containers

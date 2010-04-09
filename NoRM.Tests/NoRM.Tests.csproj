@@ -53,6 +53,7 @@
     <Compile Include="CollectionFindTests\MongoSearchQualifierTests.cs" />
     <Compile Include="CollectionFindTests\QueryTests.cs" />
     <Compile Include="CollectionFindTests\WhereQualifierTests.cs" />
+    <Compile Include="CollectionUpdateTests\UpdateModifiersTests.cs" />
     <Compile Include="CollectionUpdateTests\UpdateTests.cs" />
     <Compile Include="ConnectionsTests\AuthenticatedFixture.cs" />
     <Compile Include="BSONSerializerTest.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="ConnectionsTests\PooledConnectionProviderTests.cs" />
     <Compile Include="ConnectionsTests\QueuedConnectionProviderTests.cs" />
     <Compile Include="DBTypeTests\DBRefTests.cs" />
+    <Compile Include="DBTypeTests\GridFSTests.cs" />
     <Compile Include="DBTypeTests\ObjectIdTests.cs" />
     <Compile Include="LinqTests\LinqAggregates.cs" />
     <Compile Include="LinqTests\LinqDeepGraph.cs" />
@@ -72,7 +74,7 @@
     <Compile Include="MapReduceTests.cs" />
     <Compile Include="MongoAdminTests.cs" />
     <Compile Include="MongoCollectionTests.cs" />
-    <Compile Include="MongoConfigutationTests.cs" />
+    <Compile Include="MongoConfigurationTests.cs" />
     <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
     <Compile Include="MongoFixture.cs" />

@@ -1,11 +1,30 @@
+using Norm.Configuration;
+using Norm.Collections;
 
-namespace NoRM.Protocol.SystemMessages.Request
+namespace Norm.Protocol.SystemMessages.Request
 {
     /// <summary>
     /// The create collection request.
     /// </summary>
-    internal class CreateCollectionRequest
+    internal class CreateCollectionRequest : ISystemQuery
     {
+        /// <summary>
+        /// Initializes the <see cref="CreateCollectionRequest"/> class.
+        /// </summary>
+        static CreateCollectionRequest()
+        {
+            MongoConfiguration.Initialize(c =>
+                c.For<CreateCollectionRequest>(a =>
+                                                   {
+                                                       a.ForProperty(auth => auth.Create).UseAlias("create");
+                                                       a.ForProperty(auth => auth.Size).UseAlias("size");
+                                                       a.ForProperty(auth => auth.Max).UseAlias("max");
+                                                       a.ForProperty(auth => auth.Capped).UseAlias("capped");
+                                                       a.ForProperty(auth => auth.AutoIndexId).UseAlias("autoIndexId");
+                                                   })
+                );
+        }
+
         private readonly CreateCollectionOptions _options;
 
         /// <summary>
@@ -20,7 +39,7 @@ namespace NoRM.Protocol.SystemMessages.Request
         /// <summary>
         /// Gets options name.
         /// </summary>
-        public string create
+        public string Create
         {
             get { return this._options.Name; }
         }
@@ -28,7 +47,7 @@ namespace NoRM.Protocol.SystemMessages.Request
         /// <summary>
         /// Gets the size.
         /// </summary>
-        public int size
+        public int? Size
         {
             get { return this._options.Size; }
         }
@@ -36,7 +55,7 @@ namespace NoRM.Protocol.SystemMessages.Request
         /// <summary>
         /// Gets the max.
         /// </summary>
-        public long? max
+        public long? Max
         {
             get { return this._options.Max; }
         }
@@ -44,7 +63,7 @@ namespace NoRM.Protocol.SystemMessages.Request
         /// <summary>
         /// Gets a value indicating whether capped.
         /// </summary>
-        public bool capped
+        public bool Capped
         {
             get { return this._options.Capped; }
         }
@@ -52,7 +71,7 @@ namespace NoRM.Protocol.SystemMessages.Request
         /// <summary>
         /// Gets a value indicating whether autoIndexId.
         /// </summary>
-        public bool autoIndexId
+        public bool AutoIndexId
         {
             get { return this._options.AutoIndexId; }
         }

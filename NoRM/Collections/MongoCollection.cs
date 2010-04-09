@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using NoRM.BSON;
-using NoRM.Protocol.Messages;
-using NoRM.Responses;
+using Norm.BSON;
+using Norm.Protocol.Messages;
+using Norm.Responses;
 
-namespace NoRM
+namespace Norm.Collections
 {
     /// <summary>
     /// The mongo collection.
@@ -44,7 +42,7 @@ namespace NoRM
         /// <returns>The count.</returns>
         public long Count()
         {
-            return Count(new {});
+            return Count(new { });
         }
 
         /// <summary>
@@ -57,11 +55,11 @@ namespace NoRM
             long retval = 0;
 
             var f = _db.GetCollection<Flyweight>("$cmd")
-                .FindOne(new {count = _collectionName, query = query});
+                .FindOne(new { count = _collectionName, query = query });
 
             if (f != null)
             {
-                retval = (long) f.Get<double>("n");
+                retval = (long)f.Get<double>("n");
             }
 
             return retval;
@@ -77,7 +75,7 @@ namespace NoRM
             //long retval = 0;
 
             var f = _db.GetCollection<Flyweight>("$cmd")
-                .FindOne(new {group = _collectionName, query = query});
+                .FindOne(new { group = _collectionName, query = query });
 
             return null;
         }
@@ -109,13 +107,13 @@ namespace NoRM
         {
             var retval = false;
             var coll = _db.GetCollection<DeleteIndicesResponse>("$cmd");
-            var result = coll.FindOne(new {deleteIndexes = _collectionName, index = indexName});
+            var result = coll.FindOne(new { deleteIndexes = _collectionName, index = indexName });
             numberDeleted = 0;
 
-            if (result != null && result.OK == 1.0)
+            if (result != null && result.Ok == 1.0)
             {
                 retval = true;
-                numberDeleted = result.NIndexesWas.Value;
+                numberDeleted = result.NumberIndexesWas.Value;
             }
 
             return retval;
@@ -170,6 +168,11 @@ namespace NoRM
             return Find(template, Int32.MaxValue);
         }
 
+        public IEnumerable Find(object template, object orderby)
+        {
+            return this.Find(template, orderby, Int32.MaxValue, 0, FullyQualifiedName);
+        }
+
         /// <summary>
         /// Get the documents that match the specified template.
         /// </summary>
@@ -178,31 +181,53 @@ namespace NoRM
         /// <returns></returns>
         public IEnumerable Find(object template, int limit)
         {
-            return Find(template, limit, FullyQualifiedName);
+            return Find(template, null, limit, 0, this.FullyQualifiedName);
         }
 
         /// <summary>
-        /// Finds documents.
+        /// Find the number requested, skip some, and take some.
+        /// </summary>
+        /// <param name="template"></param>
+        /// <param name="limit"></param>
+        /// <param name="skip"></param>
+        /// <returns></returns>
+        public IEnumerable Find(object template, int limit, int skip)
+        {
+            return Find(template, null, limit, skip, this.FullyQualifiedName);
+        }
+
+        public IEnumerable Find(object template, object orderby, int limit)
+        {
+            return this.Find(template, orderby, limit, 0, this.FullyQualifiedName);
+        }
+
+        /// <summary>
+        /// Queries the collection for documents that match the template (spec document)
         /// </summary>
         /// <param name="template">The document template.</param>
         /// <param name="limit">The limit.</param>
         /// <param name="fullyQualifiedName">The fully qualified name.</param>
-        /// <returns></returns>
+        /// <returns>anything that matches the template</returns>
         public IEnumerable Find(object template, int limit, string fullyQualifiedName)
         {
+            return this.Find(template, null, limit, 0, fullyQualifiedName);
+        }
+
+        public IEnumerable Find(object template, object orderBy, int limit, string fullyQualifiedName)
+        {
+            return this.Find(template, orderBy, limit, 0, fullyQualifiedName);
+        }
+
+        public IEnumerable Find(object template, object orderBy, int limit, int skip, string fullyQualifiedName)
+        {
             var qm = new QueryMessage<object, object>(this._db.CurrentConnection, fullyQualifiedName)
-                         {
-                             NumberToTake = limit,
-                             Query = template
-                         };
-            var reply = qm.Execute();
-
-            foreach (var r in reply.Results)
-            {
-                yield return r;
-            }
-
-            yield break;
+                {
+                    NumberToTake = limit,
+                    Query = template,
+                    OrderBy = orderBy,
+                    NumberToSkip = skip
+                };
+            return new MongoQueryExecutor<object, object>(qm);
         }
     }
 }

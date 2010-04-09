@@ -1,13 +1,16 @@
-﻿using NoRM.BSON;
+﻿using Norm.BSON;
 
-namespace NoRM.Responses
+namespace Norm.Responses
 {
     /// <summary>
     /// The dropped database response.
     /// </summary>
-    public class DroppedDatabaseResponse : IFlyweight
+    public class DroppedDatabaseResponse : BaseStatusMessage, IFlyweight
     {
+        /// <summary>
+        /// Gets or sets the dropped database.
+        /// </summary>
+        /// <value>The dropped.</value>
         public string Dropped { get; set; }
-        public double? OK { get; set; }
     }
 }

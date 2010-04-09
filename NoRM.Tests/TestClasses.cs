@@ -3,12 +3,52 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
-using NoRM.Attributes;
-using NoRM.Linq;
-using NoRM.Responses;
+using Norm.Attributes;
+using Norm.Linq;
+using Norm.Responses;
+using Norm.BSON.DbTypes;
+using Norm.Collections;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
+    internal class ReduceProduct
+    {
+        public ObjectId Id { get; set; }
+        public float Price { get; set; }
+
+        public ReduceProduct()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+    }
+
+    public class ProductSum
+    {
+        public int Id { get; set; }
+        public int Value { get; set; }
+    }
+    public class ProductSumObjectId
+    {
+        public ObjectId Id { get; set; }
+        public int Value { get; set; }
+    }
+
+    public class TestClass
+    {
+        public TestClass()
+        {
+            Id = Guid.NewGuid();
+        }
+
+        [MongoIdentifier]
+        public Guid? Id { get; set; }
+
+        public double? ADouble { get; set; }
+        public string AString { get; set; }
+        public int? AInteger { get; set; }
+        public List<String> AStringArray { get; set; }
+    }
+
     internal class TestHelper
     {
         private static readonly string _connectionStringHost = ConfigurationManager.AppSettings["connectionStringHost"];
@@ -45,8 +85,8 @@ namespace NoRM.Tests
                 query = string.Concat('?', query);
             }
             var host = string.IsNullOrEmpty(_connectionStringHost) ? "localhost" : _connectionStringHost;
-            database = database ?? "NoRMTests";
-            return string.Format("mongodb://{0}{1}/{2}{3}", authentication, host, database, query);            
+            database = database ?? "NormTests";
+            return string.Format("mongodb://{0}{1}/{2}{3}", authentication, host, database, query);
         }
     }
 
@@ -57,7 +97,7 @@ namespace NoRM.Tests
 
         public Session()
         {
-            _provider = new MongoQueryProvider("NoRMTests");
+            _provider = new MongoQueryProvider("NormTests");
         }
 
         public MongoQueryProvider Provider
@@ -68,6 +108,14 @@ namespace NoRM.Tests
         public IQueryable<Product> Products
         {
             get { return new MongoQuery<Product>(_provider); }
+        }
+        public IQueryable<Thread> Threads
+        {
+            get { return new MongoQuery<Thread>(_provider); }
+        }
+        public IQueryable<Post> Posts
+        {
+            get { return new MongoQuery<Post>(_provider); }
         }
 
         #region IDisposable Members
@@ -84,7 +132,7 @@ namespace NoRM.Tests
             T result = default(T);
             using (MapReduce mr = _provider.Server.CreateMapReduce())
             {
-                MapReduceResponse response = mr.Execute(new MapReduceOptions(typeof (T).Name) {Map = map, Reduce = reduce});
+                MapReduceResponse response = mr.Execute(new MapReduceOptions(typeof(T).Name) { Map = map, Reduce = reduce });
                 MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
                 MapReduceResult<T> r = coll.Find().FirstOrDefault();
                 result = r.Value;
@@ -104,13 +152,49 @@ namespace NoRM.Tests
 
         public void Drop<T>()
         {
-            _provider.DB.DropCollection(typeof (T).Name);
+            _provider.DB.DropCollection(typeof(T).Name);
         }
 
         public void CreateCappedCollection(string name)
         {
             _provider.DB.CreateCollection(new CreateCollectionOptions(name));
         }
+    }
+
+    internal class Post
+    {
+        public Post()
+        {
+            Id = ObjectId.NewObjectId();
+            Comments = new List<Comment>();
+            Tags = new List<string>();
+        }
+        public ObjectId Id { get; set; }
+        public string Title { get; set; }
+        public int Score { get; set; }
+        public IList<Comment> Comments { get; set; }
+        public IList<string> Tags { get; set; }
+    }
+
+    internal class Post2
+    {
+        public Post2()
+        {
+            Id = ObjectId.NewObjectId();
+            Comments = new List<Comment>();
+            Tags = new List<string>();
+        }
+        public ObjectId Id { get; set; }
+        public string Title { get; set; }
+        public int Score { get; set; }
+        public IList<Comment> Comments { get; set; }
+        public IList<string> Tags { get; set; }
+    }
+
+
+    internal class Comment
+    {
+        public string Text { get; set; }
     }
 
     internal class CheeseClubContact
@@ -125,20 +209,32 @@ namespace NoRM.Tests
         }
     }
 
+    internal class ProductReference
+    {
+        public ProductReference()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+        public DBReference<Product>[] ProductsOrdered { get; set; }
+    }
+
     internal class Person
     {
         public ObjectId Id { get; set; }
         public string Name { get; set; }
         public Address Address { get; set; }
         public DateTime LastContact { get; set; }
-
+        public List<String> Relatives { get; set; }
         public Person()
         {
             Id = ObjectId.NewObjectId();
             Address = new Address();
         }
     }
-    
+
     internal class Address
     {
         public string Street { get; set; }
@@ -160,10 +256,12 @@ namespace NoRM.Tests
         public Address Address { get; set; }
     }
 
-    internal class InventoryChange {
+    internal class InventoryChange
+    {
         public int AmountChanged { get; set; }
         public DateTime CreatedOn { get; set; }
-        public InventoryChange() {
+        public InventoryChange()
+        {
             CreatedOn = DateTime.Now;
         }
     }
@@ -173,11 +271,13 @@ namespace NoRM.Tests
         public Product()
         {
             Supplier = new Supplier();
-            Id = ObjectId.NewObjectId();
+            _id = ObjectId.NewObjectId();
             Inventory = new List<InventoryChange>();
+            this.UniqueID = Guid.NewGuid();
         }
         public List<InventoryChange> Inventory { get; set; }
-        public ObjectId Id { get; set; }
+        public ObjectId _id { get; set; }
+        public Guid UniqueID { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
         public Supplier Supplier { get; set; }
@@ -212,12 +312,12 @@ namespace NoRM.Tests
     {
         public ObjectId _id { get; set; }
     }
-    
+
     public class PrivateSetter
     {
-        public int Id{ get; private set;}
+        public int Id { get; private set; }
 
-        public PrivateSetter(){}
+        public PrivateSetter() { }
         public PrivateSetter(int id)
         {
             Id = id;
@@ -232,13 +332,44 @@ namespace NoRM.Tests
             {
                 if (_names == null)
                 {
-                    _names =new List<string>();
+                    _names = new List<string>();
                 }
                 return _names;
             }
-        }        
+        }
+    }
+    public class HashSetList
+    {
+        private HashSet<string> _names;
+        public ICollection<string> Names
+        {
+            get
+            {
+                if (_names == null)
+                {
+                    _names = new HashSet<string>();
+                }
+                return _names;
+            }
+        }
     }
     public class DictionaryObject
+    {
+        private Dictionary<string, int> _lookup;
+        public Dictionary<string, int> Names
+        {
+            get
+            {
+                if (_lookup == null)
+                {
+                    _lookup = new Dictionary<string, int>();
+                }
+                return _lookup;
+            }
+            set { _lookup = value; }
+        }
+    }
+    public class IDictionaryObject
     {
         private IDictionary<string, int> _lookup;
         public IDictionary<string, int> Names
@@ -251,7 +382,7 @@ namespace NoRM.Tests
                 }
                 return _lookup;
             }
-            set{ _lookup = value;}
+            set { _lookup = value; }
         }
     }
     public class ReadOnlyDictionary
@@ -296,5 +427,25 @@ namespace NoRM.Tests
     public class ChildGeneralDTO : GeneralDTO
     {
         public bool IsOver9000 { get; set; }
+    }
+    
+    public class PrivateConstructor
+    {
+        public string Name{ get; set;}
+        private PrivateConstructor(){}
+
+        public static PrivateConstructor Create(string name)
+        {
+            return new PrivateConstructor {Name = name};
+        }
+    }
+    
+    public class Forum
+    {
+        public ObjectId Id{ get; set;}
+    }
+    public class Thread
+    {
+        public ObjectId ForumId{ get; set;}   
     }
 }

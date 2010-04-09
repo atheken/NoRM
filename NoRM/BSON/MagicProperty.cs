@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Reflection;
-using NoRM.Attributes;
+using Norm.Attributes;
 
-namespace NoRM.BSON
+namespace Norm.BSON
 {
+    /// <summary>
+    /// A class to call Properties dynamically on an instance.
+    /// </summary>
     public class MagicProperty
     {
         private static readonly Type _myType = typeof(MagicProperty);

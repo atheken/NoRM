@@ -1,6 +1,6 @@
 using System;
 
-namespace NoRM.Attributes
+namespace Norm.Attributes
 {
     /// <summary>
     /// Ignores properties if the value is null.
