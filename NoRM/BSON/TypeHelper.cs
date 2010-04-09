@@ -60,10 +60,6 @@ namespace Norm.BSON
                 lock (_lock)
                 {
                     if (!_cachedTypeLookup.TryGetValue(type, out helper))
-            {
-                lock (_lock)
-                {
-                    if (!_cachedTypeLookup.TryGetValue(type, out helper))
                     {
                         helper = new TypeHelper(type);
                         _cachedTypeLookup[type] = helper;

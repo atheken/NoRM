@@ -2,6 +2,7 @@
 using Norm.BSON;
 namespace Norm.Responses
 {
+    /// <summary>TODO::Description.</summary>
     public class CurrentOperationContainer
     {
         static CurrentOperationContainer()
@@ -12,7 +13,8 @@ namespace Norm.Responses
                                                    })
                 );
         }
-        
+
+        /// <summary>TODO::Description.</summary>
         public CurrentOperationResponse[] Responses{ get; private set;}
     }
     /// <summary>
@@ -31,17 +33,38 @@ namespace Norm.Responses
                                                    })
                 );
         }
-        
+
+        /// <summary>TODO::Description.</summary>
         public int? OperationId { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string Operation { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string Namespace { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string LockType { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public bool WaitingForLock { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public bool Active { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string Client { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string Query { get; set; }
-        public double? InLock { get; set; }        
+
+        /// <summary>TODO::Description.</summary>
+        public double? InLock { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public int? SecondsRunning{ get; set;}
+
+        /// <summary>TODO::Description.</summary>
         public string Desc{ get; set;}
     }
 }
