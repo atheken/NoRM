@@ -37,6 +37,8 @@ namespace Norm.Responses
         /// </summary>
         /// <value>The sys info.</value>
         public string SystemInformation { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public int? Bits { get; set; }
     }
 }

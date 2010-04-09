@@ -7,9 +7,16 @@ namespace Norm.Responses
     /// </summary>
     public class MapReduceResponse : BaseStatusMessage
     {
+        /// <summary>TODO::Description.</summary>
         private MongoDatabase _database;
+
+        /// <summary>TODO::Description.</summary>
         public string Result { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public MapReduceCount Counts { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public long TimeMillis { get; set; }
 
 

@@ -23,6 +23,8 @@ namespace Norm.Protocol.Messages
         /// <param name="connection">The connection.</param>
         /// <param name="fullyQualifiedCollestionName">The fully Qualified Collestion Name.</param>
         /// <param name="reply">The reply.</param>
+        /// <param name="originalOperation"></param>
+        /// <param name="limit"></param>
         internal ReplyMessage(IConnection connection, string fullyQualifiedCollestionName, BinaryReader reply, MongoOp originalOperation, int limit)
             : base(connection, fullyQualifiedCollestionName)
         {
@@ -117,6 +119,7 @@ namespace Norm.Protocol.Messages
 
         #region IDisposable Members
 
+        /// <summary>TODO::Description.</summary>
         public void Dispose()
         {
             //this should kill the cursor if it exists.

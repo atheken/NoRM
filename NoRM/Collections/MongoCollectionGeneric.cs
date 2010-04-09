@@ -20,7 +20,9 @@ namespace Norm.Collections
     /// <typeparam name="T">Collection type</typeparam>
     public class MongoCollection<T> : MongoCollection, IMongoCollection<T>
     {
-        // this will have a different instance for each concrete version of MongoCollection<T>
+        /// <summary>
+        /// This will have a different instance for each concrete version of <see cref="MongoCollection{T}"/>
+        /// </summary>
         protected static bool? _updateable;
 
         /// <summary>
@@ -147,12 +149,14 @@ namespace Norm.Collections
             return Find(template, 1).FirstOrDefault();
         }
 
-
+        /// <summary>TODO::Description.</summary>
         public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action)
         {
             UpdateWithModifier(matchDocument,action,false,false);
 
         }
+
+        /// <summary>TODO::Description.</summary>
         public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action,bool updateMultiple, bool upsert)
         {
             var modifierExpression = new ModifierExpression<T>();
@@ -204,6 +208,7 @@ namespace Norm.Collections
             return Find(template, limit, 0, FullyQualifiedName);
         }
 
+        /// <summary>TODO::Description.</summary>
         public IEnumerable<T> Find<U>(U template, int limit, int skip)
         {
             return Find(template, limit, skip, FullyQualifiedName);
@@ -316,6 +321,7 @@ namespace Norm.Collections
             dm.Execute();
         }
 
+        /// <summary>TODO::Description.</summary>
         public void Delete(T entity)
         {
             var helper = TypeHelper.GetHelperForType(typeof(T));

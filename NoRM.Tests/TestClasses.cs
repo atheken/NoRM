@@ -466,6 +466,43 @@ namespace Norm.Tests
     }
 
     [MongoDiscriminated]
+    public class SuperClassObjectFluentMapped
+    {
+        public SuperClassObjectFluentMapped()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+
+        [MongoIdentifier]
+        public ObjectId Id { get; protected set; }
+        public string Title { get; set; }
+
+        static SuperClassObjectFluentMapped()
+        {
+            MongoConfiguration.Initialize(config =>
+                config.For<SuperClassObjectFluentMapped>(c =>
+                {
+                    c.ForProperty(u => u.Id).UseAlias("_id");
+                    c.ForProperty(u => u.Title).UseAlias("t");
+                }));
+        }
+    }
+
+    public class SubClassedObjectFluentMapped : SuperClassObjectFluentMapped
+    {
+        public bool ABool { get; set; }
+
+        static SubClassedObjectFluentMapped()
+        {
+            MongoConfiguration.Initialize(config =>
+                config.For<SubClassedObjectFluentMapped>(c =>
+                {
+                    c.ForProperty(u => u.ABool).UseAlias("b");
+                }));
+        }
+    }
+
+    [MongoDiscriminated]
     internal interface IDiscriminated
     {
         [MongoIdentifier]

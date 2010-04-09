@@ -8,6 +8,7 @@ namespace Norm.Protocol.Messages
     /// </summary>
     public class MapReduceMessage
     {
+        /// <summary>TODO::Description.</summary>
         static MapReduceMessage()
         {
             MongoConfiguration.Initialize(c =>
@@ -22,12 +23,25 @@ namespace Norm.Protocol.Messages
                                               });
         }
 
+        /// <summary>TODO::Description.</summary>
         public string MapReduce { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string Map { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string Reduce { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public bool KeepTemp { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string Out { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public int? Limit { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         [MongoIgnoreIfNull]
         public string Finalize { get; set; }
     }

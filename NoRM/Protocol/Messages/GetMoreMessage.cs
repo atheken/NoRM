@@ -29,6 +29,7 @@ namespace Norm.Protocol.Messages
         /// <param name="cursorID">
         /// The cursor id.
         /// </param>
+        /// <param name="limit"></param>
         internal GetMoreMessage(IConnection connection,
             string fullyQualifiedCollectionName, long cursorID, int limit) :
             base(connection, fullyQualifiedCollectionName)

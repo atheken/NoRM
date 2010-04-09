@@ -191,6 +191,7 @@ namespace Norm
                              });
         }
 
+        /// <summary>TODO::Description.</summary>
         public LastErrorResponse LastError()
         {
             return GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });

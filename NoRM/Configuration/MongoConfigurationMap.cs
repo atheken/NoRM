@@ -98,9 +98,16 @@ namespace Norm.Configuration
             {
                 retval = "_id";
             }
-            else if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            else if (map.ContainsKey(type))
             {
-                retval = map[type][propertyName].Alias;
+                foreach (var m in map.Keys)
+                {
+                    if (map[m].ContainsKey(propertyName))
+                    {
+                        retval = map[m][propertyName].Alias;
+                        break;
+                    }
+                }
             }
             return retval;
         }

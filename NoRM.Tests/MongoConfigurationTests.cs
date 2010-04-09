@@ -232,6 +232,34 @@ namespace Norm.Tests
             Assert.Equal("IDiscriminated", collectionName);
         }
 
+        [Fact]
+        public void Can_correctly_determine_collection_name_from_discriminated_sub_class_when_fluent_mapped()
+        {
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(SubClassedObjectFluentMapped));
+
+            Assert.Equal("SuperClassObjectFluentMapped", collectionName);
+
+        }
+
+        [Fact]
+        public void InsertSubClassFluentMappedObjectyWithObjectIdKey()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var id1 = new ObjectId("123456123456123456123456");
+                var id2 = new ObjectId("123456123456123456123457");
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true });
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(new SubClassedObjectFluentMapped { Title = "Prod2", ABool = false });
+                var found = mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Find();
+                Assert.Equal(2, found.Count());
+                Assert.Equal(id1, found.ElementAt(0).Id);
+                Assert.Equal("Prod1", found.ElementAt(0).Title);
+                Assert.Equal(id2, found.ElementAt(1).Id);
+                Assert.Equal("Prod2", found.ElementAt(1).Title);
+
+            }
+        }
+
         #region Test classes
 
         internal class Shoppers : MongoQuery<Shopper>, IDisposable
