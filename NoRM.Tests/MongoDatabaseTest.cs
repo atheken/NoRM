@@ -115,7 +115,7 @@ namespace Norm.Tests
             }
         }
 
-        [Fact(Skip = "failing to deserialized, this appears to return a more complex object than what we are ready to handle")]
+        [Fact]
         public void GetsACollectionsStatistics()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -124,6 +124,7 @@ namespace Norm.Tests
                 var statistic = mongo.Database.GetCollectionStatistics("temp");                               
             }
         }
+
         [Fact]
         public void ThrowsExceptionIfGettingStatisticsFailsWithStrictModeOn()
         {

@@ -94,10 +94,8 @@ namespace Norm
         {
             try
             {
-                return GetCollection<CollectionStatistics>("$cmd").FindOne(new CollectionStatistics
-                                                                               {
-                                                                                   CollectionStats = collectionName
-                                                                               });
+                return GetCollection<CollectionStatistics>("$cmd")
+                    .FindOne(new { collstats = collectionName});
             }
             catch (MongoException exception)
             {
