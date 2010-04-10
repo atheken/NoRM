@@ -161,7 +161,7 @@ namespace Norm.Linq
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
             return GetCollection<ExplainResponse>(collectionName).FindOne(explain); 
             
-            _provider.DB.GetCollection<ExplainResponse>(collectionName).FindOne(explain);
+            //_provider.DB.GetCollection<ExplainResponse>(collectionName).FindOne(explain);
         }
 
         /// <summary>TODO::Description.</summary>

@@ -31,7 +31,8 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="Mongo"/> class.
         /// </summary>
-        public Mongo() : this(string.Empty, "127.0.0.1", "27017", string.Empty)
+        public Mongo()
+            : this(string.Empty, "127.0.0.1", "27017", string.Empty)
         {
         }
 
@@ -41,7 +42,8 @@ namespace Norm
         /// <param name="db">
         /// The db.
         /// </param>
-        public Mongo(string db) : this(db, "127.0.0.1", "27017", string.Empty)
+        public Mongo(string db)
+            : this(db, "127.0.0.1", "27017", string.Empty)
         {
         }
 
@@ -54,7 +56,8 @@ namespace Norm
         /// <param name="server">
         /// The server.
         /// </param>
-        public Mongo(string db, string server) : this(db, server, "27017", string.Empty)
+        public Mongo(string db, string server)
+            : this(db, server, "27017", string.Empty)
         {
         }
 
@@ -64,7 +67,8 @@ namespace Norm
         /// <param name="db">The db.</param>
         /// <param name="server">The server.</param>
         /// <param name="port">The port.</param>
-        public Mongo(string db, string server, string port) : this(db, server, port, string.Empty)
+        public Mongo(string db, string server, string port)
+            : this(db, server, port, string.Empty)
         {
         }
 

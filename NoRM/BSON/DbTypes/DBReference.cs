@@ -94,9 +94,6 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// Fetches the instance of type T in the collection referenced by the DBRef $id
         /// </summary>
-        /// <typeparam name="T">
-        /// Type referenced by DBRef
-        /// </typeparam>
         /// <param name="referenceCollection">
         /// The reference collection.
         /// </param>
@@ -111,9 +108,6 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// Fetches the instance of type T in the collection referenced by the DBRef $id
         /// </summary>
-        /// <typeparam name="T">
-        /// Type referenced by DBRef
-        /// </typeparam>
         /// <param name="server">
         /// A function that returns an instance of the Mongo server connection.
         /// </param>
