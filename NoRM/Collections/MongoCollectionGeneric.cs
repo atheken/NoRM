@@ -344,21 +344,7 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<T> Find(Flyweight template)
         {
-            var limit = 0;
-            var skip = 0;
-
-            var hasLimit = template.TryGet<int>("$limit", out limit);
-            //var hasSkip = template.TryGet<int>("$skip", out skip);
-
-            if (!hasLimit)
-            {
-                limit = Int32.MaxValue;
-            }
-
-            template.Delete("$limit");
-            template.Delete("$skip");
-
-            return Find(template, limit, skip, FullyQualifiedName);
+            return Find(template, Int32.MaxValue, 0, this.FullyQualifiedName);
         }
 
         /// <summary>
