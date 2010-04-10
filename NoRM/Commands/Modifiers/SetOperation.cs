@@ -1,7 +1,7 @@
+using Norm.BSON;
+
 namespace Norm.Commands.Modifiers
 {
-    using BSON;
-
     /// <summary>TODO::Description.</summary>
     public class SetOperation<T> : ModifierCommand
     {
