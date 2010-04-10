@@ -43,6 +43,22 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void Find_Uses_Limit_Orderby_And_Skip()
+        {
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { }, new { Name = -1}, 3, 1).ToArray();
+            Assert.Equal(3, result.Length);
+            Assert.Equal("CCC", result[0].Name);
+            Assert.Equal("BBB", result[1].Name);
+            Assert.Equal("AAA", result[2].Name);
+        }
+
+
+        [Fact]
         public void FindUsesLimitAndSkip()
         {
             _collection.Insert(new Person { Name = "BBB" });

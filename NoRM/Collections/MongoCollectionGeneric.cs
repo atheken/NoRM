@@ -208,12 +208,16 @@ namespace Norm.Collections
             return Find(template, limit, 0, FullyQualifiedName);
         }
 
-        /// <summary>TODO::Description.</summary>
+        /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
         public IEnumerable<T> Find<U>(U template, int limit, int skip)
         {
-            return Find(template, limit, skip, FullyQualifiedName);
+            return Find(template, limit, skip, this.FullyQualifiedName);
         }
 
+        public IEnumerable<T> Find<U, O>(U template, O orderby, int limit, int skip)
+        {
+            return this.Find(template, orderby, limit, skip, this.FullyQualifiedName);
+        }
 
         /// <summary>
         /// The find.
