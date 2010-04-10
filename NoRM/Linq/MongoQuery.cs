@@ -154,15 +154,9 @@ namespace Norm.Linq
         /// <returns></returns>
         internal ExplainResponse Explain(Flyweight query)
         {
-            var explain = new Flyweight();
-            explain["$query"] = query;
-            explain["$explain"] = true;
-
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
-            return GetCollection<ExplainResponse>(collectionName).FindOne(explain); 
-            
-            _provider.DB.GetCollection<ExplainResponse>(collectionName).FindOne(explain);
-        }
+            return this.GetCollection<ExplainResponse>(collectionName).Explain(query);
+         }
 
         /// <summary>TODO::Description.</summary>
         private MongoCollection<TCollection> GetCollection<TCollection>()

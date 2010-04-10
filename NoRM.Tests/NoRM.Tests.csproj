@@ -96,7 +96,6 @@
     <Compile Include="MongoAdminTests.cs" />
     <Compile Include="MongoCollectionTests.cs" />
     <Compile Include="MongoConfigurationTests.cs" />
-    <Compile Include="MongoContextTest.cs" />
     <Compile Include="MongoDatabaseTest.cs" />
     <Compile Include="MongoFixture.cs" />
     <Compile Include="MongoOptimizationTests.cs" />
