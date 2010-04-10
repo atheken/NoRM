@@ -94,6 +94,7 @@ namespace Norm.Tests
                 }
                 else
                 {
+                    Assert.Throws(typeof(MongoException),()=> admin.ForceSync(true));
                     Console.WriteLine("FSync is not supported on windows version of MongoDB and will throw an exception.");
                 }
             }
