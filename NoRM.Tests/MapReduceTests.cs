@@ -15,7 +15,7 @@ namespace Norm.Tests
                 mongo.Database.DropCollection("ReduceProduct");
             }
         }
-        
+
         [Fact]
         public void TypedMapReduceOptionSetsCollectionName()
         {
@@ -28,11 +28,11 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 var mr = mongo.CreateMapReduce();
-                var result = mr.Execute(new MapReduceOptions<ReduceProduct> {Map = _map, Reduce = _reduce});
+                var result = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce });
                 var found = false;
-                foreach(var c in mongo.Database.GetAllCollections())
+                foreach (var c in mongo.Database.GetAllCollections())
                 {
                     if (c.Name.EndsWith(result.Result))
                     {
@@ -50,7 +50,7 @@ namespace Norm.Tests
             string name;
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 var mr = mongo.CreateMapReduce();
                 name = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce }).Result;
             }
@@ -69,7 +69,7 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 string name;
                 using (var mr = mongo.CreateMapReduce())
                 {
@@ -88,7 +88,7 @@ namespace Norm.Tests
             string name;
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });                            
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 using (var mr = mongo.CreateMapReduce())
                 {
                     name = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Permenant = true }).Result;
@@ -115,7 +115,7 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 using (var mr = mongo.CreateMapReduce())
                 {
                     var result = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, OutputCollectionName = "TempMr" });
@@ -132,7 +132,7 @@ namespace Norm.Tests
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 using (var mr = mongo.CreateMapReduce())
                 {
-                    var response = mr.Execute(new MapReduceOptions<Product> { Map = _map, Reduce = _reduce});
+                    var response = mr.Execute(new MapReduceOptions<Product> { Map = _map, Reduce = _reduce });
                     var collection = response.GetCollection<ProductSum>();
                     var r = collection.Find().FirstOrDefault();
                     Assert.Equal(0, r.Id);

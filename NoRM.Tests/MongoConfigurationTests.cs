@@ -42,7 +42,7 @@ namespace Norm.Tests
 
             //the mapping should cause the typehelper cache to be rebuilt with the new properties.
             MongoConfiguration.Initialize(cfg => cfg.For<User2>(j => j.ForProperty(k => k.LastName).UseAlias("LNAME")));
-            
+
             typeHelper = TypeHelper.GetHelperForType(typeof(User2));
             Assert.Equal("LastName", typeHelper.FindProperty("LNAME").Name);
         }
@@ -131,7 +131,7 @@ namespace Norm.Tests
         [Fact]
         public void Mongo_Configuration_With_Linq_Supports_Aliases()
         {
-            
+
             MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
             using (var shoppers = new Shoppers(new MongoQueryProvider("test", "localhost", "27017", "")))
             {
@@ -227,7 +227,7 @@ namespace Norm.Tests
         [Fact]
         public void Can_correctly_determine_collection_name_when_discriminator_is_on_an_interface()
         {
-			var collectionName = MongoConfiguration.GetCollectionName(typeof(InterfaceDiscriminatedClass));
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(InterfaceDiscriminatedClass));
 
             Assert.Equal("IDiscriminated", collectionName);
         }
@@ -246,10 +246,12 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                var id1 = new ObjectId("123456123456123456123456");
-                var id2 = new ObjectId("123456123456123456123457");
-                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true });
-                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(new SubClassedObjectFluentMapped { Title = "Prod2", ABool = false });
+                var a = new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true };
+                var b = new SubClassedObjectFluentMapped { Title = "Prod2", ABool = false };
+                var id1 = a.Id;
+                var id2 = b.Id;
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(a);
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(b);
                 var found = mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Find();
                 Assert.Equal(2, found.Count());
                 Assert.Equal(id1, found.ElementAt(0).Id);
