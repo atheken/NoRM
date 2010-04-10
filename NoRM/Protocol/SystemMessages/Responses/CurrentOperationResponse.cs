@@ -17,6 +17,7 @@ namespace Norm.Responses
         /// <summary>TODO::Description.</summary>
         public CurrentOperationResponse[] Responses{ get; private set;}
     }
+
     /// <summary>
     /// The current operation response.
     /// </summary>
