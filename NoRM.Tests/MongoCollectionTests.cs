@@ -56,7 +56,7 @@ namespace Norm.Tests
                                         CreatedOn = DateTime.Now,
                                         Name = "ACME"
                                     }
-                                });
+                                }); 
                     #endregion
                 }
                 var bytes = junkInTheTrunk.SelectMany(y => Norm.BSON.BsonSerializer.Serialize(y)).Count();
@@ -124,7 +124,7 @@ namespace Norm.Tests
                 session.Provider.DB.GetCollection<Product>().DeleteIndices(out i);
 
                 //it's TWO because there's always an index on _id by default.
-                Assert.Equal(2, i);
+                Assert.Equal(2,i);
 
             }
         }
@@ -288,18 +288,15 @@ namespace Norm.Tests
 
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false&strict=false")))
             {
-                if (mongo.Database.GetAllCollections().Any(y => y.Name.EndsWith("ReduceProduct")))
-                {
-                    mongo.Database.DropCollection("ReduceProduct");
-                }
+                mongo.Database.DropCollection("ReduceProduct");
                 var collection = mongo.GetCollection<ReduceProduct>();
                 collection.Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 var r = collection.MapReduce<ProductSum>(_map, _reduce).FirstOrDefault();
                 Assert.Equal(0, r.Id);
                 Assert.Equal(4, r.Value);
             }
-
-
+            
+            
         }
 
 
