@@ -40,9 +40,9 @@ namespace Norm
         public string CollectionName { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether Permenant.
+        /// Gets or sets a value indicating whether Permanant.
         /// </summary>
-        public bool Permenant { get; set; }
+        public bool Permanant { get; set; }
 
         /// <summary>
         /// Gets or sets OutputCollectionName.
