@@ -280,6 +280,26 @@ namespace Norm.Tests
             }
         }
 
+        [Fact]
+        public void MapReduceIsSuccessful()
+        {
+            var _map = "function(){emit(0, this.Price);}";
+            var _reduce = "function(key, values){var sumPrice = 0;for(var i = 0; i < values.length; ++i){sumPrice += values[i];} return sumPrice;}";
+
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
+            {
+                mongo.Database.DropCollection("ReduceProduct");
+                var collection = mongo.GetCollection<ReduceProduct>();
+                collection.Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
+                var r = collection.MapReduce<ProductSum>(_map, _reduce).FirstOrDefault();
+                Assert.Equal(0, r.Id);
+                Assert.Equal(4, r.Value);
+            }
+            
+            
+        }
+
+
         private class IntId
         {
             public int Id { get; set; }
