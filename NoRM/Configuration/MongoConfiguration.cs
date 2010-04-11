@@ -21,9 +21,9 @@ namespace Norm.Configuration
         private static IConfigurationContainer _configuration;
 
         /// <summary>
-        /// The configuration provider.
+        /// Gets the configuration provider instance.
         /// </summary>
-        /// <value>Gets the configuration provider instance.</value>
+        /// <value>The configuration provider.</value>
         internal static IConfigurationContainer ConfigurationContainer
         {
             get

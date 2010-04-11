@@ -8,6 +8,7 @@ namespace Norm.Commands.Modifiers
         /// <summary>TODO::Description.</summary>
         public SetOperation(T setValue):base("$set",setValue)
         {
+
         }
     }
 }

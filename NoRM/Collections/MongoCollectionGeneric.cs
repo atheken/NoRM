@@ -176,7 +176,7 @@ namespace Norm.Collections
         /// Find objects in the collection without any qualifiers.
         /// </summary>
         /// <returns></returns>
-        new public IEnumerable<T> Find()
+        public IEnumerable<T> Find()
         {
             // this is a hack to get a value that will test for null into the serializer.
             return Find(new object(), Int32.MaxValue, FullyQualifiedName);
@@ -213,13 +213,7 @@ namespace Norm.Collections
         {
             return Find(template, limit, skip, this.FullyQualifiedName);
         }
-        
-        /// <summary>TODO::Description.</summary>
-        /// <param name="limit"></param>
-        /// <param name="orderby"></param>
-        /// <param name="skip"></param>
-        /// <param name="template"></param>
-        /// <returns></returns>
+
         public IEnumerable<T> Find<U, O>(U template, O orderby, int limit, int skip)
         {
             return this.Find(template, orderby, limit, skip, this.FullyQualifiedName);
@@ -242,7 +236,7 @@ namespace Norm.Collections
         /// A count on this collection without any filter.
         /// </summary>
         /// <returns>The count.</returns>
-        new public long Count()
+        public long Count()
         {
             return Count(new { });
         }

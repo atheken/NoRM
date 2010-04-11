@@ -21,7 +21,7 @@ namespace Norm.Collections
         /// Finds all documents.
         /// </summary>
         /// <returns></returns>
-        new IEnumerable<T> Find();
+        IEnumerable<T> Find();
 
         /// <summary>
         /// Finds the specified document with a limited result set.

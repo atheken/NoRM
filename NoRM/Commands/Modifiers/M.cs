@@ -27,6 +27,7 @@ namespace Norm
         {
             return new IncrementOperation(amountToIncrementBy);
         }
+
         ///<summary>
         /// Creates a $set operation to be applied to a field using the update command. 
         ///</summary>

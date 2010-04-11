@@ -110,12 +110,12 @@ namespace Norm.Tests
 
             internal DisposableConnection(ConnectionStringBuilder builder) : base(builder) { }
 
-            new public void Dispose()
+
+            public void Dispose()
             {
                 Dispose(true);
             }
-
-            new private void Dispose(bool disposing)
+            private void Dispose(bool disposing)
             {
                 if (_disposed && disposing)
                 {

@@ -1,5 +1,5 @@
+﻿using System;
 ﻿using Norm.BSON;
-using System;
 
 namespace Norm.Commands.Qualifiers
 {
@@ -13,6 +13,11 @@ namespace Norm.Commands.Qualifiers
         /// </summary>
         /// <param name="value">The value.</param>
         internal GreaterThanQualifier(double value) : base("$gt", value)
+        {
+        }
+
+        internal GreaterThanQualifier(DateTime value)
+            : base("$gt", value)
         {
         }
     }

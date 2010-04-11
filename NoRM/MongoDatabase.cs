@@ -117,7 +117,7 @@ namespace Norm
         {
             try
             {
-                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new { drop = collectionName }).Ok == 1;
+                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new { drop = collectionName }).OK == 1;
             }
             catch (MongoException exception)
             {
@@ -190,7 +190,6 @@ namespace Norm
         }
 
         /// <summary>TODO::Description.</summary>
-        /// <returns></returns>
         public LastErrorResponse LastError()
         {
             return GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });

@@ -1,3 +1,4 @@
+﻿using System;
 ﻿using Norm.Commands.Qualifiers;
 
 namespace Norm
@@ -58,6 +59,16 @@ namespace Norm
         /// <param name="value">The value.</param>
         /// <returns></returns>
         public static GreaterThanQualifier GreaterThan(double value)
+        {
+            return new GreaterThanQualifier(value);
+        }
+
+        /// <summary>
+        /// Builds a $gt qualifier for the search.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public static GreaterThanQualifier GreaterThan(DateTime value)
         {
             return new GreaterThanQualifier(value);
         }
