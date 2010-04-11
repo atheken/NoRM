@@ -90,6 +90,24 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void Find_Uses_Null_Qualifier()
+        {
+            _collection.Insert(new Person { Name = null });
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { Name = Q.IsNull() }, new { Name = OrderBy.Descending }, 2, 0).ToArray();
+            Assert.Equal(1, result.Length);
+            Assert.Equal(null, result[0].Name);
+
+            result = _collection.Find(new { Name = Q.IsNotNull() }, new { Name = OrderBy.Descending }).ToArray();
+            Assert.Equal(4,result.Length);
+            Assert.Equal("DDD", result[0].Name);
+        }
+
+        [Fact]
         public void FindUsesLimitAndSkip()
         {
             _collection.Insert(new Person { Name = "BBB" });
