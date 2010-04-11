@@ -46,6 +46,7 @@ namespace Norm
                            {
                                   Map = options.Map,
                                   Reduce = options.Reduce,
+                                  Query = options.Query,
                                   MapReduce = options.CollectionName,
                                   KeepTemp = options.Permanant,
                                   Out = options.OutputCollectionName,

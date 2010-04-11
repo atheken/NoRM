@@ -20,6 +20,7 @@ namespace Norm.Protocol.Messages
                                                   c.For<MapReduceMessage>(mrm => mrm.ForProperty(m => m.Out).UseAlias("out"));
                                                   c.For<MapReduceMessage>(mrm => mrm.ForProperty(m => m.Limit).UseAlias("limit"));
                                                   c.For<MapReduceMessage>(mrm => mrm.ForProperty(m => m.Finalize).UseAlias("finalize"));
+                                                  c.For<MapReduceMessage>(mrm => mrm.ForProperty(m => m.Query).UseAlias("query"));
                                               });
         }
 
@@ -40,6 +41,11 @@ namespace Norm.Protocol.Messages
 
         /// <summary>TODO::Description.</summary>
         public int? Limit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Query
+        /// </summary>
+        public object Query { get; set; }
 
         /// <summary>TODO::Description.</summary>
         [MongoIgnoreIfNull]

@@ -35,6 +35,11 @@ namespace Norm
         public string Reduce { get; set; }
 
         /// <summary>
+        /// Gets or sets the Query object for MapReduce.
+        /// </summary>
+        public object Query { get; set; }
+
+        /// <summary>
         /// Gets or sets CollectionName.
         /// </summary>
         public string CollectionName { get; set; }
