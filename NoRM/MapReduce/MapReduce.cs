@@ -47,13 +47,13 @@ namespace Norm
                                   Map = options.Map,
                                   Reduce = options.Reduce,
                                   MapReduce = options.CollectionName,
-                                  KeepTemp = options.Permenant,
+                                  KeepTemp = options.Permanant,
                                   Out = options.OutputCollectionName,
                                   Limit = options.Limit,
                                   Finalize = options.Finalize,
                             });
 
-            if (!options.Permenant && !string.IsNullOrEmpty(response.Result))
+            if (!options.Permanant && !string.IsNullOrEmpty(response.Result))
             {
                 this._temporaryCollections.Add(response.Result);
             }

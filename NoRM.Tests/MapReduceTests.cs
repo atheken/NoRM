@@ -91,7 +91,7 @@ namespace Norm.Tests
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });                            
                 using (var mr = mongo.CreateMapReduce())
                 {
-                    name = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Permenant = true }).Result;
+                    name = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Permanant = true }).Result;
                 }
             }
 
@@ -132,7 +132,7 @@ namespace Norm.Tests
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 using (var mr = mongo.CreateMapReduce())
                 {
-                    var response = mr.Execute(new MapReduceOptions<Product> { Map = _map, Reduce = _reduce});
+                    var response = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce , Permanant = true });
                     var collection = response.GetCollection<ProductSum>();
                     var r = collection.Find().FirstOrDefault();
                     Assert.Equal(0, r.Id);
@@ -180,7 +180,7 @@ namespace Norm.Tests
                 using (var mr = mongo.CreateMapReduce())
                 {
                     const string finalize = "function(key, value){return 1;}";
-                    var response = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Permenant = true, Finalize = finalize });
+                    var response = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Permanant = true, Finalize = finalize });
                     var collection = response.GetCollection<ProductSum>();
                     var r = collection.Find().FirstOrDefault();
                     Assert.Equal(0, r.Id);
