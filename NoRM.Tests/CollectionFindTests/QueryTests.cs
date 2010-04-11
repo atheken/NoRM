@@ -51,13 +51,43 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "AAA" });
             _collection.Insert(new Person { Name = "DDD" });
 
-            var result = _collection.Find(new { }, new { Name = -1}, 3, 1).ToArray();
+            var result = _collection.Find(new { Name = Q.NotEqual(new int?()) }, new { Name = OrderBy.Descending}, 3, 1).ToArray();
             Assert.Equal(3, result.Length);
             Assert.Equal("CCC", result[0].Name);
             Assert.Equal("BBB", result[1].Name);
             Assert.Equal("AAA", result[2].Name);
         }
 
+        [Fact]
+        public void Find_Uses_Query_And_Orderby()
+        {
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { Name = Q.NotEqual("AAA") }, new { Name = OrderBy.Descending }).ToArray();
+            Assert.Equal(3, result.Length);
+            Assert.Equal("DDD", result[0].Name);
+            Assert.Equal("CCC", result[1].Name);
+            Assert.Equal("BBB", result[2].Name);
+        }
+
+        [Fact]
+        public void Find_Uses_Query_And_Orderby_And_Limit()
+        {
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { Name = Q.NotEqual("DDD") }, new { Name = OrderBy.Descending }, 2, 0).ToArray();
+            Assert.Equal(2, result.Length);
+            Assert.Equal("CCC", result[0].Name);
+            Assert.Equal("BBB", result[1].Name);
+        }
 
         [Fact]
         public void FindUsesLimitAndSkip()
