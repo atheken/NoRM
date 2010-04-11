@@ -286,7 +286,7 @@ namespace Norm.Tests
             var _map = "function(){emit(0, this.Price);}";
             var _reduce = "function(key, values){var sumPrice = 0;for(var i = 0; i < values.length; ++i){sumPrice += values[i];} return sumPrice;}";
 
-            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false&strict=false")))
             {
                 mongo.Database.DropCollection("ReduceProduct");
                 var collection = mongo.GetCollection<ReduceProduct>();
