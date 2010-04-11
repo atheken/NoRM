@@ -13,7 +13,7 @@ namespace Norm.Protocol
         static ExplainRequest()
         {
             MongoConfiguration.Initialize(cfg=>cfg.For<ExplainRequest<T>>(y=>{
-                y.ForProperty(c=>c.Explain).UseAlias("$explain");
+                y.ForProperty(c => c.Explain).UseAlias("$explain");
                 y.ForProperty(c => c.Query).UseAlias("query"); 
             }));
         }
@@ -31,11 +31,13 @@ namespace Norm.Protocol
         /// <remarks>
         /// THIS SHOULD ALWAYS BE DEFINED BEFORE QUERY!
         /// </remarks>
+        /// <value>The Explain property gets the Explain data member.</value>
         private bool Explain { get { return true; } }
 
         /// <summary>
         /// The query that should be used.
         /// </summary>
+        /// <value>The Query property gets/sets the Query data member.</value>
         public T Query { get; protected set; }
     }
 }

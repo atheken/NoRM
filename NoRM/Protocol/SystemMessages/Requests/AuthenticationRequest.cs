@@ -25,24 +25,28 @@ namespace Norm.Protocol.SystemMessages.Requests
         /// <summary>
         /// Authenticate.
         /// </summary>
+        /// <value>The Authenticate property gets the Authenticate data member.</value>
         public int Authenticate
         {
             get { return 1; }
         }
 
         /// <summary>
-        /// Gets or sets the nonce.
+        /// The nonce.
         /// </summary>
+        /// <value>The Nonce property gets/sets the Nonce data member.</value>
         public string Nonce { get; set; }
 
         /// <summary>
-        /// Gets or sets the user.
+        /// The user.
         /// </summary>
+        /// <value>The User property gets/sets the User data member.</value>
         public string User { get; set; }
 
         /// <summary>
-        /// Gets or sets the key.
+        /// The key.
         /// </summary>
+        /// <value>The Key property gets/sets the Key data member.</value>
         public string Key { get; set; }
     }
 }

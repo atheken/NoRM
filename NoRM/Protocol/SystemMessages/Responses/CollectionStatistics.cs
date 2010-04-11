@@ -37,68 +37,68 @@ namespace Norm.Responses
         /// not sure what this is, maybe something to do with Sharding?
         /// </summary>
         /// <value></value>
-        public long? CurrentExtents { get; set; }
+        public long? CurrentExtents { get; private set; }
 
         /// <summary>
         /// Total size of all indices for this collection.
         /// </summary>
         /// <value></value>
-        public long? TotalIndexSize { get; set; }
+        public long? TotalIndexSize { get; private set; }
 
         /// <summary>
         /// ?? The previous size of the indices on disk before some index operation??
         /// </summary>
         /// <value></value>
-        public long? LastIndexSize { get; set; }
+        public long? LastIndexSize { get; private set; }
 
         /// <summary>
         /// Each index and the size on disk of the index.
         /// </summary>
         /// <value></value>
-        public Dictionary<string, double> IndexSizes { get; set; }
+        public Dictionary<string, double> IndexSizes { get; private set; }
 
         /// <summary>
         /// Not sure what this is, correlates to "lastExtentSize"
         /// </summary>
         /// <value></value>
-        public long? PreviousExtentSize { get; set; }
+        public long? PreviousExtentSize { get; private set; }
 
         /// <summary>
         /// No idea what this is.
         /// </summary>
         /// <value></value>
-        public long? Flags { get; set; }
+        public long? Flags { get; private set; }
 
         /// <summary>
         /// The amount of space that is allocated so that 
         /// inserts can be done without moving pages on disk.
         /// </summary>
         /// <value></value>
-        public double? PaddingFactor { get; set; }
+        public double? PaddingFactor { get; private set; }
 
         /// <summary>
         /// The namespace in which this collection lives.
         /// </summary>
         /// <value></value>
-        public string Namespace { get; set; }
+        public string Namespace { get; private set; }
 
         /// <summary>
         /// Number of elements in this collection
         /// </summary>
         /// <value></value>
-        public long? Count { get; set; }
+        public long? Count { get; private set; }
 
         /// <summary>
         /// The size of the data in this collection <see cref="StorageSize"/>
         /// </summary>
         /// <value></value>
-        public long? Size { get; set; }
+        public long? Size { get; private set; }
 
         /// <summary>
         /// The size on disk of this collection.
         /// </summary>
         /// <value></value>
-        public long? StorageSize { get; set; }
+        public long? StorageSize { get; private set; }
 
         /// <summary>
         /// The number of indices currently defined on this collection.
@@ -108,6 +108,6 @@ namespace Norm.Responses
         /// to 1, as  _id automatically gets an index.
         /// </remarks>
         /// <value></value>
-        public int? NumberOfIndices { get; set; }
+        public int? NumberOfIndices { get; private set; }
     }
 }

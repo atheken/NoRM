@@ -22,25 +22,25 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// Gets or sets the version.
+        /// The version.
         /// </summary>
-        /// <value>The version.</value>
-        public string Version { get; set; }
+        /// <value>The Version property gets the Version data member.</value>
+        public string Version { get; private set; }
 
         /// <summary>
-        /// Gets or sets the git version.
+        /// The git version.
         /// </summary>
-        /// <value>The git version.</value>
-        public string GitVersion { get; set; }
+        /// <value>The GitVersion property gets the GitVersion data member.</value>
+        public string GitVersion { get; private set; }
 
         /// <summary>
-        /// Gets or sets the sys info.
+        /// The sys info.
         /// </summary>
-        /// <value>The sys info.</value>
-        public string SystemInformation { get; set; }
+        /// <value>The SystemInformation property gets the SystemInformation data member.</value>
+        public string SystemInformation { get; private set; }
 
-        /// <summary>TODO::Description.</summary>
-        /// <value></value>
-        public int? Bits { get; set; }
+        /// <summary>The number of bits for the current build (32 or 64).</summary>
+        /// <value>The Bits property gets the Bits data member.</value>
+        public int? Bits { get; private set; }
     }
 }

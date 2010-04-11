@@ -23,6 +23,6 @@ namespace Norm.Responses
         /// Gets or sets the values.
         /// </summary>
         /// <value>The values.</value>
-        public List<T> Values { get; set; }
+        public List<T> Values { get; private set; }
     }
 }

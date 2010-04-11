@@ -20,21 +20,21 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// Gets or sets the number of errors.
+        /// Gets the number of errors.
         /// </summary>
         /// <value>The number of errors.</value>
-        public long? NumberOfErrors { get; set; }
+        public long? NumberOfErrors { get; private set; }
 
         /// <summary>
-        /// Gets or sets the error.
+        /// Gets the error.
         /// </summary>
         /// <value>The error.</value>
-        public string Error { get; set; }
+        public string Error { get; private set; }
 
         /// <summary>
-        /// Gets or sets the code.
+        /// Gets the code.
         /// </summary>
         /// <value>The code.</value>
-        public int Code { get; set; }
+        public int Code { get; private set; }
     }
 }

@@ -117,7 +117,7 @@ namespace Norm
         {
             try
             {
-                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new { drop = collectionName }).OK == 1;
+                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new { drop = collectionName }).Ok == 1;
             }
             catch (MongoException exception)
             {

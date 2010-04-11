@@ -14,15 +14,15 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// Gets or sets the collection name.
+        /// The collection name.
         /// </summary>
-        /// <value>The name.</value>
-        public string Name { get; set; }
+        /// <value>The Name property gets/sets the Name data member.</value>
+        public string Name { get; private set; }
 
         /// <summary>
-        /// Gets or sets the create collection options.
+        /// The create collection options.
         /// </summary>
-        /// <value>The options.</value>
-        public CreateCollectionOptions Options { get; set; }
+        /// <value>The Options property gets the Options data member.</value>
+        public CreateCollectionOptions Options { get; private set; }
     }
 }

@@ -21,9 +21,9 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// Gets or sets the nonce.
+        /// Gets the nonce.
         /// </summary>
         /// <value>The nonce.</value>
-        public string Nonce { get; set; }
+        public string Nonce { get; private set; }
     }
 }

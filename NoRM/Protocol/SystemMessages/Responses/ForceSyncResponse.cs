@@ -15,16 +15,15 @@ namespace Norm.Responses
         {
             MongoConfiguration.Initialize(c => c.For<ForceSyncResponse>(a =>
                                                    {
-                                                       a.ForProperty(auth => auth.Ok).UseAlias("ok");
                                                        a.ForProperty(auth => auth.NumberOfFiles).UseAlias("numFiles");
                                                    })
                 );
         }
 
         /// <summary>
-        /// Gets or sets the number of files.
+        /// Gets the number of files.
         /// </summary>
         /// <value>The number of files.</value>
-        public int? NumberOfFiles { get; set; }
+        public int? NumberOfFiles { get; private set; }
     }
 }

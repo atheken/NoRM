@@ -26,18 +26,18 @@ namespace Norm.Responses
         /// Gets or sets the number of previous indexes.
         /// </summary>
         /// <value>The number indexes was.</value>
-        public int? NumberIndexesWas { get; set; }
+        public int? NumberIndexesWas { get; private set; }
 
         /// <summary>
         /// Gets or sets the message.
         /// </summary>
         /// <value>The message.</value>
-        public string Message { get; set; }
+        public string Message { get; private set; }
 
         /// <summary>
         /// Gets or sets the namespace.
         /// </summary>
         /// <value>The namespace.</value>
-        public string Namespace { get; set; }
+        public string Namespace { get; private set; }
     }
 }

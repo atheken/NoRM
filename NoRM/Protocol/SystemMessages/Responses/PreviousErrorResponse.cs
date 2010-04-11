@@ -26,18 +26,18 @@ namespace Norm.Responses
         /// Gets or sets the number of errors.
         /// </summary>
         /// <value>The number of errors.</value>
-        public long? NumberOfErrors { get; set; }
+        public long? NumberOfErrors { get; private set; }
 
         /// <summary>
         /// Gets or sets the error.
         /// </summary>
         /// <value>The error.</value>
-        public string Error { get; set; }
+        public string Error { get; private set; }
 
         /// <summary>
         /// Gets or sets the number of operations ago.
         /// </summary>
         /// <value>The number of operations ago.</value>
-        public long? NumberOfOperationsAgo { get; set; }
+        public long? NumberOfOperationsAgo { get; private set; }
     }
 }

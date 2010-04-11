@@ -17,9 +17,9 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// Gets or sets the operation status.
+        /// The operation status
         /// </summary>
-        /// <value>The operation status.</value>
+        /// <value>The Ok property gets the Ok data member.</value>
         public double? Ok { get; set; }
     }
 }
