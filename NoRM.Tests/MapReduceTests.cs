@@ -121,6 +121,27 @@ namespace Norm.Tests
             }
         }
 
+        [Fact]
+        public void MapReduceWithGenericMapReduceResponse()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
+            {
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f },
+                                                            new ReduceProduct { Price = 2.5f },
+                                                            new ReduceProduct { Price = 2.5f });
+                var mr = mongo.CreateMapReduce();
+
+                var _query = new { Price = Q.GreaterThan(2) };
+                var response =
+                    mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Query = _query });
+                var collection = response.GetCollection<MapReduceResponse<int, int>>();
+                var r = collection.Find().FirstOrDefault();
+                Assert.Equal(0, r.Key);
+                Assert.Equal(5, r.Value);
+
+            }
+        }
+
 
         [Fact]
         public void SettingLimitLimitsTheNumberOfResults()
