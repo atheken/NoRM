@@ -299,13 +299,13 @@ namespace Norm.Tests
             public T MapReduce<T>(string map, string reduce)
             {
                 var result = default(T);
-                using (var mr = _provider.Server.CreateMapReduce())
-                {
-                    var response = mr.Execute(new MapReduceOptions(typeof(T).Name) { Map = map, Reduce = reduce });
-                    var coll = response.GetCollection<MapReduceResult<T>>();
-                    var r = coll.Find().FirstOrDefault();
-                    result = r.Value;
-                }
+                var mr = _provider.Server.CreateMapReduce();
+
+                var response = mr.Execute(new MapReduceOptions(typeof (T).Name) {Map = map, Reduce = reduce});
+                var coll = response.GetCollection<MapReduceResult<T>>();
+                var r = coll.Find().FirstOrDefault();
+                result = r.Value;
+
                 return result;
             }
 

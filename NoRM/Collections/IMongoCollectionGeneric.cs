@@ -126,6 +126,41 @@ namespace Norm.Collections
         /// <summary>
         /// Delete the entity
         /// </summary>
-        void Delete(T entity);   
+        void Delete(T entity);
+
+
+        /// <summary>
+        /// Execute the mapreduce on this collection.
+        /// </summary>
+        /// <param name="map"></param>
+        /// <param name="reduce"></param>
+        /// <returns></returns>
+        IEnumerable<X> MapReduce<X>(string map, string reduce);
+
+        /// <summary>
+        /// Execute the mapreduce with a limiting query on this collection.
+        /// </summary>
+        /// <param name="template"></param>
+        /// <param name="map"></param>
+        /// <param name="reduce"></param>
+        /// <returns></returns>
+        IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce);
+
+        /// <summary>
+        /// Execute the mapreduce with a limiting query and finalize on this collection.
+        /// </summary>
+        /// <param name="template"></param>
+        /// <param name="map"></param>
+        /// <param name="reduce"></param>
+        /// <param name="finalize"></param>
+        /// <returns></returns>
+        IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce, string finalize);
+
+        /// <summary>
+        /// Execute the mapreduce with the supplied options on this collection.
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        new IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
     }
 }

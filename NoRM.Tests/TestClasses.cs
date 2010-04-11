@@ -131,18 +131,18 @@ namespace Norm.Tests
         public T MapReduce<T>(string map, string reduce)
         {
             T result = default(T);
-            using (MapReduce mr = _provider.Server.CreateMapReduce())
-            {
-                MapReduceResponse response =
-                    mr.Execute(new MapReduceOptions(MongoConfiguration.GetCollectionName(typeof (T)))
-                                   {
-                                       Map = map,
-                                       Reduce = reduce
-                                   });
-                MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
-                MapReduceResult<T> r = coll.Find().FirstOrDefault();
-                result = r.Value;
-            }
+            MapReduce mr = _provider.Server.CreateMapReduce();
+
+            MapReduceResponse response =
+                mr.Execute(new MapReduceOptions(MongoConfiguration.GetCollectionName(typeof (T)))
+                               {
+                                   Map = map,
+                                   Reduce = reduce
+                               });
+            MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
+            MapReduceResult<T> r = coll.Find().FirstOrDefault();
+            result = r.Value;
+
             return result;
         }
 

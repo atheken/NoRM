@@ -327,18 +327,15 @@ namespace Norm.Linq
         /// <returns></returns>
         private T ExecuteMR<T>(string typeName, string map, string reduce, string finalize)
         {
-            T result;
-            using (var mr = Server.CreateMapReduce())
-            {
-                var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce, Finalize = finalize });
-                var coll = response.GetCollection<MapReduceResult<T>>();
-                var r = coll.Find().FirstOrDefault();
-                result = r.Value;
-            }
-
+            var mr = Server.CreateMapReduce();
+            var response = mr.Execute(new MapReduceOptions(typeName) {Map = map, Reduce = reduce, Finalize = finalize});
+            var coll = response.GetCollection<MapReduceResult<T>>();
+            var r = coll.Find().FirstOrDefault();
+            T result = r.Value;
+            
             return result;
         }
-        
+
         private T ExecuteMR<T>(string typeName, string map, string reduce)
         {
             return ExecuteMR<T>(typeName, map, reduce, null);

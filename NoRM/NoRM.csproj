@@ -166,6 +166,7 @@
     <Compile Include="MapReduce\MapReduce.cs" />
     <Compile Include="MapReduce\MapReduceOptions.cs" />
     <Compile Include="MapReduce\MapReduceOptionsGeneric.cs" />
+    <Compile Include="MapReduce\MapReduceResponse.cs" />
     <Compile Include="MongoAdmin.cs" />
     <Compile Include="Mongo.cs" />
     <Compile Include="MongoQueryExecutor.cs" />
