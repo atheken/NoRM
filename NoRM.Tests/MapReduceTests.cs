@@ -64,63 +64,18 @@ namespace Norm.Tests
             }
         }
 
-        [Fact]
-        public void TemporaryCollectionIsCleanedUpWhenDisposed()
-        {
-            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
-            {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
-                string name;
-                using (var mr = mongo.CreateMapReduce())
-                {
-                    name = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce }).Result;
-                }
-                foreach (var c in mongo.Database.GetAllCollections())
-                {
-                    Assert.Equal(false, c.Name.EndsWith(name));
-                }
-            }
-        }
-
-        [Fact]
-        public void PermenantCollectionsArentCleanedUp()
-        {
-            string name;
-            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
-            {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });                            
-                using (var mr = mongo.CreateMapReduce())
-                {
-                    name = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Permanant = true }).Result;
-                }
-            }
-
-            using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
-            {
-                var found = false;
-                foreach (var c in mongo.Database.GetAllCollections())
-                {
-                    if (c.Name.EndsWith(name))
-                    {
-                        found = true;
-                        mongo.Database.DropCollection(name);
-                    }
-                }
-                Assert.Equal(true, found);
-            }
-        }
-
+        
         [Fact]
         public void CreatesACollectionWithTheSpecifiedOutputName()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
-                using (var mr = mongo.CreateMapReduce())
-                {
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
+                var mr = mongo.CreateMapReduce();
+                
                     var result = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, OutputCollectionName = "TempMr" });
                     Assert.Equal("TempMr", result.Result);
-                }
+                
             }
         }
 
@@ -131,15 +86,17 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
-                using (var mr = mongo.CreateMapReduce())
-                {
-                    var response = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce , Permanant = true });
-                    var collection = response.GetCollection<ProductSum>();
-                    var r = collection.Find().FirstOrDefault();
-                    Assert.Equal(0, r.Id);
-                    Assert.Equal(4, r.Value);
-                }
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
+                                                            new ReduceProduct {Price = 2.5f});
+                var mr = mongo.CreateMapReduce();
+
+                var response =
+                    mr.Execute(new MapReduceOptions<ReduceProduct> {Map = _map, Reduce = _reduce, Permanant = true});
+                var collection = response.GetCollection<ProductSum>();
+                var r = collection.Find().FirstOrDefault();
+                Assert.Equal(0, r.Id);
+                Assert.Equal(4, r.Value);
+
             }
         }
 
@@ -148,16 +105,19 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }, new ReduceProduct { Price = 2.5f });
-                using (var mr = mongo.CreateMapReduce())
-                {
-                    var _query = new { Price = Q.GreaterThan(2)};
-                    var response = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Query = _query });
-                    var collection = response.GetCollection<ProductSum>();
-                    var r = collection.Find().FirstOrDefault();
-                    Assert.Equal(0, r.Id);
-                    Assert.Equal(5, r.Value);
-                }
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
+                                                            new ReduceProduct {Price = 2.5f},
+                                                            new ReduceProduct {Price = 2.5f});
+                var mr = mongo.CreateMapReduce();
+
+                var _query = new {Price = Q.GreaterThan(2)};
+                var response =
+                    mr.Execute(new MapReduceOptions<ReduceProduct> {Map = _map, Reduce = _reduce, Query = _query});
+                var collection = response.GetCollection<ProductSum>();
+                var r = collection.Find().FirstOrDefault();
+                Assert.Equal(0, r.Id);
+                Assert.Equal(5, r.Value);
+
             }
         }
 
@@ -167,13 +127,16 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
-                using (var mr = mongo.CreateMapReduce())
-                {
-                    var response = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = "function(){emit(this._id, this.Price);}", Reduce = _reduce, Limit = 1 });
-                    var collection = response.GetCollection<ProductSumObjectId>();
-                    Assert.Equal(1, collection.Find().Count());
-                }
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
+                                                            new ReduceProduct {Price = 2.5f});
+                var mr = mongo.CreateMapReduce();
+
+                var response =
+                    mr.Execute(new MapReduceOptions<ReduceProduct>
+                                   {Map = "function(){emit(this._id, this.Price);}", Reduce = _reduce, Limit = 1});
+                var collection = response.GetCollection<ProductSumObjectId>();
+                Assert.Equal(1, collection.Find().Count());
+
             }
         }
 
@@ -182,13 +145,16 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
-                using (var mr = mongo.CreateMapReduce())
-                {
-                    var response = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = "function(){emit(this._id, this.Price);}", Reduce = _reduce });
-                    var collection = response.GetCollection<ProductSumObjectId>();
-                    Assert.Equal(2, collection.Find().Count());
-                }
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
+                                                            new ReduceProduct {Price = 2.5f});
+                var mr = mongo.CreateMapReduce();
+
+                var response =
+                    mr.Execute(new MapReduceOptions<ReduceProduct>
+                                   {Map = "function(){emit(this._id, this.Price);}", Reduce = _reduce});
+                var collection = response.GetCollection<ProductSumObjectId>();
+                Assert.Equal(2, collection.Find().Count());
+
             }
         }
 
@@ -197,16 +163,19 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
-                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
-                using (var mr = mongo.CreateMapReduce())
-                {
-                    const string finalize = "function(key, value){return 1;}";
-                    var response = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Permanant = true, Finalize = finalize });
-                    var collection = response.GetCollection<ProductSum>();
-                    var r = collection.Find().FirstOrDefault();
-                    Assert.Equal(0, r.Id);
-                    Assert.Equal(1, r.Value);
-                }
+                mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
+                                                            new ReduceProduct {Price = 2.5f});
+                var mr = mongo.CreateMapReduce();
+
+                const string finalize = "function(key, value){return 1;}";
+                var response =
+                    mr.Execute(new MapReduceOptions<ReduceProduct>
+                                   {Map = _map, Reduce = _reduce, Permanant = true, Finalize = finalize});
+                var collection = response.GetCollection<ProductSum>();
+                var r = collection.Find().FirstOrDefault();
+                Assert.Equal(0, r.Id);
+                Assert.Equal(1, r.Value);
+
             }
         }
     }

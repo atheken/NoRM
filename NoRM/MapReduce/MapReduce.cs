@@ -8,31 +8,26 @@ namespace Norm
     /// <summary>
     /// Map reduce.
     /// </summary>
-    public class MapReduce : IDisposable
+    public class MapReduce
     {
         private readonly MongoDatabase _database;
         private readonly IList<string> _temporaryCollections;
-        private bool _disposed;
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="MapReduce"/> class.
         /// </summary>
         /// <param name="database">
         /// The database.
         /// </param>
+        /// <remarks>
+        /// Removed IDisposable form MapReduce. We do not need to delete the temporary collections 
+        /// (and it was causing errors). These are deleted by Mongo when the connection is terminated. 
+        /// http://groups.google.com/group/mongodb-user/browse_thread/thread/5b068bd40847950d/8de9428e132e8b68?lnk=raot
+        /// </remarks>
         internal MapReduce(MongoDatabase database)
         {
             this._database = database;
             this._temporaryCollections = new List<string>(5);
-        }
-
-        /// <summary>
-        /// The dispose.
-        /// </summary>
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -61,37 +56,6 @@ namespace Norm
 
             response.PrepareForQuerying(this._database);
             return response;
-        }
-
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources
-        /// </summary>
-        /// <param name="disposing">The disposing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!this._disposed)
-            {
-                foreach (var t in this._temporaryCollections)
-                {
-                    try
-                    {
-                        this._database.DropCollection(t);
-                    }
-                    catch (MongoException)
-                    {
-                    }
-                }
-            }
-
-            this._disposed = true;
-        }
-
-        /// <summary>
-        /// Finalizes an instance of the <see cref="MapReduce"/> class. 
-        /// </summary>
-        ~MapReduce()
-        {
-            this.Dispose(false);
         }
     }
 }

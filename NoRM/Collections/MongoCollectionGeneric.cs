@@ -538,12 +538,11 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options)
         {
-            using (var mr = new MapReduce(_db))
-            {
-                var response = mr.Execute(options);
-                var collection = response.GetCollection<X>();
-                return collection.Find().ToList();
-            }
+            var mr = new MapReduce(_db);
+            var response = mr.Execute(options);
+            var collection = response.GetCollection<X>();
+            return collection.Find().ToList();
+
         }
 
 
