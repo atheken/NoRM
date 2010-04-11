@@ -14,8 +14,13 @@ namespace Norm
     /// </summary>
     public abstract class ConnectionProvider : IConnectionProvider
     {
+        /// <summary>TODO::Description.</summary>
         public abstract ConnectionStringBuilder ConnectionString { get; }
+
+        /// <summary>TODO::Description.</summary>
         public abstract IConnection Open(string options);
+
+        /// <summary>TODO::Description.</summary>
         public abstract void Close(IConnection connection);
 
         /// <summary>

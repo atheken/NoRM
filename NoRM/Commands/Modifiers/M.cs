@@ -31,7 +31,7 @@ namespace Norm
         ///<summary>
         /// Creates a $set operation to be applied to a field using the update command. 
         ///</summary>
-        ///<param name="valueToSet"></param>
+        ///<param name="setValue"></param>
         ///<returns></returns>
         public static SetOperation<T> Set<T>(T setValue)
         {

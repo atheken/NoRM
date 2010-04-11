@@ -52,6 +52,7 @@ namespace Norm.Protocol.Messages
             set;
         }
 
+        /// <summary>TODO::Description.</summary>
         public object OrderBy
         {
             get;
@@ -99,12 +100,11 @@ namespace Norm.Protocol.Messages
             {
                 var fly = new Flyweight();
 
-                if(this.Query is Flyweight)
-                {
-                    var properties = (this.Query as Flyweight).AllProperties();
-                    properties.ToList().ForEach(p => fly.Set(p.PropertyName, p.Value));
-                }
-
+                //if (this.Query is Flyweight)
+                //{
+                //    var properties = (this.Query as Flyweight).AllProperties();
+                //    properties.ToList().ForEach(p => fly.Set(p.PropertyName, p.Value));
+                //}
                 fly["query"] = this.Query;
 
                 //null for this is OK. needs to be here, though.

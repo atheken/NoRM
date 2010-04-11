@@ -52,6 +52,7 @@ namespace Norm.BSON
                 _kitchenSinkProps.Select(y => new ExpandoProperty(y.Key, y.Value)));
         }
 
+        /// <summary>TODO::Description.</summary>
         public void ReverseKitchen() {
             var reversed = _kitchenSinkProps.Reverse();
             var newKitchen = new Dictionary<string, object>();

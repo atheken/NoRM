@@ -208,7 +208,76 @@ namespace Norm.Tests
             }
         }
 
+        [Fact]
+        public void Can_correctly_determine_collection_name()
+        {
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(SuperClassObject));
+
+            Assert.Equal("SuperClassObject", collectionName);
+        }
+
+        [Fact]
+        public void Can_correctly_determine_collection_name_from_discriminated_sub_class()
+        {
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(SubClassedObject));
+
+            Assert.Equal("SuperClassObject", collectionName);
+        }
+
+        [Fact]
+        public void Can_correctly_determine_collection_name_when_discriminator_is_on_an_interface()
+        {
+			var collectionName = MongoConfiguration.GetCollectionName(typeof(InterfaceDiscriminatedClass));
+
+            Assert.Equal("IDiscriminated", collectionName);
+        }
+
+        [Fact]
+        public void Can_correctly_determine_collection_name_from_discriminated_sub_class_when_fluent_mapped()
+        {
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(SubClassedObjectFluentMapped));
+
+            Assert.Equal("SuperClassObjectFluentMapped", collectionName);
+
+        }
+
+        [Fact]
+        public void Subclass_Adheres_To_Superclass_Fluent_Alias()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var obj1 = new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true };
+                var obj2 = new SubClassedObjectFluentMapped { Title = "Prod2", ABool = false };
+
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(obj1);
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(obj2);
+                var found = mongo.GetCollection<SuperClassObjectFluentMapped>("Fake").Find();
+
+                Assert.Equal(2, found.Count());
+                Assert.Equal(obj1.Id, found.ElementAt(0).Id);
+                Assert.Equal("Prod1", found.ElementAt(0).Title);
+                Assert.Equal(obj2.Id, found.ElementAt(1).Id);
+                Assert.Equal("Prod2", found.ElementAt(1).Title);
+
+            }
+        }
+
+        [Fact]
+        public void Subclassed_Type_Is_Returned_When_Superclass_Is_Used_For_The_Collection()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var obj1 = new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true };
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(obj1);
+                var found = mongo.GetCollection<SuperClassObjectFluentMapped>("Fake").Find();
+
+                Assert.Equal(1, found.Count());
+                Assert.Equal(typeof(SubClassedObjectFluentMapped), found.ElementAt(0).GetType());
+            }
+        }
+
         #region Test classes
+
         internal class Shoppers : MongoQuery<Shopper>, IDisposable
         {
             private readonly MongoQueryProvider _provider;
@@ -310,6 +379,7 @@ namespace Norm.Tests
             public string FirstName { get; set; }
             public string LastName { get; set; }
         }
+
         public class ShopperMap : MongoConfigurationMap
         {
             public ShopperMap()
@@ -381,6 +451,7 @@ namespace Norm.Tests
                 this.For<Product>(cfg => cfg.ForProperty(p => p.Name).UseAlias("productname"));
             }
         }
+
         #endregion
     }
 }

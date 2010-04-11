@@ -14,27 +14,51 @@ namespace Norm.Linq
     /// </summary>
     public class MongoQueryTranslator : ExpressionVisitor
     {
+        /// <summary>TODO::Description.</summary>
         private int _takeCount = Int32.MaxValue;
+
+        /// <summary>TODO::Description.</summary>
         private Expression _expression;
+
+        /// <summary>TODO::Description.</summary>
         private bool _collectionSet;
+
+        /// <summary>TODO::Description.</summary>
         private string _lastFlyProperty = string.Empty;
+
+        /// <summary>TODO::Description.</summary>
         private string _lastOperator = " === ";
+
+        /// <summary>TODO::Description.</summary>
         private StringBuilder _sb;
+
+        /// <summary>TODO::Description.</summary>
         private StringBuilder _sbIndexed;
+
+        /// <summary>TODO::Description.</summary>
         public Flyweight SortFly { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string SortDescendingBy { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         bool _whereWritten = false;
+
+        /// <summary>TODO::Description.</summary>
         public String PropName
         {
             get;
             set;
         }
+
+        /// <summary>TODO::Description.</summary>
         public String TypeName
         {
             get;
             set;
         }
 
+        /// <summary>TODO::Description.</summary>
         public String MethodCall
         {
             get;
@@ -93,6 +117,7 @@ namespace Norm.Linq
             get { return _sb.ToString(); }
         }
 
+        /// <summary>TODO::Description.</summary>
         public bool UseScopedQualifier { get; set; }
 
         /// <summary>
@@ -135,6 +160,7 @@ namespace Norm.Linq
             return Translate(exp, true);
         }
 
+        /// <summary>TODO::Description.</summary>
         public string Translate(Expression exp, bool useScopedQualifier)
         {
             UseScopedQualifier = useScopedQualifier;
@@ -285,7 +311,7 @@ namespace Norm.Linq
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
         }
 
-
+        /// <summary>TODO::Description.</summary>
         string GetBinaryOperator(BinaryExpression b) {
             var result = "";
             switch (b.NodeType) {
@@ -304,7 +330,7 @@ namespace Norm.Linq
                     result =_lastOperator;
                     break;
                 case ExpressionType.NotEqual:
-                    _lastOperator = " <> ";
+                    _lastOperator = " != ";
                     result =_lastOperator;
                     break;
                 case ExpressionType.LessThan:
@@ -339,12 +365,6 @@ namespace Norm.Linq
         /// </exception>
         protected override Expression VisitBinary(BinaryExpression b)
         {
-
-            //specific for "chained" Where() calls, where a Where() is appended
-            //to an IQueryable on top of another IQueryable
-            if (_whereWritten) {
-                _sb.Append(" && ");
-            }
             ConditionalCount++;
             _sb.Append("(");
             Visit(b.Left);
@@ -354,9 +374,12 @@ namespace Norm.Linq
             _sb.Append(")");
             return b;
         }
+
+        /// <summary>TODO::Description.</summary>
         void VisitRight(Expression exp) {
 
         }
+
         /// <summary>
         /// Visits a constant.
         /// </summary>
@@ -405,7 +428,11 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            _sb.AppendFormat("ObjectId('{0}')", c.Value);
+                            if (_lastOperator == " === ")
+                            {
+                                _sb.Remove(_sb.Length - 2, 1);
+                            }
+                            _sb.AppendFormat("'{0}'", c.Value);
                             SetFlyValue(c.Value);
                         }
                         else if (c.Value is Guid)
@@ -445,11 +472,17 @@ namespace Norm.Linq
             if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
             {
                 var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                //specific for "chained" Where() calls, where a Where() is appended
+                //to an IQueryable on top of another IQueryable
+                if (_whereWritten) {
+                    _sb.Append(" && ");
+                }
                 Visit(lambda.Body);
                 _whereWritten = true;
                 Visit(m.Arguments[0]);
                 return m;
             }
+            _whereWritten = false;
             if (m.Method.DeclaringType == typeof(string))
             {
                 IsComplex = true;
@@ -462,17 +495,22 @@ namespace Norm.Linq
                         Visit(m.Arguments[0]);
                         _sb.Append(")===0)");
                         return m;
-
                     case "Contains":
                         _sb.Append("(");
                         Visit(m.Object);
                         _sb.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        _sb.Append(")>0)");
+                        _sb.Append(")>-1)");
                         return m;
                     case "IndexOf":
                         Visit(m.Object);
                         _sb.Append(".indexOf(");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(")");
+                        return m;
+                    case "LastIndexOf":
+                        Visit(m.Object);
+                        _sb.Append(".lastIndexOf(");
                         Visit(m.Arguments[0]);
                         _sb.Append(")");
                         return m;
@@ -485,13 +523,41 @@ namespace Norm.Linq
                         Visit(m.Arguments[0]);
                         _sb.Append(")");
                         return m;
-
                     case "IsNullOrEmpty":
                         _sb.Append("(");
                         Visit(m.Arguments[0]);
                         _sb.Append(" == '' ||  ");
                         Visit(m.Arguments[0]);
                         _sb.Append(" == null  )");
+                        return m;
+                    case "ToLower":
+                    case "ToLowerInvariant":
+                        Visit(m.Object);
+                        _sb.Append(".toLowerCase()");
+                        return m;
+                    case "ToUpper":
+                    case "ToUpperInvariant":
+                        Visit(m.Object);
+                        _sb.Append(".toUpperCase()");
+                        return m;
+                    case "Substring":
+                        Visit(m.Object);
+                        _sb.Append(".substr(");
+                        Visit(m.Arguments[0]);
+                        if (m.Arguments.Count == 2)
+                        {
+                            _sb.Append(",");
+                            Visit(m.Arguments[1]);
+                        }
+                        _sb.Append(")");
+                        return m;
+                    case "Replace":
+                        Visit(m.Object);
+                        _sb.Append(".replace(new RegExp(");
+                        Visit(m.Arguments[0]);
+                        _sb.Append(",'g'),");
+                        Visit(m.Arguments[1]);
+                        _sb.Append(")");
                         return m;
                 }
             }
@@ -634,7 +700,7 @@ namespace Norm.Linq
                         case " >= ":
                             FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
                             break;
-                        case " <> ":
+                        case " != ":
                             FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
                             break;
                     }
@@ -704,28 +770,25 @@ namespace Norm.Linq
             {
                 case "ThenBy":
                     HandleSort(m.Arguments[1]);
-                    Visit(m.Arguments[0]);
-                    return m;
+                    break;
                 case "OrderBy":
                     HandleSort(m.Arguments[1]);
-                    return m;
+                    break;
                 case "ThenByDescending":
                     HandleDescendingSort(m.Arguments[1]);
-                    Visit(m.Arguments[0]);
-                    return m;
+                    break;
                 case "OrderByDescending":
                     HandleDescendingSort(m.Arguments[1]);
-                    return m;
+                    break;
                 case "Skip":
                     HandleSkip(m.Arguments[1]);
-                    return m;
+                    break;
                 case "Take":
                     HandleTake(m.Arguments[1]);
-                    Visit(m.Arguments[0]);
-                    return m;
+                    break;    
                 case "Any":
                     HandleAny(m);
-                    return m;
+                    break; 
                 default:
                     this.Take = 1;
                     this.MethodCall = m.Method.Name;
@@ -747,6 +810,8 @@ namespace Norm.Linq
                     }
                     break;
             }
+
+            Visit(m.Arguments[0]);
 
             return m;
         }

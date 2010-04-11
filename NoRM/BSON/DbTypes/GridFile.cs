@@ -16,6 +16,7 @@ namespace Norm.BSON.DbTypes
         /// Opens a file from the default namespace "fs"
         /// </summary>
         /// <param name="db"></param>
+        /// <param name="fileKey"></param>
         /// <returns></returns>
         public static GridFile OpenFile(Mongo db, ObjectId fileKey)
         {
@@ -25,7 +26,7 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="db"></param>
+        /// <param name="collection"></param>
         /// <param name="fileKey"></param>
         /// <returns></returns>
         public static GridFile OpenFile(IMongoCollection collection, ObjectId fileKey)
@@ -68,7 +69,7 @@ namespace Norm.BSON.DbTypes
 
         }
 
-
+        /// <summary>TODO::Description.</summary>
         protected class FileChunk
         {
             /// <summary>
@@ -107,8 +108,11 @@ namespace Norm.BSON.DbTypes
             public byte[] Payload { get; set; }
         }
 
+        /// <summary>TODO::Description.</summary>
         protected class FileMetadata
         {
+
+            /// <summary>TODO::Description.</summary>
             static FileMetadata()
             {
                 MongoConfiguration.Initialize(cfg =>
@@ -125,15 +129,32 @@ namespace Norm.BSON.DbTypes
                        f.ForProperty(j => j.MD5Checksum).UseAlias("md5");
                    }));
             }
-
+            
+            /// <summary>TODO::Description.</summary>
             public ObjectId ID { get; set; }
+
+            /// <summary>TODO::Description.</summary>
             public String FileName { get; set; }
+
+            /// <summary>TODO::Description.</summary>
             public String ContentType { get; set; }
+
+            /// <summary>TODO::Description.</summary>
             public long Length { get; set; }
+
+            /// <summary>TODO::Description.</summary>
             public int ChunkSize { get; set; }
+
+            /// <summary>TODO::Description.</summary>
             public DateTime UploadDate { get; set; }
+
+            /// <summary>TODO::Description.</summary>
             public List<String> Aliases { get; set; }
+
+            /// <summary>TODO::Description.</summary>
             public Object MetaData { get; set; }
+
+            /// <summary>TODO::Description.</summary>
             public String MD5Checksum { get; set; }
         }
     }

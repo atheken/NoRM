@@ -16,6 +16,9 @@ namespace Norm.Tests
         {
             _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
             _collection = _server.GetCollection<Person>("People");
+            //cause the collection to exist on the server by inserting, then deleting some things.
+            _collection.Insert(new Person());
+            _collection.Delete(new { });
         }
         public void Dispose()
         {
@@ -35,9 +38,26 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "AAA" });
             _collection.Insert(new Person { Name = "DDD" });
 
-            var result = _collection.Find(new { }, 3 ).ToArray();
+            var result = _collection.Find(new { }, 3).ToArray();
             Assert.Equal(3, result.Length);
         }
+
+        [Fact]
+        public void Find_Uses_Limit_Orderby_And_Skip()
+        {
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { }, new { Name = -1}, 3, 1).ToArray();
+            Assert.Equal(3, result.Length);
+            Assert.Equal("CCC", result[0].Name);
+            Assert.Equal("BBB", result[1].Name);
+            Assert.Equal("AAA", result[2].Name);
+        }
+
 
         [Fact]
         public void FindUsesLimitAndSkip()
@@ -78,18 +98,14 @@ namespace Norm.Tests
                     State = "CO",
                     Zip = "45123"
                 },
-                Relatives = new List<string>(){ "Emma","Bruce","Charlie"
-                }
+                Relatives = new List<string>() { "Emma", "Bruce", "Charlie" }
             };
             _collection.Insert(person1);
             _collection.Insert(person2);
 
             var elem = new Flyweight();
             elem["Relatives"] = "Charlie";
-            var query = new Flyweight();
-            query["$where"] = "for(var c in this.Relatives){ return this.Relatives[c]  ===  'Joe'}";
-
-            var a = _collection.Find(query).ToArray();
+            var a = _collection.Find(elem).ToArray();
             Assert.Equal(1, a.Length);
         }
 
@@ -154,23 +170,16 @@ namespace Norm.Tests
             Assert.Equal(2, results.Count());
         }
         [Fact]
-        public void QueryWithinEmbeddedArray() {
-            using (var session = new Session()) {
-                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
-                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA" }, new Comment { Text = "commentB" } } };
-                var posts = _server.Database.GetCollection<Post>();
-                posts.Delete(new Object());
-                posts.Insert(post1);
-                posts.Insert(post2);
+        public void QueryWithinEmbeddedArray()
+        {
 
-                var fun = @"function(){for(var i in this.Comments){if(i.Text === 'commentA') return true;}}";
+            var post1 = new Person { Name = "First", Relatives = new List<String> { "comment1", "comment2" } };
+            var post2 = new Person { Name = "Second", Relatives = new List<String> { "commentA", "commentB" } };
+            _collection.Insert(post1);
+            _collection.Insert(post2);
 
-                var query = new Flyweight();
-                query["$where"] = fun;
-                var results = posts.Find(query);
-                Assert.Equal("Second",results.First().Title);
-
-            }
+            var results = _collection.Find(new { Relatives = "commentA" });
+            Assert.Equal("Second", results.First().Name);
         }
     }
 }

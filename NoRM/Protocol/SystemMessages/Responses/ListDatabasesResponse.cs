@@ -7,7 +7,10 @@ namespace Norm.Responses
     /// </summary>
     public class ListDatabasesResponse : BaseStatusMessage
     {
+        /// <summary>TODO::Description.</summary>
         public double? TotalSize { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public List<DatabaseInfo> Databases { get; set; }
     }
 }

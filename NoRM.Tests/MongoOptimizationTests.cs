@@ -49,7 +49,7 @@ namespace Norm.Tests
                 // Then you can run this command to see a detailed explain plan
                 // db.Product.find({"Supplier.Name":"abc"})
 
-                // The following query is the same as runging: db.Product.find({"Supplier.Name":"abc"}).explain()
+                // The following query is the same as running: db.Product.find({"Supplier.Name":"abc"}).explain()
                 var query = new Flyweight();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 

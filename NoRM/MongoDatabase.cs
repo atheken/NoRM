@@ -94,10 +94,8 @@ namespace Norm
         {
             try
             {
-                return GetCollection<CollectionStatistics>("$cmd").FindOne(new CollectionStatistics
-                                                                               {
-                                                                                   CollectionStats = collectionName
-                                                                               });
+                return GetCollection<CollectionStatistics>("$cmd")
+                    .FindOne(new { collstats = collectionName});
             }
             catch (MongoException exception)
             {
@@ -191,6 +189,7 @@ namespace Norm
                              });
         }
 
+        /// <summary>TODO::Description.</summary>
         public LastErrorResponse LastError()
         {
             return GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });

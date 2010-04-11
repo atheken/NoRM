@@ -7,8 +7,13 @@ namespace Norm.Responses
     /// </summary>
     public class ProfilingInformationResponse
     {
+        /// <summary>TODO::Description.</summary>
         public DateTime? Ts { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public string Info { get; set; }
+
+        /// <summary>TODO::Description.</summary>
         public double? Millis { get; set; }
     }
 }

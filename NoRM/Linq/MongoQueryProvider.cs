@@ -188,7 +188,7 @@ namespace Norm.Linq
                 tranny.SortFly.ReverseKitchen();
                 result = collection.Find(fly, tranny.SortFly, tranny.Take, tranny.Skip, collection.FullyQualifiedName);
             } else {
-                result=collection.Find(fly, tranny.Take, tranny.Skip);
+                result = collection.Find(fly, tranny.Take, tranny.Skip);
             }
 
             return result;

@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Xunit;
+using System.Linq;
+using System;
 
 namespace Norm.Tests
 {
@@ -84,9 +86,16 @@ namespace Norm.Tests
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
-                var response = admin.ForceSync(true);
-                Assert.Equal(1d, response.Ok);
-                Assert.True(response.NumberOfFiles > 0); //don't know what this is
+                if (!admin.BuildInfo().SystemInformation.ToLower().Contains("windows"))
+                {
+                    var response = admin.ForceSync(true);
+                    Assert.Equal(1d, response.Ok);
+                    Assert.True(response.NumberOfFiles > 0); //don't know what this is
+                }
+                else
+                {
+                    Console.WriteLine("FSync is not supported on windows version of MongoDB and will throw an exception.");
+                }
             }
         }
         [Fact]
@@ -129,5 +138,16 @@ namespace Norm.Tests
                 var status = admin.ServerStatus();
             }            
         } 
+        
+        [Fact]
+        public void ReturnsEmptyInProcessResponse()
+        {
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
+            {
+                var response = admin.GetCurrentOperations();
+                Assert.Equal(0, response.Count());
+            }
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Norm.Linq;
 using Xunit;
 using Norm.Configuration;
 
@@ -71,6 +72,7 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "3", Price = 33 });
                 var products = session.Products.Where(x => x.Price > 10);
                 var result = products.Where(x => x.Price < 30);
+                result = result.Where(x => x.Name.Contains("2"));
                 Assert.Equal(22, result.SingleOrDefault().Price);
             }
         }
@@ -82,7 +84,7 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "1", Price = 40 });
                 session.Add(new Product { Name = "2", Price = 22 });
                 session.Add(new Product { Name = "3", Price = 33 });
-                var products = session.Products.OrderBy(x => x.Price).ToList();
+                var products = session.Products.OrderBy(x=>x.Price).ToList();
                 Assert.Equal(22, products[0].Price);
                 Assert.Equal(40, products[2].Price);
             }
@@ -98,7 +100,7 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "3", Price = 33 });
                 session.Add(new Product { Name = "2", Price = 50 });
                 session.Add(new Product { Name = "1", Price = 50 });
-                var products = session.Products.OrderBy(x => x.Price).ThenBy(x => x.Name).ToList();
+                var products = session.Products.OrderBy(x => x.Price).ThenBy(x=>x.Name).ToList();
                 Assert.Equal(10, products[0].Price);
                 Assert.Equal(22, products[1].Price);
                 Assert.Equal(33, products[2].Price);
@@ -131,6 +133,39 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void OneProductShouldBeReturnedWhenFiveInDBOrderedByPriceThenSkipThreeAndTakeOne()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 22 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                session.Add(new Product { Name = "2", Price = 50 });
+                session.Add(new Product { Name = "1", Price = 50 });
+                var products = session.Products.OrderByDescending(x => x.Price).Skip(3).Take(1).ToList();
+                Assert.Equal(22, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
+        public void OneProductShouldBeReturnedWhenFiveInDBOrderedByPriceAndWhereThenSkipTwoAndTakeOne()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 10 });
+                session.Add(new Product { Name = "3", Price = 33 });
+                session.Add(new Product { Name = "6", Price = 50 });
+                session.Add(new Product { Name = "5", Price = 50 });
+                var products = session.Products.OrderBy(x => x.Price).ThenByDescending(x => x.Name).Where(x => x.Price == 50).Skip(1).Take(1).ToList();
+                Assert.Equal(50, products[0].Price);
+                Assert.Equal("5", products[0].Name);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
         public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedDewscendingByPrice()
         {
             using (var session = new Session())
@@ -143,6 +178,103 @@ namespace Norm.Tests
                 Assert.Equal(10, products[2].Price);
             }
         }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToLower()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToLower() == "test2").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(22, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToLowerInvariant()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToLowerInvariant() == "test2").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(22, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToUpper()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToUpper() == "TEST3").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToUpperInvariant()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToUpperInvariant() == "TEST3").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenToUpperAndContains()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test", Price = 10 });
+                session.Add(new Product { Name = "Test", Price = 22 });
+                session.Add(new Product { Name = "Test1", Price = 33 });
+                var products = session.Products.Where(x => x.Name.ToUpper().Contains("EST")).ToList();
+                Assert.Equal(3, products.Count);
+            }
+        }
+       
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenSubstringUsedWithLength()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "TestName1", Price = 10 });
+                session.Add(new Product { Name = "TestName2", Price = 22 });
+                session.Add(new Product { Name = "TestName3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Substring(2,4) == "stNa").ToList();
+                Assert.Equal(3, products.Count);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenSubstringUsedWithOutLength()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "TestName1", Price = 10 });
+                session.Add(new Product { Name = "TestName2", Price = 22 });
+                session.Add(new Product { Name = "TestName3", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Substring(2) == "stName2").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(22, products[0].Price);
+            }
+        }
+
         [Fact]
         public void FourProductsShouldBeReturnedWhenStartsOrEndsWithX()
         {
@@ -157,6 +289,7 @@ namespace Norm.Tests
                 Assert.Equal(4, products.Count);
             }
         }
+
         [Fact]
         public void OneProductsShouldBeReturnedWhen3InDbWithPriceEqual10()
         {
@@ -318,6 +451,38 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void OneProductsShouldBeReturnedWhenLastIndexOfXEqual6()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "TestX4", Price = 22 });
+                session.Add(new Product { Name = "TXest5X", Price = 33 });
+                session.Add(new Product { Name = "TeXst3", Price = 10 });
+                session.Add(new Product { Name = "TXest4", Price = 22 });
+                var products = session.Products.Where(x => x.Name.LastIndexOf("X") == 6).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenReplaceOfXWithY()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test3X", Price = 10 });
+                session.Add(new Product { Name = "TestX4", Price = 22 });
+                session.Add(new Product { Name = "TXesXt5", Price = 33 });
+                session.Add(new Product { Name = "TeXst3", Price = 10 });
+                session.Add(new Product { Name = "TXest4", Price = 22 });
+                var products = session.Products.Where(x => x.Name.Replace("X","Y") == "TYesYt5").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
         public void OneProductsShouldBeReturnedWhenIsNullOrEmptyWithEmptyString()
         {
             using (var session = new Session())
@@ -386,6 +551,19 @@ namespace Norm.Tests
                 session.Add(new Product { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1) });
                 var products = session.Products.Where(x => x.Available < DateTime.Now).ToList();
                 Assert.Equal(3, products.Count);
+            }
+        }
+
+        [Fact]
+        public void TwoProductsShouldBeReturnedWhenNotEqualsOne()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10 });
+                session.Add(new Product { Name = "Test2", Price = 22 });
+                session.Add(new Product { Name = "Test3", Price = 33 });
+                var result = session.Products.Where(x => x.Price != 22);
+                Assert.Equal(2, result.Count());
             }
         }
 
@@ -472,6 +650,19 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void OneProductsShouldBeReturnedWhenContainsMatchesFirstCharacter()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "ATest", Price = 10 });
+                session.Add(new Product { Name = "BTest", Price = 22 });
+                session.Add(new Product { Name = "CTest", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Contains("B")).ToList();
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
         public void TwoProductsShouldBeReturnedWhenEndsWithX()
         {
             using (var session = new Session())
@@ -498,16 +689,36 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void LastTwoProductsofThreeShouldBeReturnedWithSkipTake()
+        public void TwoProductsofFourShouldBeReturnedWithSkipTake()
         {
             using (var session = new Session())
             {
+                
                 session.Add(new Product { Name = "Test1", Price = 10 });
                 session.Add(new Product { Name = "Test2", Price = 22 });
                 session.Add(new Product { Name = "Test3", Price = 33 });
+                session.Add(new Product { Name = "Test4", Price = 44 });
                 var products = session.Products.Skip(1).Take(2).ToList();
                 Assert.Equal(22.0, products[0].Price);
                 Assert.Equal(33.0, products[1].Price);
+                Assert.Equal(2, products.Count);
+            }
+        }
+
+        [Fact]
+        public void TwoProductsofFourShouldBeReturnedWithSkipTakeAndWhere()
+        {
+            using (var session = new Session())
+            {
+
+                session.Add(new Product { Name = "Test", Price = 10 });
+                session.Add(new Product { Name = "Test1", Price = 22 });
+                session.Add(new Product { Name = "Test", Price = 33 });
+                session.Add(new Product { Name = "Test", Price = 44 });
+                var products = session.Products.Where(x => x.Name == "Test").Skip(1).Take(2).ToList();
+                Assert.Equal(33, products[0].Price);
+                Assert.Equal(44, products[1].Price);
+                Assert.Equal(2, products.Count);
             }
         }
 
@@ -523,6 +734,36 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => p._id == targetId).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(targetId, products[0]._id);
+            }
+        }
+
+        [Fact]
+        public void FiltersBasedOnObjectIdInComplexQuery()
+        {
+            var targetId = ObjectId.NewObjectId();
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10, Available = new DateTime(2000, 2, 5) });
+                session.Add(new Product { Name = "Test2", Price = 22, Available = new DateTime(2000, 2, 6), _id = targetId });
+                session.Add(new Product { Name = "Test3", Price = 33, Available = new DateTime(2000, 2, 7) });
+                var products = session.Products.Where(p => p._id == targetId && p.Available.Day == 6).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(targetId, products[0]._id);
+            }
+        }
+        [Fact]
+        public void FiltersBasedOnObjectIdExclusionInComplexQuery()
+        {
+            var targetId = ObjectId.NewObjectId();
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "Test1", Price = 10, Available = new DateTime(2000, 2, 5) });
+                session.Add(new Product { Name = "Test2", Price = 22, Available = new DateTime(2000, 2, 5), _id = targetId });
+                session.Add(new Product { Name = "Test3", Price = 33, Available = new DateTime(2000, 2, 5) });
+                var products = session.Products.Where(p => p._id != targetId && p.Available.Day == 5).ToList();
+                Assert.Equal(2, products.Count);
+                Assert.NotEqual(targetId, products[0]._id);
+                Assert.NotEqual(targetId, products[1]._id);
             }
         }
 
@@ -567,10 +808,81 @@ namespace Norm.Tests
                 session.Add(post1);
                 session.Add(post2);
                 var found = session.Posts.Where(p => p.Comments.Any(a => a.Text == "commentA")).SingleOrDefault();
-                Assert.Equal("Second", found.Title);
 
+                Assert.Equal("Second", found.Title);
             }
         }
 
+        [Fact]
+        public void CanQueryAndReturnSubClassedObjects()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<SuperClassObject>();
+
+                session.Add<SuperClassObject>(new SubClassedObject { Title = "Find This", ABool = true });
+                session.Add<SuperClassObject>(new SubClassedObject { Title = "Don't Find This", ABool = false });
+
+                var query = new MongoQuery<SuperClassObject>(session.Provider);
+
+                var dtos = query.Where(dto => dto.Title == "Find This").ToList();
+
+                Assert.Equal(1, dtos.Count);
+                Assert.Equal("Find This", dtos[0].Title);
+    }
+        }
+
+        [Fact]
+        public void CanQueryAndReturnSubClassedObjects_EvenWhenAddedBySubClass()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<SuperClassObject>();
+
+                session.Add(new SubClassedObject());
+
+                var query = new MongoQuery<SuperClassObject>(session.Provider);
+
+                var dtos = query.ToList();
+
+                Assert.Equal(1, dtos.Count);
+            }
+        }
+
+        [Fact]
+        public void CanQueryAndReturnSubClassedObjects_EvenWhenQueriedBySubClass()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<SuperClassObject>();
+
+                session.Add(new SubClassedObject());
+
+                var query = new MongoQuery<SubClassedObject>(session.Provider);
+
+                var dtos = query.ToList();
+
+                Assert.Equal(1, dtos.Count);
+            }
+        }
+
+        [Fact]
+        public void CanQueryAndReturnSubClassedObjects_EvenWhenQueriedByInterface()
+        {
+            using (var session = new Session())
+            {
+                session.Drop<IDiscriminated>();
+
+                var obj = new InterfaceDiscriminatedClass();
+                session.Add(obj);
+
+                var query = new MongoQuery<IDiscriminated>(session.Provider);
+
+                var dtos = query.ToList();
+
+                Assert.Equal(1, dtos.Count);
+                Assert.Equal(obj.Id, dtos.Single().Id);
+            }
+        }
     }
 }

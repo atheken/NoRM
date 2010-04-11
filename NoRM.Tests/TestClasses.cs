@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Norm.Attributes;
+using Norm.Configuration;
 using Norm.Linq;
 using Norm.Responses;
 using Norm.BSON.DbTypes;
@@ -132,7 +133,12 @@ namespace Norm.Tests
             T result = default(T);
             using (MapReduce mr = _provider.Server.CreateMapReduce())
             {
-                MapReduceResponse response = mr.Execute(new MapReduceOptions(typeof(T).Name) { Map = map, Reduce = reduce });
+                MapReduceResponse response =
+                    mr.Execute(new MapReduceOptions(MongoConfiguration.GetCollectionName(typeof (T)))
+                                   {
+                                       Map = map,
+                                       Reduce = reduce
+                                   });
                 MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
                 MapReduceResult<T> r = coll.Find().FirstOrDefault();
                 result = r.Value;
@@ -152,7 +158,7 @@ namespace Norm.Tests
 
         public void Drop<T>()
         {
-            _provider.DB.DropCollection(typeof(T).Name);
+            _provider.DB.DropCollection(MongoConfiguration.GetCollectionName(typeof(T)));
         }
 
         public void CreateCappedCollection(string name)
@@ -218,7 +224,19 @@ namespace Norm.Tests
 
         public ObjectId Id { get; set; }
         public string Name { get; set; }
-        public DBReference<Product>[] ProductsOrdered { get; set; }
+        public DbReference<Product>[] ProductsOrdered { get; set; }
+    }
+
+    internal class User
+    {
+        public string Id{ get; set; }
+        public string EmailAddress{ get; set; }
+    }
+
+    internal class Role
+    {
+        public string Id{ get; set; }
+        public List<DbReference<User,string>> Users{ get; set; }
     }
 
     internal class Person
@@ -418,15 +436,103 @@ namespace Norm.Tests
         public float? AFloat { get; set; }
         public Flags32? Flags32 { get; set; }
         public Flags64? Flags64 { get; set; }
-
+        internal IEnumerable<Person> AnIEnumerable { get; set; }
+        
         [MongoIgnore]
         public int IgnoredProperty { get; set; }
     }
 
-
     public class ChildGeneralDTO : GeneralDTO
     {
         public bool IsOver9000 { get; set; }
+    }
+
+    [MongoDiscriminated]
+    public class SuperClassObject
+    {
+        public SuperClassObject()
+        {
+            Id = Guid.NewGuid();
+        }
+
+        [MongoIdentifier]
+        public Guid Id { get; protected set; }
+        public string Title { get; set; }
+    }
+
+    public class SubClassedObject : SuperClassObject
+    {
+        public bool ABool { get; set; }
+    }
+
+    [MongoDiscriminated]
+    public class SuperClassObjectFluentMapped
+    {
+        public SuperClassObjectFluentMapped()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+
+        [MongoIdentifier]
+        public ObjectId Id { get; protected set; }
+        public string Title { get; set; }
+
+        static SuperClassObjectFluentMapped()
+        {
+            MongoConfiguration.Initialize(config =>
+                config.For<SuperClassObjectFluentMapped>(c =>
+                {
+                    c.ForProperty(u => u.Id).UseAlias("_id");
+                    c.ForProperty(u => u.Title).UseAlias("t");
+                }));
+        }
+    }
+
+    public class SubClassedObjectFluentMapped : SuperClassObjectFluentMapped
+    {
+        public bool ABool { get; set; }
+
+        static SubClassedObjectFluentMapped()
+        {
+            MongoConfiguration.Initialize(config =>
+                config.For<SubClassedObjectFluentMapped>(c =>
+                {
+                    c.ForProperty(u => u.ABool).UseAlias("b");
+                }));
+        }
+    }
+
+    [MongoDiscriminated]
+    internal interface IDiscriminated
+    {
+        [MongoIdentifier]
+        Guid Id { get; }
+    }
+
+    internal class InterfaceDiscriminatedClass : IDiscriminated
+    {
+        public InterfaceDiscriminatedClass()
+        {
+            Id = Guid.NewGuid();
+        }
+
+        public Guid Id { get; protected set; }
+    }
+
+    internal interface IDTOWithNonDefaultId
+    {
+        [MongoIdentifier]
+        Guid MyId { get; }
+    }
+
+    internal class DtoWithNonDefaultIdClass : IDTOWithNonDefaultId
+    {
+        public DtoWithNonDefaultIdClass()
+        {
+            MyId = Guid.NewGuid();
+        }
+
+        public Guid MyId { get; protected set; }
     }
     
     public class PrivateConstructor
@@ -444,8 +550,9 @@ namespace Norm.Tests
     {
         public ObjectId Id{ get; set;}
     }
+
     public class Thread
     {
-        public ObjectId ForumId{ get; set;}   
+        public ObjectId ForumId{ get; set; }
     }
 }

@@ -53,7 +53,8 @@ namespace Norm.Linq
         /// <param name="provider">
         /// The provider.
         /// </param>
-        public MongoQuery(MongoQueryProvider provider) : this(provider, typeof(T).Name)
+        public MongoQuery(MongoQueryProvider provider)
+			: this(provider, MongoConfiguration.GetCollectionName(typeof(T)))
         {
         }
 
@@ -153,14 +154,11 @@ namespace Norm.Linq
         /// <returns></returns>
         internal ExplainResponse Explain(Flyweight query)
         {
-            var explain = new Flyweight();
-            explain["$query"] = query;
-            explain["$explain"] = true;
-
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
-            return GetCollection<ExplainResponse>(collectionName).FindOne(explain); _provider.DB.GetCollection<ExplainResponse>(collectionName).FindOne(explain);
-        }
+            return this.GetCollection<ExplainResponse>(collectionName).Explain(query);
+         }
 
+        /// <summary>TODO::Description.</summary>
         private MongoCollection<TCollection> GetCollection<TCollection>()
         {
             var collectionName = _collectionName == string.Empty
@@ -170,6 +168,7 @@ namespace Norm.Linq
             return GetCollection<TCollection>(collectionName);
         }
 
+        /// <summary>TODO::Description.</summary>
         private MongoCollection<TCollection> GetCollection<TCollection>(string collectionName)
         {
             return _provider.DB.GetCollection<TCollection>(collectionName);

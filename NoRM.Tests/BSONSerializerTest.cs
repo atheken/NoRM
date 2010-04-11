@@ -9,7 +9,7 @@ using System.Linq;
 namespace Norm.Tests
 {
     public class BSONSerializerTest
-    {       
+    {
         [Fact]
         public void DoesntSerializeIgnoredProperties()
         {
@@ -133,6 +133,16 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void SerializationOfIEnumerableTIsNotLossy()
+        {
+            var gto = new GeneralDTO{ AnIEnumerable = new List<Person>(){ new Person(), new Person()}};
+            var bytes = BsonSerializer.Serialize(gto);
+        
+            var gto2 = BsonDeserializer.Deserialize<GeneralDTO>(bytes);
+            Assert.Equal(2, gto2.AnIEnumerable.Count());
+        }
+
+        [Fact]
         public void SerializationOfIntsAreNotLossy()
         {
             var obj1 = new GeneralDTO { AnInt = 100 };
@@ -200,11 +210,39 @@ namespace Norm.Tests
         [Fact]
         public void SerializationOfInheritenceIsNotLossy()
         {
-            var obj1 = new ChildGeneralDTO {Pi = 3.14, IsOver9000 = true};
-            var hydratedObj1 = BsonDeserializer.Deserialize<ChildGeneralDTO>(BsonSerializer.Serialize(obj1));
-            Assert.Equal(obj1.Pi, hydratedObj1.Pi);
-            Assert.Equal(obj1.IsOver9000, hydratedObj1.IsOver9000); 
+            var obj1 = new SubClassedObject {Title = "Subclassed", ABool = true};
+            var hydratedObj1 = BsonDeserializer.Deserialize<SubClassedObject>(BsonSerializer.Serialize(obj1));
+            Assert.Equal(obj1.Title, hydratedObj1.Title);
+            Assert.Equal(obj1.ABool, hydratedObj1.ABool);
         }
+
+        [Fact]
+        public void SerializationOfInheritenceIsNotLossy_EvenWhenWeAskForTheBaseType()
+        {
+            var obj1 = new SubClassedObject { Title = "The Title", ABool = true };
+            var hydratedObj1 = (SubClassedObject)BsonDeserializer.Deserialize<SuperClassObject>(BsonSerializer.Serialize(obj1));
+            Assert.Equal(obj1.Title, hydratedObj1.Title);
+            Assert.Equal(obj1.ABool, hydratedObj1.ABool);
+        }
+
+        [Fact]
+        public void SerializationOfInheritenceIsNotLossy_EvenWhenDiscriminatorIsOnAnInterface()
+        {
+            var obj1 = new InterfaceDiscriminatedClass();
+            var hydratedObj1 = BsonDeserializer.Deserialize<InterfaceDiscriminatedClass>(BsonSerializer.Serialize(obj1));
+
+            Assert.Equal(obj1.Id, hydratedObj1.Id);
+        }
+
+        [Fact]
+        public void SerializationOfInheritenceIsNotLossy_EvenWhenDiscriminatorIsOnAnInterfaceAndWeTryToDeserializeUsingTheInterface()
+        {
+            var obj1 = new InterfaceDiscriminatedClass();
+            var hydratedObj1 = (InterfaceDiscriminatedClass)BsonDeserializer.Deserialize<IDiscriminated>(BsonSerializer.Serialize(obj1));
+
+            Assert.Equal(obj1.Id, hydratedObj1.Id);
+        }
+
         [Fact]
         public void SerializationOfRegexIsNotLossy()
         {
@@ -319,7 +357,8 @@ namespace Norm.Tests
         public void SerializationOfEmptyListIsNotLossy()
         {
             var obj1Bytes = BsonSerializer.Serialize(new GeneralDTO { AList = new List<string>() });
-            BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);  
+            var obj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
+            Assert.True(obj2.AList != null);
         } 
         
         [Fact]
