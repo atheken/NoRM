@@ -19,6 +19,7 @@ namespace Norm.Protocol.Messages
                                                   c.For<MapReduceMessage>(mrm => mrm.ForProperty(m => m.Out).UseAlias("out"));
                                                   c.For<MapReduceMessage>(mrm => mrm.ForProperty(m => m.Limit).UseAlias("limit"));
                                                   c.For<MapReduceMessage>(mrm => mrm.ForProperty(m => m.Finalize).UseAlias("finalize"));
+                                                  c.For<MapReduceMessage>(mrm => mrm.ForProperty(m => m.Query).UseAlias("query"));
                                               });
         }
 
@@ -45,6 +46,11 @@ namespace Norm.Protocol.Messages
         /// <summary>TODO::Description.</summary>
         /// <value>The Limit property gets/sets the Limit data member.</value>
         public int? Limit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Query
+        /// </summary>
+        public object Query { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value>The Finalize property gets/sets the Finalize data member.</value>
