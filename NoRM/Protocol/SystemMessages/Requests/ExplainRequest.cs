@@ -1,53 +1,41 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using Norm.BSON;
-//using Norm.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Norm.Configuration;
+using Norm.Protocol.SystemMessages;
 
-//namespace Norm.Protocol.SystemMessages
-//{
-//    /// <summary>
-//    /// Provides a message that sends a system Query to the server.
-//    /// </summary>
-//    internal class ExplainRequest : ISystemQuery
-//    {
-//        static ExplainRequest()
-//        {
-//            MongoConfiguration.Initialize(c => c.For<ExplainRequest>(a =>
-//                    {
-//                        //a.ForProperty(ex => ex.Explain).UseAlias("$explain");
-//                        a.ForProperty(ex => ex.Query).UseAlias("query");
-//                    })
-//                );
-//        }
+namespace Norm.Protocol
+{
+    /// <summary>TODO::Description.</summary>
+    public class ExplainRequest<T>  : ISystemQuery
+    {
+        static ExplainRequest()
+        {
+            MongoConfiguration.Initialize(cfg=>cfg.For<ExplainRequest<T>>(y=>{
+                y.ForProperty(c=>c.Explain).UseAlias("$explain");
+                y.ForProperty(c => c.Query).UseAlias("query"); 
+            }));
+        }
 
-//        public ExplainRequest(object query)
-//        {
-//            Query = new Flyweight();
-//            Query["$query"] = query;
-//            Query["$explain"] = true;
-//        }
+        /// <summary>TODO::Description.</summary>
+        /// <param name="query">The query.</param>
+        public ExplainRequest(T query)
+        {
+            this.Query = query;
+        }
 
-//        ///// <summary>
-//        ///// Indicates that the explain query should be
-//        ///// </summary>
-//        //public bool Explain
-//        //{
-//        //    get
-//        //    {
-//        //        return true;
-//        //    }
+        /// <summary>
+        /// Tells the server to explain the query.
+        /// </summary>
+        /// <remarks>
+        /// THIS SHOULD ALWAYS BE DEFINED BEFORE QUERY!
+        /// </remarks>
+        private bool Explain { get { return true; } }
 
-//        //}
-        
-//        /// <summary>
-//        /// The query to be explained.
-//        /// </summary>
-//        public Flyweight Query
-//        {
-//            get;
-//            private set;
-//        }
-//    }
-//}
+        /// <summary>
+        /// The query that should be used.
+        /// </summary>
+        public T Query { get; protected set; }
+    }
+}

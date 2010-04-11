@@ -15,7 +15,6 @@ namespace Norm.Responses
         {
             MongoConfiguration.Initialize(c => c.For<GetNonceResponse>(a =>
                                                    {
-                                                       a.ForProperty(auth => auth.Ok).UseAlias("ok");
                                                        a.ForProperty(auth => auth.Nonce).UseAlias("nonce");
                                                    })
                 );

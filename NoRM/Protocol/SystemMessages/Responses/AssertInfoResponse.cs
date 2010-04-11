@@ -53,6 +53,7 @@ namespace Norm.Responses
         /// <summary>
         /// Gets or sets assert user.
         /// </summary>
+        /// <value></value>
         public string AssertUser { get; set; }
     }
 }

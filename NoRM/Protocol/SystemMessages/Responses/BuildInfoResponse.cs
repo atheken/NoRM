@@ -14,8 +14,7 @@ namespace Norm.Responses
         static BuildInfoResponse()
         {
             MongoConfiguration.Initialize(c => c.For<BuildInfoResponse>(a =>
-                 {
-                     a.ForProperty(auth => auth.Ok).UseAlias("ok");
+                 {                     
                      a.ForProperty(auth => auth.Version).UseAlias("version");
                      a.ForProperty(auth => auth.GitVersion).UseAlias("gitVersion");
                      a.ForProperty(auth => auth.SystemInformation).UseAlias("sysInfo");
@@ -27,11 +26,13 @@ namespace Norm.Responses
         /// </summary>
         /// <value>The version.</value>
         public string Version { get; set; }
+
         /// <summary>
         /// Gets or sets the git version.
         /// </summary>
         /// <value>The git version.</value>
         public string GitVersion { get; set; }
+
         /// <summary>
         /// Gets or sets the sys info.
         /// </summary>
@@ -39,6 +40,7 @@ namespace Norm.Responses
         public string SystemInformation { get; set; }
 
         /// <summary>TODO::Description.</summary>
+        /// <value></value>
         public int? Bits { get; set; }
     }
 }

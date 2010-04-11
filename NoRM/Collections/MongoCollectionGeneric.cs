@@ -9,7 +9,7 @@ using Norm.Protocol;
 using Norm.Protocol.Messages;
 using Norm.Protocol.SystemMessages.Requests;
 using Norm.Responses;
-using TypeHelper=Norm.BSON.TypeHelper;
+using TypeHelper = Norm.BSON.TypeHelper;
 using Norm.Commands.Modifiers;
 
 namespace Norm.Collections
@@ -152,18 +152,18 @@ namespace Norm.Collections
         /// <summary>TODO::Description.</summary>
         public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action)
         {
-            UpdateWithModifier(matchDocument,action,false,false);
+            UpdateWithModifier(matchDocument, action, false, false);
 
         }
 
         /// <summary>TODO::Description.</summary>
-        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action,bool updateMultiple, bool upsert)
+        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
         {
             var modifierExpression = new ModifierExpression<T>();
             action(modifierExpression);
             if (matchDocument is ObjectId)
             {
-                Update(new { _id = matchDocument }, modifierExpression.Fly,updateMultiple,upsert);
+                Update(new { _id = matchDocument }, modifierExpression.Fly, updateMultiple, upsert);
             }
             else
             {
@@ -208,12 +208,22 @@ namespace Norm.Collections
             return Find(template, limit, 0, FullyQualifiedName);
         }
 
-        /// <summary>TODO::Description.</summary>
+        /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
         public IEnumerable<T> Find<U>(U template, int limit, int skip)
         {
-            return Find(template, limit, skip, FullyQualifiedName);
+            return Find(template, limit, skip, this.FullyQualifiedName);
         }
-
+        
+        /// <summary>TODO::Description.</summary>
+        /// <param name="limit"></param>
+        /// <param name="orderby"></param>
+        /// <param name="skip"></param>
+        /// <param name="template"></param>
+        /// <returns></returns>
+        public IEnumerable<T> Find<U, O>(U template, O orderby, int limit, int skip)
+        {
+            return this.Find(template, orderby, limit, skip, this.FullyQualifiedName);
+        }
 
         /// <summary>
         /// The find.
@@ -330,7 +340,7 @@ namespace Norm.Collections
             {
                 throw new MongoException(string.Format("Cannot delete {0} since it has no id property", typeof(T).FullName));
             }
-            Delete(new{Id = idProperty.Getter(entity)});
+            Delete(new { Id = idProperty.Getter(entity) });
         }
 
         /// <summary>
@@ -340,21 +350,7 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<T> Find(Flyweight template)
         {
-            var limit = 0;
-            var skip = 0;
-
-            var hasLimit = template.TryGet<int>("$limit", out limit);
-            //var hasSkip = template.TryGet<int>("$skip", out skip);
-
-            if (!hasLimit)
-            {
-                limit = Int32.MaxValue;
-            }
-
-            template.Delete("$limit");
-            template.Delete("$skip");
-
-            return Find(template, limit, skip, FullyQualifiedName);
+            return Find(template, Int32.MaxValue, 0, this.FullyQualifiedName);
         }
 
         /// <summary>
@@ -368,7 +364,7 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
         {
-            return this.Find<U,Object>(template, null, limit, skip, fullyQualifiedName);
+            return this.Find<U, Object>(template, null, limit, skip, fullyQualifiedName);
         }
 
 
@@ -414,19 +410,16 @@ namespace Norm.Collections
         {
             return this.Find(template, orderBy, Int32.MaxValue, 0, this.FullyQualifiedName);
         }
-
         /// <summary>
         /// Generates a query explain plan.
         /// </summary>
-        /// <param name="template">The document query template.</param>
+        /// <typeparam name="U">The type of the template document (probably an anonymous type..</typeparam>
+        /// <param name="template">The template of the query to explain.</param>
         /// <returns></returns>
-        public ExplainResponse Explain(object template)
+        public ExplainResponse Explain<U>(U template)
         {
-            var query = new Flyweight();
-            query["$explain"] = true;
-            query["query"] = template;
-            var explainPlan = new MongoCollection<ExplainResponse>(_collectionName, _db, _connection).Find(query);
-            return explainPlan.FirstOrDefault();
+            return this._db.GetCollection<ExplainResponse>(this._collectionName)
+                .FindOne(new ExplainRequest<U>(template));
         }
 
         /// <summary>
@@ -494,7 +487,7 @@ namespace Norm.Collections
                 var error = _db.LastError();
                 if (error.Code > 0)
                 {
-                    throw new MongoException(error.Error);                    
+                    throw new MongoException(error.Error);
                 }
             }
         }
@@ -513,7 +506,7 @@ namespace Norm.Collections
         /// <param name="entities">The entities.</param>
         private static void TrySettingId(IEnumerable<T> entities)
         {
-            if(CanUpdateWithoutId(typeof(T)))
+            if (CanUpdateWithoutId(typeof(T)))
             {
                 return;
             }
@@ -523,8 +516,8 @@ namespace Norm.Collections
             {
                 return;
             }
-            
-            foreach(var entity in entities)
+
+            foreach (var entity in entities)
             {
                 var value = idProperty.Getter(entity);
                 if (value == null)

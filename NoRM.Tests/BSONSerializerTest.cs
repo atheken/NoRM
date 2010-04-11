@@ -437,10 +437,5 @@ namespace Norm.Tests
             Assert.Equal(start.Name, end.Name);            
         }
         
-        [Fact]
-        public void WillSerializeObjectWithDiscriminator()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

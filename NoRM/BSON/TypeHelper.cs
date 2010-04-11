@@ -151,11 +151,8 @@ namespace Norm.BSON
         /// <returns></returns>
         public MagicProperty FindIdProperty()
         {
-            return _properties.ContainsKey("$_id")
-                    ? _properties["$_id"]
-                    : _properties.ContainsKey("$id")
-                        ? _properties["$id"]
-                        : null;
+            return _properties.ContainsKey("$_id") ?
+                _properties["$_id"] : _properties.ContainsKey("$id") ? _properties["$id"] : null;
         }
 
         /// <summary>
@@ -206,9 +203,7 @@ namespace Norm.BSON
                 //HACK: this is a latent BUG, if MongoConfiguration is altered after stashing the type helper, we die.
                 var alias = MongoConfiguration.GetPropertyAlias(property.DeclaringType, property.Name);
 
-                var name = (property == idProperty && alias != "$id")
-                               ? "$_id"
-                               : alias;
+                var name = (property == idProperty && alias != "$id") ? "$_id" : alias;
                 magic.Add(name, new MagicProperty(property, property.DeclaringType));
             }
 

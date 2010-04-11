@@ -15,7 +15,6 @@ namespace Norm.Responses
         {
             MongoConfiguration.Initialize(c => c.For<GenericCommandResponse>(a =>
                                                    {
-                                                       a.ForProperty(auth => auth.Ok).UseAlias("ok");
                                                        a.ForProperty(auth => auth.Info).UseAlias("info");
                                                    })
                 );

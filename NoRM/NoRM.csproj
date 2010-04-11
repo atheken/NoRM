@@ -173,6 +173,7 @@
     <Compile Include="Mongo.cs" />
     <Compile Include="MongoQueryExecutor.cs" />
     <Compile Include="Protocol\IUpdateWithoutId.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\ExplainRequest.cs" />
     <Compile Include="Protocol\Messages\IndexOption.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
     <Compile Include="Protocol\Messages\QueryMessageGeneric.cs" />
@@ -181,7 +182,6 @@
     </Compile>
     <Compile Include="Protocol\SystemMessages\ProfileLevel.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\CreateCollectionRequest.cs" />
-    <Compile Include="Protocol\SystemMessages\Requests\ExplainRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\MongoIndex.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\AssertInfoResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\BaseStatusMessage.cs" />

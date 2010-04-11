@@ -1,4 +1,5 @@
-﻿
+﻿using Norm.Configuration;
+
 namespace Norm.Responses
 {
     /// <summary>
@@ -6,6 +7,15 @@ namespace Norm.Responses
     /// </summary>
     public class BaseStatusMessage
     {
+        static BaseStatusMessage()
+        {
+            MongoConfiguration.Initialize(c => c.For<BaseStatusMessage>(a =>
+                       {
+                           a.ForProperty(auth => auth.Ok).UseAlias("ok");
+                       })
+                );
+        }
+
         /// <summary>
         /// Gets or sets the operation status.
         /// </summary>

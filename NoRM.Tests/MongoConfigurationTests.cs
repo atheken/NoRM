@@ -242,21 +242,37 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void InsertSubClassFluentMappedObjectyWithObjectIdKey()
+        public void Subclass_Adheres_To_Superclass_Fluent_Alias()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                var id1 = new ObjectId("123456123456123456123456");
-                var id2 = new ObjectId("123456123456123456123457");
-                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true });
-                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(new SubClassedObjectFluentMapped { Title = "Prod2", ABool = false });
-                var found = mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Find();
+                var obj1 = new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true };
+                var obj2 = new SubClassedObjectFluentMapped { Title = "Prod2", ABool = false };
+
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(obj1);
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(obj2);
+                var found = mongo.GetCollection<SuperClassObjectFluentMapped>("Fake").Find();
+
                 Assert.Equal(2, found.Count());
-                Assert.Equal(id1, found.ElementAt(0).Id);
+                Assert.Equal(obj1.Id, found.ElementAt(0).Id);
                 Assert.Equal("Prod1", found.ElementAt(0).Title);
-                Assert.Equal(id2, found.ElementAt(1).Id);
+                Assert.Equal(obj2.Id, found.ElementAt(1).Id);
                 Assert.Equal("Prod2", found.ElementAt(1).Title);
 
+            }
+        }
+
+        [Fact]
+        public void Subclassed_Type_Is_Returned_When_Superclass_Is_Used_For_The_Collection()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var obj1 = new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true };
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(obj1);
+                var found = mongo.GetCollection<SuperClassObjectFluentMapped>("Fake").Find();
+
+                Assert.Equal(1, found.Count());
+                Assert.Equal(typeof(SubClassedObjectFluentMapped), found.ElementAt(0).GetType());
             }
         }
 
