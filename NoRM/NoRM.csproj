@@ -114,6 +114,7 @@
     <Compile Include="Commands\Modifiers\PushAllOperation.cs" />
     <Compile Include="Commands\Modifiers\PushOperation.cs" />
     <Compile Include="Commands\Modifiers\SetOperation.cs" />
+    <Compile Include="Commands\OrderBy.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />
