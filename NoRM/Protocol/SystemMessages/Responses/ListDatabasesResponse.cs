@@ -9,10 +9,10 @@ namespace Norm.Responses
     {
         /// <summary>?? Gets the total size of all the databases returned?? </summary>
         /// <value></value>
-        public double? TotalSize { get; private set; }
+        public double? TotalSize { get; set; }
 
         /// <summary>The databases.</summary>
         /// <value></value>
-        public List<DatabaseInfo> Databases { get; private set; }
+        public List<DatabaseInfo> Databases { get; set; }
     }
 }

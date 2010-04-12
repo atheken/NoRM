@@ -17,12 +17,12 @@ namespace Norm.Responses
         /// The collection name.
         /// </summary>
         /// <value>The Name property gets/sets the Name data member.</value>
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// The create collection options.
         /// </summary>
         /// <value>The Options property gets the Options data member.</value>
-        public CreateCollectionOptions Options { get; private set; }
+        public CreateCollectionOptions Options { get; set; }
     }
 }

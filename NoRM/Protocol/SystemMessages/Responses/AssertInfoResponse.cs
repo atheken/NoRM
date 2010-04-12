@@ -28,36 +28,36 @@ namespace Norm.Responses
         /// Indicates if the database asserted.
         /// </summary>
         /// <value>The DatabaseAsserted property gets the DatabaseAsserted data member.</value>
-        public bool? DatabaseAsserted { get; private set; }
+        public bool? DatabaseAsserted { get; set; }
 
         /// <summary>
         /// Indicates that the database asserted or a user assert has happened
         /// </summary>
         /// <value>The Asserted property gets the Asserted data member.</value>
-        public bool? Asserted { get; private set; }
+        public bool? Asserted { get; set; }
 
         /// <summary>
         /// The assert.
         /// </summary>
         /// <value>The Assert property gets the Assert data member.</value>
-        public string Assert { get; private set; }
+        public string Assert { get; set; }
 
         /// <summary>
         /// The warning assert.
         /// </summary>
         /// <value>The WarningAssert property gets the WarningAssert data member.</value>
-        public string WarningAssert { get; private set; }
+        public string WarningAssert { get; set; }
 
         /// <summary>
         /// The assert message.
         /// </summary>
         /// <value>The AssertMessage property gets the AssertMessage data member.</value>
-        public string AssertMessage { get; private set; }
+        public string AssertMessage { get; set; }
 
         /// <summary>
         /// Gets or sets assert user.
         /// </summary>
         /// <value>The AssertUser property gets the AssertUser data member.</value>
-        public string AssertUser { get; private set; }
+        public string AssertUser { get; set; }
     }
 }

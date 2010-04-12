@@ -8,18 +8,18 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string Ns { get; private set; }
+        public string Ns { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string Result { get; private set; }
+        public string Result { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public bool? Valid { get; private set; }
+        public bool? Valid { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public double? LastExtentSize { get; private set; }
+        public double? LastExtentSize { get; set; }
     }
 }

@@ -8,14 +8,14 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value>The name.</value>
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value>The size on disk.</value>
-        public double? SizeOnDisk { get; private set; }
+        public double? SizeOnDisk { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value>If the database is empty.</value>
-        public bool Empty { get; private set; }
+        public bool Empty { get; set; }
     }
 }

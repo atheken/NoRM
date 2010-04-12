@@ -8,18 +8,18 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string drop { get; private set; }
+        public string drop { get; set; }
         
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public double? NIndexesWas { get; private set; }
+        public double? NIndexesWas { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string Msg { get; private set; }
+        public string Msg { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string Ns { get; private set; }
+        public string Ns { get; set; }
     }
 }

@@ -9,14 +9,14 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public DateTime? Ts { get; private set; }
+        public DateTime? Ts { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string Info { get; private set; }
+        public string Info { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public double? Millis { get; private set; }
+        public double? Millis { get; set; }
     }
 }

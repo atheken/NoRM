@@ -24,6 +24,6 @@ namespace Norm.Responses
         /// Gets the number of files.
         /// </summary>
         /// <value>The number of files.</value>
-        public int? NumberOfFiles { get; private set; }
+        public int? NumberOfFiles { get; set; }
     }
 }

@@ -24,6 +24,6 @@ namespace Norm.Responses
         /// Gets the command info.
         /// </summary>
         /// <value>The info.</value>
-        public string Info { get; private set; }
+        public string Info { get; set; }
     }
 }

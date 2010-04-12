@@ -28,6 +28,6 @@ namespace Norm.Responses
         /// The previous level.
         /// </summary>
         /// <value>The PreviousLevel property gets the PreviousLevel data member.</value>
-        public double? PreviousLevel { get; private set; }
+        public double? PreviousLevel { get; set; }
     }
 }

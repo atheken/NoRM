@@ -25,22 +25,22 @@ namespace Norm.Responses
         /// The version.
         /// </summary>
         /// <value>The Version property gets the Version data member.</value>
-        public string Version { get; private set; }
+        public string Version { get; set; }
 
         /// <summary>
         /// The git version.
         /// </summary>
         /// <value>The GitVersion property gets the GitVersion data member.</value>
-        public string GitVersion { get; private set; }
+        public string GitVersion { get; set; }
 
         /// <summary>
         /// The sys info.
         /// </summary>
         /// <value>The SystemInformation property gets the SystemInformation data member.</value>
-        public string SystemInformation { get; private set; }
+        public string SystemInformation { get; set; }
 
         /// <summary>The number of bits for the current build (32 or 64).</summary>
         /// <value>The Bits property gets the Bits data member.</value>
-        public int? Bits { get; private set; }
+        public int? Bits { get; set; }
     }
 }

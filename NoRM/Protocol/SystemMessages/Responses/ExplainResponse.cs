@@ -29,36 +29,36 @@ namespace Norm.Responses
         /// Gets the number of objects that would be scanned by this query.
         /// </summary>
         /// <value>The number of objects that will be scanned.</value>
-        public int? NumberOfScannedObjects { get; private set; }
+        public int? NumberOfScannedObjects { get; set; }
 
         /// <summary>
         /// Gets or sets the number scanned.
         /// </summary>
         /// <value>The number scanned.</value>
-        public int NumberScanned { get; private set; }
+        public int NumberScanned { get; set; }
         
         /// <summary>
         /// Gets or sets the number.
         /// </summary>
         /// <value>The number.</value>
-        public int Number { get; private set; }
+        public int Number { get; set; }
         
         /// <summary>
         /// Gets or sets the milliseconds.
         /// </summary>
         /// <value>The milliseconds.</value>
-        public int Milliseconds { get; private set; }
+        public int Milliseconds { get; set; }
         
         /// <summary>
         /// Gets or sets the old explain plan.
         /// </summary>
         /// <value>The old plan.</value>
-        public ExplainPlan OldPlan { get; private set; }
+        public ExplainPlan OldPlan { get; set; }
         
         /// <summary>
         /// Gets or sets all explain plans.
         /// </summary>
         /// <value>All plans.</value>
-        public ExplainPlan[] AllPlans { get; private set; }
+        public ExplainPlan[] AllPlans { get; set; }
     }
 }

@@ -11,6 +11,6 @@ namespace Norm.Responses
         /// Gets or sets the dropped database.
         /// </summary>
         /// <value>The dropped.</value>
-        public string Dropped { get; private set; }
+        public string Dropped { get; set; }
     }
 }

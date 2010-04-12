@@ -11,15 +11,15 @@ namespace Norm.Responses
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string Result { get; private set; }
+        public string Result { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public MapReduceCount Counts { get; private set; }
+        public MapReduceCount Counts { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public long TimeMillis { get; private set; }
+        public long TimeMillis { get; set; }
 
 
         /// <summary>

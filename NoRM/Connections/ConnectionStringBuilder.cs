@@ -246,7 +246,6 @@ namespace Norm
         /// The build authentication.
         /// </summary>
         /// <param name="sb">The string builder.</param>
-        /// <param name="coreBuilder">The core builder.</param>
         /// <returns></returns>
         /// <exception cref="MongoException">
         /// </exception>

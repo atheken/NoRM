@@ -10,47 +10,47 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public double? Uptime { get; private set; }
+        public double? Uptime { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public double? localTime { get; private set; }
+        public double? localTime { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public GlobalLockResponse GlobalLock { get; private set; }
+        public GlobalLockResponse GlobalLock { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public MemoryResponse Mem { get; private set; }
+        public MemoryResponse Mem { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public ConnectionsResponse Connections { get; private set; }
+        public ConnectionsResponse Connections { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public ExtraInfoResponse Extrainfo { get; private set; }
+        public ExtraInfoResponse Extrainfo { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public IndexCountersResponse IndexCounters { get; private set; }
+        public IndexCountersResponse IndexCounters { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public BackgroundFlushingResponse BackgroundFlushing { get; private set; }
+        public BackgroundFlushingResponse BackgroundFlushing { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public OpCountersResponse OpCounters { get; private set; }
+        public OpCountersResponse OpCounters { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public AssertsResponse Asserts { get; private set; }
+        public AssertsResponse Asserts { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string Note { get; private set; }
+        public string Note { get; set; }
 
         static ServerStatusResponse()
         {
@@ -77,15 +77,15 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public double? TotalTime { get; private set; }
+        public double? TotalTime { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public double? LockTime { get; private set; }
+        public double? LockTime { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public double? Ratio { get; private set; }
+        public double? Ratio { get; set; }
     }
 
     /// <summary>
@@ -95,19 +95,19 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Resident { get; private set; }
+        public int? Resident { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Virtual { get; private set; }
+        public int? Virtual { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public long? Mapped { get; private set; }
+        public long? Mapped { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public bool? Supported { get; private set; }
+        public bool? Supported { get; set; }
     }
 
     /// <summary>
@@ -117,11 +117,11 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public long? Current { get; private set; }
+        public long? Current { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public long? Available { get; private set; }
+        public long? Available { get; set; }
     }
 
     /// <summary>
@@ -131,7 +131,7 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string Note { get; private set; }
+        public string Note { get; set; }
     }
 
     /// <summary>
@@ -141,7 +141,7 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public string Note { get; private set; }
+        public string Note { get; set; }
     }
 
     /// <summary>
@@ -151,23 +151,23 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Flushes { get; private set; }
+        public int? Flushes { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? TotalMilliseconds { get; private set; }
+        public int? TotalMilliseconds { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? AverageMilliseconds { get; private set; }
+        public int? AverageMilliseconds { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? LastMilliseconds { get; private set; }
+        public int? LastMilliseconds { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public double? LastFinished { get; private set; }
+        public double? LastFinished { get; set; }
 
         static BackgroundFlushingResponse()
         {
@@ -190,27 +190,27 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Insertions { get; private set; }
+        public int? Insertions { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Queries { get; private set; }
+        public int? Queries { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Updates { get; private set; }
+        public int? Updates { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Deletions { get; private set; }
+        public int? Deletions { get; set; }
 
         /// <summary>How many times a query had to re-query the server for the total resultant set.</summary>
         /// <value></value>
-        public int? Pages { get; private set; }
+        public int? Pages { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Commands { get; private set; }
+        public int? Commands { get; set; }
 
         static OpCountersResponse()
         {
@@ -234,22 +234,22 @@ namespace Norm.Responses
     {
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Regular { get; private set; }
+        public int? Regular { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Warning { get; private set; }
+        public int? Warning { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Msg { get; private set; }
+        public int? Msg { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? User { get; private set; }
+        public int? User { get; set; }
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
-        public int? Rollovers { get; private set; }
+        public int? Rollovers { get; set; }
     }
 }

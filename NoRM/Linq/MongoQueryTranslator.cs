@@ -18,12 +18,6 @@ namespace Norm.Linq
         private int _takeCount = Int32.MaxValue;
 
         /// <summary>TODO::Description.</summary>
-        private Expression _expression;
-
-        /// <summary>TODO::Description.</summary>
-        private bool _collectionSet;
-
-        /// <summary>TODO::Description.</summary>
         private string _lastFlyProperty = string.Empty;
 
         /// <summary>TODO::Description.</summary>

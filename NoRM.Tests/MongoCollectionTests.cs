@@ -295,10 +295,7 @@ namespace Norm.Tests
                 Assert.Equal(0, r.Id);
                 Assert.Equal(4, r.Value);
             }
-            
-            
         }
-
 
         private class IntId
         {
