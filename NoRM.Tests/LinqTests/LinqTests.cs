@@ -54,10 +54,30 @@ namespace Norm.Tests
             var external = new Product { Price = 10 };
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "test", Price = external.Price });
+                session.Add(new Product { Name = "test", Price = 30 });
+                session.Add(new Product { Name = "test1", Price = external.Price });
                 var product = session.Products
                     .Where(p => p.Price == external.Price)
-                    .FirstOrDefault();
+                    .SingleOrDefault();
+
+                Assert.Equal(10, product.Price);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportExternalObjectProperties2()
+        {
+            // NOTE: This one fails because there's no support for parsing the object's property.
+            // This even more complex when using a nested type like a product's supplier
+            var another = new Supplier {Name = "test1"};
+            var external = new Product { Price = 10, Supplier = another };
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "test", Price = 30 });
+                session.Add(new Product { Name = "test1", Price = external.Price });
+                var product = session.Products
+                    .Where(p => p.Name == external.Supplier.Name)
+                    .SingleOrDefault();
 
                 Assert.Equal(10, product.Price);
             }

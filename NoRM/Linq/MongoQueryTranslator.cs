@@ -181,11 +181,6 @@ namespace Norm.Linq
         /// </exception>
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            //if(m.Expression.NodeType == ExpressionType.MemberAccess)
-            //{
-            //    VisitMemberAccess((MemberExpression)m.Expression);
-            //}
-
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
@@ -285,6 +280,21 @@ namespace Norm.Linq
                     }
                     SetFlyValue(val);
                 }
+                else if (IsANestedConstantExpression(m))
+                {
+                    var val = GetValue(m);
+
+                    if (val is String)
+                    {
+                        result = String.Format("\"{0}\"", val);
+                    }
+                    else
+                    {
+                        result = val.ToString();
+                    }
+                    SetFlyValue(val);
+
+                }
                 else
                 {
                     var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
@@ -309,6 +319,29 @@ namespace Norm.Linq
 
             // if this is a property NOT on the object...
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
+        }
+
+        private object GetValue(MemberExpression member)
+        {
+            var expression = Expression.Convert(member, typeof(object));
+            var getterLambda = Expression.Lambda<Func<object>>(expression);
+            var getter = getterLambda.Compile();
+
+            return getter();
+        }
+
+        private bool IsANestedConstantExpression(Expression e)
+        {
+            if (e.NodeType == ExpressionType.MemberAccess && ((MemberExpression)e).Expression.NodeType == ExpressionType.Constant)
+                return true;
+
+            if (e is MemberExpression)
+            {
+                if (IsANestedConstantExpression(((MemberExpression)e).Expression))
+                    return true;
+            }
+
+            return false;         
         }
 
         /// <summary>TODO::Description.</summary>
@@ -442,7 +475,7 @@ namespace Norm.Linq
                         }
                         else
                         {
-                            throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
+                            //throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
                         }
                         break;
                     default:
@@ -756,7 +789,7 @@ namespace Norm.Linq
             var subValue = (ConstantExpression)stripped.Right;
             var op = GetBinaryOperator(stripped);
             this.IsComplex = true;
-            var result = "function(){for(var i in this." + member.Member.Name + "){if(this." + member.Member.Name + "[i]." + subMember.Member.Name + " === '" + subValue.Value + "') return true;}}";
+            var result = "function(){for(var i in this." + member.Member.Name + "){if(this." + member.Member.Name + "[i]." + subMember.Member.Name + " === '" + subValue.Value + "') return true; } return false;}";
             _sb.Append(result);
         }
         /// <summary>
@@ -788,7 +821,7 @@ namespace Norm.Linq
                     break;    
                 case "Any":
                     HandleAny(m);
-                    break; 
+                    break;
                 default:
                     this.Take = 1;
                     this.MethodCall = m.Method.Name;
@@ -799,15 +832,8 @@ namespace Norm.Linq
                         {
                             Visit(lambda.Body);
                         }
-                        else
-                        {
-                            Visit(m.Arguments[0]);
-                        }
                     }
-                    else
-                    {
-                        Visit(m.Arguments[0]);
-                    }
+
                     break;
             }
 
