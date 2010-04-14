@@ -134,6 +134,7 @@ namespace Norm.Linq
         public virtual IEnumerator<T> GetEnumerator()
         {
             // var docs= (ICursor)this.provider.Execute(this.expression);
+            // need the collection name I mapped to :: _provider.DB.GetCollection<T>();
             return _provider.Execute<T>(_expression).GetEnumerator();
         }
 
