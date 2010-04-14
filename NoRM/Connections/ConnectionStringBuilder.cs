@@ -126,6 +126,7 @@ namespace Norm
                 StrictMode = true,
                 Pooled = true,
                 PoolSize = 25,
+                Lifetime = 15,
             };
            
             // var coreBuilder = new StringBuilder();
