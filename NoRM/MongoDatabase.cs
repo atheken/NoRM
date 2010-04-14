@@ -4,6 +4,7 @@ using Norm.Protocol.SystemMessages;
 using Norm.Protocol.SystemMessages.Request;
 using Norm.Responses;
 using Norm.Collections;
+using System;
 
 namespace Norm
 {
@@ -63,7 +64,7 @@ namespace Norm
             return new MongoCollection<T>(collectionName, this, this._connection);
         }
 
-        /// <summary>
+         /// <summary>
         /// Gets a collection.
         /// </summary>
         /// <typeparam name="T">Collection type</typeparam>
