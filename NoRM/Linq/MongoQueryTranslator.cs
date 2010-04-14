@@ -110,6 +110,11 @@ namespace Norm.Linq
         }
 
         /// <summary>
+        /// Gets whether it is a count expression.
+        /// </summary>
+        public bool IsCount { get; private set; }
+
+        /// <summary>
         /// Gets where expression.
         /// </summary>
         public string WhereExpression
@@ -169,6 +174,27 @@ namespace Norm.Linq
             FlyWeight = new Flyweight();
             SortFly = new Flyweight();
             Visit(exp);
+
+            var qry = _sb.ToString();
+
+            if (!string.IsNullOrEmpty(qry) || IsComplex)
+            {
+                if (IsComplex)
+                {
+                    // reset - need to use the where statement generated
+                    // instead of the props set on the internal flyweight
+                    FlyWeight = new Flyweight();
+                    if (qry.StartsWith("function"))
+                    {
+                        FlyWeight["$where"] = qry;
+                    }
+                    else
+                    {
+                        FlyWeight["$where"] = " function(){return " + qry + "; }";
+                    }
+                }
+            }
+
             return _sb.ToString();
         }
 
@@ -194,7 +220,6 @@ namespace Norm.Linq
                     _sb.Append("this.");
                 }
                 _sb.Append(alias);
-
                 _lastFlyProperty = alias;
                 return m;
             }
@@ -265,52 +290,20 @@ namespace Norm.Linq
 
                 String result = "";
 
-                if (m.Expression.NodeType == ExpressionType.Constant)
+                var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
+
+                if (expressionRootType != null)
                 {
-                    var constant = m.Expression as ConstantExpression;
-                    var fi = (FieldInfo)m.Member;
-                    var val = fi.GetValue(constant.Value);
-                    if (val is String)
-                    {
-                        result = String.Format("\"{0}\"", val);
-                    }
-                    else
-                    {
-                        result = val.ToString();
-                    }
-                    SetFlyValue(val);
+                    fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
                 }
-                else if (IsANestedConstantExpression(m))
+
+                result = string.Join(".", fixedName);
+                //sb.Append("this." + result);
+                if (UseScopedQualifier)
                 {
-                    var val = GetValue(m);
-
-                    if (val is String)
-                    {
-                        result = String.Format("\"{0}\"", val);
-                    }
-                    else
-                    {
-                        result = val.ToString();
-                    }
-                    SetFlyValue(val);
-
+                    _sb.Append("this.");
                 }
-                else
-                {
-                    var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
-
-                    if (expressionRootType != null)
-                    {
-                        fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
-                    }
-
-                    result = string.Join(".", fixedName);
-                    //sb.Append("this." + result);
-                    if (UseScopedQualifier)
-                    {
-                        _sb.Append("this.");
-                    }
-                }
+  
                 _sb.Append(result);
 
                 _lastFlyProperty = result;
@@ -319,29 +312,6 @@ namespace Norm.Linq
 
             // if this is a property NOT on the object...
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
-        }
-
-        private object GetValue(MemberExpression member)
-        {
-            var expression = Expression.Convert(member, typeof(object));
-            var getterLambda = Expression.Lambda<Func<object>>(expression);
-            var getter = getterLambda.Compile();
-
-            return getter();
-        }
-
-        private bool IsANestedConstantExpression(Expression e)
-        {
-            if (e.NodeType == ExpressionType.MemberAccess && ((MemberExpression)e).Expression.NodeType == ExpressionType.Constant)
-                return true;
-
-            if (e is MemberExpression)
-            {
-                if (IsANestedConstantExpression(((MemberExpression)e).Expression))
-                    return true;
-            }
-
-            return false;         
         }
 
         /// <summary>TODO::Description.</summary>
@@ -402,7 +372,6 @@ namespace Norm.Linq
             _sb.Append("(");
             Visit(b.Left);
             _sb.Append(GetBinaryOperator(b));
-
             Visit(b.Right);
             _sb.Append(")");
             return b;
@@ -822,6 +791,26 @@ namespace Norm.Linq
                 case "Any":
                     HandleAny(m);
                     break;
+                case "Count":
+                    IsCount = true;
+                    break;
+                case "Min":
+                case "Max":
+                case "Sum":
+                case "Average":
+                    if (m.Arguments.Count == 1)
+                    {
+                        var stripped = (LambdaExpression)StripQuotes(m);
+                        var member = (MemberExpression)stripped.Body;
+                        PropName = member.Member.Name;
+                    }
+                    else if (m.Arguments.Count == 2)
+                    {
+                        var stripped = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                        var member = (MemberExpression)stripped.Body;
+                        PropName = member.Member.Name;
+                    }
+                    break;
                 default:
                     this.Take = 1;
                     this.MethodCall = m.Method.Name;
@@ -840,6 +829,19 @@ namespace Norm.Linq
             Visit(m.Arguments[0]);
 
             return m;
+        }
+
+        private static LambdaExpression GetLambda(Expression e)
+        {
+            while (e.NodeType == ExpressionType.Quote)
+            {
+                e = ((UnaryExpression)e).Operand;
+            }
+            if (e.NodeType == ExpressionType.Constant)
+            {
+                return ((ConstantExpression)e).Value as LambdaExpression;
+            }
+            return e as LambdaExpression;
         }
     }
 }

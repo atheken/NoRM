@@ -133,8 +133,11 @@ namespace Norm.Linq
         /// </returns>
         public virtual IEnumerator<T> GetEnumerator()
         {
-            // var docs= (ICursor)this.provider.Execute(this.expression);
-            return _provider.Execute<T>(_expression).GetEnumerator();
+            //object result = _provider.Execute(_expression);
+            //var converted = (IEnumerable<T>)Convert.ChangeType(result, typeof(IEnumerable<T>));
+            //return converted.GetEnumerator();
+
+            return ((IEnumerable<T>)_provider.Execute<T>(_expression)).GetEnumerator();
         }
 
         /// <summary>
