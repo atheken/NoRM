@@ -307,7 +307,7 @@ namespace Norm.Collections
         /// is of this type, or BAD THINGS will happen.</typeparam>
         /// <param name="keyName">Name of the key.</param>
         /// <returns></returns>
-        public IEnumerable<U> Distinct<U>(string keyName) where U : class, new()
+        public IEnumerable<U> Distinct<U>(string keyName)
         {
             return _db.GetCollection<DistinctValuesResponse<U>>("$cmd")
                 .FindOne(new { distinct = _collectionName, key = keyName }).Values;
