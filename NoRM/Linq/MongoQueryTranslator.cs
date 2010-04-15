@@ -322,7 +322,6 @@ namespace Norm.Linq
                 case ExpressionType.AndAlso:
                     result =" && ";
                     break;
-
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
                     IsComplex = true;
@@ -471,20 +470,6 @@ namespace Norm.Linq
                 this.MethodCall = m.Method.Name;
             }
 
-            if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
-            {
-                var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                //specific for "chained" Where() calls, where a Where() is appended
-                //to an IQueryable on top of another IQueryable
-                if (_whereWritten) {
-                    _sb.Append(" && ");
-                }
-                Visit(lambda.Body);
-                _whereWritten = true;
-                Visit(m.Arguments[0]);
-                return m;
-            }
-            _whereWritten = false;
             if (m.Method.DeclaringType == typeof(string))
             {
                 IsComplex = true;
@@ -589,7 +574,7 @@ namespace Norm.Linq
         private static HashSet<String> _callableMethods = new HashSet<string>(){
             "First","Single","FirstOrDefault","SingleOrDefault","Count",
             "Sum","Average","Min","Max","Any","Take","Skip", 
-            "OrderBy","ThenBy", "OrderByDescending", "ThenByDescending"};
+            "OrderBy","ThenBy", "OrderByDescending", "ThenByDescending", "Where"};
 
         /// <summary>
         /// Determines if it's a callable method.
@@ -750,17 +735,35 @@ namespace Norm.Linq
             this.SortFly[member.Member.Name] = -1;
         }
 
-        void HandleAny(MethodCallExpression exp) {
-            var member = (MemberExpression)exp.Arguments[0];
-            var lambda = (LambdaExpression)exp.Arguments[1];
-            var stripped = (BinaryExpression)StripQuotes(lambda.Body);
-            var subMember = (MemberExpression)stripped.Left;
-            var subValue = (ConstantExpression)stripped.Right;
-            var op = GetBinaryOperator(stripped);
-            this.IsComplex = true;
-            var result = "function(){for(var i in this." + member.Member.Name + "){if(this." + member.Member.Name + "[i]." + subMember.Member.Name + " === '" + subValue.Value + "') return true; } return false;}";
-            _sb.Append(result);
+        void HandleAggregate(MethodCallExpression exp)
+        {
+            if (exp.Arguments.Count == 2)
+            {
+                var stripped = (LambdaExpression)StripQuotes(exp.Arguments[1]);
+                var member = (MemberExpression)stripped.Body;
+                PropName = member.Member.Name;
+            }
         }
+
+        void HandleAny(MethodCallExpression exp) 
+        {
+            if (exp.Arguments.Count == 2)
+            {
+                HandleWhere(exp.Arguments[1]);
+            }
+        }
+
+        void HandleWhere(Expression exp)
+        {
+            if (_whereWritten)
+            {
+                _sb.Append(" && ");
+            }
+           
+            Visit(exp);
+            _whereWritten = true;
+        }
+
         /// <summary>
         /// The handle method call.
         /// </summary>
@@ -770,6 +773,9 @@ namespace Norm.Linq
         {
             switch (m.Method.Name)
             {
+                case "Where":
+                    HandleWhere(m.Arguments[1]);
+                    break;
                 case "ThenBy":
                     HandleSort(m.Arguments[1]);
                     break;
@@ -798,18 +804,7 @@ namespace Norm.Linq
                 case "Max":
                 case "Sum":
                 case "Average":
-                    if (m.Arguments.Count == 1)
-                    {
-                        var stripped = (LambdaExpression)StripQuotes(m);
-                        var member = (MemberExpression)stripped.Body;
-                        PropName = member.Member.Name;
-                    }
-                    else if (m.Arguments.Count == 2)
-                    {
-                        var stripped = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                        var member = (MemberExpression)stripped.Body;
-                        PropName = member.Member.Name;
-                    }
+                    HandleAggregate(m);
                     break;
                 default:
                     this.Take = 1;

@@ -174,6 +174,33 @@ namespace Norm.Tests
                 Assert.True(session.Products.Any(x => x.Price == 10));
             }
         }
+
+        [Fact]
+        public void AnyShouldReturnTrueWhenProductPrice10AndWhere()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 20 });
+                session.Add(new Product { Name = "3", Price = 30 });
+
+                Assert.True(session.Products.Where(x=>x.Price < 30).Any(x => x.Price == 10));
+            }
+        }
+
+        [Fact]
+        public void AnyShouldReturnTrueWhenProductList()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new Product { Name = "1", Price = 10 });
+                session.Add(new Product { Name = "2", Price = 20 });
+                session.Add(new Product { Name = "3", Price = 30 });
+
+                Assert.True(session.Products.Any());
+            }
+        }
+
         [Fact]
         public void AnyShouldReturnFalseWhenProductPrice100()
         {
