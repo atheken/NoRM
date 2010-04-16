@@ -171,14 +171,23 @@ namespace Norm.BSON
                 var name = property == idProperty && !IsDbReference(property.DeclaringType)
                                ? "_id"
                                : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
-
-                var value = property.Getter(document);
-                if (value == null && property.IgnoreIfNull)
+                object value;
+                if (property.IgnoreProperty(document, out value))
                 {
+                    // ignore the member
                     continue;
                 }
-
+                // serialize the member
                 SerializeMember(name, value);
+                //if (property.ShouldSerialize(document))
+                //{
+                //    var value = property.Getter(document);
+                //    if (value == null && property.IgnoreIfNull)
+                //    {
+                //        continue;
+                //    }
+                //    SerializeMember(name, value);
+                //}
             }
 
             var fly = document as IFlyweight;

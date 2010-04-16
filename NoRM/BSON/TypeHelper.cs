@@ -224,5 +224,26 @@ namespace Norm.BSON
 
             return null;
         }
+
+        /// <summary>
+        /// Apply default values to the properties in the instance
+        /// </summary>
+        /// <param name="typeHelper"></param>
+        /// <param name="instance"></param>
+        public void ApplyDefaultValues(object instance)
+        {
+            // error check.
+            if (instance == null) return;
+            // get all the properties
+            foreach (var prop in this.GetProperties())
+            {
+                // see if the property has a DefaultValue attribute
+                if (prop.HasDefaultValue)
+                {
+                    // set the default value for the property.
+                    prop.Setter(instance, prop.GetDefaultValue());
+                }
+            }
+        }
     }
 }
