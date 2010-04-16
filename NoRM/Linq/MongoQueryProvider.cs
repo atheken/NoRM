@@ -120,7 +120,12 @@ namespace Norm.Linq
         {
             return Execute(expression);
         }
-       
+
+        /// <summary>
+        /// </summary>
+        /// <param name="expression">An expression tree that represents a LINQ query.</param>
+        /// <returns>The execute.</returns>
+        /// 
         public object Execute<T>(Expression expression)
         {
             expression = PartialEvaluator.Eval(expression, this.CanBeEvaluatedLocally);
@@ -132,40 +137,44 @@ namespace Norm.Linq
             // This is the actual Query mechanism...
             var collection = new MongoCollection<T>(tranny.TypeName, DB, DB.CurrentConnection);
 
-            var averyMap = "function(){emit(0, {val: this." + tranny.PropName + ",tSize:1} )};";
-            if (!string.IsNullOrEmpty(qry))
+            string map = "", reduce = "", finalize = "";
+            if (!string.IsNullOrEmpty(tranny.AggregatePropName))
             {
-                averyMap = "function(){if (" + qry + ") {emit(0, {val: this." + tranny.PropName + ",tSize:1} )};}";
+                map = "function(){emit(0, {val: this." + tranny.AggregatePropName + ",tSize:1} )};";
+                if (!string.IsNullOrEmpty(qry))
+                {
+                    map = "function(){if (" + qry + ") {emit(0, {val: this." + tranny.AggregatePropName + ",tSize:1} )};}";
+                }
+
+                reduce = string.Empty;
+                finalize = "function(key, res){ return res.val; }";
             }
 
-            var reduce = string.Empty;
-            var finalize = "function(key, res){ return res.val; }";
             object result;
-
             switch (tranny.MethodCall)
             {
                 case "Any":
-                    result = collection.Count(tranny.FlyWeight) > 0;
+                    result = collection.Count(fly) > 0;
                     break;
                 case "Count":
                     result = collection.Count(fly);
                     break;
                 case "Sum":
-                    reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){ sum+=values[i].val;} return {val:sum};}";
-                    result = ExecuteMR<double>(tranny.TypeName, averyMap, reduce, finalize);
+                    reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; i++){ sum+=values[i].val;} return {val:sum};}";
+                    result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
                     break;
                 case "Average":
-                    reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; ++i){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
+                    reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; i++){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
                     finalize = "function(key, res){ return res.val / res.tSize; }";
-                    result = ExecuteMR<double>(tranny.TypeName, averyMap, reduce, finalize);
+                    result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
                     break;
                 case "Min":
-                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
-                    result = ExecuteMR<double>(tranny.TypeName, averyMap, reduce, finalize);
+                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
+                    result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
                     break;
                 case "Max":
-                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
-                    result = ExecuteMR<double>(tranny.TypeName, averyMap, reduce, finalize);
+                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
+                    result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
                     break;
                 case "Single":
                 case "SingleOrDefault":
@@ -189,16 +198,6 @@ namespace Norm.Linq
             return result;
         }
 
-        /// <summary>
-        /// Avert your eyes all who come here seeking enlightenment. You cannot behold the true
-        /// joy and intense power of the treasure lying inside the mess. So I beseech you - turn
-        /// back now if you are queasy, squeemish, or otherwise feel entitled to code that not
-        /// only does what you need, but looks pretty doing it.
-        /// I'll clean this up as I have time. For now, it's vomitous.
-        /// </summary>
-        /// <param name="expression">An expression tree that represents a LINQ query.</param>
-        /// <returns>The execute.</returns>
-        /// 
         public object Execute(Expression expression)
         {
             return null;
