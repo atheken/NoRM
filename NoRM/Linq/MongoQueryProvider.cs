@@ -137,16 +137,20 @@ namespace Norm.Linq
             // This is the actual Query mechanism...
             var collection = new MongoCollection<T>(tranny.TypeName, DB, DB.CurrentConnection);
 
-            var map = "function(){emit(0, {val: this." + tranny.PropName + ",tSize:1} )};";
-            if (!string.IsNullOrEmpty(qry))
+            string map = "", reduce = "", finalize = "";
+            if (!string.IsNullOrEmpty(tranny.AggregatePropName))
             {
-                map = "function(){if (" + qry + ") {emit(0, {val: this." + tranny.PropName + ",tSize:1} )};}";
+                map = "function(){emit(0, {val: this." + tranny.AggregatePropName + ",tSize:1} )};";
+                if (!string.IsNullOrEmpty(qry))
+                {
+                    map = "function(){if (" + qry + ") {emit(0, {val: this." + tranny.AggregatePropName + ",tSize:1} )};}";
+                }
+
+                reduce = string.Empty;
+                finalize = "function(key, res){ return res.val; }";
             }
 
-            var reduce = string.Empty;
-            var finalize = "function(key, res){ return res.val; }";
             object result;
-
             switch (tranny.MethodCall)
             {
                 case "Any":
@@ -156,20 +160,20 @@ namespace Norm.Linq
                     result = collection.Count(fly);
                     break;
                 case "Sum":
-                    reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; ++i){ sum+=values[i].val;} return {val:sum};}";
+                    reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; i++){ sum+=values[i].val;} return {val:sum};}";
                     result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
                     break;
                 case "Average":
-                    reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; ++i){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
+                    reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; i++){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
                     finalize = "function(key, res){ return res.val / res.tSize; }";
                     result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
                     break;
                 case "Min":
-                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
+                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
                     result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
                     break;
                 case "Max":
-                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; ++i){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
+                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
                     result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
                     break;
                 case "Single":

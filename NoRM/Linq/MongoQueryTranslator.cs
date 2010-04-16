@@ -6,6 +6,7 @@ using System.Text;
 using Norm.BSON;
 using Norm.Configuration;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace Norm.Linq
 {
@@ -45,7 +46,7 @@ namespace Norm.Linq
         bool _whereWritten = false;
 
         /// <summary>TODO::Description.</summary>
-        public String PropName
+        public String AggregatePropName
         {
             get;
             set;
@@ -108,11 +109,6 @@ namespace Norm.Linq
                 this._takeCount = value;
             }
         }
-
-        /// <summary>
-        /// Gets whether it is a count expression.
-        /// </summary>
-        public bool IsCount { get; private set; }
 
         /// <summary>
         /// Gets where expression.
@@ -215,10 +211,12 @@ namespace Norm.Linq
                 {
                     alias = "_id";
                 }
+
                 if (UseScopedQualifier)
                 {
                     _sb.Append("this.");
                 }
+
                 _sb.Append(alias);
                 _lastFlyProperty = alias;
                 return m;
@@ -376,11 +374,6 @@ namespace Norm.Linq
             return b;
         }
 
-        /// <summary>TODO::Description.</summary>
-        void VisitRight(Expression exp) {
-
-        }
-
         /// <summary>
         /// Visits a constant.
         /// </summary>
@@ -443,7 +436,7 @@ namespace Norm.Linq
                         }
                         else
                         {
-                            //throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
+                            throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", c.Value));
                         }
                         break;
                     default:
@@ -550,24 +543,21 @@ namespace Norm.Linq
             }
             else if (m.Method.DeclaringType == typeof(DateTime))
             {
-                //switch (m.Method.Name)
-                //{
-                //}
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && IsCallableMethod(m.Method.Name))
             {
                 return HandleMethodCall(m);
             }
-            else if (m.Method.DeclaringType == typeof(Enumerable))
+            else if (typeof(IEnumerable).IsAssignableFrom(m.Method.DeclaringType)) //&& IsCallableMethod(m.Method.Name))
             {
-                // Subquery - Count() or Sum()
-                if (IsCallableMethod(m.Method.Name))
+                if (m.Method.Name == "Contains")
                 {
                     return HandleMethodCall(m);
-                }
+                } 
+                
+                throw new NotSupportedException(string.Format("Subqueries are not currently supported", m.Method.Name));
             }
 
-            // for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
 
@@ -722,17 +712,11 @@ namespace Norm.Linq
             this.Take = (int)exp.GetConstantValue();
         }
 
-        void HandleSort(Expression exp)
+        void HandleSort(Expression exp, bool ascending)
         {
             var stripped = (LambdaExpression)StripQuotes(exp);
             var member = (MemberExpression)stripped.Body;
-            this.SortFly[member.Member.Name] = 1;
-        }
-        void HandleDescendingSort(Expression exp)
-        {
-            var stripped = (LambdaExpression)StripQuotes(exp);
-            var member = (MemberExpression)stripped.Body;
-            this.SortFly[member.Member.Name] = -1;
+            this.SortFly[member.Member.Name] = ascending ? 1 : -1;
         }
 
         void HandleAggregate(MethodCallExpression exp)
@@ -741,11 +725,11 @@ namespace Norm.Linq
             {
                 var stripped = (LambdaExpression)StripQuotes(exp.Arguments[1]);
                 var member = (MemberExpression)stripped.Body;
-                PropName = member.Member.Name;
+                AggregatePropName = member.Member.Name;
             }
         }
 
-        void HandleAny(MethodCallExpression exp) 
+        void TranslateToWhere(MethodCallExpression exp) 
         {
             if (exp.Arguments.Count == 2)
             {
@@ -758,10 +742,27 @@ namespace Norm.Linq
             if (_whereWritten)
             {
                 _sb.Append(" && ");
+                IsComplex = true;
             }
            
             Visit(exp);
             _whereWritten = true;
+        }
+
+        private void HandleContains(MethodCallExpression m)
+        {
+            var collection = (IEnumerable)m.Object.GetConstantValue();
+
+            _sb.Append("(");
+            foreach (var item in collection)
+            {
+                Visit(m.Arguments[0]);
+                _sb.Append(" === ");
+                Visit(ConstantExpression.Constant(item));
+                _sb.Append(" || ");
+            }
+            _sb.Remove(_sb.Length - 4, 4);
+            _sb.Append(")");
         }
 
         /// <summary>
@@ -773,20 +774,24 @@ namespace Norm.Linq
         {
             switch (m.Method.Name)
             {
+                case "Any":
+                case "Single":
+                case "SingleOrDefault":
+                case "First":
+                case "FirstOrDefault":
                 case "Where":
-                    HandleWhere(m.Arguments[1]);
+                    TranslateToWhere(m);
                     break;
-                case "ThenBy":
-                    HandleSort(m.Arguments[1]);
-                    break;
+                case "Contains":
+                    HandleContains(m);
+                    return m;
                 case "OrderBy":
-                    HandleSort(m.Arguments[1]);
-                    break;
-                case "ThenByDescending":
-                    HandleDescendingSort(m.Arguments[1]);
+                case "ThenBy":
+                    HandleSort(m.Arguments[1], true);
                     break;
                 case "OrderByDescending":
-                    HandleDescendingSort(m.Arguments[1]);
+                case "ThenByDescending":
+                    HandleSort(m.Arguments[1], false);
                     break;
                 case "Skip":
                     HandleSkip(m.Arguments[1]);
@@ -794,12 +799,6 @@ namespace Norm.Linq
                 case "Take":
                     HandleTake(m.Arguments[1]);
                     break;    
-                case "Any":
-                    HandleAny(m);
-                    break;
-                case "Count":
-                    IsCount = true;
-                    break;
                 case "Min":
                 case "Max":
                 case "Sum":
