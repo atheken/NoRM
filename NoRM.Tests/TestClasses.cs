@@ -9,6 +9,7 @@ using Norm.Linq;
 using Norm.Responses;
 using Norm.BSON.DbTypes;
 using Norm.Collections;
+using System.ComponentModel;
 
 namespace Norm.Tests
 {
@@ -416,6 +417,24 @@ namespace Norm.Tests
                 }
                 return _lookup;
             }
+        }
+    }
+
+    public class SerializerTest
+    {
+        public int Id { get; set; }
+
+        [DefaultValue("Test")]
+        public string Message { get; set; }
+
+        [DefaultValue(typeof(DateTime), "0001-01-01")]
+        public DateTime MagicDate { get; set; }
+
+        public int ComplexProperty { get; set; }
+
+        public bool ShouldSerializeComplexProperty()
+        {
+            return this.ComplexProperty != 3;
         }
     }
 
