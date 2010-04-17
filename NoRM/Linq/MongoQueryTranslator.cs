@@ -706,14 +706,14 @@ namespace Norm.Linq
             this.Take = (int)exp.GetConstantValue();
         }
 
-        void HandleSort(Expression exp, bool ascending)
+        private void HandleSort(Expression exp, OrderBy orderby)
         {
             var stripped = (LambdaExpression)StripQuotes(exp);
             var member = (MemberExpression)stripped.Body;
-            this.SortFly[member.Member.Name] = ascending ? 1 : -1;
+            this.SortFly[member.Member.Name] = orderby;
         }
 
-        void HandleAggregate(MethodCallExpression exp)
+        private void HandleAggregate(MethodCallExpression exp)
         {
             if (exp.Arguments.Count == 2)
             {
@@ -723,7 +723,7 @@ namespace Norm.Linq
             }
         }
 
-        void TranslateToWhere(MethodCallExpression exp) 
+        private void TranslateToWhere(MethodCallExpression exp) 
         {
             if (exp.Arguments.Count == 2)
             {
@@ -731,7 +731,7 @@ namespace Norm.Linq
             }
         }
 
-        void HandleWhere(Expression exp)
+        private void HandleWhere(Expression exp)
         {
             if (_whereWritten)
             {
@@ -781,11 +781,11 @@ namespace Norm.Linq
                     return m;
                 case "OrderBy":
                 case "ThenBy":
-                    HandleSort(m.Arguments[1], true);
+                    HandleSort(m.Arguments[1], OrderBy.Ascending);
                     break;
                 case "OrderByDescending":
                 case "ThenByDescending":
-                    HandleSort(m.Arguments[1], false);
+                    HandleSort(m.Arguments[1], OrderBy.Descending);
                     break;
                 case "Skip":
                     HandleSkip(m.Arguments[1]);
