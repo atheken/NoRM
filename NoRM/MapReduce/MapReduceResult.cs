@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Norm
+﻿namespace Norm
 {
     /// <summary>
     /// A generic class for handling MapReduce resonses. Not required to use but is helpful if returning more than one value.
     /// MapReduce returns a collection of objects that are key - value pairs. The value can be a single value, or more likely a document response.
     /// If you are getting back a single int you could declare MapReduceResponseGeneric&lt;int%gt;, if its a more complex type it could be MapReduceResponseGeneric&lt;myclass&gt;
     /// </summary>
-    public class MapReduceResponse<K, V>
+    public class MapReduceResult<K, V>
     {
         /// <summary>
         /// The Id returned from Mongo

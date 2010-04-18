@@ -134,7 +134,7 @@ namespace Norm.Tests
                 var _query = new { Price = Q.GreaterThan(2) };
                 var response =
                     mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Query = _query });
-                var collection = response.GetCollection<MapReduceResponse<int, int>>();
+                var collection = response.GetCollection<MapReduceResult<int, int>>();
                 var r = collection.Find().FirstOrDefault();
                 Assert.Equal(0, r.Key);
                 Assert.Equal(5, r.Value);

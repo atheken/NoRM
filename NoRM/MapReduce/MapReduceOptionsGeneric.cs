@@ -1,5 +1,4 @@
-﻿
-using Norm.Configuration;
+﻿using Norm.Configuration;
 
 namespace Norm
 {
