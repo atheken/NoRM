@@ -6,6 +6,7 @@ using System.Reflection;
 using Norm.BSON;
 using Norm.Collections;
 using System.Collections;
+using Norm.Configuration;
 
 namespace Norm.Linq
 {
@@ -135,7 +136,8 @@ namespace Norm.Linq
             var fly = tranny.FlyWeight;
 
             // This is the actual Query mechanism...
-            var collection = new MongoCollection<T>(tranny.TypeName, DB, DB.CurrentConnection);
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
+            var collection = new MongoCollection<T>(collectionName, DB, DB.CurrentConnection);
 
             string map = "", reduce = "", finalize = "";
             if (!string.IsNullOrEmpty(tranny.AggregatePropName))
