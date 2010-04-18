@@ -16,7 +16,7 @@ namespace Norm.Linq
     /// <typeparam name="T">Type to query; also the underlying collection type.</typeparam>
     public class MongoQuery<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable, IMongoQuery
     {
-        //private MongoCollection<T> _collection;
+        //private MongoCollection<T> Collection;
         private readonly Expression _expression;
         private readonly MongoQueryProvider _provider;
         //private Flyweight _query;
@@ -43,7 +43,7 @@ namespace Norm.Linq
             _provider = provider;
             _expression = Expression.Constant(this);
             _collectionName = collectionName;
-            //_collection = GetCollection<T>(); //provider.DB.GetCollection<T>();
+            //Collection = GetCollection<T>(); //provider.DB.GetCollection<T>();
             //_query = new Flyweight();
         }
 

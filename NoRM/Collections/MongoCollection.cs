@@ -235,8 +235,8 @@ namespace Norm.Collections
                     NumberToTake = limit,
                     Query = template,
                     OrderBy = orderBy,
-                    NumberToSkip = skip
-                };
+                    NumberToSkip = skip,                    
+                };            
             return new MongoQueryExecutor<object, object>(qm);
         }
     }

@@ -116,12 +116,24 @@ namespace Norm.BSON
             {
                 WriteFlyweight((Flyweight)document);
             }
+            else if (document is FieldSelectionList)
+            {
+                WriteFieldListSelection((FieldSelectionList) document);
+            }
             else
             {
                 WriteObject(document);
             }
 
             EndDocument(true);
+        }
+
+        private void WriteFieldListSelection(FieldSelectionList fields)
+        {
+            foreach(var field in fields)
+            {
+                Write(field, 1);
+            }
         }
 
         /// <summary>

@@ -229,5 +229,6 @@ namespace Norm.Tests
             var results = _collection.Find(new { Relatives = "commentA" });
             Assert.Equal("Second", results.First().Name);
         }
+        
     }
 }
