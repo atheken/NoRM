@@ -262,7 +262,13 @@ namespace Norm.BSON
                 var property = (name == "_id" || name == "$id")
                     ? typeHelper.FindIdProperty()
                     : typeHelper.FindProperty(name);
-               
+
+
+                if(name == "")
+                {
+                    break;
+                }
+
                 if (property == null)
                 {
                     throw new MongoException(string.Format("Deserialization failed: type {0} does not have a property named {1}", type.FullName, name));
