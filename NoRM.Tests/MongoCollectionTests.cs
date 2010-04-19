@@ -174,8 +174,8 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                var id1 = new ObjectId("123456123456123456123456");
-                var id2 = new ObjectId("123456123456123456123457");
+                var id1 = ObjectId.NewObjectId();
+                var id2 = ObjectId.NewObjectId();
                 mongo.GetCollection<TestProduct>("Fake").Save(new TestProduct { _id = id1, Name = "Prod1" });
                 mongo.GetCollection<TestProduct>("Fake").Save(new TestProduct { _id = id2, Name = "Prod2" });
                 var found = mongo.GetCollection<TestProduct>("Fake").Find();
@@ -193,7 +193,7 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                var id = new ObjectId("123456123456123456123456");
+                var id = ObjectId.NewObjectId();
                 mongo.GetCollection<TestProduct>("Fake").Save(new TestProduct { _id = id, Name = "Prod" });
                 mongo.GetCollection<TestProduct>("Fake").Save(new TestProduct { _id = id, Name = "Updated Prod" });
                 var found = mongo.GetCollection<TestProduct>("Fake").Find();
