@@ -262,8 +262,8 @@ namespace Norm.BSON
                 var property = (name == "_id" || name == "$id")
                     ? typeHelper.FindIdProperty()
                     : typeHelper.FindProperty(name);
-               
-                if (property == null)
+
+                if (property == null && typeHelper.Expando == null)
                 {
                     throw new MongoException(string.Format("Deserialization failed: type {0} does not have a property named {1}", type.FullName, name));
                 }
@@ -283,12 +283,17 @@ namespace Norm.BSON
                     }                                        
                 }
                 object container = null;
-                if (property.Setter == null)
+                if (property != null && property.Setter == null)
                 {
-                    container = property.Getter(instance);                    
+                    container = property.Getter(instance);
                 }
-                var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
-                if (container == null && value!=null)
+                var propertyType = property != null ? property.Type : _typeMap.ContainsKey(storageType) ? _typeMap[storageType] : typeof(object);
+                var value = isNull ? null : DeserializeValue(propertyType, storageType, container);
+                if (property == null)
+                {
+                    ((IDictionary<string, object>)typeHelper.Expando.Getter(instance))[name] = value;
+                }                
+               else  if (container == null && value!=null)
                 {
                     property.Setter(instance, value);
                 }
