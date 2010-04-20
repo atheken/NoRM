@@ -24,30 +24,52 @@ namespace Norm.Configuration
             typeConfigurationAction((ITypeConfiguration<T>)typeConfiguration);
         }
 
+        private bool PropertyIsExplicitlyMappedToId(Type type, string propertyName)
+        {
+            var map = MongoTypeConfiguration.PropertyMaps;
+            if(map.ContainsKey(type))
+            {
+                if(map[type].ContainsKey(propertyName))
+                {
+                    return map[type][propertyName].IsId;
+                }
+            }
+            return false;
+        }
+
         private bool IsIdPropertyForType(Type type, String propertyName)
         {
             bool retval = false;
+
             if (!_idProperties.ContainsKey(type))
             {
                 PropertyInfo idProp = null;
-                foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
-                    BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
+
+                if (!PropertyIsExplicitlyMappedToId(type, propertyName))
                 {
-                    if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
+                    foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
+                                BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
                     {
-                        idProp = property;
-                        break;
-                    }
-                    if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        idProp = property;
-                        break;
-                    }
-                    if (idProp == null && property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        idProp = property;
-                        break;
-                    }
+                        if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
+                        {
+                            idProp = property;
+                            break;
+                        }
+                        if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            idProp = property;
+                            break;
+                        }
+                        if (idProp == null && property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            idProp = property;
+                            break;
+                        }
+                    } 
+                }
+                else
+                {
+                    idProp = type.GetProperty(propertyName);
                 }
                 if (idProp != null)
                 {

@@ -35,6 +35,13 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void Mongo_Configuration_Supports_Id_Specified_In_Configuration_Map()
+        {
+            MongoConfiguration.Initialize(maps => maps.AddMap<EntityWithUnconventionalIdConfigurationMap>());
+            Assert.Equal("_id", MongoConfiguration.GetPropertyAlias(typeof(EntityWithUnconventionalId), "NonDefaultId"));
+        }
+
+        [Fact]
         public void Mongo_Configuration_Should_Notify_TypeHelper()
         {
             var typeHelper = TypeHelper.GetHelperForType(typeof(User2));
@@ -453,5 +460,18 @@ namespace Norm.Tests
         }
 
         #endregion
+    }
+
+    public class EntityWithUnconventionalId
+    {
+        public string NonDefaultId { get; set; }
+    }
+
+    public class EntityWithUnconventionalIdConfigurationMap : MongoConfigurationMap
+    {
+        public EntityWithUnconventionalIdConfigurationMap()
+        {
+            For<EntityWithUnconventionalId>(config => config.IdIs(entity => entity.NonDefaultId));
+        }
     }
 }

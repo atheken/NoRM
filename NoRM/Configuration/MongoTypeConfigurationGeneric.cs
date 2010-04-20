@@ -13,6 +13,14 @@ namespace Norm.Configuration
     /// </typeparam>
     public class MongoTypeConfiguration<T> : MongoTypeConfiguration, ITypeConfiguration<T>
     {
+        private void CheckForPropertyMap(Type typeKey)
+        {
+            if (!PropertyMaps.ContainsKey(typeKey))
+            {
+                PropertyMaps.Add(typeKey, new Dictionary<string, PropertyMappingExpression>());
+            }
+        }
+
         /// <summary>
         /// Looks up property names for use with aliases.
         /// </summary>
@@ -22,14 +30,19 @@ namespace Norm.Configuration
         {
             var propertyName = TypeHelper.FindProperty(sourcePropery);
             var typeKey = typeof(T);
-            if (!PropertyMaps.ContainsKey(typeKey))
-            {
-                PropertyMaps.Add(typeKey, new Dictionary<string, PropertyMappingExpression>());
-            }
+            CheckForPropertyMap(typeKey);
             var expression = new PropertyMappingExpression { SourcePropertyName = propertyName };
             PropertyMaps[typeKey][propertyName] = expression;
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
             return expression;
+        }
+
+        public void IdIs(Expression<Func<T, object>> idProperty)
+        {
+            var propertyName = TypeHelper.FindProperty(idProperty);
+            var typeKey = typeof (T);
+            CheckForPropertyMap(typeKey);
+            PropertyMaps[typeKey][propertyName] = new PropertyMappingExpression {IsId = true};
         }
 
         /// <summary>
