@@ -135,9 +135,8 @@ namespace Norm.Linq
             var qry = tranny.Translate(expression);
             var fly = tranny.FlyWeight;
 
-            // This is the actual Query mechanism...
-            var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
-            var collection = new MongoCollection<T>(collectionName, DB, DB.CurrentConnection);
+            // This is the actual Query mechanism...            
+            var collection = new MongoCollection<T>(tranny.CollectionName, DB, DB.CurrentConnection);
 
             string map = "", reduce = "", finalize = "";
             if (!string.IsNullOrEmpty(tranny.AggregatePropName))

@@ -60,6 +60,9 @@ namespace Norm.Linq
         }
 
         /// <summary>TODO::Description.</summary>
+        public string CollectionName{ get; set;}
+
+        /// <summary>TODO::Description.</summary>
         public String MethodCall
         {
             get;
@@ -388,6 +391,7 @@ namespace Norm.Linq
             {
                 // set the collection name
                 this.TypeName = q.ElementType.Name;
+                this.CollectionName = MongoConfiguration.GetCollectionName(q.ElementType);                
 
                 // this is our Query wrapper - see if it has an expression
                 var qry = (IMongoQuery)c.Value;
