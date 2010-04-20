@@ -64,6 +64,18 @@ namespace Norm.BSON
         }
 
         /// <summary>
+        /// Deserializes the specified object data.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectData">The object data.</param>
+        /// <param name="outProps">The out props.</param>
+        /// <returns></returns>
+        public static T Deserialize<T>(int length, BinaryReader reader, ref IDictionary<WeakReference, Flyweight> outProps)
+        {
+            return Deserialize<T>(reader, length);
+        }        
+
+        /// <summary>
         /// Deserializes the specified stream.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -73,6 +85,11 @@ namespace Norm.BSON
         {
             return new BsonDeserializer(stream).Read<T>();
         }
+        private static T Deserialize<T>(BinaryReader stream, int length)
+        {
+            return new BsonDeserializer(stream).Read<T>(length);
+        }
+
 
         /// <summary>
         /// Reads a document instance.
@@ -81,10 +98,14 @@ namespace Norm.BSON
         /// <returns></returns>
         private T Read<T>()
         {
-            NewDocument(_reader.ReadInt32());
+            return Read<T>(_reader.ReadInt32());
+        }
+        private T Read<T>(int length)
+        {
+            NewDocument(length);
             var @object = (T)DeserializeValue(typeof(T), BSONTypes.Object);
             return @object;
-        }
+        }        
 
         /// <summary>
         /// Reads the specified document forward by the input value.

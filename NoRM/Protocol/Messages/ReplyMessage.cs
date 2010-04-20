@@ -52,15 +52,13 @@ namespace Norm.Protocol.Messages
             else
             {
                 while (_messageLength > 0)
-                {
+                {                    
                     var length = reply.ReadInt32();
                     if (length > 0)
-                    {
-                        var bin = BitConverter.GetBytes(length).Concat(
-                            reply.ReadBytes(length - 4)).ToArray();
-
+                    {                        
+                        //var bin = BitConverter.GetBytes(length).Concat(reply.ReadBytes(length - 4)).ToArray();                        
                         IDictionary<WeakReference, Flyweight> outProps = new Dictionary<WeakReference, Flyweight>(0);
-                        var obj = BsonDeserializer.Deserialize<T>(bin, ref outProps);
+                        var obj = BsonDeserializer.Deserialize<T>(length, reply, ref outProps);
                         this._results.Add(obj);
                         if (_connection.EnableExpandoProperties)
                         {
