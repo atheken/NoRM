@@ -577,7 +577,7 @@ namespace Norm.Linq
         private static HashSet<String> _callableMethods = new HashSet<string>(){
             "First","Single","FirstOrDefault","SingleOrDefault","Count",
             "Sum","Average","Min","Max","Any","Take","Skip", 
-            "OrderBy","ThenBy", "OrderByDescending", "ThenByDescending", "Where"};
+            "OrderBy","ThenBy","OrderByDescending","ThenByDescending","Where"};
 
         /// <summary>
         /// Determines if it's a callable method.
@@ -771,7 +771,7 @@ namespace Norm.Linq
             {
                 Visit(m.Arguments[0]);
                 _sb.Append(" === ");
-                Visit(ConstantExpression.Constant(item));
+                Visit(Expression.Constant(item));
                 _sb.Append(" || ");
             }
             _sb.Remove(_sb.Length - 4, 4);
