@@ -195,9 +195,9 @@ namespace Norm.Tests
             Assert.Equal(14, ConnectionStringBuilder.Create("mongodb://localhost?timeout=14").Timeout);
         }
         [Fact]
-        public void LifetimeIs0ByDefault()
+        public void LifetimeIs15ByDefault()
         {
-            Assert.Equal(0, ConnectionStringBuilder.Create("mongodb://localhost").Lifetime);
+            Assert.Equal(15, ConnectionStringBuilder.Create("mongodb://localhost").Lifetime);
         }
         [Fact]
         public void ParsesLifetimeOption()

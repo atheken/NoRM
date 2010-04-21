@@ -552,14 +552,23 @@ namespace Norm.Linq
             {
                 return HandleMethodCall(m);
             }
-            else if (typeof(IEnumerable).IsAssignableFrom(m.Method.DeclaringType)) //&& IsCallableMethod(m.Method.Name))
+            else if (typeof(IEnumerable).IsAssignableFrom(m.Method.DeclaringType))
             {
                 if (m.Method.Name == "Contains")
                 {
                     return HandleMethodCall(m);
                 } 
                 
-                throw new NotSupportedException(string.Format("Subqueries are not currently supported", m.Method.Name));
+                throw new NotSupportedException(string.Format("Subqueries with {0} are not currently supported", m.Method.Name));
+            }
+            else if (typeof(Enumerable).IsAssignableFrom(m.Method.DeclaringType))
+            {
+                if (m.Method.Name == "Count" && m.Arguments.Count == 1)
+                {
+                    return HandleMethodCall(m);
+                }
+
+                throw new NotSupportedException(string.Format("Subqueries with {0} are not currently supported", m.Method.Name));
             }
 
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
@@ -769,6 +778,12 @@ namespace Norm.Linq
             _sb.Append(")");
         }
 
+        private void HandleSubCount(MethodCallExpression m)
+        {
+            Visit(m.Arguments[0]);
+            _sb.Append(".length");
+        }
+
         /// <summary>
         /// The handle method call.
         /// </summary>
@@ -809,6 +824,9 @@ namespace Norm.Linq
                 case "Average":
                     HandleAggregate(m);
                     break;
+                case "Count":
+                    HandleSubCount(m);
+                    return m;
                 default:
                     this.Take = 1;
                     this.MethodCall = m.Method.Name;
