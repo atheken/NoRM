@@ -265,7 +265,7 @@ namespace Norm.Linq
                 }
 
                 result = string.Join(".", fixedName);
-                //sb.Append("this." + result);
+
                 if (UseScopedQualifier)
                 {
                     _sbWhere.Append("this.");
@@ -369,7 +369,8 @@ namespace Norm.Linq
             }
             else if (c.Value == null)
             {
-                _sbWhere.Append("NULL");
+                _sbWhere.Append("null");
+                SetFlyValue(null);
             }
             else
             {

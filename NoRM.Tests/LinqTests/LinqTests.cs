@@ -34,6 +34,19 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportNulls()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = null, Price = 20 });
+                session.Add(new TestProduct { Name = "test1", Price = 10 });
+                var products = session.Products.Where(p => p.Name == null).ToList();
+                Assert.Equal(20, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
         public void SingleQualifierQueryIsExecutedAsANDQuery()
         {
             using (var session = new Session())
