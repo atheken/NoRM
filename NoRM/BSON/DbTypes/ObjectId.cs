@@ -209,10 +209,10 @@ namespace Norm
         /// <summary>TODO::Description.</summary>
         public static implicit operator string(ObjectId oid)
         {
-            return oid.ToString();
+        	return oid == null ? null : oid.ToString();
         }
 
-        /// <summary>TODO::Description.</summary>
+    	/// <summary>TODO::Description.</summary>
         public static implicit operator ObjectId(String oidString)
         {
             ObjectId retval = ObjectId.Empty;
