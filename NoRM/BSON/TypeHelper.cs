@@ -35,6 +35,12 @@ namespace Norm.BSON
             }
         }
 
+        private static PropertyInfo[] GetProperties(Type type)
+        {
+            return type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
+                                                BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeHelper"/> class.
         /// </summary>
@@ -42,9 +48,8 @@ namespace Norm.BSON
         public TypeHelper(Type type)
         {
             _type = type;
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
-                                                BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-            _properties = LoadMagicProperties(properties, IdProperty(properties));
+            var properties = GetProperties(type);
+            _properties = LoadMagicProperties(properties, FindIdProperty(type, properties));
         }
 
         /// <summary>
@@ -155,32 +160,56 @@ namespace Norm.BSON
                 _properties["$_id"] : _properties.ContainsKey("$id") ? _properties["$id"] : null;
         }
 
+        private static bool PropertyIsExplicitlyMappedToId(Type type, string propertyName)
+        {
+            var map = MongoTypeConfiguration.PropertyMaps;
+            if (map.ContainsKey(type))
+            {
+                if (map[type].ContainsKey(propertyName))
+                {
+                    return map[type][propertyName].IsId;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Gets the id property.
         /// </summary>
         /// <param name="properties">The properties.</param>
         /// <returns></returns>
-        private static PropertyInfo IdProperty(IEnumerable<PropertyInfo> properties)
+        public static PropertyInfo FindIdProperty(Type type, IEnumerable<PropertyInfo> properties)
         {
-            PropertyInfo foundSoFar = null;
+            PropertyInfo idProp = null;
             foreach (var property in properties)
             {
+                if(PropertyIsExplicitlyMappedToId(type, property.Name))
+                {
+                    idProp = property;
+                    break;
+                }
                 if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
                 {
-                    return property;
+                    idProp = property;
+                    break;
                 }
                 if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    foundSoFar = property;
+                    idProp = property;
+                    break;
                 }
-                if (foundSoFar == null && property.Name.Equals("Id",
-                    StringComparison.InvariantCultureIgnoreCase))
+                if (idProp == null && property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    foundSoFar = property;
+                    idProp = property;
+                    break;
                 }
             }
+            return idProp;
+        }
 
-            return foundSoFar;
+        public static PropertyInfo FindIdProperty(Type type)
+        {
+            return FindIdProperty(type, GetProperties(type));
         }
 
         /// <summary>
