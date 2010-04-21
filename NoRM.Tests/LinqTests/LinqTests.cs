@@ -758,7 +758,6 @@ namespace Norm.Tests
             }
         }
 
-
         [Fact]
         public void FiltersBasedOnObjectId()
         {

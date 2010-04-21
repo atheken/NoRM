@@ -142,29 +142,31 @@ namespace Norm.Linq
             _sbIndexed = new StringBuilder();
             FlyWeight = new Flyweight();
             SortFly = new Flyweight();
+
             Visit(exp);
 
-            var qry = _sbWhere.ToString();
+            TransformToFlyWeightWhere();
 
-            if (!string.IsNullOrEmpty(qry) || IsComplex)
+            return WhereExpression;
+        }
+
+        private void TransformToFlyWeightWhere()
+        {
+            var where = WhereExpression;
+            if (!string.IsNullOrEmpty(where) && IsComplex)
             {
-                if (IsComplex)
+                // reset - need to use the where statement generated
+                // instead of the props set on the internal flyweight
+                FlyWeight = new Flyweight();
+                if (where.StartsWith("function"))
                 {
-                    // reset - need to use the where statement generated
-                    // instead of the props set on the internal flyweight
-                    FlyWeight = new Flyweight();
-                    if (qry.StartsWith("function"))
-                    {
-                        FlyWeight["$where"] = qry;
-                    }
-                    else
-                    {
-                        FlyWeight["$where"] = " function(){return " + qry + ";}";
-                    }
+                    FlyWeight["$where"] = where;
+                }
+                else
+                {
+                    FlyWeight["$where"] = " function(){return " + where + ";}";
                 }
             }
-
-            return qry;
         }
 
         /// <summary>
@@ -209,14 +211,8 @@ namespace Norm.Linq
             else if (m.Member.DeclaringType == typeof(DateTime) || m.Member.DeclaringType == typeof(DateTimeOffset))
             {
                 #region DateTime Magic
-                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-
                 // this is complex
                 IsComplex = true;
-
-                // this is a DateProperty hanging off the property - clip the last 2 elements
-                var fixedName = fullName.Skip(1).Take(fullName.Length - 2).ToArray();
-                var propName = string.Join(".", fixedName);
 
                 // now we get to do some tricky fun with javascript
                 switch (m.Member.Name)
