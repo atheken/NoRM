@@ -31,7 +31,7 @@ namespace Norm.Linq
         private string _lastOperator = " === ";
 
         /// <summary>TODO::Description.</summary>
-        private StringBuilder _sb;
+        private StringBuilder _sbWhere;
 
         /// <summary>TODO::Description.</summary>
         private StringBuilder _sbIndexed;
@@ -118,41 +118,11 @@ namespace Norm.Linq
         /// </summary>
         public string WhereExpression
         {
-            get { return _sb.ToString(); }
+            get { return _sbWhere.ToString(); }
         }
 
         /// <summary>TODO::Description.</summary>
         public bool UseScopedQualifier { get; set; }
-
-        /// <summary>
-        /// The translate collection name.
-        /// </summary>
-        /// <param name="exp">The exp.</param>
-        /// <returns>The collection name.</returns>
-        public string TranslateCollectionName(Expression exp)
-        {
-            ConstantExpression c = null;
-            switch (exp.NodeType)
-            {
-                case ExpressionType.Constant:
-                    c = (ConstantExpression)exp;
-                    break;
-                case ExpressionType.Call:
-                    {
-                        var m = (MethodCallExpression)exp;
-                        c = m.Arguments[0] as ConstantExpression;
-                    }
-                    break;
-            }
-
-            //var result = string.Empty;
-
-            // the first argument is a Constant - it's the query itself
-            var q = c.Value as IQueryable;
-            var result = q.ElementType.Name;
-
-            return result;
-        }
 
         /// <summary>
         /// Translates LINQ to MongoDB.
@@ -168,13 +138,13 @@ namespace Norm.Linq
         public string Translate(Expression exp, bool useScopedQualifier)
         {
             UseScopedQualifier = useScopedQualifier;
-            _sb = new StringBuilder();
+            _sbWhere = new StringBuilder();
             _sbIndexed = new StringBuilder();
             FlyWeight = new Flyweight();
             SortFly = new Flyweight();
             Visit(exp);
 
-            var qry = _sb.ToString();
+            var qry = _sbWhere.ToString();
 
             if (!string.IsNullOrEmpty(qry) || IsComplex)
             {
@@ -189,12 +159,12 @@ namespace Norm.Linq
                     }
                     else
                     {
-                        FlyWeight["$where"] = " function(){return " + qry + "; }";
+                        FlyWeight["$where"] = " function(){return " + qry + ";}";
                     }
                 }
             }
 
-            return _sb.ToString();
+            return qry;
         }
 
         /// <summary>
@@ -217,10 +187,10 @@ namespace Norm.Linq
 
                 if (UseScopedQualifier)
                 {
-                    _sb.Append("this.");
+                    _sbWhere.Append("this.");
                 }
 
-                _sb.Append(alias);
+                _sbWhere.Append(alias);
                 _lastFlyProperty = alias;
                 return m;
             }
@@ -230,9 +200,9 @@ namespace Norm.Linq
                 switch (m.Member.Name)
                 {
                     case "Length":
-                        _sb.Append("LEN(");
+                        IsComplex = true;
                         Visit(m.Expression);
-                        _sb.Append(")");
+                        _sbWhere.Append(".length");
                         return m;
                 }
             }
@@ -253,31 +223,31 @@ namespace Norm.Linq
                 {
                     case "Day":
                         Visit(m.Expression);
-                        _sb.Append(".getDate()");
+                        _sbWhere.Append(".getDate()");
                         return m;
                     case "Month":
                         Visit(m.Expression);
-                        _sb.Append(".getMonth()");
+                        _sbWhere.Append(".getMonth()");
                         return m;
                     case "Year":
                         Visit(m.Expression);
-                        _sb.Append(".getFullYear()");
+                        _sbWhere.Append(".getFullYear()");
                         return m;
                     case "Hour":
                         Visit(m.Expression);
-                        _sb.Append(".getHours()");
+                        _sbWhere.Append(".getHours()");
                         return m;
                     case "Minute":
                         Visit(m.Expression);
-                        _sb.Append(".getMinutes()");
+                        _sbWhere.Append(".getMinutes()");
                         return m;
                     case "Second":
                         Visit(m.Expression);
-                        _sb.Append(".getSeconds()");
+                        _sbWhere.Append(".getSeconds()");
                         return m;
                     case "DayOfWeek":
                         Visit(m.Expression);
-                        _sb.Append(".getDay()");
+                        _sbWhere.Append(".getDay()");
                         return m;
                 }
                 #endregion
@@ -302,10 +272,10 @@ namespace Norm.Linq
                 //sb.Append("this." + result);
                 if (UseScopedQualifier)
                 {
-                    _sb.Append("this.");
+                    _sbWhere.Append("this.");
                 }
   
-                _sb.Append(result);
+                _sbWhere.Append(result);
 
                 _lastFlyProperty = result;
                 return m;
@@ -369,11 +339,11 @@ namespace Norm.Linq
         protected override Expression VisitBinary(BinaryExpression b)
         {
             ConditionalCount++;
-            _sb.Append("(");
+            _sbWhere.Append("(");
             Visit(b.Left);
-            _sb.Append(GetBinaryOperator(b));
+            _sbWhere.Append(GetBinaryOperator(b));
             Visit(b.Right);
-            _sb.Append(")");
+            _sbWhere.Append(")");
             return b;
         }
 
@@ -403,24 +373,24 @@ namespace Norm.Linq
             }
             else if (c.Value == null)
             {
-                _sb.Append("NULL");
+                _sbWhere.Append("NULL");
             }
             else
             {
                 switch (Type.GetTypeCode(c.Value.GetType()))
                 {
                     case TypeCode.Boolean:
-                        _sb.Append(((bool)c.Value) ? 1 : 0);
+                        _sbWhere.Append(((bool)c.Value) ? 1 : 0);
                         SetFlyValue(((bool)c.Value) ? 1 : 0);
                         break;
                     case TypeCode.DateTime:
                         var val = "new Date(" + (long)((DateTime)c.Value).Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
-                        _sb.Append(val);
+                        _sbWhere.Append(val);
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.String:
                         var sval = "'" + c.Value + "'";
-                        _sb.Append(sval);
+                        _sbWhere.Append(sval);
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.Object:
@@ -428,14 +398,14 @@ namespace Norm.Linq
                         {
                             if (_lastOperator == " === ")
                             {
-                                _sb.Remove(_sb.Length - 2, 1);
+                                _sbWhere.Remove(_sbWhere.Length - 2, 1);
                             }
-                            _sb.AppendFormat("'{0}'", c.Value);
+                            _sbWhere.AppendFormat("'{0}'", c.Value);
                             SetFlyValue(c.Value);
                         }
                         else if (c.Value is Guid)
                         {
-                            _sb.AppendFormat("'{0}'", c.Value);
+                            _sbWhere.AppendFormat("'{0}'", c.Value);
                             SetFlyValue(c.Value);
                         }
                         else
@@ -444,7 +414,7 @@ namespace Norm.Linq
                         }
                         break;
                     default:
-                        _sb.Append(c.Value);
+                        _sbWhere.Append(c.Value);
                         SetFlyValue(c.Value);
                         break;
                 }
@@ -473,75 +443,75 @@ namespace Norm.Linq
                 switch (m.Method.Name)
                 {
                     case "StartsWith":
-                        _sb.Append("(");
+                        _sbWhere.Append("(");
                         Visit(m.Object);
-                        _sb.Append(".indexOf(");
+                        _sbWhere.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        _sb.Append(")===0)");
+                        _sbWhere.Append(")===0)");
                         return m;
                     case "Contains":
-                        _sb.Append("(");
+                        _sbWhere.Append("(");
                         Visit(m.Object);
-                        _sb.Append(".indexOf(");
+                        _sbWhere.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        _sb.Append(")>-1)");
+                        _sbWhere.Append(")>-1)");
                         return m;
                     case "IndexOf":
                         Visit(m.Object);
-                        _sb.Append(".indexOf(");
+                        _sbWhere.Append(".indexOf(");
                         Visit(m.Arguments[0]);
-                        _sb.Append(")");
+                        _sbWhere.Append(")");
                         return m;
                     case "LastIndexOf":
                         Visit(m.Object);
-                        _sb.Append(".lastIndexOf(");
+                        _sbWhere.Append(".lastIndexOf(");
                         Visit(m.Arguments[0]);
-                        _sb.Append(")");
+                        _sbWhere.Append(")");
                         return m;
                     case "EndsWith":
-                        _sb.Append("(");
+                        _sbWhere.Append("(");
                         Visit(m.Object);
-                        _sb.Append(".match(");
+                        _sbWhere.Append(".match(");
                         Visit(m.Arguments[0]);
-                        _sb.Append("+'$')==");
+                        _sbWhere.Append("+'$')==");
                         Visit(m.Arguments[0]);
-                        _sb.Append(")");
+                        _sbWhere.Append(")");
                         return m;
                     case "IsNullOrEmpty":
-                        _sb.Append("(");
+                        _sbWhere.Append("(");
                         Visit(m.Arguments[0]);
-                        _sb.Append(" == '' ||  ");
+                        _sbWhere.Append(" == '' ||  ");
                         Visit(m.Arguments[0]);
-                        _sb.Append(" == null  )");
+                        _sbWhere.Append(" == null  )");
                         return m;
                     case "ToLower":
                     case "ToLowerInvariant":
                         Visit(m.Object);
-                        _sb.Append(".toLowerCase()");
+                        _sbWhere.Append(".toLowerCase()");
                         return m;
                     case "ToUpper":
                     case "ToUpperInvariant":
                         Visit(m.Object);
-                        _sb.Append(".toUpperCase()");
+                        _sbWhere.Append(".toUpperCase()");
                         return m;
                     case "Substring":
                         Visit(m.Object);
-                        _sb.Append(".substr(");
+                        _sbWhere.Append(".substr(");
                         Visit(m.Arguments[0]);
                         if (m.Arguments.Count == 2)
                         {
-                            _sb.Append(",");
+                            _sbWhere.Append(",");
                             Visit(m.Arguments[1]);
                         }
-                        _sb.Append(")");
+                        _sbWhere.Append(")");
                         return m;
                     case "Replace":
                         Visit(m.Object);
-                        _sb.Append(".replace(new RegExp(");
+                        _sbWhere.Append(".replace(new RegExp(");
                         Visit(m.Arguments[0]);
-                        _sb.Append(",'g'),");
+                        _sbWhere.Append(",'g'),");
                         Visit(m.Arguments[1]);
-                        _sb.Append(")");
+                        _sbWhere.Append(")");
                         return m;
                 }
             }
@@ -754,7 +724,7 @@ namespace Norm.Linq
         {
             if (_whereWritten)
             {
-                _sb.Append(" && ");
+                _sbWhere.Append(" && ");
                 IsComplex = true;
             }
            
@@ -766,22 +736,22 @@ namespace Norm.Linq
         {
             var collection = (IEnumerable)m.Object.GetConstantValue();
 
-            _sb.Append("(");
+            _sbWhere.Append("(");
             foreach (var item in collection)
             {
                 Visit(m.Arguments[0]);
-                _sb.Append(" === ");
+                _sbWhere.Append(" === ");
                 Visit(Expression.Constant(item));
-                _sb.Append(" || ");
+                _sbWhere.Append(" || ");
             }
-            _sb.Remove(_sb.Length - 4, 4);
-            _sb.Append(")");
+            _sbWhere.Remove(_sbWhere.Length - 4, 4);
+            _sbWhere.Append(")");
         }
 
         private void HandleSubCount(MethodCallExpression m)
         {
             Visit(m.Arguments[0]);
-            _sb.Append(".length");
+            _sbWhere.Append(".length");
         }
 
         /// <summary>

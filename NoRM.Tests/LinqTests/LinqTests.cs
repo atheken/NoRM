@@ -743,6 +743,23 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void TwoProductsofFourShouldBeReturnedWhereLengthOfNameEquals4()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "Test", Price = 10 });
+                session.Add(new TestProduct { Name = "Test1", Price = 22 });
+                session.Add(new TestProduct { Name = "Test1", Price = 33 });
+                session.Add(new TestProduct { Name = "Test", Price = 44 });
+                var products = session.Products.Where(x => x.Name.Length == 4).ToList().OrderBy(x => x.Price).ToArray();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(44, products[1].Price);
+                Assert.Equal(2, products.Length);
+            }
+        }
+
+
+        [Fact]
         public void FiltersBasedOnObjectId()
         {
             var targetId = ObjectId.NewObjectId();
