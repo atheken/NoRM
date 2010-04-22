@@ -30,9 +30,7 @@ namespace Norm.Configuration
 
             if (!_idProperties.ContainsKey(type))
             {
-                PropertyInfo idProp = null;
-
-                idProp = TypeHelper.FindIdProperty(type);
+                PropertyInfo idProp = TypeHelper.FindIdProperty(type);
 
                 if (idProp != null)
                 {

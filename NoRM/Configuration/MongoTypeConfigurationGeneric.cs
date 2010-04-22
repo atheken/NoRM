@@ -37,6 +37,11 @@ namespace Norm.Configuration
             return expression;
         }
 
+        /// <summary>
+        /// Defines a property as and entity's Id explicitly.
+        /// </summary>
+        /// <param name="idProperty">The Id propery.</param>
+        /// <returns></returns>
         public void IdIs(Expression<Func<T, object>> idProperty)
         {
             var propertyName = TypeHelper.FindProperty(idProperty);

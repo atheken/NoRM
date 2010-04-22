@@ -35,6 +35,10 @@ namespace Norm.BSON
             }
         }
 
+        /// <summary>
+        /// Returns the PropertyInfo for properties defined as Instance, Public, NonPublic, or FlattenHierarchy
+        /// </summary>
+        /// <param name="type">The type.</param>
         private static PropertyInfo[] GetProperties(Type type)
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
@@ -160,6 +164,11 @@ namespace Norm.BSON
                 _properties["$_id"] : _properties.ContainsKey("$id") ? _properties["$id"] : null;
         }
 
+        /// <summary>
+        /// Determines if the Id has been defined explicitly in a MongoConfigurationMap <see cref="MongoConfigurationMap"/>.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="propertyName">The property name.</param>
         private static bool PropertyIsExplicitlyMappedToId(Type type, string propertyName)
         {
             var map = MongoTypeConfiguration.PropertyMaps;
@@ -176,9 +185,10 @@ namespace Norm.BSON
         /// <summary>
         /// Gets the id property.
         /// </summary>
+        /// <param name="type">The type.</param>
         /// <param name="properties">The properties.</param>
         /// <returns></returns>
-        public static PropertyInfo FindIdProperty(Type type, IEnumerable<PropertyInfo> properties)
+        private static PropertyInfo FindIdProperty(Type type, IEnumerable<PropertyInfo> properties)
         {
             PropertyInfo idProp = null;
             foreach (var property in properties)
@@ -198,7 +208,7 @@ namespace Norm.BSON
                     idProp = property;
                     break;
                 }
-                if (idProp == null && property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
+                if (property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase)) //idProp is always null if execution gets here
                 {
                     idProp = property;
                     break;
@@ -207,6 +217,11 @@ namespace Norm.BSON
             return idProp;
         }
 
+        ///<summary>
+        /// Returns the property defined as the Id for the entity either by convention or explicitly. 
+        ///</summary>
+        ///<param name="type">The type.</param>
+        ///<returns></returns>
         public static PropertyInfo FindIdProperty(Type type)
         {
             return FindIdProperty(type, GetProperties(type));

@@ -20,7 +20,7 @@ namespace Norm.Configuration
         IPropertyMappingExpression ForProperty(Expression<Func<T, object>> sourcePropery);
 
         /// <summary>
-        /// Specifies the Id property for entities that don't have the conventional Id's and can't be changed.
+        /// Specifies the Id property for entities that don't have conventional Id's and can't be changed.
         /// </summary>
         /// <param name="idProperty">The unconventional Id propery.</param>
         /// <returns></returns>
