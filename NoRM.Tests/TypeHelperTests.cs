@@ -75,7 +75,28 @@ namespace Norm.Tests
         {
             Assert.Throws<MongoConfigurationMapException>(() => TypeHelper.FindIdProperty(typeof(EntityWithUnderscoreidAndAttribute)));
         }
+
+        [Fact]
+        public void FindIdProperty_Throws_MongoConfigurationException_When_Entity_Has__id_And_MappedId()
+        {
+            MongoConfiguration.Initialize(config => config.AddMap<EntityWithUnderscoreidAndMappedIdConfigurationMap>());
+            Assert.Throws<MongoConfigurationMapException>(() => TypeHelper.FindIdProperty(typeof(EntityWithUnderscoreidAndAttribute)));
+        }
 	}
+
+    public class EntityWithUnderscoreidAndMappedIdConfigurationMap : MongoConfigurationMap
+    {
+        public EntityWithUnderscoreidAndMappedIdConfigurationMap()
+        {
+            For<EntityWithUnderscoreidAndMappedId>(config => config.IdIs(entity => entity.UnconventionalId));
+        }
+    }
+
+    public class EntityWithUnderscoreidAndMappedId
+    {
+        public ObjectId _id { get; set; }
+        public ObjectId UnconventionalId { get; set; }
+    }
 
     public class EntityWithUnderscoreidAndAttribute
     {

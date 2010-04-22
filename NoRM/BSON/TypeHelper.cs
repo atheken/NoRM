@@ -200,7 +200,7 @@ namespace Norm.BSON
         /// <returns></returns>
         private static PropertyInfo FindIdProperty(Type type, IEnumerable<PropertyInfo> properties)
         {
-            PropertyInfo idProp = null;
+            //PropertyInfo idProp = null;
             Dictionary<string, PropertyInfo> idDictionary = new Dictionary<string, PropertyInfo>(4);
 
             foreach (var property in properties)
@@ -233,7 +233,7 @@ namespace Norm.BSON
                 {
                     if(idDictionary.Keys.Contains("Mapped") || idDictionary.Keys.Contains("Attribute"))
                     {
-                        throw new MongoConfigurationMapException();
+                        throw new MongoConfigurationMapException(type.Name + " exposes a property called _id and defines a an Id using MongoIndentifier or by explicit mapping.");
                     }
                 }
             }
