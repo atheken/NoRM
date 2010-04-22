@@ -205,23 +205,19 @@ namespace Norm.BSON
             {
                 if(PropertyIsExplicitlyMappedToId(type, property.Name))
                 {
-                    idProp = property;
-                    break;
+                    return property;
                 }
                 if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
                 {
-                    idProp = property;
-                    break;
+                    return property;
                 }
                 if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    idProp = property;
-                    break;
+                    return property;
                 }
-                if (property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase)) //idProp is always null if execution gets here
+                if (property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    idProp = property;
-                    break;
+                    idProp = property;                    
                 }
             }
             return idProp;
