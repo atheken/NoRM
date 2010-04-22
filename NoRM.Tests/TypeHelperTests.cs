@@ -82,7 +82,44 @@ namespace Norm.Tests
             MongoConfiguration.Initialize(config => config.AddMap<EntityWithUnderscoreidAndMappedIdConfigurationMap>());
             Assert.Throws<MongoConfigurationMapException>(() => TypeHelper.FindIdProperty(typeof(EntityWithUnderscoreidAndAttribute)));
         }
+
+        [Fact]
+        public void FindIdProperty_Returns_MappedId_Property_When_Entity_Has_MappedId_And_Attribute_Defined_Id()
+        {
+            MongoConfiguration.Initialize(config => config.AddMap<EntityWithMappedIdAndAttributeDefindIdConfigurationMap>());
+            Assert.Equal("MappedId", TypeHelper.FindIdProperty(typeof(EntityWithMappedIdAndAttributeDefindId)).Name);
+        }
+
+        [Fact]
+        public void FindIdProperty_Returns_Attribute_Defined_Id_Property_When_Entity_Has_Attribute_Defined_Id_And_Conventional_Id()
+        {
+            Assert.Equal("AttributeDefinedId", TypeHelper.FindIdProperty(typeof(EntityWithAttributeDefindIdAndConventionalId)).Name);
+        }
 	}
+
+    public class EntityWithAttributeDefindIdAndConventionalId
+    {
+        [MongoIdentifier]
+        public Guid AttributeDefinedId { get; set;}
+
+        public ObjectId Id { get; set; }
+    }
+
+    public class EntityWithMappedIdAndAttributeDefindIdConfigurationMap : MongoConfigurationMap
+    {
+        public EntityWithMappedIdAndAttributeDefindIdConfigurationMap()
+        {
+            For<EntityWithMappedIdAndAttributeDefindId>(config => config.IdIs(entity => entity.MappedId));
+        }
+    }
+
+    public class EntityWithMappedIdAndAttributeDefindId
+    {
+        public Guid MappedId { get; set; }
+
+        [MongoIdentifier]
+        public ObjectId AttributeDefinedId { get; set; }
+    }
 
     public class EntityWithUnderscoreidAndMappedIdConfigurationMap : MongoConfigurationMap
     {

@@ -200,7 +200,6 @@ namespace Norm.BSON
         /// <returns></returns>
         private static PropertyInfo FindIdProperty(Type type, IEnumerable<PropertyInfo> properties)
         {
-            //PropertyInfo idProp = null;
             Dictionary<string, PropertyInfo> idDictionary = new Dictionary<string, PropertyInfo>(4);
 
             foreach (var property in properties)
@@ -208,22 +207,18 @@ namespace Norm.BSON
                 if(PropertyIsExplicitlyMappedToId(type, property.Name))
                 {
                     idDictionary.Add("Mapped", property);
-                    //return property;
                 }
                 else if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
                 {
                     idDictionary.Add("Attribute", property);
-                    //return property;
                 }
                 else if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
                 {
                     idDictionary.Add("MongoDefault", property);
-                    //return property;
                 }
                 else if (property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
                 {
                     idDictionary.Add("Conventional", property);
-                    //idProp = property;
                 }
             }
 
@@ -237,9 +232,25 @@ namespace Norm.BSON
                     }
                 }
             }
+
+            if (idDictionary.Keys.Contains("MongoDefault"))
+            {
+                return idDictionary["MongoDefault"];
+            }
+            if(idDictionary.Keys.Contains("Mapped"))
+            {
+                return idDictionary["Mapped"];
+            }
+            if(idDictionary.Keys.Contains("Attribute"))
+            {
+                return idDictionary["Attribute"];
+            }
+            if(idDictionary.Keys.Contains("Conventional"))
+            {
+                return idDictionary["Conventional"];
+            }
             
-            //return idProp;
-            return idDictionary.Values.First();
+            return null;
         }
 
         ///<summary>
