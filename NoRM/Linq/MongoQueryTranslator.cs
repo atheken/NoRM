@@ -253,30 +253,28 @@ namespace Norm.Linq
                 var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
                 // this supports the "deep graph" name - "Product.Address.City"
-                var fixedName = fullName.Skip(1).Take(fullName.Length - 1)
+                var fixedName = fullName
+                    .Skip(1)
                     .Where(x => x != "First()")
-                    .Select(x => System.Text.RegularExpressions.Regex.Replace(x, @"\[[0-9]+\]",""))
+                    .Select(x => System.Text.RegularExpressions.Regex.Replace(x, @"\[[0-9]+\]", ""))
                     .ToArray();
 
-                String result = "";
-
                 var expressionRootType = GetParameterExpression(m.Expression);
-
                 if (expressionRootType != null)
                 {
                     fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
                 }
 
-                result = string.Join(".", fixedName);
-
                 if (UseScopedQualifier)
                 {
                     _sbWhere.Append("this.");
                 }
-  
-                _sbWhere.Append(result);
 
+                string result = string.Join(".", fixedName);
+                
+                _sbWhere.Append(result);
                 _lastFlyProperty = result;
+
                 return m;
             }
 
@@ -284,18 +282,79 @@ namespace Norm.Linq
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
         }
 
+        /// <summary>
+        /// The get parameter expression.
+        /// </summary>
+        /// <param name="expression">
+        /// The expression.
+        /// </param>
+        /// <returns>
+        /// </returns>
+        private static ParameterExpression GetParameterExpression(Expression expression)
+        {
+            var expressionRoot = false;
+            Expression parentExpression = expression;
+
+            while (!expressionRoot)
+            {
+                if (parentExpression.NodeType == ExpressionType.MemberAccess)
+                {
+                    parentExpression = ((MemberExpression)parentExpression).Expression;
+                    expressionRoot = parentExpression is ParameterExpression;
+                }
+                else if (parentExpression.NodeType == ExpressionType.ArrayIndex)
+                {
+                    parentExpression = ((BinaryExpression)parentExpression).Left;
+                    expressionRoot = parentExpression is ParameterExpression;
+                }
+                else if (parentExpression.NodeType == ExpressionType.Call)
+                {
+                    parentExpression = ((MemberExpression)(((MethodCallExpression)parentExpression).Arguments[0])).Expression;
+                    expressionRoot = parentExpression is ParameterExpression;
+                }
+                else
+                {
+                    expressionRoot = true;
+                }
+
+            }
+
+            return (ParameterExpression)parentExpression;
+        }
+
+        /// <summary>
+        /// The get deep alias.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="graph">The graph.</param>
+        /// <returns></returns>
+        private static string[] GetDeepAlias(Type type, string[] graph)
+        {
+            var graphParts = new string[graph.Length];
+            var typeToQuery = type;
+
+            for (var i = 0; i < graph.Length; i++)
+            {
+                var property = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
+                graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
+                typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
+            }
+
+            return graphParts;
+        }
+
         /// <summary>TODO::Description.</summary>
-        string GetBinaryOperator(BinaryExpression b) {
+        private string GetBinaryOperator(BinaryExpression b) {
             var result = "";
             switch (b.NodeType) {
                 case ExpressionType.And:
                 case ExpressionType.AndAlso:
-                    result =" && ";
+                    result = " && ";
                     break;
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
                     IsComplex = true;
-                    result =" || ";
+                    result = " || ";
                     break;
                 case ExpressionType.Equal:
                     _lastOperator = " === ";//Should this be '===' instead? a la 'Javascript: The good parts'
@@ -572,67 +631,6 @@ namespace Norm.Linq
             }
 
             return e;
-        }
-
-        /// <summary>
-        /// The get parameter expression.
-        /// </summary>
-        /// <param name="expression">
-        /// The expression.
-        /// </param>
-        /// <returns>
-        /// </returns>
-        private static ParameterExpression GetParameterExpression(Expression expression)
-        {
-            var expressionRoot = false;
-            Expression parentExpression = expression;
-
-            while (!expressionRoot)
-            {
-                if (parentExpression.NodeType == ExpressionType.MemberAccess)
-                {
-                    parentExpression = ((MemberExpression)parentExpression).Expression;
-                    expressionRoot = parentExpression is ParameterExpression;
-                }
-                else if (parentExpression.NodeType == ExpressionType.ArrayIndex)
-                {
-                    parentExpression = ((BinaryExpression)parentExpression).Left;
-                    expressionRoot = parentExpression is ParameterExpression;
-                }
-                else if (parentExpression.NodeType == ExpressionType.Call)
-                {
-                    parentExpression = ((MemberExpression)(((MethodCallExpression)parentExpression).Arguments[0])).Expression;
-                    expressionRoot = parentExpression is ParameterExpression;
-                }
-                else
-                {
-                    expressionRoot = true;
-                }
-
-            }
-
-            return (ParameterExpression)parentExpression;
-        }
-
-        /// <summary>
-        /// The get deep alias.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="graph">The graph.</param>
-        /// <returns></returns>
-        private static string[] GetDeepAlias(Type type, string[] graph)
-        {
-            var graphParts = new string[graph.Length];
-            var typeToQuery = type;
-
-            for (var i = 0; i < graph.Length; i++)
-            {
-                var property = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
-                graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
-                typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
-            }
-
-            return graphParts;
         }
 
         /// <summary>
