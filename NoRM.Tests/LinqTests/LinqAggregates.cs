@@ -10,10 +10,10 @@ namespace Norm.Tests
     {
         public LinqAggregates()
         {
-            MongoConfiguration.RemoveMapFor<Product>();
+            MongoConfiguration.RemoveMapFor<TestProduct>();
             using (var session = new Session())
             {
-                session.Drop<Product>();
+                session.Drop<TestProduct>();
             }
         }
 
@@ -22,9 +22,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 22 });
-                session.Add(new Product { Name = "3", Price = 33 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 22 });
+                session.Add(new TestProduct { Name = "3", Price = 33 });
                 var result = session.Products.Count();
                 Assert.Equal(3, result);
             }
@@ -34,9 +34,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 22 });
-                session.Add(new Product { Name = "3", Price = 33 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 22 });
+                session.Add(new TestProduct { Name = "3", Price = 33 });
                 var result = session.Products.Where(x => x.Price > 20).Count();
                 Assert.Equal(2, result);
             }
@@ -48,9 +48,9 @@ namespace Norm.Tests
             var target = ObjectId.NewObjectId();
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 40, _id = target });
-                session.Add(new Product { Name = "2", Price = 22, _id = ObjectId.NewObjectId() });
-                session.Add(new Product { Name = "3", Price = 33, _id = ObjectId.NewObjectId() });
+                session.Add(new TestProduct { Name = "1", Price = 40, _id = target });
+                session.Add(new TestProduct { Name = "2", Price = 22, _id = ObjectId.NewObjectId() });
+                session.Add(new TestProduct { Name = "3", Price = 33, _id = ObjectId.NewObjectId() });
                 var result = session.Products.Where(x => x._id == target).Count();
                 Assert.Equal(1, result);
             }
@@ -60,9 +60,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "dd", Price = 10 });
-                session.Add(new Product { Name = "ss", Price = 20 });
-                session.Add(new Product { Name = "asdasddds", Price = 30 });
+                session.Add(new TestProduct { Name = "dd", Price = 10 });
+                session.Add(new TestProduct { Name = "ss", Price = 20 });
+                session.Add(new TestProduct { Name = "asdasddds", Price = 30 });
                 var result = session.Products.Sum(x => x.Price);
                 Assert.Equal(60, result);
             }
@@ -72,9 +72,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 20 });
-                session.Add(new Product { Name = "3", Price = 30 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Where(x => x.Price < 30).Sum(x => x.Price);
                 Assert.Equal(30, result);
             }
@@ -89,9 +89,9 @@ namespace Norm.Tests
                 names.Add("1");
                 names.Add("2");
 
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 20 });
-                session.Add(new Product { Name = "3", Price = 30 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Where(x => names.Contains(x.Name)).Sum(x => x.Price);
                 Assert.Equal(30, result);
             }
@@ -102,9 +102,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 20 });
-                session.Add(new Product { Name = "3", Price = 30 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Average(x => x.Price);
                 Assert.Equal(20, result);
             }
@@ -114,9 +114,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 20 });
-                session.Add(new Product { Name = "3", Price = 30 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Where(x => x.Price < 30).Average(x => x.Price);
                 Assert.Equal(15, result);
             }
@@ -129,7 +129,7 @@ namespace Norm.Tests
             {
                 for (var i = 0; i < 1000; i++)
                 {
-                    session.Add(new Product { Name = i.ToString(), Price = i + 1 });
+                    session.Add(new TestProduct { Name = i.ToString(), Price = i + 1 });
                 }
 
                 var result = session.Products.Average(x => x.Price);
@@ -142,9 +142,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 20 });
-                session.Add(new Product { Name = "3", Price = 30 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Min(x => x.Price);
                 Assert.Equal(10, result);
             }
@@ -155,9 +155,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 20 });
-                session.Add(new Product { Name = "3", Price = 30 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Max(x => x.Price);
                 Assert.Equal(30, result);
             }
@@ -167,21 +167,48 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 20 });
-                session.Add(new Product { Name = "3", Price = 30 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
 
                 Assert.True(session.Products.Any(x => x.Price == 10));
             }
         }
+
+        [Fact]
+        public void AnyShouldReturnTrueWhenProductPrice10AndWhere()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                Assert.True(session.Products.Where(x=>x.Price < 30).Any(x => x.Price == 10));
+            }
+        }
+
+        [Fact]
+        public void AnyShouldReturnTrueWhenProductList()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                Assert.True(session.Products.Any());
+            }
+        }
+
         [Fact]
         public void AnyShouldReturnFalseWhenProductPrice100()
         {
             using (var session = new Session())
             {
-                session.Add(new Product { Name = "1", Price = 10 });
-                session.Add(new Product { Name = "2", Price = 20 });
-                session.Add(new Product { Name = "3", Price = 30 });
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
 
                 Assert.False(session.Products.Any(x => x.Price == 100));
             }

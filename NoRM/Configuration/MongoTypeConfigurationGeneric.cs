@@ -69,5 +69,14 @@ namespace Norm.Configuration
             ConnectionStrings[typeof(T)] = connectionString;
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
+
+        /// <summary>
+        /// Marks a type as a summary of another type (partial get)
+        /// </summary>  
+        public void SummaryOf<S>()
+        {
+            SummaryTypes[typeof (T)] = typeof (S);
+            MongoConfiguration.FireTypeChangedEvent(typeof(T));
+        }
     }
 }

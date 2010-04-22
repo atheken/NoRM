@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Norm.BSON;
+using Norm.Configuration;
 using Norm.Linq;
 using Norm.Protocol;
 using Norm.Protocol.Messages;
@@ -307,7 +308,7 @@ namespace Norm.Collections
         /// is of this type, or BAD THINGS will happen.</typeparam>
         /// <param name="keyName">Name of the key.</param>
         /// <returns></returns>
-        public IEnumerable<U> Distinct<U>(string keyName) where U : class, new()
+        public IEnumerable<U> Distinct<U>(string keyName)
         {
             return _db.GetCollection<DistinctValuesResponse<U>>("$cmd")
                 .FindOne(new { distinct = _collectionName, key = keyName }).Values;
@@ -388,8 +389,23 @@ namespace Norm.Collections
                 Query = template,
                 OrderBy = orderBy
             };
-
+            var type = typeof (T);
+            if (MongoConfiguration.SummaryTypeFor(type) != null)
+            {
+                qm.FieldSelection = GetSelectionFields(type);
+            }
             return new MongoQueryExecutor<T, U>(qm);
+        }
+
+        private static FieldSelectionList GetSelectionFields(Type type)
+        {
+            var properties = TypeHelper.GetHelperForType(type).GetProperties();
+            var fields = new FieldSelectionList(properties.Count);
+            foreach (var property in properties)
+            {
+                fields.Add(property.Name);
+            }
+            return fields;
         }
 
         /// <summary>
@@ -486,6 +502,67 @@ namespace Norm.Collections
             }
         }
 
+
+        /// <summary>
+        /// Executes the MapReduce on this collection
+        /// </summary>
+        /// <typeparam name="X">The return type</typeparam>
+        /// <param name="map"></param>
+        /// <param name="reduce"></param>
+        /// <returns></returns>
+        public IEnumerable<X> MapReduce<X>(string map, string reduce)
+        {
+            return MapReduce<X>(new MapReduceOptions<T> {Map = map, Reduce = reduce});
+        }
+        
+        /// <summary>
+        /// Executes the map reduce with an applied template
+        /// </summary>
+        /// <typeparam name="U">The type of the template</typeparam>
+        /// <typeparam name="X">The return type</typeparam>
+        /// <param name="template"></param>
+        /// <param name="map"></param>
+        /// <param name="reduce"></param>
+        /// <returns></returns>
+        public IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce)
+        {
+            return MapReduce<X>(new MapReduceOptions<T> {Query = template, Map = map, Reduce = reduce });
+            
+        }
+
+        /// <summary>
+        /// Executes the map reduce with an applied template and finalize
+        /// </summary>
+        /// <typeparam name="U">The type of the template</typeparam>
+        /// <typeparam name="X">The return type</typeparam>
+        /// <param name="template">The template</param>
+        /// <param name="map"></param>
+        /// <param name="reduce"></param>
+        /// <param name="finalize"></param>
+        /// <returns></returns>
+        public IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce, string finalize)
+        {
+            return MapReduce<X>(new MapReduceOptions<T> {Query = template, Map = map, Reduce = reduce, Finalize = finalize});
+            
+        }
+
+        /// <summary>
+        /// Executes the map reduce with any options
+        /// </summary>
+        /// <typeparam name="X">The return type</typeparam>
+        /// <param name="options">The options</param>
+        /// <returns></returns>
+        public IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options)
+        {
+            var mr = new MapReduce(_db);
+            var response = mr.Execute(options);
+            var collection = response.GetCollection<X>();
+            return collection.Find().ToList();
+
+        }
+
+
+
         private void AssertUpdatable()
         {
             if (!Updateable)
@@ -531,5 +608,6 @@ namespace Norm.Collections
         {
             return typeof(T).GetInterface("IUpdateWithoutId") != null;
         }
+
     }
 }

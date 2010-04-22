@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Norm.BSON;
+using Norm.Responses;
 using Xunit;
 using Norm.Collections;
 using System.Text.RegularExpressions;
@@ -11,11 +12,14 @@ namespace Norm.Tests
     public class QueryTests : IDisposable
     {
         private readonly Mongo _server;
+        private BuildInfoResponse _buildInfo = null;
         private readonly MongoCollection<Person> _collection;
         public QueryTests()
         {
+            var admin = new MongoAdmin("mongodb://localhost/admin?pooling=false&strict=true");
             _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
             _collection = _server.GetCollection<Person>("People");
+            _buildInfo = admin.BuildInfo();
             //cause the collection to exist on the server by inserting, then deleting some things.
             _collection.Insert(new Person());
             _collection.Delete(new { });
@@ -51,13 +55,61 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "AAA" });
             _collection.Insert(new Person { Name = "DDD" });
 
-            var result = _collection.Find(new { }, new { Name = -1}, 3, 1).ToArray();
+            var result = _collection.Find(new { Name = Q.NotEqual(new int?()) }, new { Name = OrderBy.Descending}, 3, 1).ToArray();
             Assert.Equal(3, result.Length);
             Assert.Equal("CCC", result[0].Name);
             Assert.Equal("BBB", result[1].Name);
             Assert.Equal("AAA", result[2].Name);
         }
 
+        [Fact]
+        public void Find_Uses_Query_And_Orderby()
+        {
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { Name = Q.NotEqual("AAA") }, new { Name = OrderBy.Descending }).ToArray();
+            Assert.Equal(3, result.Length);
+            Assert.Equal("DDD", result[0].Name);
+            Assert.Equal("CCC", result[1].Name);
+            Assert.Equal("BBB", result[2].Name);
+        }
+
+        [Fact]
+        public void Find_Uses_Query_And_Orderby_And_Limit()
+        {
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { Name = Q.NotEqual("DDD") }, new { Name = OrderBy.Descending }, 2, 0).ToArray();
+            Assert.Equal(2, result.Length);
+            Assert.Equal("CCC", result[0].Name);
+            Assert.Equal("BBB", result[1].Name);
+        }
+
+        [Fact]
+        public void Find_Uses_Null_Qualifier()
+        {
+            _collection.Insert(new Person { Name = null });
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Find(new { Name = Q.IsNull() }, new { Name = OrderBy.Descending }, 2, 0).ToArray();
+            Assert.Equal(1, result.Length);
+            Assert.Equal(null, result[0].Name);
+
+            result = _collection.Find(new { Name = Q.IsNotNull() }, new { Name = OrderBy.Descending }).ToArray();
+            Assert.Equal(4,result.Length);
+            Assert.Equal("DDD", result[0].Name);
+        }
 
         [Fact]
         public void FindUsesLimitAndSkip()
@@ -180,6 +232,67 @@ namespace Norm.Tests
 
             var results = _collection.Find(new { Relatives = "commentA" });
             Assert.Equal("Second", results.First().Name);
+        }
+
+
+        [Fact]
+        public void Distinct_On_Collection_Should_Return_Arrays_As_Value_If_Earlier_Than_1_5_0()
+        {
+            var isLessThan150 = Regex.IsMatch(_buildInfo.Version, "^([01][.][01234])");
+
+            // Any version earlier than MongoDB 1.5.0
+            if (isLessThan150)
+            {
+                _collection.Insert(new Person {Name = "Joe Cool", Relatives = new List<string>(new[] {"Tom Cool", "Sam Cool"})});
+                _collection.Insert(new Person {Name = "Sam Cool", Relatives = new List<string>(new[] {"Joe Cool", "Jay Cool"})});
+                _collection.Insert(new Person {Name = "Ted Cool", Relatives = new List<string>(new[] {"Tom Cool", "Sam Cool"})});
+                _collection.Insert(new Person {Name = "Jay Cool", Relatives = new List<string>(new[] {"Sam Cool"})});
+
+                var results = _collection.Distinct<string[]>("Relatives");
+                Assert.Equal(3, results.Count());
+            }
+        }
+
+        [Fact]
+        public void Distinct_On_Collection_Should_Return_Array_Values_In_1_5_0_Or_Later()
+        {
+            var isLessThan150 = Regex.IsMatch(_buildInfo.Version, "^([01][.][01234])");
+
+            // Any version MongoDB 1.5.0 +
+            if (!isLessThan150)
+            {
+                _collection.Insert(new Person { Name = "Joe Cool", Relatives = new List<string>(new[] { "Tom Cool", "Sam Cool" }) });
+                _collection.Insert(new Person { Name = "Sam Cool", Relatives = new List<string>(new[] { "Joe Cool", "Jay Cool" }) });
+                _collection.Insert(new Person { Name = "Ted Cool", Relatives = new List<string>(new[] { "Tom Cool", "Sam Cool" }) });
+                _collection.Insert(new Person { Name = "Jay Cool", Relatives = new List<string>(new[] { "Sam Cool" }) });
+
+                var results = _collection.Distinct<string>("Relatives");
+                Assert.Equal(4, results.Count());
+            }
+        }
+
+        [Fact]
+        public void DistinctOnSimpleProperty()
+        {
+            _collection.Insert(new Person { Name = "Joe Cool", Relatives = new List<string>(new[] { "Tom Cool", "Sam Cool" }) });
+            _collection.Insert(new Person { Name = "Sam Cool", Relatives = new List<string>(new[] { "Joe Cool", "Jay Cool" }) });
+            _collection.Insert(new Person { Name = "Ted Cool", Relatives = new List<string>(new[] { "Tom Cool", "Sam Cool" }) });
+            _collection.Insert(new Person { Name = "Jay Cool", Relatives = new List<string>(new[] { "Sam Cool" }) });
+
+            var results = _collection.Distinct<string>("Name");
+            Assert.Equal(4, results.Count());
+        }
+
+        [Fact]
+        public void DistinctOnComplexProperty()
+        {
+            _collection.Insert(new Person {Name = "Joe Cool", Address = new Address {State = "CA"}});
+            _collection.Insert(new Person {Name = "Sam Cool", Address = new Address {State = "CA"}});
+            _collection.Insert(new Person {Name = "Ted Cool", Address = new Address {State = "CA", Zip = "90010"}});
+            _collection.Insert(new Person {Name = "Jay Cool", Address = new Address {State = "NY"}});
+
+            var results = _collection.Distinct<Address>("Address");
+            Assert.Equal(3, results.Count());
         }
     }
 }

@@ -64,6 +64,18 @@ namespace Norm.BSON
         }
 
         /// <summary>
+        /// Deserializes the specified object data.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objectData">The object data.</param>
+        /// <param name="outProps">The out props.</param>
+        /// <returns></returns>
+        public static T Deserialize<T>(int length, BinaryReader reader, ref IDictionary<WeakReference, Flyweight> outProps)
+        {
+            return Deserialize<T>(reader, length);
+        }        
+
+        /// <summary>
         /// Deserializes the specified stream.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -73,6 +85,11 @@ namespace Norm.BSON
         {
             return new BsonDeserializer(stream).Read<T>();
         }
+        private static T Deserialize<T>(BinaryReader stream, int length)
+        {
+            return new BsonDeserializer(stream).Read<T>(length);
+        }
+
 
         /// <summary>
         /// Reads a document instance.
@@ -81,10 +98,14 @@ namespace Norm.BSON
         /// <returns></returns>
         private T Read<T>()
         {
-            NewDocument(_reader.ReadInt32());
+            return Read<T>(_reader.ReadInt32());
+        }
+        private T Read<T>(int length)
+        {
+            NewDocument(length);
             var @object = (T)DeserializeValue(typeof(T), BSONTypes.Object);
             return @object;
-        }
+        }        
 
         /// <summary>
         /// Reads the specified document forward by the input value.
@@ -262,8 +283,8 @@ namespace Norm.BSON
                 var property = (name == "_id" || name == "$id")
                     ? typeHelper.FindIdProperty()
                     : typeHelper.FindProperty(name);
-               
-                if (property == null)
+
+                if (property == null && typeHelper.Expando == null)
                 {
                     throw new MongoException(string.Format("Deserialization failed: type {0} does not have a property named {1}", type.FullName, name));
                 }
@@ -283,12 +304,17 @@ namespace Norm.BSON
                     }                                        
                 }
                 object container = null;
-                if (property.Setter == null)
+                if (property != null && property.Setter == null)
                 {
-                    container = property.Getter(instance);                    
+                    container = property.Getter(instance);
                 }
-                var value = isNull ? null : DeserializeValue(property.Type, storageType, container);
-                if (container == null && value!=null)
+                var propertyType = property != null ? property.Type : _typeMap.ContainsKey(storageType) ? _typeMap[storageType] : typeof(object);
+                var value = isNull ? null : DeserializeValue(propertyType, storageType, container);
+                if (property == null)
+                {
+                    ((IDictionary<string, object>)typeHelper.Expando.Getter(instance))[name] = value;
+                }                
+               else  if (container == null && value!=null)
                 {
                     property.Setter(instance, value);
                 }

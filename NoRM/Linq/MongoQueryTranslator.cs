@@ -6,6 +6,7 @@ using System.Text;
 using Norm.BSON;
 using Norm.Configuration;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace Norm.Linq
 {
@@ -45,7 +46,7 @@ namespace Norm.Linq
         bool _whereWritten = false;
 
         /// <summary>TODO::Description.</summary>
-        public String PropName
+        public String AggregatePropName
         {
             get;
             set;
@@ -57,6 +58,9 @@ namespace Norm.Linq
             get;
             set;
         }
+
+        /// <summary>TODO::Description.</summary>
+        public string CollectionName{ get; set;}
 
         /// <summary>TODO::Description.</summary>
         public String MethodCall
@@ -169,6 +173,27 @@ namespace Norm.Linq
             FlyWeight = new Flyweight();
             SortFly = new Flyweight();
             Visit(exp);
+
+            var qry = _sb.ToString();
+
+            if (!string.IsNullOrEmpty(qry) || IsComplex)
+            {
+                if (IsComplex)
+                {
+                    // reset - need to use the where statement generated
+                    // instead of the props set on the internal flyweight
+                    FlyWeight = new Flyweight();
+                    if (qry.StartsWith("function"))
+                    {
+                        FlyWeight["$where"] = qry;
+                    }
+                    else
+                    {
+                        FlyWeight["$where"] = " function(){return " + qry + "; }";
+                    }
+                }
+            }
+
             return _sb.ToString();
         }
 
@@ -181,11 +206,6 @@ namespace Norm.Linq
         /// </exception>
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            //if(m.Expression.NodeType == ExpressionType.MemberAccess)
-            //{
-            //    VisitMemberAccess((MemberExpression)m.Expression);
-            //}
-
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
@@ -194,12 +214,13 @@ namespace Norm.Linq
                 {
                     alias = "_id";
                 }
+
                 if (UseScopedQualifier)
                 {
                     _sb.Append("this.");
                 }
-                _sb.Append(alias);
 
+                _sb.Append(alias);
                 _lastFlyProperty = alias;
                 return m;
             }
@@ -270,37 +291,20 @@ namespace Norm.Linq
 
                 String result = "";
 
-                if (m.Expression.NodeType == ExpressionType.Constant)
-                {
-                    var constant = m.Expression as ConstantExpression;
-                    var fi = (FieldInfo)m.Member;
-                    var val = fi.GetValue(constant.Value);
-                    if (val is String)
-                    {
-                        result = String.Format("\"{0}\"", val);
-                    }
-                    else
-                    {
-                        result = val.ToString();
-                    }
-                    SetFlyValue(val);
-                }
-                else
-                {
-                    var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
+                var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
 
-                    if (expressionRootType != null)
-                    {
-                        fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
-                    }
-
-                    result = string.Join(".", fixedName);
-                    //sb.Append("this." + result);
-                    if (UseScopedQualifier)
-                    {
-                        _sb.Append("this.");
-                    }
+                if (expressionRootType != null)
+                {
+                    fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
                 }
+
+                result = string.Join(".", fixedName);
+                //sb.Append("this." + result);
+                if (UseScopedQualifier)
+                {
+                    _sb.Append("this.");
+                }
+  
                 _sb.Append(result);
 
                 _lastFlyProperty = result;
@@ -319,7 +323,6 @@ namespace Norm.Linq
                 case ExpressionType.AndAlso:
                     result =" && ";
                     break;
-
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
                     IsComplex = true;
@@ -369,15 +372,9 @@ namespace Norm.Linq
             _sb.Append("(");
             Visit(b.Left);
             _sb.Append(GetBinaryOperator(b));
-
             Visit(b.Right);
             _sb.Append(")");
             return b;
-        }
-
-        /// <summary>TODO::Description.</summary>
-        void VisitRight(Expression exp) {
-
         }
 
         /// <summary>
@@ -394,6 +391,7 @@ namespace Norm.Linq
             {
                 // set the collection name
                 this.TypeName = q.ElementType.Name;
+                this.CollectionName = MongoConfiguration.GetCollectionName(q.ElementType);                
 
                 // this is our Query wrapper - see if it has an expression
                 var qry = (IMongoQuery)c.Value;
@@ -469,20 +467,6 @@ namespace Norm.Linq
                 this.MethodCall = m.Method.Name;
             }
 
-            if (m.Method.DeclaringType == typeof(Queryable) && m.Method.Name == "Where")
-            {
-                var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
-                //specific for "chained" Where() calls, where a Where() is appended
-                //to an IQueryable on top of another IQueryable
-                if (_whereWritten) {
-                    _sb.Append(" && ");
-                }
-                Visit(lambda.Body);
-                _whereWritten = true;
-                Visit(m.Arguments[0]);
-                return m;
-            }
-            _whereWritten = false;
             if (m.Method.DeclaringType == typeof(string))
             {
                 IsComplex = true;
@@ -563,31 +547,28 @@ namespace Norm.Linq
             }
             else if (m.Method.DeclaringType == typeof(DateTime))
             {
-                //switch (m.Method.Name)
-                //{
-                //}
             }
             else if (m.Method.DeclaringType == typeof(Queryable) && IsCallableMethod(m.Method.Name))
             {
                 return HandleMethodCall(m);
             }
-            else if (m.Method.DeclaringType == typeof(Enumerable))
+            else if (typeof(IEnumerable).IsAssignableFrom(m.Method.DeclaringType)) //&& IsCallableMethod(m.Method.Name))
             {
-                // Subquery - Count() or Sum()
-                if (IsCallableMethod(m.Method.Name))
+                if (m.Method.Name == "Contains")
                 {
                     return HandleMethodCall(m);
-                }
+                } 
+                
+                throw new NotSupportedException(string.Format("Subqueries are not currently supported", m.Method.Name));
             }
 
-            // for now...
             throw new NotSupportedException(string.Format("The method '{0}' is not supported", m.Method.Name));
         }
 
         private static HashSet<String> _callableMethods = new HashSet<string>(){
             "First","Single","FirstOrDefault","SingleOrDefault","Count",
             "Sum","Average","Min","Max","Any","Take","Skip", 
-            "OrderBy","ThenBy", "OrderByDescending", "ThenByDescending"};
+            "OrderBy","ThenBy", "OrderByDescending", "ThenByDescending", "Where"};
 
         /// <summary>
         /// Determines if it's a callable method.
@@ -735,30 +716,59 @@ namespace Norm.Linq
             this.Take = (int)exp.GetConstantValue();
         }
 
-        void HandleSort(Expression exp)
+        private void HandleSort(Expression exp, OrderBy orderby)
         {
             var stripped = (LambdaExpression)StripQuotes(exp);
             var member = (MemberExpression)stripped.Body;
-            this.SortFly[member.Member.Name] = 1;
-        }
-        void HandleDescendingSort(Expression exp)
-        {
-            var stripped = (LambdaExpression)StripQuotes(exp);
-            var member = (MemberExpression)stripped.Body;
-            this.SortFly[member.Member.Name] = -1;
+            this.SortFly[member.Member.Name] = orderby;
         }
 
-        void HandleAny(MethodCallExpression exp) {
-            var member = (MemberExpression)exp.Arguments[0];
-            var lambda = (LambdaExpression)exp.Arguments[1];
-            var stripped = (BinaryExpression)StripQuotes(lambda.Body);
-            var subMember = (MemberExpression)stripped.Left;
-            var subValue = (ConstantExpression)stripped.Right;
-            var op = GetBinaryOperator(stripped);
-            this.IsComplex = true;
-            var result = "function(){for(var i in this." + member.Member.Name + "){if(this." + member.Member.Name + "[i]." + subMember.Member.Name + " === '" + subValue.Value + "') return true;}}";
-            _sb.Append(result);
+        private void HandleAggregate(MethodCallExpression exp)
+        {
+            if (exp.Arguments.Count == 2)
+            {
+                var stripped = (LambdaExpression)StripQuotes(exp.Arguments[1]);
+                var member = (MemberExpression)stripped.Body;
+                AggregatePropName = member.Member.Name;
+            }
         }
+
+        private void TranslateToWhere(MethodCallExpression exp) 
+        {
+            if (exp.Arguments.Count == 2)
+            {
+                HandleWhere(exp.Arguments[1]);
+            }
+        }
+
+        private void HandleWhere(Expression exp)
+        {
+            if (_whereWritten)
+            {
+                _sb.Append(" && ");
+                IsComplex = true;
+            }
+           
+            Visit(exp);
+            _whereWritten = true;
+        }
+
+        private void HandleContains(MethodCallExpression m)
+        {
+            var collection = (IEnumerable)m.Object.GetConstantValue();
+
+            _sb.Append("(");
+            foreach (var item in collection)
+            {
+                Visit(m.Arguments[0]);
+                _sb.Append(" === ");
+                Visit(ConstantExpression.Constant(item));
+                _sb.Append(" || ");
+            }
+            _sb.Remove(_sb.Length - 4, 4);
+            _sb.Append(")");
+        }
+
         /// <summary>
         /// The handle method call.
         /// </summary>
@@ -768,17 +778,24 @@ namespace Norm.Linq
         {
             switch (m.Method.Name)
             {
-                case "ThenBy":
-                    HandleSort(m.Arguments[1]);
+                case "Any":
+                case "Single":
+                case "SingleOrDefault":
+                case "First":
+                case "FirstOrDefault":
+                case "Where":
+                    TranslateToWhere(m);
                     break;
+                case "Contains":
+                    HandleContains(m);
+                    return m;
                 case "OrderBy":
-                    HandleSort(m.Arguments[1]);
-                    break;
-                case "ThenByDescending":
-                    HandleDescendingSort(m.Arguments[1]);
+                case "ThenBy":
+                    HandleSort(m.Arguments[1], OrderBy.Ascending);
                     break;
                 case "OrderByDescending":
-                    HandleDescendingSort(m.Arguments[1]);
+                case "ThenByDescending":
+                    HandleSort(m.Arguments[1], OrderBy.Descending);
                     break;
                 case "Skip":
                     HandleSkip(m.Arguments[1]);
@@ -786,9 +803,12 @@ namespace Norm.Linq
                 case "Take":
                     HandleTake(m.Arguments[1]);
                     break;    
-                case "Any":
-                    HandleAny(m);
-                    break; 
+                case "Min":
+                case "Max":
+                case "Sum":
+                case "Average":
+                    HandleAggregate(m);
+                    break;
                 default:
                     this.Take = 1;
                     this.MethodCall = m.Method.Name;
@@ -799,21 +819,27 @@ namespace Norm.Linq
                         {
                             Visit(lambda.Body);
                         }
-                        else
-                        {
-                            Visit(m.Arguments[0]);
-                        }
                     }
-                    else
-                    {
-                        Visit(m.Arguments[0]);
-                    }
+
                     break;
             }
 
             Visit(m.Arguments[0]);
 
             return m;
+        }
+
+        private static LambdaExpression GetLambda(Expression e)
+        {
+            while (e.NodeType == ExpressionType.Quote)
+            {
+                e = ((UnaryExpression)e).Operand;
+            }
+            if (e.NodeType == ExpressionType.Constant)
+            {
+                return ((ConstantExpression)e).Value as LambdaExpression;
+            }
+            return e as LambdaExpression;
         }
     }
 }

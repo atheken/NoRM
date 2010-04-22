@@ -437,5 +437,17 @@ namespace Norm.Tests
             Assert.Equal(start.Name, end.Name);            
         }
         
+        [Fact]
+        public void SerializesExtraPropertiesToExpandoCollection()
+        {
+            var address = new Address {City = "Arrakeen", State = "Arrakis", Street = "1 Grand Palace Way", Zip = "sp1c3"};
+            var bytes = BsonSerializer.Serialize(address);
+            var expando = BsonDeserializer.Deserialize<ExpandoAddress>(bytes);
+            Assert.Equal(expando.City, address.City);
+            Assert.Equal(expando.Street, address.Street);
+            Assert.Equal(expando.Expando["State"], address.State);
+            Assert.Equal(expando.Expando["Zip"], address.Zip);
+        }
+        
     }
 }

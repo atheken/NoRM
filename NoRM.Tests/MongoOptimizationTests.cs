@@ -14,16 +14,16 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
+                session.Drop<TestProduct>();
 
-                session.Add(new Product
+                session.Add(new TestProduct
                 {
                     Name = "ExplainProduct",
                     Price = 10,
                     Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                 });
 
-                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "Test", true, IndexOption.Ascending);
+                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "Test", true, IndexOption.Ascending);
             }
         }
 
@@ -32,11 +32,11 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
+                session.Drop<TestProduct>();
 
-                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
 
-                session.Add(new Product
+                session.Add(new TestProduct
                                 {
                                     Name = "ExplainProduct",
                                     Price = 10,
@@ -53,7 +53,7 @@ namespace Norm.Tests
                 var query = new Flyweight();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
-                var result = session.Provider.DB.GetCollection<Product>().Explain(query);
+                var result = session.Provider.DB.GetCollection<TestProduct>().Explain(query);
 
                 Assert.Equal("BtreeCursor TestIndex", result.Cursor);
             }
@@ -64,11 +64,11 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
+                session.Drop<TestProduct>();
 
-                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Name, "TestIndex", true, IndexOption.Ascending);
+                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Name, "TestIndex", true, IndexOption.Ascending);
 
-                session.Add(new Product
+                session.Add(new TestProduct
                 {
                     Name = "ExplainProduct",
                     Price = 10,
@@ -76,7 +76,7 @@ namespace Norm.Tests
                 });
 
 
-                var result = session.Provider.DB.GetCollection<Product>().Explain(new { Name = "ExplainProduct" });
+                var result = session.Provider.DB.GetCollection<TestProduct>().Explain(new { Name = "ExplainProduct" });
 
                 Assert.Equal("BtreeCursor TestIndex", result.Cursor);
             }
@@ -87,11 +87,11 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
+                session.Drop<TestProduct>();
                
-                session.Provider.DB.GetCollection<Product>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
 
-                session.Add(new Product
+                session.Add(new TestProduct
                 {
                     Name = "ExplainProduct",
                     Price = 10,
@@ -111,9 +111,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
+                session.Drop<TestProduct>();
 
-                session.Add(new Product
+                session.Add(new TestProduct
                                 {
                                     Name = "ExplainProduct",
                                     Price = 10,
@@ -124,7 +124,7 @@ namespace Norm.Tests
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
                 var result = session.Provider.DB
-                    .GetCollection<Product>()
+                    .GetCollection<TestProduct>()
                     .Find(query)
                     .Hint(p => p.Name, IndexOption.Ascending);
 
@@ -137,9 +137,9 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Drop<Product>();
+                session.Drop<TestProduct>();
 
-                session.Add(new Product
+                session.Add(new TestProduct
                 {
                     Name = "ExplainProduct",
                     Price = 10,
@@ -149,7 +149,7 @@ namespace Norm.Tests
                 var query = new Flyweight();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
-                var result = session.Provider.DB.GetCollection<Product>()
+                var result = session.Provider.DB.GetCollection<TestProduct>()
                     .Find(query)
                     .Hint(p => p.Name, IndexOption.Ascending)
                     .Hint(p => p.Supplier.Name, IndexOption.Descending);

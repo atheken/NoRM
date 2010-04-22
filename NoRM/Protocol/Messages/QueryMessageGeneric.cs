@@ -52,6 +52,11 @@ namespace Norm.Protocol.Messages
             set;
         }
 
+        /// <summary>
+        /// The fields to select
+        /// </summary>
+        internal FieldSelectionList FieldSelection { get; set; }
+
         /// <summary>TODO::Description.</summary>
         public object OrderBy
         {
@@ -111,9 +116,14 @@ namespace Norm.Protocol.Messages
                 if (this.OrderBy != null)
                 {
                     fly["orderby"] = this.OrderBy;
-                }
+                }                
                 //add more query options here, as needed.
                 messageBytes.Add(BsonSerializer.Serialize(fly));
+                
+                if (FieldSelection != null)
+                {
+                    messageBytes.Add(BsonSerializer.Serialize(FieldSelection));
+                }
             }
             #endregion
 

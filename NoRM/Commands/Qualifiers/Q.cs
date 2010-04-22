@@ -14,7 +14,28 @@ namespace Norm
     public class Q
     {
         /// <summary>
-        /// The where.
+        /// Construct an "equals" qualifier testing for Null.
+        /// </summary>
+        /// <remarks>
+        /// This is just sugar, it returns an object reference to null.
+        /// </remarks>
+        /// <returns></returns>
+        public static object IsNull()
+        {
+            return (object)null;
+        }
+
+        /// <summary>
+        /// Construct a {$ne : null} qualifier
+        /// </summary>
+        /// <returns></returns>
+        public static NotEqualQualifier IsNotNull()
+        {
+            return Q.NotEqual(new bool?());
+        }
+
+        /// <summary>
+        /// construct a $where qualifier
         /// </summary>
         /// <param name="expression">The expression.</param>
         /// <returns></returns>

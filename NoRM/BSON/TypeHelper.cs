@@ -54,6 +54,11 @@ namespace Norm.BSON
             _type = type;
             var properties = GetProperties(type);
             _properties = LoadMagicProperties(properties, FindIdProperty(type, properties));
+
+            if (typeof(IExpando).IsAssignableFrom(type))
+            {
+                Expando = _properties["Expando"];
+            }
         }
 
         /// <summary>
@@ -135,6 +140,11 @@ namespace Norm.BSON
             return type.GetProperties().Where(p => p.Name == name).First();
         }
 
+        /// <summary>
+        /// The IExpando property
+        /// </summary>
+        public MagicProperty Expando { get; private set; }
+        
         /// <summary>
         /// Gets all properties.
         /// </summary>

@@ -8,7 +8,7 @@ namespace Norm.Responses
     /// </summary>
     /// <typeparam name="T">
     /// </typeparam>
-    internal class DistinctValuesResponse<T> : BaseStatusMessage where T : class, new()
+    internal class DistinctValuesResponse<T> : BaseStatusMessage
     {
         /// <summary>
         /// Initializes the <see cref="DistinctValuesResponse&lt;T&gt;"/> class.

@@ -13,10 +13,11 @@ namespace Norm.Tests
         {
             MongoConfiguration.RemoveMapFor<User2>();
             MongoConfiguration.RemoveMapFor<User>();
-            MongoConfiguration.RemoveMapFor<Product>();
+            MongoConfiguration.RemoveMapFor<TestProduct>();
             MongoConfiguration.RemoveMapFor<Shopper>();
             MongoConfiguration.RemoveMapFor<Cart>();
-            MongoConfiguration.RemoveMapFor<Product>();
+            MongoConfiguration.RemoveMapFor<TestProduct>();
+            MongoConfiguration.RemoveMapFor<ProductSummary>();
 
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
@@ -130,7 +131,7 @@ namespace Norm.Tests
         {
             MongoConfiguration.Initialize(r => r.For<User>(u => u.ForProperty(user => user.FirstName).UseAlias("thisIsntDying")));
 
-            var connection = MongoConfiguration.GetConnectionString(typeof(Product));
+            var connection = MongoConfiguration.GetConnectionString(typeof(TestProduct));
 
             Assert.Equal(null, connection);
         }
@@ -151,7 +152,7 @@ namespace Norm.Tests
                     {
                         Id = ObjectId.NewObjectId(),
                         Name = "Cart1",
-                        Product = new Product { Name = "SomeProduct" }
+                        Product = new TestProduct { Name = "SomeProduct" }
                     }
                 });
 
@@ -163,7 +164,7 @@ namespace Norm.Tests
                     {
                         Id = ObjectId.NewObjectId(),
                         Name = "Cart2",
-                        Product = new Product { Name = "OtherProduct" }
+                        Product = new TestProduct { Name = "OtherProduct" }
                     }
                 });
 
@@ -283,6 +284,23 @@ namespace Norm.Tests
             }
         }
 
+        [Fact]
+        public void MarksAClassAsASummary()
+        {
+            MongoConfiguration.Initialize(m => m.For<ProductSummary>(p => p.SummaryOf<TestProduct>()));
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                mongo.GetCollection<TestProduct>().Save(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Soap", Price = 2, Supplier = new Supplier { Name = "A Supplier" } });
+                mongo.GetCollection<TestProduct>().Save(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Rope", Price = 1, Supplier = new Supplier { Name = "A Supplier" } });
+                mongo.GetCollection<TestProduct>().Save(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Fun", Price = 0, Supplier = new Supplier { Name = "A Supplier" } });
+
+                var found = mongo.GetCollection<ProductSummary>().Find();
+                Assert.Equal(3, found.Count());
+                Assert.Equal("Soap", found.ElementAt(0).Name);
+                Assert.Equal(2, found.ElementAt(0).Price);
+            }
+        }
+
         #region Test classes
 
         internal class Shoppers : MongoQuery<Shopper>, IDisposable
@@ -306,13 +324,13 @@ namespace Norm.Tests
             public T MapReduce<T>(string map, string reduce)
             {
                 var result = default(T);
-                using (var mr = _provider.Server.CreateMapReduce())
-                {
-                    var response = mr.Execute(new MapReduceOptions(typeof(T).Name) { Map = map, Reduce = reduce });
-                    var coll = response.GetCollection<MapReduceResult<T>>();
-                    var r = coll.Find().FirstOrDefault();
-                    result = r.Value;
-                }
+                var mr = _provider.Server.CreateMapReduce();
+
+                var response = mr.Execute(new MapReduceOptions(typeof (T).Name) {Map = map, Reduce = reduce});
+                var coll = response.GetCollection<MapReduceResult<T>>();
+                var r = coll.Find().FirstOrDefault();
+                result = r.Value;
+
                 return result;
             }
 
@@ -361,7 +379,7 @@ namespace Norm.Tests
             }
             public string Name { get; set; }
             public ObjectId Id { get; set; }
-            public Product Product { get; set; }
+            public TestProduct Product { get; set; }
             public Supplier[] CartSuppliers { get; set; }
         }
 
@@ -405,7 +423,7 @@ namespace Norm.Tests
                     c.ForProperty(ca => ca.Name).UseAlias("ThisCartName");
                 });
 
-                For<Product>(c => c.ForProperty(p => p.Price).UseAlias("DiscountPrice"));
+                For<TestProduct>(c => c.ForProperty(p => p.Price).UseAlias("DiscountPrice"));
             }
         }
 
@@ -455,7 +473,7 @@ namespace Norm.Tests
                     cfg.UseConnectionString(TestHelper.ConnectionString());
                 });
 
-                this.For<Product>(cfg => cfg.ForProperty(p => p.Name).UseAlias("productname"));
+                this.For<TestProduct>(cfg => cfg.ForProperty(p => p.Name).UseAlias("productname"));
             }
         }
 
