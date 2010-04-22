@@ -972,5 +972,43 @@ namespace Norm.Tests
                 Assert.Equal(obj.Id, dtos.Single().Id);
             }
         }
+
+        [Fact]
+        public void CanAQuerySupportArrayIdentifiers()
+        {
+            MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
+            using (var shoppers = new Shoppers(new MongoQueryProvider("test", "localhost", "27017", "")))
+            {
+                shoppers.Drop<Shopper>();
+                shoppers.Add(new Shopper
+                {
+                    Id = ObjectId.NewObjectId(),
+                    Name = "John",
+                    Cart = new Cart
+                    {
+                        Id = ObjectId.NewObjectId(),
+                        Name = "Cart1",
+                        CartSuppliers = new[] { new Supplier { Name = "Supplier1" }, new Supplier { Name = "Supplier2" } }
+                    }
+                });
+
+                shoppers.Add(new Shopper
+                {
+                    Id = ObjectId.NewObjectId(),
+                    Name = "Jane",
+                    Cart = new Cart
+                    {
+                        Id = ObjectId.NewObjectId(),
+                        Name = "Cart2",
+                        CartSuppliers = new[] { new Supplier { Name = "Supplier3" }, new Supplier { Name = "Supplier4" } }
+                    }
+                });
+
+                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers[0].Name == "Supplier4").ToList();
+                Assert.Equal("Jane", deepQuery[0].Name);
+                Assert.Equal("Cart2", deepQuery[0].Cart.Name);
+                Assert.Equal(1, deepQuery.Count);
+            }
+        }
     }
 }

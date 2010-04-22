@@ -228,7 +228,7 @@ namespace Norm.Tests
         public DbReference<TestProduct>[] ProductsOrdered { get; set; }
     }
 
-    internal class User
+    internal class User3
     {
         public string Id{ get; set; }
         public string EmailAddress{ get; set; }
@@ -237,7 +237,7 @@ namespace Norm.Tests
     internal class Role
     {
         public string Id{ get; set; }
-        public List<DbReference<User,string>> Users{ get; set; }
+        public List<DbReference<User3,string>> Users{ get; set; }
     }
 
     internal class Person
@@ -581,4 +581,179 @@ namespace Norm.Tests
     {
         public ObjectId ForumId{ get; set; }
     }
+
+    internal class Shoppers : MongoQuery<Shopper>, IDisposable
+    {
+        private readonly MongoQueryProvider _provider;
+
+        public Shoppers(MongoQueryProvider provider)
+            : base(provider)
+        {
+            _provider = provider;
+        }
+
+        public MongoQueryProvider Provider
+        {
+            get
+            {
+                return _provider;
+            }
+        }
+
+        public T MapReduce<T>(string map, string reduce)
+        {
+            var result = default(T);
+            var mr = _provider.Server.CreateMapReduce();
+
+            var response = mr.Execute(new MapReduceOptions(typeof(T).Name) { Map = map, Reduce = reduce });
+            var coll = response.GetCollection<MapReduceResult<T>>();
+            var r = coll.Find().FirstOrDefault();
+            result = r.Value;
+
+            return result;
+        }
+
+        public void Add<T>(T item) where T : class, new()
+        {
+            _provider.DB.GetCollection<T>().Insert(item);
+        }
+
+        public void Update<T>(T item) where T : class, new()
+        {
+            _provider.DB.GetCollection<T>().UpdateOne(item, item);
+        }
+
+        public void Drop<T>()
+        {
+            _provider.DB.DropCollection(MongoConfiguration.GetCollectionName(typeof(T)));
+        }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            _provider.Server.Dispose();
+        }
+
+        #endregion
+    }
+
+    internal class Shopper
+    {
+        public Shopper()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+
+        public ObjectId Id { get; set; }
+        public string Name { get; set; }
+        public Cart Cart { get; set; }
+    }
+
+    internal class Cart
+    {
+        public Cart()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+        public string Name { get; set; }
+        public ObjectId Id { get; set; }
+        public TestProduct Product { get; set; }
+        public Supplier[] CartSuppliers { get; set; }
+    }
+
+    internal class User
+    {
+        public User()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+        public ObjectId Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+
+    internal class User2
+    {
+        public User2()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+        public ObjectId Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+
+    public class ShopperMap : MongoConfigurationMap
+    {
+        public ShopperMap()
+        {
+            For<Shopper>(config =>
+            {
+                config.UseCollectionNamed("MyProducts");
+                config.ForProperty(u => u.Name).UseAlias("shopperName");
+                config.ForProperty(u => u.Cart).UseAlias("MyCart");
+            });
+
+            For<Cart>(c =>
+            {
+                c.UseCollectionNamed("ListOfCarts");
+                c.ForProperty(cart => cart.Product).UseAlias("ProductsGoHere");
+                c.ForProperty(ca => ca.Name).UseAlias("ThisCartName");
+            });
+
+            For<TestProduct>(c => c.ForProperty(p => p.Price).UseAlias("DiscountPrice"));
+        }
+    }
+
+    internal class IdMap0
+    {
+        public ObjectId _ID { get; set; }
+    }
+
+    internal class IdMap1
+    {
+        [MongoIdentifier]
+        public ObjectId TheID { get; set; }
+    }
+
+    internal class IdMap2
+    {
+        public ObjectId ID { get; set; }
+    }
+
+    internal class IdMap3
+    {
+        public ObjectId id { get; set; }
+    }
+
+    internal class IdMap4
+    {
+        public ObjectId Id { get; set; }
+    }
+
+    public class OtherMap : MongoConfigurationMap
+    {
+        public OtherMap()
+        {
+            For<User>(cfg => cfg.ForProperty(u => u.LastName).UseAlias("last"));
+        }
+    }
+
+    public class CustomMap : MongoConfigurationMap
+    {
+        public CustomMap()
+        {
+            this.For<User>(cfg =>
+            {
+                cfg.ForProperty(u => u.FirstName).UseAlias("first");
+                cfg.ForProperty(u => u.LastName).UseAlias("last");
+                cfg.UseCollectionNamed("UserBucket");
+                cfg.UseConnectionString(TestHelper.ConnectionString());
+            });
+
+            this.For<TestProduct>(cfg => cfg.ForProperty(p => p.Name).UseAlias("productname"));
+        }
+    }
+
 }

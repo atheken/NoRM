@@ -253,11 +253,14 @@ namespace Norm.Linq
                 var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
                 // this supports the "deep graph" name - "Product.Address.City"
-                var fixedName = fullName.Skip(1).Take(fullName.Length - 1).ToArray();
+                var fixedName = fullName.Skip(1).Take(fullName.Length - 1)
+                    .Where(x => x != "First()")
+                    .Select(x => System.Text.RegularExpressions.Regex.Replace(x, @"\[[0-9]+\]",""))
+                    .ToArray();
 
                 String result = "";
 
-                var expressionRootType = GetParameterExpression((MemberExpression)m.Expression);
+                var expressionRootType = GetParameterExpression(m.Expression);
 
                 if (expressionRootType != null)
                 {
@@ -591,6 +594,16 @@ namespace Norm.Linq
                     parentExpression = ((MemberExpression)parentExpression).Expression;
                     expressionRoot = parentExpression is ParameterExpression;
                 }
+                else if (parentExpression.NodeType == ExpressionType.ArrayIndex)
+                {
+                    parentExpression = ((BinaryExpression)parentExpression).Left;
+                    expressionRoot = parentExpression is ParameterExpression;
+                }
+                else if (parentExpression.NodeType == ExpressionType.Call)
+                {
+                    parentExpression = ((MemberExpression)(((MethodCallExpression)parentExpression).Arguments[0])).Expression;
+                    expressionRoot = parentExpression is ParameterExpression;
+                }
                 else
                 {
                     expressionRoot = true;
@@ -614,9 +627,9 @@ namespace Norm.Linq
 
             for (var i = 0; i < graph.Length; i++)
             {
-                var prpperty = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
+                var property = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
                 graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
-                typeToQuery = prpperty.PropertyType;
+                typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
             }
 
             return graphParts;
