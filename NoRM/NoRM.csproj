@@ -138,6 +138,7 @@
     <Compile Include="Configuration\ITypedConfigurationGeneric.cs" />
     <Compile Include="Configuration\MongoConfiguration.cs" />
     <Compile Include="Configuration\MongoConfigurationMap.cs" />
+    <Compile Include="Configuration\MongoConfigurationMapException.cs" />
     <Compile Include="Configuration\MongoConfigurationTypeMap.cs" />
     <Compile Include="Configuration\MongoTypeConfiguration.cs" />
     <Compile Include="Configuration\MongoTypeConfigurationGeneric.cs" />

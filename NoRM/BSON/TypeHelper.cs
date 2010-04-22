@@ -201,26 +201,45 @@ namespace Norm.BSON
         private static PropertyInfo FindIdProperty(Type type, IEnumerable<PropertyInfo> properties)
         {
             PropertyInfo idProp = null;
+            Dictionary<string, PropertyInfo> idDictionary = new Dictionary<string, PropertyInfo>(4);
+
             foreach (var property in properties)
             {
                 if(PropertyIsExplicitlyMappedToId(type, property.Name))
                 {
-                    return property;
+                    idDictionary.Add("Mapped", property);
+                    //return property;
                 }
-                if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
+                else if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
                 {
-                    return property;
+                    idDictionary.Add("Attribute", property);
+                    //return property;
                 }
-                if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
+                else if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return property;
+                    idDictionary.Add("MongoDefault", property);
+                    //return property;
                 }
-                if (property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
+                else if (property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    idProp = property;                    
+                    idDictionary.Add("Conventional", property);
+                    //idProp = property;
                 }
             }
-            return idProp;
+
+            if(idDictionary.Count > 1)
+            {
+                if(idDictionary.Keys.Contains("MongoDefault"))
+                {
+                    if(idDictionary.Keys.Contains("Mapped") || idDictionary.Keys.Contains("Attribute"))
+                    {
+                        throw new MongoConfigurationMapException();
+                    }
+                }
+            }
+            
+            //return idProp;
+            return idDictionary.Values.First();
         }
 
         ///<summary>
