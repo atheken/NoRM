@@ -902,6 +902,34 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void FirstWhereNoResultsReturnedInWhere()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "ATest", Price = 10 });
+                session.Add(new TestProduct { Name = "BTest", Price = 22 });
+                session.Add(new TestProduct { Name = "BTest", Price = 33 });
+                var noProducct = session.Products.Where(x => x.Name == "ZTest");
+                var ex = Assert.Throws<InvalidOperationException>(() => noProducct.First());
+                Assert.Equal("Sequence contains no elements", ex.Message);
+            }
+        }
+
+        [Fact]
+        public void FirstOrDefaultWhereNoResultsReturnedInWhere()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "ATest", Price = 10 });
+                session.Add(new TestProduct { Name = "BTest", Price = 22 });
+                session.Add(new TestProduct { Name = "BTest", Price = 33 });
+                var noProducct = session.Products.Where(x => x.Name == "ZTest").FirstOrDefault();
+                Assert.Equal(null, noProducct);
+            }
+        }
+
+
+        [Fact]
         public void CanQueryAndReturnSubClassedObjects()
         {
             using (var session = new Session())

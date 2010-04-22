@@ -177,11 +177,17 @@ namespace Norm.Linq
                     reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
                     result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
                     break;
-                case "Single":
                 case "SingleOrDefault":
-                case "First":
                 case "FirstOrDefault":
                     result = collection.FindOne(fly);
+                    break;
+                case "Single":
+                case "First":
+                    result = collection.FindOne(fly); 
+                    if (result == null)
+                    {
+                        throw new InvalidOperationException("Sequence contains no elements");
+                    }
                     break;
                 default:
                     if (translator.SortFly.AllProperties().Count() > 0)
