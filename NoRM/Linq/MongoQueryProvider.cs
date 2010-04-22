@@ -201,7 +201,7 @@ namespace Norm.Linq
 
         public object Execute(Expression expression)
         {
-            throw new NotSupportedException("Not generic Linq queries are not supported");
+            throw new NotSupportedException("Non generic Linq queries are not supported");
         }
 
         private bool CanBeEvaluatedLocally(Expression expression)

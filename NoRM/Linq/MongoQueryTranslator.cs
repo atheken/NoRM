@@ -250,13 +250,13 @@ namespace Norm.Linq
             }
             else
             {
-                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-
                 // this supports the "deep graph" name - "Product.Address.City"
+                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                
                 var fixedName = fullName
                     .Skip(1)
                     .Where(x => x != "First()")
-                    .Select(x => System.Text.RegularExpressions.Regex.Replace(x, @"\[[0-9]+\]", ""))
+                    .Select(x => System.Text.RegularExpressions.Regex.Replace(x, @"\[[0-9]+\]$", ""))
                     .ToArray();
 
                 var expressionRootType = GetParameterExpression(m.Expression);
