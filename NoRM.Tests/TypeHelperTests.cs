@@ -95,7 +95,18 @@ namespace Norm.Tests
         {
             Assert.Equal("AttributeDefinedId", TypeHelper.FindIdProperty(typeof(EntityWithAttributeDefindIdAndConventionalId)).Name);
         }
+
+        [Fact]
+        public void FindIdProperty_Returns_Null_When_Entity_Has_No_Id_Defined()
+        {
+            Assert.Null(TypeHelper.FindIdProperty(typeof(EntityWithNoId)));
+        }
 	}
+
+    public class EntityWithNoId
+    {
+        public string SomeProperty { get; set; }
+    }
 
     public class EntityWithAttributeDefindIdAndConventionalId
     {
