@@ -206,52 +206,40 @@ namespace Norm.BSON
             const string conventional = "C";
 
             Dictionary<string, PropertyInfo> idDictionary = new Dictionary<string, PropertyInfo>(4);
+            idDictionary.Add(mongoDefault, null);
+            idDictionary.Add(mapDefined, null);
+            idDictionary.Add(attributeDefined, null);
+            idDictionary.Add(conventional, null);
 
             foreach (var property in properties)
             {
                 if(PropertyIsExplicitlyMappedToId(type, property.Name))
                 {
-                    idDictionary.Add(mapDefined, property);
+                    idDictionary[mapDefined] = property;
                 }
                 else if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
                 {
-                    idDictionary.Add(attributeDefined, property);
+                    idDictionary[attributeDefined] = property;
                 }
                 else if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    idDictionary.Add(mongoDefault, property);
+                    idDictionary[mongoDefault] = property;
                 }
                 else if (property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    idDictionary.Add(conventional, property);
+                    idDictionary[conventional] = property;
                 }
             }
 
-            if(idDictionary.Count > 1)
+            if(idDictionary[mongoDefault] != null)
             {
-                if(idDictionary.Keys.Contains(mongoDefault))
+                if(idDictionary[mapDefined] != null || idDictionary[attributeDefined] != null)
                 {
-                    if(idDictionary.Keys.Contains(mapDefined) || idDictionary.Keys.Contains(attributeDefined))
-                    {
-                        throw new MongoConfigurationMapException(type.Name + " exposes a property called _id and defines a an Id using MongoIndentifier or by explicit mapping.");
-                    }
+                    throw new MongoConfigurationMapException(type.Name + " exposes a property called _id and defines a an Id using MongoIndentifier or by explicit mapping.");
                 }
             }
 
-            if (idDictionary.Keys.Contains(mongoDefault))
-            {
-                return idDictionary[mongoDefault];
-            }
-            if(idDictionary.Keys.Contains(mapDefined))
-            {
-                return idDictionary[mapDefined];
-            }
-            if(idDictionary.Keys.Contains(attributeDefined))
-            {
-                return idDictionary[attributeDefined];
-            }
-
-            return idDictionary.Keys.Contains(conventional) ? idDictionary[conventional] : null;
+            return idDictionary.Values.FirstOrDefault(value => value != null);
         }
 
         ///<summary>
