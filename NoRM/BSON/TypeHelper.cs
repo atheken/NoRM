@@ -39,7 +39,7 @@ namespace Norm.BSON
         /// Returns the PropertyInfo for properties defined as Instance, Public, NonPublic, or FlattenHierarchy
         /// </summary>
         /// <param name="type">The type.</param>
-        private static PropertyInfo[] GetProperties(Type type)
+        public static PropertyInfo[] GetProperties(Type type)
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
                                                 BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
@@ -53,7 +53,7 @@ namespace Norm.BSON
         {
             _type = type;
             var properties = GetProperties(type);
-            _properties = LoadMagicProperties(properties, FindIdProperty(type, properties));
+            _properties = LoadMagicProperties(properties, new IdPropertyFinder(type, properties).IdProperty);
 
             if (typeof(IExpando).IsAssignableFrom(type))
             {
@@ -174,74 +174,6 @@ namespace Norm.BSON
                 _properties["$_id"] : _properties.ContainsKey("$id") ? _properties["$id"] : null;
         }
 
-        /// <summary>
-        /// Determines if the Id has been defined explicitly in a MongoConfigurationMap <see cref="MongoConfigurationMap"/>.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="propertyName">The property name.</param>
-        private static bool PropertyIsExplicitlyMappedToId(Type type, string propertyName)
-        {
-            var map = MongoTypeConfiguration.PropertyMaps;
-            if (map.ContainsKey(type))
-            {
-                if (map[type].ContainsKey(propertyName))
-                {
-                    return map[type][propertyName].IsId;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Gets the id property.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="properties">The properties.</param>
-        /// <returns></returns>
-        private static PropertyInfo FindIdProperty(Type type, IEnumerable<PropertyInfo> properties)
-        {
-            const string mapDefined = "M";
-            const string attributeDefined = "A";
-            const string mongoDefault = "MD";
-            const string conventional = "C";
-
-            Dictionary<string, PropertyInfo> idDictionary = new Dictionary<string, PropertyInfo>(4);
-            idDictionary.Add(mongoDefault, null);
-            idDictionary.Add(mapDefined, null);
-            idDictionary.Add(attributeDefined, null);
-            idDictionary.Add(conventional, null);
-
-            foreach (var property in properties)
-            {
-                if(PropertyIsExplicitlyMappedToId(type, property.Name))
-                {
-                    idDictionary[mapDefined] = property;
-                }
-                else if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
-                {
-                    idDictionary[attributeDefined] = property;
-                }
-                else if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    idDictionary[mongoDefault] = property;
-                }
-                else if (property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    idDictionary[conventional] = property;
-                }
-            }
-
-            if(idDictionary[mongoDefault] != null)
-            {
-                if(idDictionary[mapDefined] != null || idDictionary[attributeDefined] != null)
-                {
-                    throw new MongoConfigurationMapException(type.Name + " exposes a property called _id and defines a an Id using MongoIndentifier or by explicit mapping.");
-                }
-            }
-
-            return idDictionary.Values.FirstOrDefault(value => value != null);
-        }
-
         ///<summary>
         /// Returns the property defined as the Id for the entity either by convention or explicitly. 
         ///</summary>
@@ -249,7 +181,7 @@ namespace Norm.BSON
         ///<returns></returns>
         public static PropertyInfo FindIdProperty(Type type)
         {
-            return FindIdProperty(type, GetProperties(type));
+            return new IdPropertyFinder(type).IdProperty;
         }
 
         /// <summary>
