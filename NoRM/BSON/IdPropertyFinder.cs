@@ -11,11 +11,7 @@ namespace Norm.BSON
     ///</summary>
     public class IdPropertyFinder
     {
-        private const string MapDefined = "M";
-        private const string AttributeDefined = "A";
-        private const string MongoDefault = "MD";
-        private const string Conventional = "C";
-        private readonly Dictionary<string, PropertyInfo> _idDictionary;
+        private readonly Dictionary<IdType, PropertyInfo> _idDictionary;
         private readonly Type _type;
         private PropertyInfo[] _properties;
 
@@ -26,12 +22,12 @@ namespace Norm.BSON
         public IdPropertyFinder(Type type)
         {
             _type = type;
-            _idDictionary = new Dictionary<string, PropertyInfo>(4)
+            _idDictionary = new Dictionary<IdType, PropertyInfo>(4)
                                 {
-                                    { MongoDefault, null },
-                                    { MapDefined, null },
-                                    { AttributeDefined, null },
-                                    { Conventional, null }
+                                    { IdType.MongoDefault, null },
+                                    { IdType.MapDefined, null },
+                                    { IdType.AttributeDefined, null },
+                                    { IdType.Conventional, null }
                                 };
         }
 
@@ -86,9 +82,9 @@ namespace Norm.BSON
         {
             //This could be written as one line (MongoDefault && (MapDefined || AttributeDefined)) but two lines is more clearer.
             //This has the potential to become cumbersome should we discover more conflicts.
-            if (_idDictionary[MongoDefault] != null)
+            if (_idDictionary[IdType.MongoDefault] != null)
             {
-                if (_idDictionary[MapDefined] != null || _idDictionary[AttributeDefined] != null)
+                if (_idDictionary[IdType.MapDefined] != null || _idDictionary[IdType.AttributeDefined] != null)
                 {
                     throw new MongoConfigurationMapException(_type.Name + " exposes a property called _id and defines a an Id using MongoIndentifier or by explicit mapping.");
                 }
@@ -99,19 +95,19 @@ namespace Norm.BSON
         {
             if (PropertyIsExplicitlyMappedToId(property.Name))
             {
-                _idDictionary[MapDefined] = property;
+                _idDictionary[IdType.MapDefined] = property;
             }
             else if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
             {
-                _idDictionary[AttributeDefined] = property;
+                _idDictionary[IdType.AttributeDefined] = property;
             }
             else if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
             {
-                _idDictionary[MongoDefault] = property;
+                _idDictionary[IdType.MongoDefault] = property;
             }
             else if (property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
             {
-                _idDictionary[Conventional] = property;
+                _idDictionary[IdType.Conventional] = property;
             }
         }
 
@@ -127,5 +123,14 @@ namespace Norm.BSON
                 AddCandidate(property);
             }
         }
+
+        private enum IdType
+        {
+            MapDefined,
+            AttributeDefined,
+            MongoDefault,
+            Conventional,
+        }
+
     }
 }
