@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Norm.BSON;
+using Norm.Configuration;
 using Norm.Linq;
 using Norm.Protocol;
 using Norm.Protocol.Messages;
@@ -399,8 +400,23 @@ namespace Norm.Collections
                 Query = template,
                 OrderBy = orderBy
             };
-
+            var type = typeof (T);
+            if (MongoConfiguration.SummaryTypeFor(type) != null)
+            {
+                qm.FieldSelection = GetSelectionFields(type);
+            }
             return new MongoQueryExecutor<T, U>(qm);
+        }
+
+        private static FieldSelectionList GetSelectionFields(Type type)
+        {
+            var properties = TypeHelper.GetHelperForType(type).GetProperties();
+            var fields = new FieldSelectionList(properties.Count);
+            foreach (var property in properties)
+            {
+                fields.Add(property.Name);
+            }
+            return fields;
         }
 
         /// <summary>

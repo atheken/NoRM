@@ -27,28 +27,11 @@ namespace Norm.Configuration
         private bool IsIdPropertyForType(Type type, String propertyName)
         {
             bool retval = false;
+
             if (!_idProperties.ContainsKey(type))
             {
-                PropertyInfo idProp = null;
-                foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
-                    BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
-                {
-                    if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
-                    {
-                        idProp = property;
-                        break;
-                    }
-                    if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        idProp = property;
-                        break;
-                    }
-                    if (idProp == null && property.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        idProp = property;
-                        break;
-                    }
-                }
+                PropertyInfo idProp = TypeHelper.FindIdProperty(type);
+
                 if (idProp != null)
                 {
                     _idProperties[type] = idProp.Name;
@@ -110,6 +93,12 @@ namespace Norm.Configuration
                 }
             }
             return retval;
+        }
+
+        public Type SummaryTypeFor(Type type)
+        {
+            var summaryTypes = MongoTypeConfiguration.SummaryTypes;
+            return summaryTypes.ContainsKey(type) ? summaryTypes[type] : null;
         }
 
         /// <summary>

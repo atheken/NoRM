@@ -88,6 +88,8 @@
     <Compile Include="BSON\BsonSerializer.cs" />
     <Compile Include="BSON\BSONTypes.cs" />
     <Compile Include="BSON\ExpandoProperty.cs" />
+    <Compile Include="BSON\FieldSelectionList.cs" />
+    <Compile Include="BSON\IdPropertyFinder.cs" />
     <Compile Include="BSON\Lists\ArrayWrapper.cs" />
     <Compile Include="BSON\Lists\BaseWrapper.cs" />
     <Compile Include="BSON\Lists\CollectionWrapper.cs" />
@@ -138,6 +140,7 @@
     <Compile Include="Configuration\ITypedConfigurationGeneric.cs" />
     <Compile Include="Configuration\MongoConfiguration.cs" />
     <Compile Include="Configuration\MongoConfigurationMap.cs" />
+    <Compile Include="Configuration\MongoConfigurationMapException.cs" />
     <Compile Include="Configuration\MongoConfigurationTypeMap.cs" />
     <Compile Include="Configuration\MongoTypeConfiguration.cs" />
     <Compile Include="Configuration\MongoTypeConfigurationGeneric.cs" />
@@ -154,6 +157,7 @@
     <Compile Include="Connections\QueuedConnectionProviders.cs" />
     <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
+    <Compile Include="IExpando.cs" />
     <Compile Include="IHideSystemTypes.cs" />
     <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
@@ -168,7 +172,7 @@
     <Compile Include="MapReduce\MapReduce.cs" />
     <Compile Include="MapReduce\MapReduceOptions.cs" />
     <Compile Include="MapReduce\MapReduceOptionsGeneric.cs" />
-    <Compile Include="MapReduce\MapReduceResponse.cs" />
+    <Compile Include="MapReduce\MapReduceResult.cs" />
     <Compile Include="MongoAdmin.cs" />
     <Compile Include="Mongo.cs" />
     <Compile Include="MongoQueryExecutor.cs" />

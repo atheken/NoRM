@@ -7,6 +7,7 @@ namespace Norm.Configuration
     /// </summary>
     public interface IMongoConfigurationMap : IHideObjectMembers
     {
+                
         /// <summary>
         /// Fluently define a configuration for the specified type. This will be merged with any existing types.
         /// </summary>
@@ -44,5 +45,10 @@ namespace Norm.Configuration
         /// Type's property alias if configured; otherwise null
         /// </returns>
         string GetPropertyAlias(Type type, string propertyName);
+
+        /// <summary>
+        /// Gets the real collection type
+        /// </summary>
+        Type SummaryTypeFor(Type type);
     }
 }

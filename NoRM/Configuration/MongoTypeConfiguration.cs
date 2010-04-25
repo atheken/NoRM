@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace Norm.Configuration
 {
@@ -11,8 +10,8 @@ namespace Norm.Configuration
     {
         private static readonly Dictionary<Type, string> _collectionNames = new Dictionary<Type, string>();
         private static readonly Dictionary<Type, string> _connectionStrings = new Dictionary<Type, string>();
-        private static readonly Dictionary<Type, Dictionary<string, PropertyMappingExpression>> _typeConfigurations =
-            new Dictionary<Type, Dictionary<string, PropertyMappingExpression>>();
+        private static readonly Dictionary<Type, Dictionary<string, PropertyMappingExpression>> _typeConfigurations = new Dictionary<Type, Dictionary<string, PropertyMappingExpression>>();
+        private static readonly IDictionary<Type, Type> _summaryTypes = new Dictionary<Type, Type>();
 
         /// <summary>
         /// Gets the property maps.
@@ -70,6 +69,15 @@ namespace Norm.Configuration
         internal static Dictionary<Type, string> CollectionNames
         {
             get { return _collectionNames; }
+        }
+
+        /// <summary>
+        /// Gets the summary types.
+        /// </summary>
+        /// <value>The summary type.</value>
+        internal static IDictionary<Type, Type> SummaryTypes
+        {
+            get { return _summaryTypes; }
         }
     }
 }

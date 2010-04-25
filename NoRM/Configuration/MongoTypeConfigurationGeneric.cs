@@ -13,6 +13,14 @@ namespace Norm.Configuration
     /// </typeparam>
     public class MongoTypeConfiguration<T> : MongoTypeConfiguration, ITypeConfiguration<T>
     {
+        private void CheckForPropertyMap(Type typeKey)
+        {
+            if (!PropertyMaps.ContainsKey(typeKey))
+            {
+                PropertyMaps.Add(typeKey, new Dictionary<string, PropertyMappingExpression>());
+            }
+        }
+
         /// <summary>
         /// Looks up property names for use with aliases.
         /// </summary>
@@ -22,14 +30,24 @@ namespace Norm.Configuration
         {
             var propertyName = TypeHelper.FindProperty(sourcePropery);
             var typeKey = typeof(T);
-            if (!PropertyMaps.ContainsKey(typeKey))
-            {
-                PropertyMaps.Add(typeKey, new Dictionary<string, PropertyMappingExpression>());
-            }
+            CheckForPropertyMap(typeKey);
             var expression = new PropertyMappingExpression { SourcePropertyName = propertyName };
             PropertyMaps[typeKey][propertyName] = expression;
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
             return expression;
+        }
+
+        /// <summary>
+        /// Defines a property as and entity's Id explicitly.
+        /// </summary>
+        /// <param name="idProperty">The Id propery.</param>
+        /// <returns></returns>
+        public void IdIs(Expression<Func<T, object>> idProperty)
+        {
+            var propertyName = TypeHelper.FindProperty(idProperty);
+            var typeKey = typeof (T);
+            CheckForPropertyMap(typeKey);
+            PropertyMaps[typeKey][propertyName] = new PropertyMappingExpression {IsId = true};
         }
 
         /// <summary>
@@ -49,6 +67,15 @@ namespace Norm.Configuration
         public void UseConnectionString(string connectionString)
         {
             ConnectionStrings[typeof(T)] = connectionString;
+            MongoConfiguration.FireTypeChangedEvent(typeof(T));
+        }
+
+        /// <summary>
+        /// Marks a type as a summary of another type (partial get)
+        /// </summary>  
+        public void SummaryOf<S>()
+        {
+            SummaryTypes[typeof (T)] = typeof (S);
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
     }

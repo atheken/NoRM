@@ -1,4 +1,6 @@
+using System;
 using Norm.BSON;
+using Norm.Configuration;
 using Xunit;
 
 namespace Norm.Tests
@@ -35,7 +37,7 @@ namespace Norm.Tests
 			Assert.NotNull(helper.FindIdProperty());
 		}
 
-		[Fact]
+		[Fact(Skip = "Karl doesn't think this is possible")]
 		public void Can_Infer_ID_From_Interface_Attribute()
 		{
 			var helper = TypeHelper.GetHelperForType(typeof(DtoWithNonDefaultIdClass));

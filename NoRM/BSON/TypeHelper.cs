@@ -36,15 +36,29 @@ namespace Norm.BSON
         }
 
         /// <summary>
+        /// Returns the PropertyInfo for properties defined as Instance, Public, NonPublic, or FlattenHierarchy
+        /// </summary>
+        /// <param name="type">The type.</param>
+        public static PropertyInfo[] GetProperties(Type type)
+        {
+            return type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
+                                                BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TypeHelper"/> class.
         /// </summary>
         /// <param name="type">The type.</param>
         public TypeHelper(Type type)
         {
             _type = type;
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
-                                                BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-            _properties = LoadMagicProperties(properties, IdProperty(properties));
+            var properties = GetProperties(type);
+            _properties = LoadMagicProperties(properties, new IdPropertyFinder(type, properties).IdProperty);
+
+            if (typeof(IExpando).IsAssignableFrom(type))
+            {
+                Expando = _properties["Expando"];
+            }
         }
 
         /// <summary>
@@ -127,6 +141,11 @@ namespace Norm.BSON
         }
 
         /// <summary>
+        /// The IExpando property
+        /// </summary>
+        public MagicProperty Expando { get; private set; }
+        
+        /// <summary>
         /// Gets all properties.
         /// </summary>
         /// <returns></returns>
@@ -155,32 +174,14 @@ namespace Norm.BSON
                 _properties["$_id"] : _properties.ContainsKey("$id") ? _properties["$id"] : null;
         }
 
-        /// <summary>
-        /// Gets the id property.
-        /// </summary>
-        /// <param name="properties">The properties.</param>
-        /// <returns></returns>
-        private static PropertyInfo IdProperty(IEnumerable<PropertyInfo> properties)
+        ///<summary>
+        /// Returns the property defined as the Id for the entity either by convention or explicitly. 
+        ///</summary>
+        ///<param name="type">The type.</param>
+        ///<returns></returns>
+        public static PropertyInfo FindIdProperty(Type type)
         {
-            PropertyInfo foundSoFar = null;
-            foreach (var property in properties)
-            {
-                if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
-                {
-                    return property;
-                }
-                if (property.Name.Equals("_id", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    foundSoFar = property;
-                }
-                if (foundSoFar == null && property.Name.Equals("Id",
-                    StringComparison.InvariantCultureIgnoreCase))
-                {
-                    foundSoFar = property;
-                }
-            }
-
-            return foundSoFar;
+            return new IdPropertyFinder(type).IdProperty;
         }
 
         /// <summary>

@@ -107,9 +107,9 @@ namespace Norm.Tests
             get { return _provider; }
         }
 
-        public IQueryable<Product> Products
+        public IQueryable<TestProduct> Products
         {
-            get { return new MongoQuery<Product>(_provider); }
+            get { return new MongoQuery<TestProduct>(_provider); }
         }
         public IQueryable<Thread> Threads
         {
@@ -183,6 +183,7 @@ namespace Norm.Tests
         public IList<string> Tags { get; set; }
     }
 
+
     internal class Post2
     {
         public Post2()
@@ -225,7 +226,7 @@ namespace Norm.Tests
 
         public ObjectId Id { get; set; }
         public string Name { get; set; }
-        public DbReference<Product>[] ProductsOrdered { get; set; }
+        public DbReference<TestProduct>[] ProductsOrdered { get; set; }
     }
 
     internal class User
@@ -262,6 +263,22 @@ namespace Norm.Tests
         public string Zip { get; set; }
     }
 
+    internal class ExpandoAddress : IExpando
+    {
+        public string Street { get; set; }
+        public string City { get; set; }
+
+        private IDictionary<string, object> _expando;
+        public IDictionary<string, object> Expando
+        {
+            get
+            {
+                if (_expando == null) { _expando = new Dictionary<string, object>(); }
+                return _expando;
+            }
+        }
+    } 
+
     internal class Supplier
     {
         public Supplier()
@@ -273,7 +290,7 @@ namespace Norm.Tests
         public string Name { get; set; }
         public DateTime CreatedOn { get; set; }
         public Address Address { get; set; }
-    }
+    }   
 
     internal class InventoryChange
     {
@@ -285,9 +302,9 @@ namespace Norm.Tests
         }
     }
 
-    internal class Product
+    internal class TestProduct
     {
-        public Product()
+        public TestProduct()
         {
             Supplier = new Supplier();
             _id = ObjectId.NewObjectId();
@@ -301,7 +318,16 @@ namespace Norm.Tests
         public double Price { get; set; }
         public Supplier Supplier { get; set; }
         public DateTime Available { get; set; }
+    }    
+
+    internal class ProductSummary
+    {
+        public ObjectId Id { get; private set; }
+        public string Name{ get; set;}
+        public double Price { get; set; }
     }
+
+   
 
     public class FakeObject
     {

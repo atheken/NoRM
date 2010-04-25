@@ -15,12 +15,12 @@ namespace Norm.Tests
 
             using (var session = new Session())
             {
-                session.Drop<Product>();
+                session.Drop<TestProduct>();
                 session.Drop<ProductReference>();
 
-                session.Add(new Product { _id = id, Name = "RefProduct" });
+                session.Add(new TestProduct { _id = id, Name = "RefProduct" });
 
-                var productReference = new DbReference<Product>(id);
+                var productReference = new DbReference<TestProduct>(id);
 
                 session.Add(new ProductReference
                     {
