@@ -131,12 +131,13 @@ namespace Norm.Tests
             }
         }
 
-        [Fact(Skip="todo")]
+        [Fact]
         public void GetsServerStatus()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var status = admin.ServerStatus();
+                Assert.Equal(1d, status.Ok);
             }            
         } 
         
