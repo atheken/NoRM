@@ -46,10 +46,10 @@ namespace Norm.Tests
 
             using (var session = new Session())
             {
-                session.Drop<User>();
+                session.Drop<User3>();
                 session.Drop<Role>();
 
-                session.Add(new User
+                session.Add(new User3
                                 {
                                     Id = userId,
                                     EmailAddress = "user@domain.com"
@@ -57,9 +57,9 @@ namespace Norm.Tests
                 session.Add(new Role
                                 {
                                     Id = roleName,
-                                    Users = new List<DbReference<User, string>>
+                                    Users = new List<DbReference<User3, string>>
                                                 {
-                                                    new DbReference<User, string>(userId)
+                                                    new DbReference<User3, string>(userId)
                                                 }
                                 });
             }

@@ -103,9 +103,10 @@ namespace Norm.Linq
 
         /// <summary>
         /// The i query provider. execute.
+        /// </summary>
         /// <typeparam name="S">Type to execute</typeparam>
         /// <param name="expression">The expression.</param>
-        /// <returns></returns>
+        /// <returns>Resulting object</returns>
         S IQueryProvider.Execute<S>(Expression expression)
         {
             object result = Execute<S>(expression);
@@ -126,25 +127,24 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="expression">An expression tree that represents a LINQ query.</param>
         /// <returns>The execute.</returns>
-        /// 
         public object Execute<T>(Expression expression)
         {
             expression = PartialEvaluator.Eval(expression, this.CanBeEvaluatedLocally);
 
-            var tranny = new MongoQueryTranslator();
-            var qry = tranny.Translate(expression);
-            var fly = tranny.FlyWeight;
+            var translator = new MongoQueryTranslator();
+            var qry = translator.Translate(expression);
+            var fly = translator.FlyWeight;
 
             // This is the actual Query mechanism...            
-            var collection = new MongoCollection<T>(tranny.CollectionName, DB, DB.CurrentConnection);
+            var collection = new MongoCollection<T>(translator.CollectionName, DB, DB.CurrentConnection);
 
             string map = "", reduce = "", finalize = "";
-            if (!string.IsNullOrEmpty(tranny.AggregatePropName))
+            if (!string.IsNullOrEmpty(translator.AggregatePropName))
             {
-                map = "function(){emit(0, {val: this." + tranny.AggregatePropName + ",tSize:1} )};";
+                map = "function(){emit(0, {val: this." + translator.AggregatePropName + ",tSize:1} )};";
                 if (!string.IsNullOrEmpty(qry))
                 {
-                    map = "function(){if (" + qry + ") {emit(0, {val: this." + tranny.AggregatePropName + ",tSize:1} )};}";
+                    map = "function(){if (" + qry + ") {emit(0, {val: this." + translator.AggregatePropName + ",tSize:1} )};}";
                 }
 
                 reduce = string.Empty;
@@ -152,7 +152,7 @@ namespace Norm.Linq
             }
 
             object result;
-            switch (tranny.MethodCall)
+            switch (translator.MethodCall)
             {
                 case "Any":
                     result = collection.Count(fly) > 0;
@@ -162,36 +162,42 @@ namespace Norm.Linq
                     break;
                 case "Sum":
                     reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; i++){ sum+=values[i].val;} return {val:sum};}";
-                    result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
+                    result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
                     break;
                 case "Average":
                     reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; i++){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
                     finalize = "function(key, res){ return res.val / res.tSize; }";
-                    result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
+                    result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
                     break;
                 case "Min":
                     reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
-                    result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
+                    result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
                     break;
                 case "Max":
                     reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
-                    result = ExecuteMR<double>(tranny.TypeName, map, reduce, finalize);
+                    result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
                     break;
-                case "Single":
                 case "SingleOrDefault":
-                case "First":
                 case "FirstOrDefault":
                     result = collection.FindOne(fly);
                     break;
-                default:
-                    if (tranny.SortFly.AllProperties().Count() > 0)
+                case "Single":
+                case "First":
+                    result = collection.FindOne(fly); 
+                    if (result == null)
                     {
-                        tranny.SortFly.ReverseKitchen();
-                        result = collection.Find(fly, tranny.SortFly, tranny.Take, tranny.Skip, collection.FullyQualifiedName);
+                        throw new InvalidOperationException("Sequence contains no elements");
+                    }
+                    break;
+                default:
+                    if (translator.SortFly.AllProperties().Count() > 0)
+                    {
+                        translator.SortFly.ReverseKitchen();
+                        result = collection.Find(fly, translator.SortFly, translator.Take, translator.Skip, collection.FullyQualifiedName);
                     }
                     else
                     {
-                        result = collection.Find(fly, tranny.Take, tranny.Skip);
+                        result = collection.Find(fly, translator.Take, translator.Skip);
                     }
                     break;
             }
@@ -201,10 +207,10 @@ namespace Norm.Linq
 
         public object Execute(Expression expression)
         {
-            return null;
+            throw new NotSupportedException("Non generic Linq queries are not supported");
         }
 
-        protected virtual bool CanBeEvaluatedLocally(Expression expression)
+        private bool CanBeEvaluatedLocally(Expression expression)
         {
             // any operation on a query can't be done locally
             ConstantExpression cex = expression as ConstantExpression;
