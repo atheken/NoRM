@@ -74,23 +74,27 @@ namespace Norm.Protocol.Messages
         /// <summary>
         /// The cursor to be used in future calls to "get more"
         /// </summary>
+        /// <value>The CursorID property gets/sets the CursorID data member.</value>
         public long CursorID { get; protected set; }
 
         /// <summary>
         /// The location of the cursor.
         /// </summary>
+        /// <value>The CursorPosition property gets/sets the CursorPosition data member.</value>
         public int CursorPosition { get; protected set; }
 
         /// <summary>
         /// If "HasError" is set, 
         /// </summary>
+        /// <value>The HasError property gets/sets the HasError data member.</value>
         public bool HasError { get; protected set; }
 
         private ReplyMessage<T> _addedReturns = null;
 
         /// <summary>
-        /// Gets enumerable results.
+        /// An enumerable result set.
         /// </summary>
+        /// <value>The Results property gets the Results data member.</value>
         public IEnumerable<T> Results
         {
             get

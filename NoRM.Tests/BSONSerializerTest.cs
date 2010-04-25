@@ -18,6 +18,23 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void DoesntSerializePropertyWithDefaultValueAndShouldSerialize()
+        {
+            // create an instance  with the following values
+            // Id = 1
+            // Message = "Test"
+            // MagicDate = DateTime.MinValue (0001-01-01)
+            // ComplexProperty = 3
+            var o = new SerializerTest() { Id = 1, Message = "Test", ComplexProperty = 3 };
+            // when serialized it should produce a document {"Id": 1} 
+            var o1 = BsonSerializer.Serialize(o);
+            // create a object with value Id = 1
+            var s1 = BsonSerializer.Serialize(new { Id = 1 });
+            // both should be equal
+            Assert.Equal(o1, s1);
+        }
+
+        [Fact]
         public void SerializationOfEnumIsNotLossy()
         {
             var obj1 = new GeneralDTO{ Flags32 = Flags32.FlagOn, Flags64 = Flags64.FlagOff };

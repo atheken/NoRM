@@ -16,7 +16,7 @@ namespace Norm.Responses
             MongoConfiguration.Initialize(c => c.For<ExplainResponse>(a =>
             {
                 a.ForProperty(auth => auth.NumberScanned).UseAlias("nscanned");
-                a.ForProperty(auth=>auth.NumberOfScannedObjects).UseAlias("nscannedObjects");
+                a.ForProperty(auth => auth.NumberOfScannedObjects).UseAlias("nscannedObjects");
                 a.ForProperty(auth => auth.Number).UseAlias("n");
                 a.ForProperty(auth => auth.Milliseconds).UseAlias("millis");
                 a.ForProperty(auth => auth.OldPlan).UseAlias("oldPlan");
@@ -26,34 +26,39 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// The number of objects that would be scanned by this query.
+        /// Gets the number of objects that would be scanned by this query.
         /// </summary>
-        public int? NumberOfScannedObjects { get; private set; }
+        /// <value>The number of objects that will be scanned.</value>
+        public int? NumberOfScannedObjects { get; set; }
 
         /// <summary>
         /// Gets or sets the number scanned.
         /// </summary>
         /// <value>The number scanned.</value>
-        public int NumberScanned { get; private set; }
+        public int NumberScanned { get; set; }
+        
         /// <summary>
         /// Gets or sets the number.
         /// </summary>
         /// <value>The number.</value>
-        public int Number { get; private set; }
+        public int Number { get; set; }
+        
         /// <summary>
         /// Gets or sets the milliseconds.
         /// </summary>
         /// <value>The milliseconds.</value>
-        public int Milliseconds { get; private set; }
+        public int Milliseconds { get; set; }
+        
         /// <summary>
         /// Gets or sets the old explain plan.
         /// </summary>
         /// <value>The old plan.</value>
-        public ExplainPlan OldPlan { get; private set; }
+        public ExplainPlan OldPlan { get; set; }
+        
         /// <summary>
         /// Gets or sets all explain plans.
         /// </summary>
         /// <value>All plans.</value>
-        public ExplainPlan[] AllPlans { get; private set; }
+        public ExplainPlan[] AllPlans { get; set; }
     }
 }

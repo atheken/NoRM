@@ -104,6 +104,8 @@ namespace Norm.BSON
         {
             NewDocument(length);
             var @object = (T)DeserializeValue(typeof(T), BSONTypes.Object);
+            // traverse the object T and apply the DefaultValue to the properties that have them
+
             return @object;
         }        
 
@@ -251,6 +253,7 @@ namespace Norm.BSON
             {
                 instance = Activator.CreateInstance(type, true);
                 typeHelper = TypeHelper.GetHelperForType(type);
+                typeHelper.ApplyDefaultValues(instance);
             }
             while (true)
             {
@@ -271,7 +274,7 @@ namespace Norm.BSON
                     type = Type.GetType(typeName, true);
                     typeHelper = TypeHelper.GetHelperForType(type);
                     instance = Activator.CreateInstance(type, true);
-
+                    typeHelper.ApplyDefaultValues(instance);
                     continue;
                 }
 

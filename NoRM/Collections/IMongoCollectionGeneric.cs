@@ -21,7 +21,7 @@ namespace Norm.Collections
         /// Finds all documents.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<T> Find();
+        new IEnumerable<T> Find();
 
         /// <summary>
         /// Finds the specified document with a limited result set.
@@ -161,6 +161,6 @@ namespace Norm.Collections
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
-        new IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
+        IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
     }
 }

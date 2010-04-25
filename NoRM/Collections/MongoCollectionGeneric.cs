@@ -177,7 +177,7 @@ namespace Norm.Collections
         /// Find objects in the collection without any qualifiers.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<T> Find()
+        new public IEnumerable<T> Find()
         {
             // this is a hack to get a value that will test for null into the serializer.
             return Find(new object(), Int32.MaxValue, FullyQualifiedName);
@@ -210,11 +210,22 @@ namespace Norm.Collections
         }
 
         /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
+        /// <typeparam name="U">Type of document to find.</typeparam>
+        /// <param name="template">The template.</param>
+        /// <param name="limit">The number to return from this command.</param>
+        /// <param name="skip">The skip step.</param>
         public IEnumerable<T> Find<U>(U template, int limit, int skip)
         {
             return Find(template, limit, skip, this.FullyQualifiedName);
         }
 
+        /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
+        /// <typeparam name="U">Type of document to find.</typeparam>
+        /// <typeparam name="O">Type of document to find.</typeparam>
+        /// <param name="template">The template.</param>
+        /// <param name="orderby">How to order the results</param>
+        /// <param name="limit">The number to return from this command.</param>
+        /// <param name="skip">The skip step.</param>
         public IEnumerable<T> Find<U, O>(U template, O orderby, int limit, int skip)
         {
             return this.Find(template, orderby, limit, skip, this.FullyQualifiedName);
@@ -237,7 +248,7 @@ namespace Norm.Collections
         /// A count on this collection without any filter.
         /// </summary>
         /// <returns>The count.</returns>
-        public long Count()
+        new public long Count()
         {
             return Count(new { });
         }

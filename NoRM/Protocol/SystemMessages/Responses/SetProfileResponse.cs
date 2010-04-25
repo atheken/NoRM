@@ -12,7 +12,6 @@ namespace Norm.Responses
         {
             MongoConfiguration.Initialize(c => c.For<SetProfileResponse>(a =>
                                                    {
-                                                       a.ForProperty(auth => auth.Ok).UseAlias("ok");
                                                        a.ForProperty(auth => auth.PreviousLevel).UseAlias("was");
                                                        a.ForProperty(auth => auth.Profile).UseAlias("profile");
                                                    })
@@ -20,14 +19,15 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// Gets or sets the profile.
+        /// The profile.
         /// </summary>
-        /// <value>The profile.</value>
+        /// <value>The Profile property gets/sets the Profile data member.</value>
         public int? Profile { get; set; }
+
         /// <summary>
-        /// Gets or sets the previous profile level.
+        /// The previous level.
         /// </summary>
-        /// <value>The previous level.</value>
+        /// <value>The PreviousLevel property gets the PreviousLevel data member.</value>
         public double? PreviousLevel { get; set; }
     }
 }

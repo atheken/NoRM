@@ -18,6 +18,7 @@ namespace Norm.Protocol.SystemMessages.Requests
         /// <summary>
         /// Drop database.
         /// </summary>
+        /// <value>The DropDatabase property gets the DropDatabase data member.</value>
         public double DropDatabase
         {
             get { return 1d; }

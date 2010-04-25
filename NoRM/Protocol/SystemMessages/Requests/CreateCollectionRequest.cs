@@ -30,7 +30,7 @@ namespace Norm.Protocol.SystemMessages.Request
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateCollectionRequest"/> class.
         /// </summary>
-        /// <param name="options">The options.</param>
+        /// <param name="options">The options.</param>        
         public CreateCollectionRequest(CreateCollectionOptions options)
         {
             this._options = options;
@@ -39,14 +39,16 @@ namespace Norm.Protocol.SystemMessages.Request
         /// <summary>
         /// Gets options name.
         /// </summary>
+        /// <value>The Create property gets the Create data member.</value>
         public string Create
         {
             get { return this._options.Name; }
         }
 
         /// <summary>
-        /// Gets the size.
+        /// The size of the collection.
         /// </summary>
+        /// <value>The Size property gets the Size data member.</value>
         public int? Size
         {
             get { return this._options.Size; }
@@ -55,22 +57,25 @@ namespace Norm.Protocol.SystemMessages.Request
         /// <summary>
         /// Gets the max.
         /// </summary>
+        /// <value>The Max property gets the Max data member.</value>
         public long? Max
         {
             get { return this._options.Max; }
         }
 
         /// <summary>
-        /// Gets a value indicating whether capped.
+        /// A value indicating if the collection is capped.
         /// </summary>
+        /// <value>The Capped property gets the Capped data member.</value>
         public bool Capped
         {
             get { return this._options.Capped; }
         }
 
         /// <summary>
-        /// Gets a value indicating whether autoIndexId.
+        /// A value indicating the autoIndexId.
         /// </summary>
+        /// <value>The AutoIndexId property gets the AutoIndexId data member.</value>
         public bool AutoIndexId
         {
             get { return this._options.AutoIndexId; }

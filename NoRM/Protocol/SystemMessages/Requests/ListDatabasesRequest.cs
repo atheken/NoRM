@@ -16,8 +16,9 @@ namespace Norm.Protocol.SystemMessages.Requests
                 c.For<ListDatabasesRequest>(a => a.ForProperty(auth => auth.ListDatabases).UseAlias("listDatabases")));
         }
         /// <summary>
-        /// Gets a value indicating whether listDatabases.
+        /// Whether or not to list the databases.
         /// </summary>
+        /// <value>The ListDatabases property gets the ListDatabases data member.</value>
         public bool ListDatabases
         {
             get { return true; }

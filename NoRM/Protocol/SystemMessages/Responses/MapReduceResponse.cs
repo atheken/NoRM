@@ -7,16 +7,18 @@ namespace Norm.Responses
     /// </summary>
     public class MapReduceResponse : BaseStatusMessage
     {
-        /// <summary>TODO::Description.</summary>
         private MongoDatabase _database;
 
         /// <summary>TODO::Description.</summary>
+        /// <value></value>
         public string Result { get; set; }
 
         /// <summary>TODO::Description.</summary>
+        /// <value></value>
         public MapReduceCount Counts { get; set; }
 
         /// <summary>TODO::Description.</summary>
+        /// <value></value>
         public long TimeMillis { get; set; }
 
 
@@ -59,16 +61,19 @@ namespace Norm.Responses
             /// <summary>
             /// Gets or sets Input.
             /// </summary>
+            /// <value></value>
             public int Input { get; set; }
 
             /// <summary>
             /// Gets or sets Emit.
             /// </summary>
+            /// <value></value>
             public int Emit { get; set; }
 
             /// <summary>
             /// Gets or sets Output.
             /// </summary>
+            /// <value></value>
             public int Output { get; set; }
         }
 

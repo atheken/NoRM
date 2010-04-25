@@ -34,6 +34,19 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportNulls()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = null, Price = 20 });
+                session.Add(new TestProduct { Name = "test1", Price = 10 });
+                var products = session.Products.Where(p => p.Name == null).ToList();
+                Assert.Equal(20, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
         public void SingleQualifierQueryIsExecutedAsANDQuery()
         {
             using (var session = new Session())
@@ -743,6 +756,22 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void TwoProductsofFourShouldBeReturnedWhereLengthOfNameEquals4()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "Test", Price = 10 });
+                session.Add(new TestProduct { Name = "Test1", Price = 22 });
+                session.Add(new TestProduct { Name = "Test1", Price = 33 });
+                session.Add(new TestProduct { Name = "Test", Price = 44 });
+                var products = session.Products.Where(x => x.Name.Length == 4).ToList().OrderBy(x => x.Price).ToArray();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(44, products[1].Price);
+                Assert.Equal(2, products.Length);
+            }
+        }
+
+        [Fact]
         public void FiltersBasedOnObjectId()
         {
             var targetId = ObjectId.NewObjectId();
@@ -873,6 +902,34 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void FirstWhereNoResultsReturnedInWhere()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "ATest", Price = 10 });
+                session.Add(new TestProduct { Name = "BTest", Price = 22 });
+                session.Add(new TestProduct { Name = "BTest", Price = 33 });
+                var noProducct = session.Products.Where(x => x.Name == "ZTest");
+                var ex = Assert.Throws<InvalidOperationException>(() => noProducct.First());
+                Assert.Equal("Sequence contains no elements", ex.Message);
+            }
+        }
+
+        [Fact]
+        public void FirstOrDefaultWhereNoResultsReturnedInWhere()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "ATest", Price = 10 });
+                session.Add(new TestProduct { Name = "BTest", Price = 22 });
+                session.Add(new TestProduct { Name = "BTest", Price = 33 });
+                var noProducct = session.Products.Where(x => x.Name == "ZTest").FirstOrDefault();
+                Assert.Equal(null, noProducct);
+            }
+        }
+
+
+        [Fact]
         public void CanQueryAndReturnSubClassedObjects()
         {
             using (var session = new Session())
@@ -941,6 +998,44 @@ namespace Norm.Tests
 
                 Assert.Equal(1, dtos.Count);
                 Assert.Equal(obj.Id, dtos.Single().Id);
+            }
+        }
+
+        [Fact]
+        public void CanAQuerySupportArrayIdentifiers()
+        {
+            MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
+            using (var shoppers = new Shoppers(new MongoQueryProvider("test", "localhost", "27017", "")))
+            {
+                shoppers.Drop<Shopper>();
+                shoppers.Add(new Shopper
+                {
+                    Id = ObjectId.NewObjectId(),
+                    Name = "John",
+                    Cart = new Cart
+                    {
+                        Id = ObjectId.NewObjectId(),
+                        Name = "Cart1",
+                        CartSuppliers = new[] { new Supplier { Name = "Supplier1" }, new Supplier { Name = "Supplier2" } }
+                    }
+                });
+
+                shoppers.Add(new Shopper
+                {
+                    Id = ObjectId.NewObjectId(),
+                    Name = "Jane",
+                    Cart = new Cart
+                    {
+                        Id = ObjectId.NewObjectId(),
+                        Name = "Cart2",
+                        CartSuppliers = new[] { new Supplier { Name = "Supplier3" }, new Supplier { Name = "Supplier4" } }
+                    }
+                });
+
+                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers[0].Name == "Supplier4").ToList();
+                Assert.Equal("Jane", deepQuery[0].Name);
+                Assert.Equal("Cart2", deepQuery[0].Cart.Name);
+                Assert.Equal(1, deepQuery.Count);
             }
         }
     }
