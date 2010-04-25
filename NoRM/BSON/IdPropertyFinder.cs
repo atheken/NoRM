@@ -14,6 +14,7 @@ namespace Norm.BSON
         private readonly Dictionary<IdType, PropertyInfo> _idDictionary;
         private readonly Type _type;
         private PropertyInfo[] _properties;
+        private PropertyInfo[] _interfaceProperties;
 
         ///<summary>
         /// Initializes new IdPropertyFinder.
@@ -64,15 +65,15 @@ namespace Norm.BSON
         /// <summary>
         /// Determines if the Id has been explicitly defined in a MongoConfigurationMap <see cref="MongoConfigurationMap"/>.
         /// </summary>
-        /// <param name="propertyName">The property name.</param>
-        private bool PropertyIsExplicitlyMappedToId(string propertyName)
+        /// <param name="idPropertyCandidate">The property name.</param>
+        private bool PropertyIsExplicitlyMappedToId(string idPropertyCandidate)
         {
             var map = MongoTypeConfiguration.PropertyMaps;
             if (map.ContainsKey(_type))
             {
-                if (map[_type].ContainsKey(propertyName))
+                if (map[_type].ContainsKey(idPropertyCandidate))
                 {
-                    return map[_type][propertyName].IsId;
+                    return map[_type][idPropertyCandidate].IsId;
                 }
             }
             return false;
@@ -91,13 +92,40 @@ namespace Norm.BSON
             }
         }
 
+        private static bool HasMongoIdentifierAttribute(ICustomAttributeProvider idPropertyCandidate)
+        {
+            return idPropertyCandidate.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0;
+        }
+
+        private bool PropertyIsAttributeDefinedId(MemberInfo idPropertyCandidate)
+        {
+            if (HasMongoIdentifierAttribute(idPropertyCandidate))
+            {
+                return true;
+            }
+
+            if (_interfaceProperties != null)
+            {
+                var interfacePropertiesWithSameNameAsCandidate = _interfaceProperties.Where(propertyInfo => propertyInfo.Name == idPropertyCandidate.Name);
+                foreach (PropertyInfo nextProperty in interfacePropertiesWithSameNameAsCandidate)
+                {
+                    if (HasMongoIdentifierAttribute(nextProperty))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private void AddCandidate(PropertyInfo property)
         {
             if (PropertyIsExplicitlyMappedToId(property.Name))
             {
                 _idDictionary[IdType.MapDefined] = property;
             }
-            else if (property.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0)
+            else if (PropertyIsAttributeDefinedId(property))
             {
                 _idDictionary[IdType.AttributeDefined] = property;
             }
@@ -117,6 +145,8 @@ namespace Norm.BSON
             {
                 _properties = TypeHelper.GetProperties(_type);
             }
+
+            _interfaceProperties = TypeHelper.GetInterfaceProperties(_type);
 
             foreach (var property in _properties)
             {

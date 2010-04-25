@@ -63,6 +63,12 @@ namespace Norm.Tests
         {
             Assert.Null(new IdPropertyFinder(typeof(EntityWithNoId)).IdProperty);
         }
+
+        [Fact]
+        public void FindIdPropert_Returns_Id_Specified_By_Attribute_In_Implemented_Interface()
+        {
+            Assert.Equal("MyId", new IdPropertyFinder(typeof(DtoWithNonDefaultIdClass)).IdProperty.Name);
+        }
     }
 
     public class EntityWithNoId

@@ -45,6 +45,25 @@ namespace Norm.BSON
                                                 BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
         }
 
+        public static PropertyInfo[] GetInterfaceProperties(Type type)
+        {
+            List<PropertyInfo> interfaceProperties;
+            Type[] interfaces = type.GetInterfaces();
+
+            if (interfaces.Count() != 0)
+            {
+                interfaceProperties = new List<PropertyInfo>();
+                foreach (Type nextInterface in interfaces)
+                {
+                    PropertyInfo[] intProps = GetProperties(nextInterface);
+                    interfaceProperties.AddRange(intProps);
+                }
+                return interfaceProperties.ToArray();
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeHelper"/> class.
         /// </summary>
