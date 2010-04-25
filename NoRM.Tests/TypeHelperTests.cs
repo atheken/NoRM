@@ -37,12 +37,13 @@ namespace Norm.Tests
 			Assert.NotNull(helper.FindIdProperty());
 		}
 
-		[Fact(Skip = "Karl doesn't think this is possible")]
+        [Fact]
 		public void Can_Infer_ID_From_Interface_Attribute()
 		{
 			var helper = TypeHelper.GetHelperForType(typeof(DtoWithNonDefaultIdClass));
+		    var something = helper.FindIdProperty();
 
-            Assert.NotNull(helper.FindIdProperty());
+            Assert.NotNull(something);
 		}
 	}
 }
