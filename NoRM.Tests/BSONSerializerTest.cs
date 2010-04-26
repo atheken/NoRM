@@ -18,14 +18,9 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void DoesntSerializePropertyWithDefaultValueAndShouldSerialize()
+        public void Should_Not_Serialize_When_Default_Values_Specified()
         {
-            // create an instance  with the following values
-            // Id = 1
-            // Message = "Test"
-            // MagicDate = DateTime.MinValue (0001-01-01)
-            // ComplexProperty = 3
-            var o = new SerializerTest() { Id = 1, Message = "Test", ComplexProperty = 3 };
+            var o = new SerializerTest() { Id = 1, Message = "Test" };
             // when serialized it should produce a document {"Id": 1} 
             var o1 = BsonSerializer.Serialize(o);
             // create a object with value Id = 1
