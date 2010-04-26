@@ -129,7 +129,7 @@ namespace Norm.Linq
         /// </returns>
         public virtual IEnumerator<T> GetEnumerator()
         {
-            return ((IEnumerable<T>)_provider.Execute<T>(_expression)).GetEnumerator();
+            return ((IEnumerable<T>)_provider.ExecuteQuery<T>(_expression)).GetEnumerator();
         }
 
         /// <summary>
