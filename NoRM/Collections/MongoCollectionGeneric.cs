@@ -132,6 +132,14 @@ namespace Norm.Collections
 
             var um = new UpdateMessage<X, U>(_connection, FullyQualifiedName, ops, matchDocument, valueDocument);
             um.Execute();
+            if (_connection.StrictMode)
+            {
+                var error = _db.LastError();
+                if (error.Code > 0)
+                {
+                    throw new MongoException(error.Error);
+                }
+            }
         }
 
         /// <summary>
