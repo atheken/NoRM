@@ -259,10 +259,11 @@ namespace Norm.BSON
                     return;
                 case BSONTypes.DateTime:
                     Written(8);
-                    _writer.Write((long)((DateTime)value).Subtract(BsonHelper.EPOCH).TotalMilliseconds);
+                    _writer.Write((long)((DateTime)value).ToUniversalTime()
+                        .Subtract(BsonHelper.EPOCH).TotalMilliseconds);
                     return;
                 case BSONTypes.Binary:
-                    WriteBinnary(value);
+                    WriteBinary(value);
                     return;
                 case BSONTypes.ScopedCode:
                     Write((ScopedCode)value);
@@ -361,7 +362,7 @@ namespace Norm.BSON
         /// <param name="value">
         /// The value.
         /// </param>
-        private void WriteBinnary(object value)
+        private void WriteBinary(object value)
         {
             if (value is byte[])
             {
