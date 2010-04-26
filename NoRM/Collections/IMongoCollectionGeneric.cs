@@ -21,7 +21,7 @@ namespace Norm.Collections
         /// Finds all documents.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<T> Find();
+        new IEnumerable<T> Find();
 
         /// <summary>
         /// Finds the specified document with a limited result set.
@@ -105,16 +105,6 @@ namespace Norm.Collections
         void UpdateOne<X, U>(X matchDocument, U valueDocument);
 
 
-
-        /// <summary>
-        /// Attempts to save or update an instance
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <remarks>
-        /// Only works when the Id property is of type ObjectId
-        /// </remarks>
-        void Save(T entity);
-
         /// <summary>
         /// Delete the documents that mact the specified template.
         /// </summary>
@@ -161,6 +151,6 @@ namespace Norm.Collections
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
-        new IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
+        IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
     }
 }

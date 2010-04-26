@@ -147,7 +147,7 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="query">The query.</param>
         /// <returns></returns>
-        internal ExplainResponse Explain(Flyweight query)
+        internal ExplainResponse Explain(Expando query)
         {
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
             return this.GetCollection<ExplainResponse>(collectionName).Explain(query);

@@ -31,6 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -88,6 +89,8 @@
     <Compile Include="BSON\BSONTypes.cs" />
     <Compile Include="BSON\ExpandoProperty.cs" />
     <Compile Include="BSON\FieldSelectionList.cs" />
+    <Compile Include="BSON\IdPropertyFinder.cs" />
+    <Compile Include="BSON\IExpando.cs" />
     <Compile Include="BSON\Lists\ArrayWrapper.cs" />
     <Compile Include="BSON\Lists\BaseWrapper.cs" />
     <Compile Include="BSON\Lists\CollectionWrapper.cs" />
@@ -126,9 +129,7 @@
     <Compile Include="Commands\Qualifiers\NotEqualQualifier.cs" />
     <Compile Include="Commands\Qualifiers\NotInQualifier.cs" />
     <Compile Include="Commands\Qualifiers\SizeQualifier.cs" />
-    <Compile Include="BSON\ExpandoProps.cs" />
-    <Compile Include="BSON\IFlyweight.cs" />
-    <Compile Include="BSON\Flyweight.cs" />
+    <Compile Include="BSON\Expando.cs" />
     <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
     <Compile Include="Configuration\ConfigurationContainer.cs" />
     <Compile Include="Configuration\IConfigurationContainer.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="Configuration\ITypedConfigurationGeneric.cs" />
     <Compile Include="Configuration\MongoConfiguration.cs" />
     <Compile Include="Configuration\MongoConfigurationMap.cs" />
+    <Compile Include="Configuration\MongoConfigurationMapException.cs" />
     <Compile Include="Configuration\MongoConfigurationTypeMap.cs" />
     <Compile Include="Configuration\MongoTypeConfiguration.cs" />
     <Compile Include="Configuration\MongoTypeConfigurationGeneric.cs" />
@@ -154,7 +156,6 @@
     <Compile Include="Connections\QueuedConnectionProviders.cs" />
     <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
-    <Compile Include="IExpando.cs" />
     <Compile Include="IHideSystemTypes.cs" />
     <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />

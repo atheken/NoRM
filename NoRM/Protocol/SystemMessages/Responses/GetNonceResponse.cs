@@ -15,14 +15,13 @@ namespace Norm.Responses
         {
             MongoConfiguration.Initialize(c => c.For<GetNonceResponse>(a =>
                                                    {
-                                                       a.ForProperty(auth => auth.Ok).UseAlias("ok");
                                                        a.ForProperty(auth => auth.Nonce).UseAlias("nonce");
                                                    })
                 );
         }
 
         /// <summary>
-        /// Gets or sets the nonce.
+        /// Gets the nonce.
         /// </summary>
         /// <value>The nonce.</value>
         public string Nonce { get; set; }

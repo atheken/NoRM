@@ -29,21 +29,24 @@ namespace Norm.Responses
         /// </summary>
         /// <value>The cursor.</value>
         public string Cursor { get; set; }
+        
         /// <summary>
         /// Gets or sets the start key.
         /// </summary>
         /// <value>The start key.</value>
-        internal Flyweight StartKey { get; set; }
+        internal Expando StartKey { get; set; }
+        
         /// <summary>
         /// Gets or sets the end key.
         /// </summary>
         /// <value>The end key.</value>
-        internal Flyweight EndKey { get; set; }
+        internal Expando EndKey { get; set; }
+        
         /// <summary>
         /// Gets or sets the index bounds.
         /// </summary>
         /// <value>The index bounds.</value>
-        internal List<Flyweight[]> IndexBounds { get; set; }
+        internal List<Expando[]> IndexBounds { get; set; }
 
         /// <summary>
         /// Gets the explain start key list.

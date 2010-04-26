@@ -39,7 +39,7 @@ namespace Norm.Tests
 
             _collection.UpdateOne(matchDocument, aPerson);
 
-            var query = new Flyweight();
+            var query = new Expando();
             query["Name"] = Q.Equals<string>("Joe");
 
             var retreivedPerson = _collection.FindOne(query);
@@ -61,7 +61,7 @@ namespace Norm.Tests
 
             _collection.UpdateOne(matchDocument, aPerson);
 
-            var query = new Flyweight();
+            var query = new Expando();
             query["_id"] = Q.Equals<ObjectId>(aPerson.Id);
 
             var retreivedPerson = _collection.FindOne(query);
@@ -86,7 +86,7 @@ namespace Norm.Tests
             
             _collection.UpdateOne(matchDocument, updatesToApply);
 
-            var query = new Flyweight();
+            var query = new Expando();
             query["Name"] = Q.Equals<string>("Joseph");
 
             var retreivedPerson = _collection.FindOne(query);

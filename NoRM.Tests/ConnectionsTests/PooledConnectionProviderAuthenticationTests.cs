@@ -12,7 +12,6 @@ namespace Norm.Tests
             Assert.Equal("auth fails", ex.Message);
         }
 
-
         //won't pass on some 1.3.x builds of the server, but will pass against newest, or stable (1.2.3).
         [Fact(Skip="Xunit misbehaves on this test, need to investigate")]
         public void AuthenticatesWithProperCredentials()

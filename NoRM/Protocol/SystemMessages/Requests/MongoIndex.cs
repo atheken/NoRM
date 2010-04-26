@@ -25,23 +25,27 @@ namespace Norm.Protocol.SystemMessages.Requests
         }
 
         /// <summary>
-        /// Gets or sets the key.
+        /// The key.
         /// </summary>
-        public Flyweight Key { get; set; }
+        /// <value>The Key property gets/sets the Key data member.</value>
+        public Expando Key { get; set; }
 
         /// <summary>
-        /// Gets or sets the ns.
+        /// The namespace the index resides within.
         /// </summary>
+        /// <value>The Namespace property gets/sets the Namespace data member.</value>
         public string Namespace { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether unique.
+        /// Whether or not the index is unique.
         /// </summary>
+        /// <value>The Unique property gets/sets the Unique data member.</value>
         public bool Unique { get; set; }
 
         /// <summary>
-        /// Gets or sets the name.
+        /// The name of the index.
         /// </summary>
+        /// <value>The Name property gets/sets the Name data member.</value>
         public string Name { get; set; }
     }
 }

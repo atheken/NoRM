@@ -19,12 +19,6 @@ namespace Norm.Linq
         private int _takeCount = Int32.MaxValue;
 
         /// <summary>TODO::Description.</summary>
-        private Expression _expression;
-
-        /// <summary>TODO::Description.</summary>
-        private bool _collectionSet;
-
-        /// <summary>TODO::Description.</summary>
         private string _lastFlyProperty = string.Empty;
 
         /// <summary>TODO::Description.</summary>
@@ -37,7 +31,7 @@ namespace Norm.Linq
         private StringBuilder _sbIndexed;
 
         /// <summary>TODO::Description.</summary>
-        public Flyweight SortFly { get; set; }
+        public Expando SortFly { get; set; }
 
         /// <summary>TODO::Description.</summary>
         public string SortDescendingBy { get; set; }
@@ -90,7 +84,7 @@ namespace Norm.Linq
         /// <summary>
         /// Gets FlyWeight.
         /// </summary>
-        public Flyweight FlyWeight { get; private set; }
+        public Expando FlyWeight { get; private set; }
 
         /// <summary>
         /// How many to skip.
@@ -140,8 +134,8 @@ namespace Norm.Linq
             UseScopedQualifier = useScopedQualifier;
             _sbWhere = new StringBuilder();
             _sbIndexed = new StringBuilder();
-            FlyWeight = new Flyweight();
-            SortFly = new Flyweight();
+            FlyWeight = new Expando();
+            SortFly = new Expando();
 
             Visit(exp);
 
@@ -157,7 +151,7 @@ namespace Norm.Linq
             {
                 // reset - need to use the where statement generated
                 // instead of the props set on the internal flyweight
-                FlyWeight = new Flyweight();
+                FlyWeight = new Expando();
                 if (where.StartsWith("function"))
                 {
                     FlyWeight["$where"] = where;

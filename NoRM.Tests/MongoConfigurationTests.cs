@@ -251,8 +251,8 @@ namespace Norm.Tests
                 var obj1 = new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true };
                 var obj2 = new SubClassedObjectFluentMapped { Title = "Prod2", ABool = false };
 
-                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(obj1);
-                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(obj2);
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Insert(obj1);
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Insert(obj2);
                 var found = mongo.GetCollection<SuperClassObjectFluentMapped>("Fake").Find();
 
                 Assert.Equal(2, found.Count());
@@ -270,7 +270,7 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var obj1 = new SubClassedObjectFluentMapped { Title = "Prod1", ABool = true };
-                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Save(obj1);
+                mongo.GetCollection<SubClassedObjectFluentMapped>("Fake").Insert(obj1);
                 var found = mongo.GetCollection<SuperClassObjectFluentMapped>("Fake").Find();
 
                 Assert.Equal(1, found.Count());
@@ -284,9 +284,9 @@ namespace Norm.Tests
             MongoConfiguration.Initialize(m => m.For<ProductSummary>(p => p.SummaryOf<TestProduct>()));
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                mongo.GetCollection<TestProduct>().Save(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Soap", Price = 2, Supplier = new Supplier { Name = "A Supplier" } });
-                mongo.GetCollection<TestProduct>().Save(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Rope", Price = 1, Supplier = new Supplier { Name = "A Supplier" } });
-                mongo.GetCollection<TestProduct>().Save(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Fun", Price = 0, Supplier = new Supplier { Name = "A Supplier" } });
+                mongo.GetCollection<TestProduct>().Insert(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Soap", Price = 2, Supplier = new Supplier { Name = "A Supplier" } });
+                mongo.GetCollection<TestProduct>().Insert(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Rope", Price = 1, Supplier = new Supplier { Name = "A Supplier" } });
+                mongo.GetCollection<TestProduct>().Insert(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Fun", Price = 0, Supplier = new Supplier { Name = "A Supplier" } });
 
                 var found = mongo.GetCollection<ProductSummary>().Find();
                 Assert.Equal(3, found.Count());

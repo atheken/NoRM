@@ -47,6 +47,29 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void DateTime_GreaterThan_Qualifier_Works()
+        {
+            _collection.Insert(new Person { Birthday = new DateTime(1910, 1, 1) });
+            _collection.Insert(new Person { Birthday = new DateTime(1920, 1, 1) });
+            _collection.Insert(new Person { Birthday = new DateTime(1930, 1, 1) });
+
+            var find = _collection.Find(new { Birthday = Q.GreaterThan(new DateTime(1920, 1, 1)) });
+            Assert.Equal(1, find.Count());
+        }
+
+
+        [Fact]
+        public void Where_Qualifier_Works()
+        {
+            _collection.Insert(new Person { Name = "Gnomey" });
+            _collection.Insert(new Person { Name = "kde" });
+            _collection.Insert(new Person { Name = "Elfy" });
+
+            var find = _collection.Find(Q.Where("this.Name === 'Elfy';"));
+            Assert.Equal(1, find.Count());
+        }
+
+        [Fact]
         public void Find_Uses_Limit_Orderby_And_Skip()
         {
             _collection.Insert(new Person { Name = "AAA" });
@@ -55,7 +78,7 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "AAA" });
             _collection.Insert(new Person { Name = "DDD" });
 
-            var result = _collection.Find(new { Name = Q.NotEqual(new int?()) }, new { Name = OrderBy.Descending}, 3, 1).ToArray();
+            var result = _collection.Find(new { Name = Q.NotEqual(new int?()) }, new { Name = OrderBy.Descending }, 3, 1).ToArray();
             Assert.Equal(3, result.Length);
             Assert.Equal("CCC", result[0].Name);
             Assert.Equal("BBB", result[1].Name);
@@ -107,7 +130,7 @@ namespace Norm.Tests
             Assert.Equal(null, result[0].Name);
 
             result = _collection.Find(new { Name = Q.IsNotNull() }, new { Name = OrderBy.Descending }).ToArray();
-            Assert.Equal(4,result.Length);
+            Assert.Equal(4, result.Length);
             Assert.Equal("DDD", result[0].Name);
         }
 
@@ -155,7 +178,7 @@ namespace Norm.Tests
             _collection.Insert(person1);
             _collection.Insert(person2);
 
-            var elem = new Flyweight();
+            var elem = new Expando();
             elem["Relatives"] = "Charlie";
             var a = _collection.Find(elem).ToArray();
             Assert.Equal(1, a.Length);
@@ -215,7 +238,7 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "Joe Cool", Address = { Street = "123 Main St", City = "Anytown", State = "CO", Zip = "45123" } });
             _collection.Insert(new Person { Name = "Sam Cool", Address = { Street = "300 Main St", City = "Anytown", State = "CO", Zip = "45123" } });
 
-            var query = new Flyweight();
+            var query = new Expando();
             query["Address.City"] = Q.Equals<string>("Anytown");
 
             var results = _collection.Find(query);
@@ -243,10 +266,10 @@ namespace Norm.Tests
             // Any version earlier than MongoDB 1.5.0
             if (isLessThan150)
             {
-                _collection.Insert(new Person {Name = "Joe Cool", Relatives = new List<string>(new[] {"Tom Cool", "Sam Cool"})});
-                _collection.Insert(new Person {Name = "Sam Cool", Relatives = new List<string>(new[] {"Joe Cool", "Jay Cool"})});
-                _collection.Insert(new Person {Name = "Ted Cool", Relatives = new List<string>(new[] {"Tom Cool", "Sam Cool"})});
-                _collection.Insert(new Person {Name = "Jay Cool", Relatives = new List<string>(new[] {"Sam Cool"})});
+                _collection.Insert(new Person { Name = "Joe Cool", Relatives = new List<string>(new[] { "Tom Cool", "Sam Cool" }) });
+                _collection.Insert(new Person { Name = "Sam Cool", Relatives = new List<string>(new[] { "Joe Cool", "Jay Cool" }) });
+                _collection.Insert(new Person { Name = "Ted Cool", Relatives = new List<string>(new[] { "Tom Cool", "Sam Cool" }) });
+                _collection.Insert(new Person { Name = "Jay Cool", Relatives = new List<string>(new[] { "Sam Cool" }) });
 
                 var results = _collection.Distinct<string[]>("Relatives");
                 Assert.Equal(3, results.Count());
@@ -286,10 +309,10 @@ namespace Norm.Tests
         [Fact]
         public void DistinctOnComplexProperty()
         {
-            _collection.Insert(new Person {Name = "Joe Cool", Address = new Address {State = "CA"}});
-            _collection.Insert(new Person {Name = "Sam Cool", Address = new Address {State = "CA"}});
-            _collection.Insert(new Person {Name = "Ted Cool", Address = new Address {State = "CA", Zip = "90010"}});
-            _collection.Insert(new Person {Name = "Jay Cool", Address = new Address {State = "NY"}});
+            _collection.Insert(new Person { Name = "Joe Cool", Address = new Address { State = "CA" } });
+            _collection.Insert(new Person { Name = "Sam Cool", Address = new Address { State = "CA" } });
+            _collection.Insert(new Person { Name = "Ted Cool", Address = new Address { State = "CA", Zip = "90010" } });
+            _collection.Insert(new Person { Name = "Jay Cool", Address = new Address { State = "NY" } });
 
             var results = _collection.Distinct<Address>("Address");
             Assert.Equal(3, results.Count());

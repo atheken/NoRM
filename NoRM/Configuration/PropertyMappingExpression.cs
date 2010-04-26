@@ -13,6 +13,12 @@ namespace Norm.Configuration
         internal string Alias { get; set; }
 
         /// <summary>
+        /// Gets or sets whether the property is the Id for the entity.
+        /// </summary>
+        /// <value>True if the property is the entity's Id.</value>
+        internal bool IsId { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the source property.
         /// </summary>
         /// <value>The name of the source property.</value>

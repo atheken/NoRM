@@ -5,7 +5,7 @@ namespace Norm.Responses
     /// <summary>
     /// The dropped database response.
     /// </summary>
-    public class DroppedDatabaseResponse : BaseStatusMessage, IFlyweight
+    public class DroppedDatabaseResponse : BaseStatusMessage
     {
         /// <summary>
         /// Gets or sets the dropped database.

@@ -20,6 +20,8 @@ namespace Norm.Protocol.SystemMessages.Requests
         /// <summary>
         /// Gets or sets the collection statistics.
         /// </summary>
+        /// <value>The User property gets/sets the User data member.</value>
+        /// <value>The CollectionStatistics property gets/sets the CollectionStatistics data member.</value>
         public string CollectionStatistics { get; set; }
     }
 }

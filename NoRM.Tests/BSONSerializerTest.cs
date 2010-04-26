@@ -18,6 +18,23 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void DoesntSerializePropertyWithDefaultValueAndShouldSerialize()
+        {
+            // create an instance  with the following values
+            // Id = 1
+            // Message = "Test"
+            // MagicDate = DateTime.MinValue (0001-01-01)
+            // ComplexProperty = 3
+            var o = new SerializerTest() { Id = 1, Message = "Test", ComplexProperty = 3 };
+            // when serialized it should produce a document {"Id": 1} 
+            var o1 = BsonSerializer.Serialize(o);
+            // create a object with value Id = 1
+            var s1 = BsonSerializer.Serialize(new { Id = 1 });
+            // both should be equal
+            Assert.Equal(o1, s1);
+        }
+
+        [Fact]
         public void SerializationOfEnumIsNotLossy()
         {
             var obj1 = new GeneralDTO{ Flags32 = Flags32.FlagOn, Flags64 = Flags64.FlagOff };
@@ -36,10 +53,10 @@ namespace Norm.Tests
         [Fact]
         public void SerializationOfFlyweightIsNotLossy()
         {
-            var testObj = new Flyweight();
+            var testObj = new Expando();
             testObj["astring"] = "stringval";
             var testBytes = BsonSerializer.Serialize(testObj);
-            var hydrated = BsonDeserializer.Deserialize<Flyweight>(testBytes);
+            var hydrated = BsonDeserializer.Deserialize<Expando>(testBytes);
             Assert.Equal(testObj["astring"], hydrated["astring"]);
         }
         
@@ -264,14 +281,14 @@ namespace Norm.Tests
         public void SerializationOfScopedCodeIsNotLossy()
         {
             var obj1 = new GeneralDTO {Code = new ScopedCode {CodeString = "function(){return 'hello world!'}"}};
-            var scope = new Flyweight();
+            var scope = new Expando();
             scope["$ns"] = "root";
             obj1.Code.Scope = scope;
 
             var obj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
 
             Assert.Equal(obj1.Code.CodeString, obj2.Code.CodeString);
-            Assert.Equal(((Flyweight)obj1.Code.Scope)["$ns"],((Flyweight)obj2.Code.Scope)["$ns"]);
+            Assert.Equal(((Expando)obj1.Code.Scope)["$ns"],((Expando)obj2.Code.Scope)["$ns"]);
         }
         [Fact]
         public void SerializesAndDeserializesAComplexObject()
@@ -445,8 +462,8 @@ namespace Norm.Tests
             var expando = BsonDeserializer.Deserialize<ExpandoAddress>(bytes);
             Assert.Equal(expando.City, address.City);
             Assert.Equal(expando.Street, address.Street);
-            Assert.Equal(expando.Expando["State"], address.State);
-            Assert.Equal(expando.Expando["Zip"], address.Zip);
+            Assert.Equal(expando["State"], address.State);
+            Assert.Equal(expando["Zip"], address.Zip);
         }
         
     }

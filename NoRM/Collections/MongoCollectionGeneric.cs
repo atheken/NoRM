@@ -150,15 +150,15 @@ namespace Norm.Collections
             return Find(template, 1).FirstOrDefault();
         }
 
-        /// <summary>TODO::Description.</summary>
-        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action)
+        /// <summary>Allows a document to be updated using the specified action.</summary>
+        public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action)
         {
-            UpdateWithModifier(matchDocument, action, false, false);
+            Update(matchDocument, action, false, false);
 
         }
 
         /// <summary>TODO::Description.</summary>
-        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
+        public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
         {
             var modifierExpression = new ModifierExpression<T>();
             action(modifierExpression);
@@ -177,7 +177,7 @@ namespace Norm.Collections
         /// Find objects in the collection without any qualifiers.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<T> Find()
+        new public IEnumerable<T> Find()
         {
             // this is a hack to get a value that will test for null into the serializer.
             return Find(new object(), Int32.MaxValue, FullyQualifiedName);
@@ -210,11 +210,22 @@ namespace Norm.Collections
         }
 
         /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
+        /// <typeparam name="U">Type of document to find.</typeparam>
+        /// <param name="template">The template.</param>
+        /// <param name="limit">The number to return from this command.</param>
+        /// <param name="skip">The skip step.</param>
         public IEnumerable<T> Find<U>(U template, int limit, int skip)
         {
             return Find(template, limit, skip, this.FullyQualifiedName);
         }
 
+        /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
+        /// <typeparam name="U">Type of document to find.</typeparam>
+        /// <typeparam name="O">Type of document to find.</typeparam>
+        /// <param name="template">The template.</param>
+        /// <param name="orderby">How to order the results</param>
+        /// <param name="limit">The number to return from this command.</param>
+        /// <param name="skip">The skip step.</param>
         public IEnumerable<T> Find<U, O>(U template, O orderby, int limit, int skip)
         {
             return this.Find(template, orderby, limit, skip, this.FullyQualifiedName);
@@ -237,7 +248,7 @@ namespace Norm.Collections
         /// A count on this collection without any filter.
         /// </summary>
         /// <returns>The count.</returns>
-        public long Count()
+        new public long Count()
         {
             return Count(new { });
         }
@@ -249,30 +260,6 @@ namespace Norm.Collections
         public new CollectionStatistics GetCollectionStatistics()
         {
             return _db.GetCollectionStatistics(_collectionName);
-        }
-
-        /// <summary>
-        /// Attempts to save or update an instance
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <remarks>
-        /// Only works when the Id property is of type ObjectId
-        /// </remarks>
-        public void Save(T entity)
-        {
-            AssertUpdatable();
-
-            var helper = TypeHelper.GetHelperForType(typeof(T));
-            var idProperty = helper.FindIdProperty();
-            var id = idProperty.Getter(entity);
-            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))
-            {
-                Insert(entity);
-            }
-            else
-            {
-                Update(new { Id = id }, entity, false, true);
-            }
         }
 
         /// <summary>
@@ -288,7 +275,7 @@ namespace Norm.Collections
             // Index values should contain the full namespace without "this."
             var indexProperty = translator.Translate(index, false);
 
-            var key = new Flyweight();
+            var key = new Expando();
             key.Set(indexProperty, direction);
 
             var collection = _db.GetCollection<MongoIndex<T>>("system.indexes");
@@ -336,16 +323,6 @@ namespace Norm.Collections
                 throw new MongoException(string.Format("Cannot delete {0} since it has no id property", typeof(T).FullName));
             }
             Delete(new { Id = idProperty.Getter(entity) });
-        }
-
-        /// <summary>
-        /// The find.
-        /// </summary>
-        /// <param name="template">The template.</param>
-        /// <returns></returns>
-        public IEnumerable<T> Find(Flyweight template)
-        {
-            return Find(template, Int32.MaxValue, 0, this.FullyQualifiedName);
         }
 
         /// <summary>
@@ -457,7 +434,7 @@ namespace Norm.Collections
         /// <returns>The count.</returns>
         public long Count<U>(U query)
         {
-            var f = _db.GetCollection<Flyweight>("$cmd")
+            var f = _db.GetCollection<Expando>("$cmd")
                 .FindOne(new
                 {
                     count = _collectionName,

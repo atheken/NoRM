@@ -8,7 +8,6 @@ namespace Norm.Protocol.Messages
     /// </summary>
     public class MapReduceMessage
     {
-        /// <summary>TODO::Description.</summary>
         static MapReduceMessage()
         {
             MongoConfiguration.Initialize(c =>
@@ -25,21 +24,27 @@ namespace Norm.Protocol.Messages
         }
 
         /// <summary>TODO::Description.</summary>
+        /// <value>The MapReduce property gets/sets the MapReduce data member.</value>
         public string MapReduce { get; set; }
 
         /// <summary>TODO::Description.</summary>
+        /// <value>The Map property gets/sets the Map data member.</value>
         public string Map { get; set; }
 
         /// <summary>TODO::Description.</summary>
+        /// <value>The Reduce property gets/sets the Reduce data member.</value>
         public string Reduce { get; set; }
 
         /// <summary>TODO::Description.</summary>
+        /// <value>The KeepTemp property gets/sets the KeepTemp data member.</value>
         public bool KeepTemp { get; set; }
 
         /// <summary>TODO::Description.</summary>
+        /// <value>The Out property gets/sets the Out data member.</value>
         public string Out { get; set; }
 
         /// <summary>TODO::Description.</summary>
+        /// <value>The Limit property gets/sets the Limit data member.</value>
         public int? Limit { get; set; }
 
         /// <summary>
@@ -48,6 +53,7 @@ namespace Norm.Protocol.Messages
         public object Query { get; set; }
 
         /// <summary>TODO::Description.</summary>
+        /// <value>The Finalize property gets/sets the Finalize data member.</value>
         [MongoIgnoreIfNull]
         public string Finalize { get; set; }
     }
