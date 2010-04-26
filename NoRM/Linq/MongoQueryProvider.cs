@@ -211,7 +211,7 @@ namespace Norm.Linq
             try
             {
                 return typeof(MongoQueryProvider)
-                    .GetMethod("ExecuteLinq")
+                    .GetMethod("ExecuteQuery")
                     .MakeGenericMethod(elementType)
                     .Invoke(this, new object[] { expression });
             }
