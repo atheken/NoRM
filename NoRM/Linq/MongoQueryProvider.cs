@@ -13,7 +13,7 @@ namespace Norm.Linq
     /// <summary>
     /// The mongo query provider.
     /// </summary>
-    public class MongoQueryProvider : IQueryProvider
+    public class MongoQueryProvider : IQueryProvider, IDisposable
     {
         private readonly Mongo _server;
 
@@ -257,6 +257,11 @@ namespace Norm.Linq
         private T ExecuteMR<T>(string typeName, string map, string reduce)
         {
             return ExecuteMR<T>(typeName, map, reduce, null);
+        }
+        
+        public void Dispose()
+        {
+            _server.Dispose();
         }
     }
 }
