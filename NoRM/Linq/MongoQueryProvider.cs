@@ -147,7 +147,6 @@ namespace Norm.Linq
                     map = "function(){if (" + qry + ") {emit(0, {val: this." + translator.AggregatePropName + ",tSize:1} )};}";
                 }
 
-                reduce = string.Empty;
                 finalize = "function(key, res){ return res.val; }";
             }
 
