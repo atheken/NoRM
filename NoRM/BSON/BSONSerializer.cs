@@ -15,23 +15,18 @@ namespace Norm.BSON
     internal class BsonSerializer
     {
         private static readonly IDictionary<Type, BSONTypes> _typeMap = new Dictionary<Type, BSONTypes>
-                                                                            {
-                                                                                {typeof (int), BSONTypes.Int32},
-                                                                                {typeof (long), BSONTypes.Int64},
-                                                                                {typeof (bool), BSONTypes.Boolean},
-                                                                                {typeof (string), BSONTypes.String},
-                                                                                {typeof (double), BSONTypes.Double},
-                                                                                {typeof (Guid), BSONTypes.Binary},
-                                                                                {typeof (Regex), BSONTypes.Regex},
-                                                                                {typeof (DateTime), BSONTypes.DateTime},
-                                                                                {typeof (float), BSONTypes.Double},
-                                                                                {typeof (byte[]), BSONTypes.Binary},
-                                                                                {typeof (ObjectId), BSONTypes.MongoOID},
-                                                                                {
-                                                                                    typeof (ScopedCode),
-                                                                                    BSONTypes.ScopedCode
-                                                                                    }
-                                                                            };
+               {
+                {typeof (int), BSONTypes.Int32},
+                {typeof (long), BSONTypes.Int64},
+                {typeof (bool), BSONTypes.Boolean},
+                {typeof (string), BSONTypes.String},{typeof (double), BSONTypes.Double},
+                {typeof (Guid), BSONTypes.Binary},{typeof (Regex), BSONTypes.Regex},
+                {typeof (DateTime), BSONTypes.DateTime},
+                {typeof (float), BSONTypes.Double},
+                {typeof (byte[]), BSONTypes.Binary},
+                {typeof (ObjectId), BSONTypes.MongoOID},
+                {typeof (ScopedCode),BSONTypes.ScopedCode}
+               };
 
         private readonly BinaryWriter _writer;
         private Document _current;
@@ -118,7 +113,7 @@ namespace Norm.BSON
             }
             else if (document is FieldSelectionList)
             {
-                WriteFieldListSelection((FieldSelectionList) document);
+                WriteFieldListSelection((FieldSelectionList)document);
             }
             else
             {
@@ -130,7 +125,7 @@ namespace Norm.BSON
 
         private void WriteFieldListSelection(FieldSelectionList fields)
         {
-            foreach(var field in fields)
+            foreach (var field in fields)
             {
                 Write(field, 1);
             }
@@ -157,8 +152,8 @@ namespace Norm.BSON
         {
             return type.IsGenericType &&
                    (
-                    type.GetGenericTypeDefinition() == typeof (DbReference<>) ||
-                    type.GetGenericTypeDefinition() == typeof (DbReference<,>)
+                    type.GetGenericTypeDefinition() == typeof(DbReference<>) ||
+                    type.GetGenericTypeDefinition() == typeof(DbReference<,>)
                    );
         }
 

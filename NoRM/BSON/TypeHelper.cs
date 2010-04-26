@@ -76,7 +76,7 @@ namespace Norm.BSON
 
             if (typeof(IExpando).IsAssignableFrom(type))
             {
-                Expando = _properties["Expando"];
+                this.IsExpando = true;
             }
         }
 
@@ -160,9 +160,9 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// The IExpando property
+        /// indicates if this type implements "IExpando"
         /// </summary>
-        public MagicProperty Expando { get; private set; }
+        public bool IsExpando { get; private set; }
         
         /// <summary>
         /// Gets all properties.

@@ -287,7 +287,7 @@ namespace Norm.BSON
                     ? typeHelper.FindIdProperty()
                     : typeHelper.FindProperty(name);
 
-                if (property == null && typeHelper.Expando == null)
+                if (property == null && typeHelper.IsExpando)
                 {
                     throw new MongoException(string.Format("Deserialization failed: type {0} does not have a property named {1}", type.FullName, name));
                 }
@@ -315,7 +315,7 @@ namespace Norm.BSON
                 var value = isNull ? null : DeserializeValue(propertyType, storageType, container);
                 if (property == null)
                 {
-                    ((IDictionary<string, object>)typeHelper.Expando.Getter(instance))[name] = value;
+                    ((IExpando)instance)[name] = value;
                 }                
                else  if (container == null && value!=null)
                 {
