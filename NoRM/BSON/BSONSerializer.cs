@@ -186,15 +186,6 @@ namespace Norm.BSON
                 }
                 // serialize the member
                 SerializeMember(name, value);
-                //if (property.ShouldSerialize(document))
-                //{
-                //    var value = property.Getter(document);
-                //    if (value == null && property.IgnoreIfNull)
-                //    {
-                //        continue;
-                //    }
-                //    SerializeMember(name, value);
-                //}
             }
 
             var fly = document as IExpando;
