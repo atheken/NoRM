@@ -90,6 +90,7 @@
     <Compile Include="BSON\ExpandoProperty.cs" />
     <Compile Include="BSON\FieldSelectionList.cs" />
     <Compile Include="BSON\IdPropertyFinder.cs" />
+    <Compile Include="BSON\IExpando.cs" />
     <Compile Include="BSON\Lists\ArrayWrapper.cs" />
     <Compile Include="BSON\Lists\BaseWrapper.cs" />
     <Compile Include="BSON\Lists\CollectionWrapper.cs" />
@@ -128,9 +129,7 @@
     <Compile Include="Commands\Qualifiers\NotEqualQualifier.cs" />
     <Compile Include="Commands\Qualifiers\NotInQualifier.cs" />
     <Compile Include="Commands\Qualifiers\SizeQualifier.cs" />
-    <Compile Include="BSON\ExpandoProps.cs" />
-    <Compile Include="BSON\IFlyweight.cs" />
-    <Compile Include="BSON\Flyweight.cs" />
+    <Compile Include="BSON\Expando.cs" />
     <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
     <Compile Include="Configuration\ConfigurationContainer.cs" />
     <Compile Include="Configuration\IConfigurationContainer.cs" />
@@ -157,7 +156,6 @@
     <Compile Include="Connections\QueuedConnectionProviders.cs" />
     <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
-    <Compile Include="IExpando.cs" />
     <Compile Include="IHideSystemTypes.cs" />
     <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />

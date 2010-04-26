@@ -9,7 +9,7 @@ namespace Norm.Commands.Modifiers
     {
         public ModifierExpression()
         {
-            Fly=new Flyweight();
+            Fly=new Expando();
         }
         public void Increment(Expression<Func<T, object>> func,int amountToIncrement)
         {
@@ -66,6 +66,6 @@ namespace Norm.Commands.Modifiers
             Fly[propertyName] = M.PullAll(pullValue);
         }
 
-        public Flyweight Fly { get; set; }
+        public Expando Fly { get; set; }
     }
 }

@@ -60,7 +60,7 @@ namespace Norm.Collections
         {
             long retval = 0;
 
-            var f = _db.GetCollection<Flyweight>("$cmd")
+            var f = _db.GetCollection<Expando>("$cmd")
                 .FindOne(new { count = _collectionName, query = query });
 
             if (f != null)
@@ -80,7 +80,7 @@ namespace Norm.Collections
         {
             //long retval = 0;
 
-            var f = _db.GetCollection<Flyweight>("$cmd")
+            var f = _db.GetCollection<Expando>("$cmd")
                 .FindOne(new { group = _collectionName, query = query });
 
             return null;

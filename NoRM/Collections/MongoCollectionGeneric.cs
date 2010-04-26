@@ -275,7 +275,7 @@ namespace Norm.Collections
             // Index values should contain the full namespace without "this."
             var indexProperty = translator.Translate(index, false);
 
-            var key = new Flyweight();
+            var key = new Expando();
             key.Set(indexProperty, direction);
 
             var collection = _db.GetCollection<MongoIndex<T>>("system.indexes");
@@ -434,7 +434,7 @@ namespace Norm.Collections
         /// <returns>The count.</returns>
         public long Count<U>(U query)
         {
-            var f = _db.GetCollection<Flyweight>("$cmd")
+            var f = _db.GetCollection<Expando>("$cmd")
                 .FindOne(new
                 {
                     count = _collectionName,

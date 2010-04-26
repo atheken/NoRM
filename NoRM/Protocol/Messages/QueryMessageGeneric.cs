@@ -106,7 +106,7 @@ namespace Norm.Protocol.Messages
             }
             else
             {
-                var fly = new Flyweight();
+                var fly = new Expando();
 
                 //if (this.Query is Flyweight)
                 //{

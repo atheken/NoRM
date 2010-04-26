@@ -178,7 +178,7 @@ namespace Norm.Tests
             _collection.Insert(person1);
             _collection.Insert(person2);
 
-            var elem = new Flyweight();
+            var elem = new Expando();
             elem["Relatives"] = "Charlie";
             var a = _collection.Find(elem).ToArray();
             Assert.Equal(1, a.Length);
@@ -238,7 +238,7 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "Joe Cool", Address = { Street = "123 Main St", City = "Anytown", State = "CO", Zip = "45123" } });
             _collection.Insert(new Person { Name = "Sam Cool", Address = { Street = "300 Main St", City = "Anytown", State = "CO", Zip = "45123" } });
 
-            var query = new Flyweight();
+            var query = new Expando();
             query["Address.City"] = Q.Equals<string>("Anytown");
 
             var results = _collection.Find(query);

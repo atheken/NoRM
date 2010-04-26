@@ -42,7 +42,7 @@ namespace Norm.BSON
         /// <returns></returns>
         public static T Deserialize<T>(byte[] objectData) where T : class
         {
-            IDictionary<WeakReference, Flyweight> outprops = new Dictionary<WeakReference, Flyweight>();
+            IDictionary<WeakReference, Expando> outprops = new Dictionary<WeakReference, Expando>();
             return Deserialize<T>(objectData, ref outprops);
         }
 
@@ -53,7 +53,7 @@ namespace Norm.BSON
         /// <param name="objectData">The object data.</param>
         /// <param name="outProps">The out props.</param>
         /// <returns></returns>
-        public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Flyweight> outProps)
+        public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Expando> outProps)
         {
             using (var ms = new MemoryStream())
             {
@@ -70,7 +70,7 @@ namespace Norm.BSON
         /// <param name="objectData">The object data.</param>
         /// <param name="outProps">The out props.</param>
         /// <returns></returns>
-        public static T Deserialize<T>(int length, BinaryReader reader, ref IDictionary<WeakReference, Flyweight> outProps)
+        public static T Deserialize<T>(int length, BinaryReader reader, ref IDictionary<WeakReference, Expando> outProps)
         {
             return Deserialize<T>(reader, length);
         }        
@@ -230,7 +230,7 @@ namespace Norm.BSON
             {
                 return ReadScopedCode();
             }
-            if (type == typeof(Flyweight))
+            if (type == typeof(Expando))
             {
                 return ReadFlyweight();
             }
@@ -563,16 +563,16 @@ namespace Norm.BSON
             Read(4);
             var name = ReadString();
             NewDocument(_reader.ReadInt32());
-            return new ScopedCode { CodeString = name, Scope = DeserializeValue(typeof(Flyweight), BSONTypes.Object) };
+            return new ScopedCode { CodeString = name, Scope = DeserializeValue(typeof(Expando), BSONTypes.Object) };
         }
 
         /// <summary>
         /// Reads a flyweight.
         /// </summary>
         /// <returns></returns>
-        private Flyweight ReadFlyweight()
+        private Expando ReadFlyweight()
         {
-            var flyweight = new Flyweight();
+            var flyweight = new Expando();
             while (true)
             {
                 var storageType = ReadType();

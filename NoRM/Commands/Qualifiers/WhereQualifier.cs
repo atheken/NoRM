@@ -5,7 +5,7 @@ namespace Norm.Commands.Qualifiers
     /// <summary>
     /// Provides a hook to create a $where qualifier for a query.
     /// </summary>
-    public class WhereQualifier : Flyweight
+    public class WhereQualifier : Expando
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WhereQualifier"/> class.

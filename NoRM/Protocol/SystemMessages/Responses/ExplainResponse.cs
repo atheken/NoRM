@@ -1,12 +1,14 @@
 ﻿using Norm.BSON;
 using Norm.Configuration;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Norm.Responses
 {
     /// <summary>
     /// The explain response.
     /// </summary>
-    public class ExplainResponse : ExplainPlan, IFlyweight
+    public class ExplainResponse : ExplainPlan, IExpando
     {
         /// <summary>
         /// Explains the plan.
@@ -24,6 +26,8 @@ namespace Norm.Responses
             })
                 );
         }
+
+        private Dictionary<string, object> _properties = new Dictionary<string, object>();
 
         /// <summary>
         /// Gets the number of objects that would be scanned by this query.
@@ -60,5 +64,32 @@ namespace Norm.Responses
         /// </summary>
         /// <value>All plans.</value>
         public ExplainPlan[] AllPlans { get; set; }
+
+        /// <summary>
+        /// Additional, non-static properties of this message.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ExpandoProperty> AllProperties()
+        {
+            return this._properties.Select(j => new ExpandoProperty(j.Key, j.Value));
+        }
+
+        public void Delete(string propertyName)
+        {
+            this._properties.Remove(propertyName);
+        }
+
+        public object this[string propertyName]
+        {
+            get
+            {
+                return this._properties[propertyName];
+            }
+            set
+            {
+                this._properties[propertyName] = value;
+            }
+        }
+
     }
 }

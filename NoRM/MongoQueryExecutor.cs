@@ -15,7 +15,7 @@ namespace Norm
     /// <typeparam name="U">Document template type</typeparam>
     public class MongoQueryExecutor<T, U> : IEnumerable<T>
     {
-        private readonly Flyweight _hints = new Flyweight();
+        private readonly Expando _hints = new Expando();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQueryExecutor&lt;T, U&gt;"/> class.
@@ -60,7 +60,7 @@ namespace Norm
             {
                 var query = Message.Query;
 
-                var queryWithHint = new Flyweight();
+                var queryWithHint = new Expando();
                 queryWithHint["$query"] = query;
                 queryWithHint["$hint"] = _hints;
                 replyMessage = Message.Execute();

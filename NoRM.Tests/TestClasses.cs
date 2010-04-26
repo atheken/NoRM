@@ -10,6 +10,7 @@ using Norm.Responses;
 using Norm.BSON.DbTypes;
 using Norm.Collections;
 using System.ComponentModel;
+using Norm.BSON;
 
 namespace Norm.Tests
 {
@@ -268,16 +269,34 @@ namespace Norm.Tests
     {
         public string Street { get; set; }
         public string City { get; set; }
+        private Dictionary<String, object> _properties = new Dictionary<string, object>(0);
 
-        private IDictionary<string, object> _expando;
-        public IDictionary<string, object> Expando
+        /// <summary>
+        /// Additional, non-static properties of this message.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ExpandoProperty> AllProperties()
+        {
+            return this._properties.Select(j => new ExpandoProperty(j.Key, j.Value));
+        }
+
+        public void Delete(string propertyName)
+        {
+            this._properties.Remove(propertyName);
+        }
+
+        public object this[string propertyName]
         {
             get
             {
-                if (_expando == null) { _expando = new Dictionary<string, object>(); }
-                return _expando;
+                return this._properties[propertyName];
+            }
+            set
+            {
+                this._properties[propertyName] = value;
             }
         }
+
     } 
 
     internal class Supplier

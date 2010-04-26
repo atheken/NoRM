@@ -62,7 +62,7 @@ namespace Norm.Linq
             var translator = new MongoQueryTranslator();
             var index = translator.Translate(hint);
 
-            var proxy = (MongoQueryExecutor<T, Flyweight>)find;
+            var proxy = (MongoQueryExecutor<T, Expando>)find;
             proxy.AddHint(index, direction);
             return find;
         }

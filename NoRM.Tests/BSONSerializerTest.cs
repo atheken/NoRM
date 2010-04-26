@@ -53,10 +53,10 @@ namespace Norm.Tests
         [Fact]
         public void SerializationOfFlyweightIsNotLossy()
         {
-            var testObj = new Flyweight();
+            var testObj = new Expando();
             testObj["astring"] = "stringval";
             var testBytes = BsonSerializer.Serialize(testObj);
-            var hydrated = BsonDeserializer.Deserialize<Flyweight>(testBytes);
+            var hydrated = BsonDeserializer.Deserialize<Expando>(testBytes);
             Assert.Equal(testObj["astring"], hydrated["astring"]);
         }
         
@@ -281,14 +281,14 @@ namespace Norm.Tests
         public void SerializationOfScopedCodeIsNotLossy()
         {
             var obj1 = new GeneralDTO {Code = new ScopedCode {CodeString = "function(){return 'hello world!'}"}};
-            var scope = new Flyweight();
+            var scope = new Expando();
             scope["$ns"] = "root";
             obj1.Code.Scope = scope;
 
             var obj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
 
             Assert.Equal(obj1.Code.CodeString, obj2.Code.CodeString);
-            Assert.Equal(((Flyweight)obj1.Code.Scope)["$ns"],((Flyweight)obj2.Code.Scope)["$ns"]);
+            Assert.Equal(((Expando)obj1.Code.Scope)["$ns"],((Expando)obj2.Code.Scope)["$ns"]);
         }
         [Fact]
         public void SerializesAndDeserializesAComplexObject()
@@ -462,8 +462,8 @@ namespace Norm.Tests
             var expando = BsonDeserializer.Deserialize<ExpandoAddress>(bytes);
             Assert.Equal(expando.City, address.City);
             Assert.Equal(expando.Street, address.Street);
-            Assert.Equal(expando.Expando["State"], address.State);
-            Assert.Equal(expando.Expando["Zip"], address.Zip);
+            Assert.Equal(expando["State"], address.State);
+            Assert.Equal(expando["Zip"], address.Zip);
         }
         
     }

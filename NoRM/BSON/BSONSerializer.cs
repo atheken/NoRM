@@ -112,9 +112,9 @@ namespace Norm.BSON
         private void WriteDocument(object document)
         {
             NewDocument();
-            if (document is Flyweight)
+            if (document is Expando)
             {
-                WriteFlyweight((Flyweight)document);
+                WriteFlyweight((Expando)document);
             }
             else if (document is FieldSelectionList)
             {
@@ -140,7 +140,7 @@ namespace Norm.BSON
         /// Writes a Flyweight.
         /// </summary>
         /// <param name="document">The document.</param>
-        private void WriteFlyweight(Flyweight document)
+        private void WriteFlyweight(Expando document)
         {
             foreach (var property in document.AllProperties())
             {
@@ -202,7 +202,7 @@ namespace Norm.BSON
                 //}
             }
 
-            var fly = document as IFlyweight;
+            var fly = document as IExpando;
             if (fly != null)
             {
                 foreach (var f in fly.AllProperties())

@@ -9,9 +9,9 @@ namespace Norm.BSON
     /// Arbitrary properties for all!
     /// </summary>
     /// <remarks>
-    /// Ok, so this is an abuse of the term "flyweight" - sorry.
+    /// This is a glorified dictionary, but so be it.
     /// </remarks>
-    public class Flyweight : IFlyweight
+    public class Expando : IExpando
     {
         private Dictionary<string, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
 
@@ -130,5 +130,6 @@ namespace Norm.BSON
 
             return retval;
         }
+        
     }
 }
