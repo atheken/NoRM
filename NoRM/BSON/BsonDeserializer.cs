@@ -73,7 +73,7 @@ namespace Norm.BSON
         public static T Deserialize<T>(int length, BinaryReader reader, ref IDictionary<WeakReference, Expando> outProps)
         {
             return Deserialize<T>(reader, length);
-        }        
+        }
 
         /// <summary>
         /// Deserializes the specified stream.
@@ -107,7 +107,7 @@ namespace Norm.BSON
             // traverse the object T and apply the DefaultValue to the properties that have them
 
             return @object;
-        }        
+        }
 
         /// <summary>
         /// Reads the specified document forward by the input value.
@@ -279,15 +279,17 @@ namespace Norm.BSON
                 }
 
                 if (instance == null)
+                {
                     throw new MongoException("Could not find the type to instantiate in the document, and " + type.Name + " is an interface or abstract type. Add a MongoDiscriminatedAttribute to the type or base type, or try to work with a concrete type next time.");
-
-                processedNonTypeProperties = true;
+                }
                 
+                processedNonTypeProperties = true;
+
                 var property = (name == "_id" || name == "$id")
                     ? typeHelper.FindIdProperty()
                     : typeHelper.FindProperty(name);
 
-                if (property == null && typeHelper.IsExpando)
+                if (property == null && !typeHelper.IsExpando)
                 {
                     throw new MongoException(string.Format("Deserialization failed: type {0} does not have a property named {1}", type.FullName, name));
                 }
@@ -303,8 +305,8 @@ namespace Norm.BSON
                     }
                     else
                     {
-                        NewDocument(length);    
-                    }                                        
+                        NewDocument(length);
+                    }
                 }
                 object container = null;
                 if (property != null && property.Setter == null)
@@ -316,8 +318,8 @@ namespace Norm.BSON
                 if (property == null)
                 {
                     ((IExpando)instance)[name] = value;
-                }                
-               else  if (container == null && value!=null)
+                }
+                else if (container == null && value != null)
                 {
                     property.Setter(instance, value);
                 }
@@ -380,7 +382,7 @@ namespace Norm.BSON
                     return true;
                 }
             }
-            return false; 
+            return false;
         }
 
         /// <summary>
