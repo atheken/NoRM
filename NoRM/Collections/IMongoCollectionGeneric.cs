@@ -105,16 +105,6 @@ namespace Norm.Collections
         void UpdateOne<X, U>(X matchDocument, U valueDocument);
 
 
-
-        /// <summary>
-        /// Attempts to save or update an instance
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <remarks>
-        /// Only works when the Id property is of type ObjectId
-        /// </remarks>
-        void Save(T entity);
-
         /// <summary>
         /// Delete the documents that mact the specified template.
         /// </summary>

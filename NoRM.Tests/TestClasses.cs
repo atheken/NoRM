@@ -248,6 +248,7 @@ namespace Norm.Tests
         public Address Address { get; set; }
         public DateTime LastContact { get; set; }
         public List<String> Relatives { get; set; }
+        public DateTime Birthday { get; set; }
         public Person()
         {
             Id = ObjectId.NewObjectId();

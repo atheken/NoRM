@@ -14,7 +14,7 @@ namespace Norm.Commands.Modifiers
         public void Increment(Expression<Func<T, object>> func,int amountToIncrement)
         {
             var propertyName = TypeHelper.FindProperty(func);
-            Fly[propertyName] = M.Inc(amountToIncrement);
+            Fly[propertyName] = M.Increment(amountToIncrement);
         }
 
         public void SetValue<X>(Expression<Func<T, object>> func,X rer)

@@ -22,6 +22,20 @@ namespace Norm.Tests
             }
         }
 
+        [Fact(Skip = "")]
+        public void Get_Collection_Statistics_Works()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var coll = mongo.GetCollection<IntId>("Fake");
+                coll.Insert(new IntId { Id = 4, Name = "Test 1" });
+                coll.Insert(new IntId { Id = 5, Name = "Test 2" });
+                var stats = coll.GetCollectionStatistics();
+                Assert.NotNull(stats);
+                Assert.Equal(stats.Count, 2);
+            }
+        }
+
         [Fact]
         public void Find_On_Collection_Returning_More_Than_4MB_Of_Docs_Works()
         {
@@ -56,7 +70,7 @@ namespace Norm.Tests
                                         CreatedOn = DateTime.Now,
                                         Name = "ACME"
                                     }
-                                }); 
+                                });
                     #endregion
                 }
                 var bytes = junkInTheTrunk.SelectMany(y => Norm.BSON.BsonSerializer.Serialize(y)).Count();
@@ -72,7 +86,7 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Save(new Address()));
+                var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Insert(new Address()));
                 Assert.Equal("This collection does not accept insertions/updates, this is due to the fact that the collection's type Norm.Tests.Address does not specify an identifier property", ex.Message);
             }
         }
@@ -82,8 +96,8 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 4, Name = "Test 1" });
-                mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 5, Name = "Test 2" });
+                mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test 1" });
+                mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 5, Name = "Test 2" });
                 var found = mongo.GetCollection<IntId>("Fake").Find();
                 Assert.Equal(2, found.Count());
                 Assert.Equal(4, found.ElementAt(0).Id);
@@ -124,7 +138,7 @@ namespace Norm.Tests
                 session.Provider.DB.GetCollection<TestProduct>().DeleteIndices(out i);
 
                 //it's TWO because there's always an index on _id by default.
-                Assert.Equal(2,i);
+                Assert.Equal(2, i);
 
             }
         }
@@ -160,8 +174,8 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 4, Name = "Test" });
-                mongo.GetCollection<IntId>("Fake").Save(new IntId { Id = 4, Name = "Updated" });
+                mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test" });
+                mongo.GetCollection<IntId>("Fake").Update(new { Id = 4 }, new { Name = "Updated" }, false, false);
                 var found = mongo.GetCollection<IntId>("Fake").Find();
                 Assert.Equal(1, found.Count());
                 Assert.Equal(4, found.ElementAt(0).Id);
@@ -176,8 +190,8 @@ namespace Norm.Tests
             {
                 var id1 = ObjectId.NewObjectId();
                 var id2 = ObjectId.NewObjectId();
-                mongo.GetCollection<TestProduct>("Fake").Save(new TestProduct { _id = id1, Name = "Prod1" });
-                mongo.GetCollection<TestProduct>("Fake").Save(new TestProduct { _id = id2, Name = "Prod2" });
+                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id1, Name = "Prod1" });
+                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id2, Name = "Prod2" });
                 var found = mongo.GetCollection<TestProduct>("Fake").Find();
                 Assert.Equal(2, found.Count());
                 Assert.Equal(id1, found.ElementAt(0)._id);
@@ -194,8 +208,8 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var id = ObjectId.NewObjectId();
-                mongo.GetCollection<TestProduct>("Fake").Save(new TestProduct { _id = id, Name = "Prod" });
-                mongo.GetCollection<TestProduct>("Fake").Save(new TestProduct { _id = id, Name = "Updated Prod" });
+                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id, Name = "Prod" });
+                mongo.GetCollection<TestProduct>("Fake").Update(new { _id = id }, new { Name = "Updated Prod" }, false, false);
                 var found = mongo.GetCollection<TestProduct>("Fake").Find();
                 Assert.Equal(1, found.Count());
                 Assert.Equal(id, found.ElementAt(0)._id);
@@ -209,7 +223,7 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var product = new TestProduct { _id = null };
-                mongo.GetCollection<TestProduct>("Fake").Save(product);
+                mongo.GetCollection<TestProduct>("Fake").Insert(product);
                 Assert.NotNull(product._id);
                 Assert.NotEqual(ObjectId.Empty, product._id);
             }

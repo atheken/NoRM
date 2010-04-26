@@ -150,15 +150,15 @@ namespace Norm.Collections
             return Find(template, 1).FirstOrDefault();
         }
 
-        /// <summary>TODO::Description.</summary>
-        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action)
+        /// <summary>Allows a document to be updated using the specified action.</summary>
+        public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action)
         {
-            UpdateWithModifier(matchDocument, action, false, false);
+            Update(matchDocument, action, false, false);
 
         }
 
         /// <summary>TODO::Description.</summary>
-        public void UpdateWithModifier<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
+        public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
         {
             var modifierExpression = new ModifierExpression<T>();
             action(modifierExpression);
@@ -263,30 +263,6 @@ namespace Norm.Collections
         }
 
         /// <summary>
-        /// Attempts to save or update an instance
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <remarks>
-        /// Only works when the Id property is of type ObjectId
-        /// </remarks>
-        public void Save(T entity)
-        {
-            AssertUpdatable();
-
-            var helper = TypeHelper.GetHelperForType(typeof(T));
-            var idProperty = helper.FindIdProperty();
-            var id = idProperty.Getter(entity);
-            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))
-            {
-                Insert(entity);
-            }
-            else
-            {
-                Update(new { Id = id }, entity, false, true);
-            }
-        }
-
-        /// <summary>
         /// Creates an index for a given collection.
         /// </summary>
         /// <param name="index">The property to index.</param>
@@ -347,16 +323,6 @@ namespace Norm.Collections
                 throw new MongoException(string.Format("Cannot delete {0} since it has no id property", typeof(T).FullName));
             }
             Delete(new { Id = idProperty.Getter(entity) });
-        }
-
-        /// <summary>
-        /// The find.
-        /// </summary>
-        /// <param name="template">The template.</param>
-        /// <returns></returns>
-        public IEnumerable<T> Find(Flyweight template)
-        {
-            return Find(template, Int32.MaxValue, 0, this.FullyQualifiedName);
         }
 
         /// <summary>

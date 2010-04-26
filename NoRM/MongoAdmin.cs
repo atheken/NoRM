@@ -123,7 +123,22 @@ namespace Norm
         /// <returns>The set profile level.</returns>
         public bool SetProfileLevel(int value)
         {
-            var result = this._database.GetCollection<ProfileLevelResponse>("$cmd").FindOne(new { profile = value });
+            var result = this._database.GetCollection<ProfileLevelResponse>("$cmd")
+                .FindOne(new { profile = value });
+            return result != null && result.Ok == 1.0;
+        }
+
+        /// <summary>
+        /// Set the profiling currently defined for the server, default is 1.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The set profile level.</returns>
+        public bool SetProfileLevel(int value, out int previousLevel)
+        {
+            var result = this._database.GetCollection<ProfileLevelResponse>("$cmd")
+                .FindOne(new { profile = value });
+            previousLevel = result.PreviousLevel.Value;
+
             return result != null && result.Ok == 1.0;
         }
 

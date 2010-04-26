@@ -16,6 +16,21 @@ namespace Norm.Tests
                 admin.DropDatabase();
             }
         }
+
+        [Fact]
+        public void Set_Profile_Level_Changes_Profile_Level_And_Reports_Change()
+        {
+            using(var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                int prev;
+                if (mAdmin.SetProfileLevel(3, out prev))
+                {
+                    mAdmin.SetProfileLevel(prev);
+                }
+            }
+
+        }
+
         [Fact]
         public void ListsAllDatabases()
         {

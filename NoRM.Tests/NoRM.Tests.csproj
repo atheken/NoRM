@@ -71,6 +71,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CollectionFindTests\DocSizeTests.cs" />
     <Compile Include="CollectionFindTests\MongoSearchQualifierTests.cs" />
     <Compile Include="CollectionFindTests\QueryTests.cs" />
     <Compile Include="CollectionFindTests\WhereQualifierTests.cs" />
