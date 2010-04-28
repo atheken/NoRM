@@ -75,6 +75,84 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportMultiplication()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Price * 2 == 20).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal("1", list[0].Name);
+            }
+        }
+        
+        [Fact]
+        public void LinqQueriesShouldSupportDivision()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Price / 2 == 10).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal("2", list[0].Name);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportAddition()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Price + 2 == 32).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal("3", list[0].Name);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportSubtraction()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Price - 6 == 24).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal("3", list[0].Name);
+            }
+        }
+
+        [Fact]
+        public void ContainsShouldReturnBothItems()
+        {
+            using (var session = new Session())
+            {
+                var names = new List<string>();
+                names.Add("1");
+                names.Add("2");
+
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+                var list = session.Products.Where(x => names.Contains(x.Name)).ToList();
+                Assert.Equal(2, list.Count);
+                Assert.Equal(30, list.Sum(x=>x.Price));
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportRegexInComplexQuery()
         {
             using (var session = new Session())

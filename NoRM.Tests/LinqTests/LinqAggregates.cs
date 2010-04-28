@@ -109,6 +109,7 @@ namespace Norm.Tests
                 Assert.Equal(20, result);
             }
         }
+
         [Fact]
         public void AvgShouldReturn15WhenThreeProductsInDBWIthSumPrice60AndLessThan30()
         {
@@ -213,5 +214,6 @@ namespace Norm.Tests
                 Assert.False(session.Products.Any(x => x.Price == 100));
             }
         }
+
     }
 }

@@ -339,48 +339,78 @@ namespace Norm.Linq
         }
 
         /// <summary>TODO::Description.</summary>
-        private string GetBinaryOperator(BinaryExpression b) {
-            var result = "";
+        private void VisitBinaryOperator(BinaryExpression b) {
+
             switch (b.NodeType) {
                 case ExpressionType.And:
                 case ExpressionType.AndAlso:
-                    result = " && ";
+                    _lastOperator = " && ";
                     break;
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
+                    _lastOperator = " || ";
                     IsComplex = true;
-                    result = " || ";
                     break;
                 case ExpressionType.Equal:
                     _lastOperator = " === ";//Should this be '===' instead? a la 'Javascript: The good parts'
-                    result =_lastOperator;
                     break;
                 case ExpressionType.NotEqual:
                     _lastOperator = " != ";
-                    result =_lastOperator;
                     break;
                 case ExpressionType.LessThan:
                     _lastOperator = " < ";
-                    result = _lastOperator;
                     break;
                 case ExpressionType.LessThanOrEqual:
                     _lastOperator = " <= ";
-                    result = _lastOperator;
                     break;
                 case ExpressionType.GreaterThan:
                     _lastOperator = " > ";
-                    result = _lastOperator;
                     break;
                 case ExpressionType.GreaterThanOrEqual:
                     _lastOperator = " >= ";
-                    result = _lastOperator;
+                    break;
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                    _lastOperator = " + ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.Coalesce:
+                     _lastOperator = " || ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.Divide:
+                     _lastOperator = " / ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.ExclusiveOr:
+                     _lastOperator = " ^ ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.LeftShift:
+                     _lastOperator = " << ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                     _lastOperator = " * ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.RightShift:
+                     _lastOperator = " >> ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                     _lastOperator = " - ";
+                    IsComplex = true;
                     break;
                 default:
                     throw new NotSupportedException(
                         string.Format("The binary operator '{0}' is not supported", b.NodeType));
 
             }
-            return result;
+
+            _sbWhere.Append(_lastOperator);
         }
         /// <summary>
         /// Visits a binary expression.
@@ -394,7 +424,7 @@ namespace Norm.Linq
             ConditionalCount++;
             _sbWhere.Append("(");
             Visit(b.Left);
-            _sbWhere.Append(GetBinaryOperator(b));
+            VisitBinaryOperator(b);
             Visit(b.Right);
             _sbWhere.Append(")");
             return b;
