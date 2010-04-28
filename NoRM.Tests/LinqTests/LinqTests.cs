@@ -4,6 +4,8 @@ using System.Linq;
 using Norm.Linq;
 using Xunit;
 using Norm.Configuration;
+using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace Norm.Tests
 {
@@ -42,6 +44,123 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "test1", Price = 10 });
                 var products = session.Products.Where(p => p.Name == null).ToList();
                 Assert.Equal(20, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportRegex()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = null, Price = 20 });
+                session.Add(new TestProduct { Name = "test1", Price = 10 });
+                var products = session.Products.Where(p => Regex.IsMatch(p.Name, "test1")).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportRegexWithMultipleWhereClause()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = null, Price = 20 });
+                session.Add(new TestProduct { Name = "test1", Price = 10 });
+                var products = session.Products.Where(p => Regex.IsMatch(p.Name, "^te") && p.Price == 10).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportMultiplication()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Price * 2 == 20).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal("1", list[0].Name);
+            }
+        }
+        
+        [Fact]
+        public void LinqQueriesShouldSupportDivision()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Price / 2 == 10).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal("2", list[0].Name);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportAddition()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Price + 2 == 32).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal("3", list[0].Name);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportSubtraction()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Price - 6 == 24).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal("3", list[0].Name);
+            }
+        }
+
+        [Fact]
+        public void ContainsShouldReturnBothItems()
+        {
+            using (var session = new Session())
+            {
+                var names = new List<string>();
+                names.Add("1");
+                names.Add("2");
+
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+                var list = session.Products.Where(x => names.Contains(x.Name)).ToList();
+                Assert.Equal(2, list.Count);
+                Assert.Equal(30, list.Sum(x=>x.Price));
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportRegexInComplexQuery()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = null, Price = 20 });
+                session.Add(new TestProduct { Name = "test1", Price = 10 });
+                var products = session.Products.Where(p => Regex.IsMatch(p.Name, "^te") && p.Name == "test1").ToList();
+                Assert.Equal(10, products[0].Price);
                 Assert.Equal(1, products.Count);
             }
         }
@@ -703,7 +822,9 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test3X", Price = 10 });
                 session.Add(new TestProduct { Name = "Test4X", Price = 22 });
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
+                           
                 var products = session.Products.Where(x => x.Name.EndsWith("X")).ToList();
+
                 Assert.Equal(2, products.Count);
             }
         }
@@ -716,8 +837,25 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest3", Price = 10 });
                 session.Add(new TestProduct { Name = "XTest4", Price = 22 });
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
+
                 var products = session.Products.Where(x => x.Name.StartsWith("X")).ToList();
+            
                 Assert.Equal(2, products.Count);
+            }
+        }
+
+        [Fact]
+        public void TwoProductsShouldBeReturnedWhenStartsWithXWithQuote()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "Test3X", Price = 10 });
+                session.Add(new TestProduct { Name = "Test4X", Price = 22 });
+                session.Add(new TestProduct { Name = "X\"Test5X", Price = 33 });
+                session.Add(new TestProduct { Name = "XTest3", Price = 10 });
+                session.Add(new TestProduct { Name = "XTest4", Price = 22 });
+                var products = session.Products.Where(x => x.Name.StartsWith("X\"Test") && x.Name.EndsWith("X")).ToList();
+                Assert.Equal(1, products.Count);
             }
         }
 
