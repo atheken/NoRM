@@ -70,7 +70,7 @@ namespace Norm.Linq
         /// <summary>
         /// Escapes the double quotes.
         /// </summary>
-        /// <param name="exp">The string</param>
+        /// <param name="str">The string</param>
         /// <returns>The escaped string.</returns>
         public static object EscapeDoubleQuotes(this string str)
         {
