@@ -75,6 +75,32 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportRegexWithOptions()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = null, Price = 20 });
+                session.Add(new TestProduct { Name = "test1", Price = 10 });
+                var products = session.Products.Where(p => Regex.IsMatch(p.Name, "TEST1", RegexOptions.Multiline | RegexOptions.IgnoreCase)).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportRegexWithOptionsInComplexQuery()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = null, Price = 20 });
+                session.Add(new TestProduct { Name = "test1", Price = 10 });
+                var products = session.Products.Where(p => Regex.IsMatch(p.Name, "TEST1", RegexOptions.Multiline | RegexOptions.IgnoreCase) && p.Name.StartsWith("tes")).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportMultiplication()
         {
             using (var session = new Session())
@@ -845,7 +871,7 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void TwoProductsShouldBeReturnedWhenStartsWithXWithQuote()
+        public void TwoProductsShouldBeReturnedWhenStartsWithXWithQuoteComplex()
         {
             using (var session = new Session())
             {
@@ -856,6 +882,39 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest4", Price = 22 });
                 var products = session.Products.Where(x => x.Name.StartsWith("X\"Test") && x.Name.EndsWith("X")).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void TwoProductsShouldBeReturnedWhenEndsWithXWithQuote()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "Test3X", Price = 10 });
+                session.Add(new TestProduct { Name = "Test4X", Price = 22 });
+                session.Add(new TestProduct { Name = "XTest\"5X", Price = 33 });
+                session.Add(new TestProduct { Name = "XTest3", Price = 10 });
+                session.Add(new TestProduct { Name = "XTest4", Price = 22 });
+                var products = session.Products.Where(x => x.Name.EndsWith("\"5X")).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
+            }
+        }
+
+        [Fact]
+        public void TwoProductsShouldBeReturnedWhenEndsWithXWithQuoteComplex()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "Test3X", Price = 10 });
+                session.Add(new TestProduct { Name = "Test4X", Price = 22 });
+                session.Add(new TestProduct { Name = "XTest\"5X", Price = 33 });
+                session.Add(new TestProduct { Name = "XTest3", Price = 10 });
+                session.Add(new TestProduct { Name = "XTest4", Price = 22 });
+                var products = session.Products.Where(x => x.Name.EndsWith("\"5X") && x.Name.StartsWith("X")).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(33, products[0].Price);
             }
         }
 

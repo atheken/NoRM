@@ -251,7 +251,7 @@ namespace Norm.Linq
                 var fixedName = fullName
                     .Skip(1)
                     .Where(x => x != "First()")
-                    .Select(x => System.Text.RegularExpressions.Regex.Replace(x, @"\[[0-9]+\]$", ""))
+                    .Select(x => Regex.Replace(x, @"\[[0-9]+\]$", ""))
                     .ToArray();
 
                 var expressionRootType = GetParameterExpression(m.Expression);
@@ -541,9 +541,18 @@ namespace Norm.Linq
                         {
                             string value = (string)m.Arguments[0].GetConstantValue();
 
-                            _sbWhere.Append("(");
+                            //_sbWhere.Append("(");
+                            //Visit(m.Object);
+                            //_sbWhere.AppendFormat(".match(\"{0}$\")==\"{0}\")", value.EscapeDoubleQuotes());
+
+                            //Seems 10% quicker than above when complex query invoked
+                            _sbWhere.Append("((");
                             Visit(m.Object);
-                            _sbWhere.AppendFormat(".match(\"{0}$\")==\"{0}\")", value.EscapeDoubleQuotes());
+                            _sbWhere.AppendFormat(".length - {0}) >= 0 && ", value.Length);
+                            Visit(m.Object);
+                            _sbWhere.AppendFormat(".lastIndexOf(\"{0}\") === (", value.EscapeDoubleQuotes());
+                            Visit(m.Object);
+                            _sbWhere.AppendFormat(".length - {0}))", value.Length);
 
                             SetFlyValue(new Regex(value + "$"));
 
@@ -622,17 +631,7 @@ namespace Norm.Linq
             {
                 if (m.Method.Name == "IsMatch")
                 {
-                    string value = "";
-                    if (m.Object == null)
-                        value = (string)m.Arguments[1].GetConstantValue();
-                    else
-                        throw new NotSupportedException(string.Format("Only the static Regex.IsMatch is supported.", m.Method.Name));
-
-                    _sbWhere.AppendFormat("(new RegExp(\"{0}\")).test(", value.EscapeDoubleQuotes());
-                    Visit(m.Arguments[0]);
-                    _sbWhere.Append(")");
-
-                    SetFlyValue(new Regex(value));
+                    HandleRegexIsMatch(m);
                     return m;
                 }
 
@@ -824,6 +823,44 @@ namespace Norm.Linq
         {
             Visit(m.Arguments[0]);
             _sbWhere.Append(".length");
+        }
+
+        private void HandleRegexIsMatch(MethodCallExpression m)
+        {
+            var options = RegexOptions.None;
+            var jsoptions = "g";
+            if (m.Arguments.Count == 3)
+            {
+                options = (RegexOptions)m.Arguments[2].GetConstantValue();
+                jsoptions = VisitRegexOptions(m, options);
+            }
+
+            string value = (string)m.Arguments[1].GetConstantValue();
+
+            _sbWhere.AppendFormat("(new RegExp(\"{0}\",\"{1}\")).test(", value.EscapeDoubleQuotes(), jsoptions);
+            Visit(m.Arguments[0]);
+            _sbWhere.Append(")");
+
+            SetFlyValue(new Regex(value, options));
+        }
+
+        private static string VisitRegexOptions(MethodCallExpression m, RegexOptions options)
+        {
+            RegexOptions[] allowedOptions = new RegexOptions[] { RegexOptions.IgnoreCase, RegexOptions.Multiline, RegexOptions.None };
+            foreach (RegexOptions Type in Enum.GetValues(typeof(RegexOptions)))
+            {
+                if ((options & Type) == Type && !allowedOptions.Contains(Type))
+                    throw new NotSupportedException(string.Format("Only the RegexOptions.Ignore and RegexOptions.Multiline options are supported.", m.Method.Name));
+            }
+
+            var jsoptions = "g";
+
+            if ((options & RegexOptions.IgnoreCase) == RegexOptions.IgnoreCase)
+                jsoptions += "i";
+            if ((options & RegexOptions.Multiline) == RegexOptions.Multiline)
+                jsoptions += "m";
+
+            return jsoptions;
         }
 
         /// <summary>
