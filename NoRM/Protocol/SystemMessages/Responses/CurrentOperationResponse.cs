@@ -23,7 +23,7 @@ namespace Norm.Responses
     /// <summary>
     /// The current operation response.
     /// </summary>
-    public class CurrentOperationResponse : IExpando
+    public class CurrentOperationResponse : BaseStatusMessage
     {
         static CurrentOperationResponse()
         {
@@ -33,6 +33,7 @@ namespace Norm.Responses
                       a.ForProperty(op => op.Operation).UseAlias("op");
                       a.ForProperty(op => op.Namespace).UseAlias("ns");
                       a.ForProperty(op => op.SecondsRunning).UseAlias("secs_running");
+                      a.ForProperty(op => op.Description).UseAlias("desc");
                   })
                 );
         }
@@ -79,35 +80,6 @@ namespace Norm.Responses
         /// <value>How long it is/was running</value>
         public int? SecondsRunning { get; set; }
 
-        /// <summary>TODO::Description.</summary>
-        /// <value>The description.</value>
-        public string Desc { get; set; }
-
-        /// <summary>
-        /// Additional, non-static properties of this message.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<ExpandoProperty> AllProperties()
-        {
-            return this._properties.Select(j => new ExpandoProperty(j.Key, j.Value));
-        }
-
-        public void Delete(string propertyName)
-        {
-            this._properties.Remove(propertyName);
-        }
-
-        public object this[string propertyName]
-        {
-            get
-            {
-                return this._properties[propertyName];
-            }
-            set
-            {
-                this._properties[propertyName] = value;
-            }
-        }
-
+        public string Description { get; set; }
     }
 }

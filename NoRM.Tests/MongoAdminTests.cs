@@ -31,6 +31,88 @@ namespace Norm.Tests
 
         }
 
+
+        [Fact]
+        public void Get_Assert_Info_Returns_Results()
+        {
+            using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                var aInfo = mAdmin.AssertionInfo();
+                Assert.NotNull(aInfo);
+                Assert.Equal(true, aInfo.WasSuccessful);
+            }
+
+        }
+
+        [Fact]
+        public void Get_CurrentOp_Returns()
+        {
+            using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                var currOps = mAdmin.GetCurrentOperations().ToArray();
+            }
+
+        }
+
+        [Fact]
+        public void Get_CurrentOp_Returns_Results()
+        {
+            using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                var a = mAdmin.PreviousErrors();
+                Assert.Equal(true, a.WasSuccessful);
+            }
+        }
+
+        [Fact]
+        public void Get_Current_Profile_Level()
+        {
+            using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                var level = mAdmin.GetProfileLevel();
+                if (level != 2d)
+                {
+                    mAdmin.SetProfileLevel(2);
+
+                }
+                Assert.Equal(2, mAdmin.GetProfileLevel());
+                mAdmin.SetProfileLevel(level);
+            }
+        }
+
+        [Fact]
+        public void Repair_Database_Returns()
+        {
+            using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                Assert.True(mAdmin.RepairDatabase(false, false));
+            }
+        }
+
+
+        [Fact]
+        public void Kill_Operation_Returns()
+        {
+            //since we don't have any long-running ops, this is all we can test without mocks.
+            using (var mAdmin = new MongoAdmin("mongodb://localhost/admin"))
+            {
+                var x = mAdmin.KillOperation(double.MaxValue);
+                Assert.Equal(false,x.WasSuccessful);
+                Assert.Equal("no op number field specified?",x["err"]);
+            }
+        }
+
+
+        [Fact]
+        public void Reset_Last_Error_Returns()
+        {
+            using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                Assert.True(mAdmin.ResetLastError());
+            }
+        }
+
+
         [Fact]
         public void ListsAllDatabases()
         {
@@ -81,7 +163,7 @@ namespace Norm.Tests
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var info = admin.BuildInfo();
-                Assert.Equal(1d, info.Ok);
+                Assert.Equal(true, info.WasSuccessful);
                 Assert.Equal(gitVersion, info.GitVersion);
                 Assert.Equal(version, info.Version);
             }
@@ -104,7 +186,7 @@ namespace Norm.Tests
                 if (!admin.BuildInfo().SystemInformation.ToLower().Contains("windows"))
                 {
                     var response = admin.ForceSync(true);
-                    Assert.Equal(1d, response.Ok);
+                    Assert.Equal(true, response.WasSuccessful);
                     Assert.True(response.NumberOfFiles > 0); //don't know what this is
                 }
                 else
@@ -152,7 +234,7 @@ namespace Norm.Tests
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var status = admin.ServerStatus();
-                Assert.Equal(1d, status.Ok);
+                Assert.Equal(true, status.WasSuccessful);
             }
         }
 

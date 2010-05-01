@@ -11,22 +11,24 @@ namespace Norm.Responses
     public class BaseStatusMessage : IExpando
     {
         private Dictionary<string, object> _properties = new Dictionary<string, object>(0);
-
-        static BaseStatusMessage()
-        {
-            MongoConfiguration.Initialize(c => c.For<BaseStatusMessage>(a =>
-                       {
-                           a.ForProperty(auth => auth.Ok).UseAlias("ok");
-                       })
-                );
-        }
+        
+        /// <summary>
+        /// This is the raw value returned from the response. 
+        /// It is required for serializer support, use "WasSuccessful" if you need a boolean value.
+        /// </summary>
+        protected double? ok { get; set; }
 
         /// <summary>
-        /// The operation status
+        /// Did this message return correctly?
         /// </summary>
-        /// <value>The Ok property gets the Ok data member.</value>
-        public double? Ok { get; set; }
-
+        /// <remarks>This maps to the "OK" value of the response.</remarks>
+        public bool WasSuccessful
+        {
+            get
+            {
+                return this.ok == 1d ? true : false;
+            }
+        }
 
         /// <summary>
         /// Additional, non-static properties of this message.

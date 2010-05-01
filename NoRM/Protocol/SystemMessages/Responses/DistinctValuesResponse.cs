@@ -11,15 +11,6 @@ namespace Norm.Responses
     internal class DistinctValuesResponse<T> : BaseStatusMessage
     {
         /// <summary>
-        /// Initializes the <see cref="DistinctValuesResponse&lt;T&gt;"/> class.
-        /// </summary>
-        static DistinctValuesResponse()
-        {
-            MongoConfiguration.Initialize(c => c.For<DistinctValuesResponse<T>>(a => a.ForProperty(auth => auth.Ok).UseAlias("ok"))
-                );
-        }
-
-        /// <summary>
         /// Gets or sets the values.
         /// </summary>
         /// <value>The values.</value>

@@ -83,7 +83,7 @@ namespace Norm
         public bool ResetLastError()
         {
             var result = this._database.GetCollection<GenericCommandResponse>("$cmd").FindOne(new { reseterror = 1d });
-            return result != null && result.Ok == 1.0;
+            return result != null && result.WasSuccessful;
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Norm
         {
             var result = this._database.GetCollection<ProfileLevelResponse>("$cmd")
                 .FindOne(new { profile = value });
-            return result != null && result.Ok == 1.0;
+            return result != null && result.WasSuccessful;
         }
 
         /// <summary>
@@ -137,16 +137,16 @@ namespace Norm
         {
             var result = this._database.GetCollection<ProfileLevelResponse>("$cmd")
                 .FindOne(new { profile = value });
-            previousLevel = result.PreviousLevel.Value;
+            previousLevel = result.PreviousLevel;
 
-            return result != null && result.Ok == 1.0;
+            return result != null && result.WasSuccessful;
         }
 
         /// <summary>
         /// Find out the profile level on the server.
         /// </summary>
         /// <returns></returns>
-        public double? GetProfileLevel()
+        public int GetProfileLevel()
         {
             var result = this._database.GetCollection<ProfileLevelResponse>("$cmd").FindOne(new { profile = -1 });
             return result.PreviousLevel;
@@ -162,7 +162,7 @@ namespace Norm
         {
             var result = this._database.GetCollection<GenericCommandResponse>("$cmd")
                 .FindOne(new { repairDatabase = 1d, preserveClonedFilesOnFailure, backupOriginalFiles });
-            return result != null && result.Ok == 1.0;
+            return result != null && result.WasSuccessful;
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace Norm
         {
             AssertConnectedToAdmin();
             var response = this._database.GetCollection<ListDatabasesResponse>("$cmd").FindOne(new ListDatabasesRequest());
-            return response != null && response.Ok == 1.0 ? response.Databases : Enumerable.Empty<DatabaseInfo>();
+            return response != null && response.WasSuccessful ? response.Databases : Enumerable.Empty<DatabaseInfo>();
         }
 
         /// <summary>

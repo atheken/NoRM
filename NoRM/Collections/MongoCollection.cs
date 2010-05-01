@@ -116,7 +116,7 @@ namespace Norm.Collections
             var result = coll.FindOne(new { deleteIndexes = _collectionName, index = indexName });
             numberDeleted = 0;
 
-            if (result != null && result.Ok == 1.0)
+            if (result != null && result.WasSuccessful)
             {
                 retval = true;
                 numberDeleted = result.NumberIndexesWas.Value;

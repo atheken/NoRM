@@ -21,6 +21,6 @@ namespace Norm.Responses
         /// Gets or sets the previous profiling level.
         /// </summary>
         /// <value>The previous level.</value>
-        public int? PreviousLevel { get; set; }
+        public int PreviousLevel { get; set; }
     }
 }
