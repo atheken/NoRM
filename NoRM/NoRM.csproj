@@ -105,7 +105,6 @@
     <Compile Include="BSON\ModifierCommand.cs" />
     <Compile Include="BSON\TypeHelper.cs" />
     <Compile Include="Collections\CreateCollectionOptions.cs" />
-    <Compile Include="Collections\IMongoCollection.cs" />
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />
     <Compile Include="Collections\MongoCollectionGeneric.cs" />

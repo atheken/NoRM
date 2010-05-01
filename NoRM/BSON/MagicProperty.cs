@@ -14,10 +14,9 @@ namespace Norm.BSON
         private static readonly Type _ignoredIfNullType = typeof(MongoIgnoreIfNullAttribute);
         private static readonly Type _defaultValueType = typeof(DefaultValueAttribute);
         private readonly PropertyInfo _property;
-        private readonly bool _ignoreIfNull;
         private readonly DefaultValueAttribute _defaultValueAttribute;
 
-        
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MagicProperty"/> class.
@@ -27,7 +26,7 @@ namespace Norm.BSON
         public MagicProperty(PropertyInfo property, Type declaringType)
         {
             _property = property;
-            _ignoreIfNull = property.GetCustomAttributes(_ignoredIfNullType, true).Length > 0;
+            this.IgnoreIfNull = property.GetCustomAttributes(_ignoredIfNullType, true).Length > 0;
             var props = property.GetCustomAttributes(_defaultValueType, true);
             if (props.Length > 0)
             {
@@ -66,7 +65,8 @@ namespace Norm.BSON
         /// <value><c>true</c> if ignoring; otherwise, <c>false</c>.</value>
         public bool IgnoreIfNull
         {
-            get { return _ignoreIfNull; }
+            get;
+            private set;
         }
         /// <summary>
         /// Returns if this PropertyInfo has DefaultValueAttribute associated
@@ -86,11 +86,12 @@ namespace Norm.BSON
         /// <returns></returns>
         public object GetDefaultValue()
         {
+            object retval = null;
             if (this.HasDefaultValue)
             {
-                return this._defaultValueAttribute.Value;
+                retval = this._defaultValueAttribute.Value;
             }
-            return null;
+            return retval;
         }
 
         /// <summary>
@@ -125,7 +126,7 @@ namespace Norm.BSON
                 }
                 // finally check if the property has the MongoIgnoreIfNull attribute.
                 // and ignore if true.
-                if (this._ignoreIfNull && value == null)
+                if (this.IgnoreIfNull && value == null)
                 {
                     ignore = true;
                 }
@@ -139,7 +140,7 @@ namespace Norm.BSON
         /// </summary>
         /// <value>The setter.</value>
         public Action<object, object> Setter { get; private set; }
-       
+
         /// <summary>
         /// Gets or sets the property getter.
         /// </summary>
@@ -150,7 +151,7 @@ namespace Norm.BSON
         /// Gets of sets the property ShouldSerialize
         /// </summary>
         public Func<object, bool> ShouldSerialize { get; private set; }
-        
+
         /// <summary>
         /// Creates the setter method.
         /// </summary>
@@ -162,7 +163,7 @@ namespace Norm.BSON
             var constructedHelper = genericHelper.MakeGenericMethod(property.DeclaringType, property.PropertyType);
             return (Action<object, object>)constructedHelper.Invoke(null, new object[] { property });
         }
-       
+
         /// <summary>
         /// Creates the getter method.
         /// </summary>
@@ -216,7 +217,7 @@ namespace Norm.BSON
             var func = (Action<TTarget, TParam>)Delegate.CreateDelegate(typeof(Action<TTarget, TParam>), m);
             return (target, param) => func((TTarget)target, (TParam)param);
         }
-        
+
         /// <summary>
         /// Getter method.
         /// </summary>

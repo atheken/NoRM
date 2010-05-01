@@ -26,6 +26,14 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void Update_Multiple_With_Lambda_Works()
+        {
+            _collection.Insert(new CheeseClubContact { Name = "Hello" }, new CheeseClubContact { Name = "World" });
+            _collection.Update(new { Name = Q.NotEqual("") }, h => h.SetValue(y => y.Name, "Cheese"), true, false);
+            Assert.Equal(2, _collection.Find(new { Name = "Cheese" }).Count());
+        }
+
+        [Fact]
         public void BasicUsageOfUpdateOne()
         {
             var aPerson = new CheeseClubContact { Name = "Joe", FavoriteCheese = "Cheddar" };
@@ -83,7 +91,7 @@ namespace Norm.Tests
 
             var matchDocument = new { Name = "Joe" };
             var updatesToApply = new { Name = "Joseph" };
-            
+
             _collection.UpdateOne(matchDocument, updatesToApply);
 
             var query = new Expando();

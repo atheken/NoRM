@@ -18,14 +18,6 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoAdmin"/> class.
         /// </summary>
-        public MongoAdmin()
-            : this("mongodb://127.0.0.1:27017")
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoAdmin"/> class.
-        /// </summary>
         /// <param name="connectionString">
         /// The connection string.
         /// </param>

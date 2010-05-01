@@ -1,13 +1,18 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace Norm.Collections
 {
+    public interface IMongoCollection : IMongoCollection<Object>
+    {
+
+    }
 
     /// <summary>
     /// Generic collection interface
     /// </summary>
     /// <typeparam name="T">The type of collection</typeparam>
-    public interface IMongoCollection<T> : IMongoCollection
+    public interface IMongoCollection<T> 
     {
         /// <summary>
         /// Finds the specified document.
@@ -85,15 +90,6 @@ namespace Norm.Collections
         /// </summary>
         /// <value><c>true</c> if updateable; otherwise, <c>false</c>.</value>
         bool Updateable { get; }
-
-        /// <summary>
-        /// Updates multiple documents.
-        /// </summary>
-        /// <typeparam name="X">Document to match</typeparam>
-        /// <typeparam name="U">Document to update</typeparam>
-        /// <param name="matchDocument">The match document.</param>
-        /// <param name="valueDocument">The value document.</param>
-        void UpdateMultiple<X, U>(X matchDocument, U valueDocument);
 
         /// <summary>
         /// Updates one document.

@@ -253,15 +253,17 @@ namespace Norm.BSON
         public void ApplyDefaultValues(object instance)
         {
             // error check.
-            if (instance == null) return;
-            // get all the properties
-            foreach (var prop in this.GetProperties())
+            if (instance != null)
             {
-                // see if the property has a DefaultValue attribute
-                if (prop.HasDefaultValue)
+                // get all the properties
+                foreach (var prop in this.GetProperties())
                 {
-                    // set the default value for the property.
-                    prop.Setter(instance, prop.GetDefaultValue());
+                    // see if the property has a DefaultValue attribute
+                    if (prop.HasDefaultValue)
+                    {
+                        // set the default value for the property.
+                        prop.Setter(instance, prop.GetDefaultValue());
+                    }
                 }
             }
         }

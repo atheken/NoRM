@@ -19,12 +19,21 @@ namespace Norm.Collections
     /// Mongo typed collection.
     /// </summary>
     /// <typeparam name="T">Collection type</typeparam>
-    public class MongoCollection<T> : MongoCollection, IMongoCollection<T>
+    public class MongoCollection<T> : IMongoCollection<T>
     {
         /// <summary>
         /// This will have a different instance for each concrete version of <see cref="MongoCollection{T}"/>
         /// </summary>
         protected static bool? _updateable;
+
+        /// <summary>TODO::Description.</summary>
+        protected string _collectionName;
+
+        /// <summary>TODO::Description.</summary>
+        protected IConnection _connection;
+
+        /// <summary>TODO::Description.</summary>
+        protected MongoDatabase _db;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoCollection{T}"/> class.
@@ -38,13 +47,6 @@ namespace Norm.Collections
             _db = db;
             _connection = connection;
             _collectionName = collectionName;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoCollection{T}"/> class.
-        /// </summary>
-        protected MongoCollection()
-        {
         }
 
         /// <summary>
@@ -93,18 +95,6 @@ namespace Norm.Collections
         }
 
         /// <summary>
-        /// Overload of Update that updates all matching documents, and doesn't upsert if no matches are found.
-        /// </summary>
-        /// <typeparam name="X">Document to match</typeparam>
-        /// <typeparam name="U">Value document</typeparam>
-        /// <param name="matchDocument">The match document.</param>
-        /// <param name="valueDocument">The value document.</param>
-        public void UpdateMultiple<X, U>(X matchDocument, U valueDocument)
-        {
-            Update(matchDocument, valueDocument, true, false);
-        }
-
-        /// <summary>
         /// The update.
         /// </summary>
         /// <typeparam name="X">Document to match</typeparam>
@@ -132,6 +122,74 @@ namespace Norm.Collections
 
             var um = new UpdateMessage<X, U>(_connection, FullyQualifiedName, ops, matchDocument, valueDocument);
             um.Execute();
+        }
+
+        /// <summary>
+        /// The name of this collection, including the database prefix.
+        /// </summary>
+        public string FullyQualifiedName
+        {
+            get { return string.Format("{0}.{1}", _db.DatabaseName, _collectionName); }
+        }
+
+
+        /// <summary>
+        /// The document count.
+        /// </summary>
+        /// <param name="query">The query.</param>
+        /// <returns>The count.</returns>
+        public long Count(object query)
+        {
+            long retval = 0;
+
+            var f = _db.GetCollection<Expando>("$cmd")
+                .FindOne(new { count = _collectionName, query = query });
+
+            if (f != null)
+            {
+                retval = (long)f.Get<double>("n");
+            }
+
+            return retval;
+        }
+
+        /// <summary>
+        /// Deletes all indices on this collection.
+        /// </summary>
+        /// <param name="numberDeleted">
+        /// </param>
+        /// <returns>
+        /// The delete indices.
+        /// </returns>
+        public bool DeleteIndices(out int numberDeleted)
+        {
+            return DeleteIndex("*", out numberDeleted);
+        }
+
+        /// <summary>
+        /// Deletes the specified index for the collection.
+        /// </summary>
+        /// <param name="indexName">
+        /// </param>
+        /// <param name="numberDeleted">
+        /// </param>
+        /// <returns>
+        /// The delete index.
+        /// </returns>
+        public bool DeleteIndex(string indexName, out int numberDeleted)
+        {
+            var retval = false;
+            var coll = _db.GetCollection<DeleteIndicesResponse>("$cmd");
+            var result = coll.FindOne(new { deleteIndexes = _collectionName, index = indexName });
+            numberDeleted = 0;
+
+            if (result != null && result.WasSuccessful)
+            {
+                retval = true;
+                numberDeleted = result.NumberIndexesWas.Value;
+            }
+
+            return retval;
         }
 
         /// <summary>
@@ -366,7 +424,7 @@ namespace Norm.Collections
                 Query = template,
                 OrderBy = orderBy
             };
-            var type = typeof (T);
+            var type = typeof(T);
             if (MongoConfiguration.SummaryTypeFor(type) != null)
             {
                 qm.FieldSelection = GetSelectionFields(type);
@@ -407,23 +465,6 @@ namespace Norm.Collections
         {
             return this._db.GetCollection<ExplainResponse>(this._collectionName)
                 .FindOne(new ExplainRequest<U>(template));
-        }
-
-        /// <summary>
-        /// Constructs and returns a grouping of values based on initial values
-        /// </summary>
-        /// <typeparam name="X">Key</typeparam>
-        /// <typeparam name="Y">Filter</typeparam>
-        /// <typeparam name="Z">Initial value</typeparam>
-        /// <param name="key">The key.</param>
-        /// <param name="filter">The filter.</param>
-        /// <param name="initialValue">The initial value.</param>
-        /// <param name="reduce">The reduce.</param>
-        /// <returns>The group by.</returns>
-        public object GroupBy<X, Y, Z>(X key, Y filter, Z initialValue, string reduce)
-        {
-            //TODO: implement it.
-            return null;
         }
 
         /// <summary>
@@ -489,9 +530,9 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<X> MapReduce<X>(string map, string reduce)
         {
-            return MapReduce<X>(new MapReduceOptions<T> {Map = map, Reduce = reduce});
+            return MapReduce<X>(new MapReduceOptions<T> { Map = map, Reduce = reduce });
         }
-        
+
         /// <summary>
         /// Executes the map reduce with an applied template
         /// </summary>
@@ -503,8 +544,8 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce)
         {
-            return MapReduce<X>(new MapReduceOptions<T> {Query = template, Map = map, Reduce = reduce });
-            
+            return MapReduce<X>(new MapReduceOptions<T> { Query = template, Map = map, Reduce = reduce });
+
         }
 
         /// <summary>
@@ -519,8 +560,8 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce, string finalize)
         {
-            return MapReduce<X>(new MapReduceOptions<T> {Query = template, Map = map, Reduce = reduce, Finalize = finalize});
-            
+            return MapReduce<X>(new MapReduceOptions<T> { Query = template, Map = map, Reduce = reduce, Finalize = finalize });
+
         }
 
         /// <summary>
@@ -585,6 +626,5 @@ namespace Norm.Collections
         {
             return typeof(T).GetInterface("IUpdateWithoutId") != null;
         }
-
     }
 }

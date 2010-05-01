@@ -17,22 +17,23 @@ namespace Norm.BSON
         {
             _list.Add(value);
         }
-        
+
         protected override object CreateContainer(Type type, Type itemType)
         {
+            object retval = null;
             if (type.IsInterface)
             {
-                return Activator.CreateInstance(typeof(List<>).MakeGenericType(itemType));
+                retval = Activator.CreateInstance(typeof(List<>).MakeGenericType(itemType));
             }
-            if (type.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, new Type[0], null) != null)
+            else if (type.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, new Type[0], null) != null)
             {
-                return Activator.CreateInstance(type);
+                retval = Activator.CreateInstance(type);
             }
-            return null;
+            return retval;
         }
         protected override void SetContainer(object container)
         {
             _list = container == null ? new ArrayList() : (IList)container;
-        }               
+        }
     }
 }

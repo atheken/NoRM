@@ -20,7 +20,7 @@ namespace Norm.BSON.DbTypes
         /// <returns></returns>
         public static GridFile OpenFile(Mongo db, ObjectId fileKey)
         {
-            return GridFile.OpenFile(db.GetCollection<Object>("fs"), fileKey);
+            return GridFile.OpenFile((IMongoCollection)db.GetCollection<Object>("fs"), fileKey);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Norm.BSON.DbTypes
         /// <returns></returns>
         public static GridFile CreateFile(Mongo db)
         {
-            GridFile retval = new GridFile(db.GetCollection<Object>("fs"));
+            GridFile retval = new GridFile((IMongoCollection)db.GetCollection<Object>("fs"));
             return retval;
         }
 
