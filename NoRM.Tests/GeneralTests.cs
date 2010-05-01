@@ -4,12 +4,24 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Norm.Responses;
+using Norm;
+using Norm.Tests;
 
 
 namespace NoRM.Tests
 {
     public class GeneralTests
     {
+        [Fact]
+        public void Get_Last_Error_Returns()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var le = mongo.LastError();
+                Assert.Equal(true, le.WasSuccessful);
+            }
+        }
+
         [Fact]
         public void Base_Status_Message_Supports_Expando()
         {

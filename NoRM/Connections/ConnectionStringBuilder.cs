@@ -100,13 +100,7 @@ namespace Norm
                 }
                 catch (NullReferenceException)
                 {
-                    throw new MongoException("Connection string is missing");
-                }
-
-                if (string.IsNullOrEmpty(connection) ||
-                    !connection.StartsWith(PROTOCOL, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    throw new MongoException("Invalid connection string: the protocol must be mongodb://");
+                    throw new MongoException("Connection String must start with 'mongodb://' or be the name of a connection string in the app.config.");
                 }
             }
 
