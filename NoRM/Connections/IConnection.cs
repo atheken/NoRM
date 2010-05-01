@@ -33,10 +33,6 @@ namespace Norm
         /// </summary>
         int QueryTimeout { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether to enable ExpandoProperties.
-        /// </summary>
-        bool EnableExpandoProperties { get; }
 
         /// <summary>
         /// Gets a value indicating whether to use strict mode.

@@ -111,11 +111,7 @@ namespace Norm.Tests
         {
             Assert.Throws<FormatException>(() => ConnectionStringBuilder.Create("mongodb://localhost?querytimeout=glenn"));
         }
-        [Fact]
-        public void ThrowsExceptionForInvalidExpandoValue()
-        {
-            Assert.Throws<FormatException>(() => ConnectionStringBuilder.Create("mongodb://localhost?expando=quagmire"));
-        }
+      
         [Fact]
         public void ThrowsExceptionForInvalidPoolingValue()
         {
@@ -142,17 +138,7 @@ namespace Norm.Tests
             Assert.Equal(true, ConnectionStringBuilder.Create("mongodb://localhost?strict=true").StrictMode);
             Assert.Equal(false, ConnectionStringBuilder.Create("mongodb://localhost?strict=false").StrictMode);
         }
-        [Fact]
-        public void ExpandoIsOffByDefault()
-        {
-            Assert.Equal(false, ConnectionStringBuilder.Create("mongodb://localhost").EnableExpandoProperties);
-        }
-        [Fact]
-        public void ParsesExpandoOption()
-        {
-            Assert.Equal(true, ConnectionStringBuilder.Create("mongodb://localhost?expando=true").EnableExpandoProperties);
-            Assert.Equal(false, ConnectionStringBuilder.Create("mongodb://localhost?expando=false").EnableExpandoProperties);
-        }
+       
         [Fact]
         public void QueryTimeoutIs30ByDefault()
         {

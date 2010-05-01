@@ -164,11 +164,11 @@ namespace Norm.Collections
             action(modifierExpression);
             if (matchDocument is ObjectId)
             {
-                Update(new { _id = matchDocument }, modifierExpression.Fly, updateMultiple, upsert);
+                Update(new { _id = matchDocument }, modifierExpression.Expression, updateMultiple, upsert);
             }
             else
             {
-                Update(matchDocument, modifierExpression.Fly, updateMultiple, upsert);
+                Update(matchDocument, modifierExpression.Expression, updateMultiple, upsert);
 
             }
         }

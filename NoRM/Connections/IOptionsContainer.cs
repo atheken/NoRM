@@ -11,12 +11,7 @@ namespace Norm
         /// <param name="timeout">The timeout.</param>
         void SetQueryTimeout(int timeout);
 
-        /// <summary>
-        /// Sets expando properties.
-        /// </summary>
-        /// <param name="enabled">The enabled.</param>
-        void SetEnableExpandoProperties(bool enabled);
-
+      
         /// <summary>
         /// Sets strict mode.
         /// </summary>

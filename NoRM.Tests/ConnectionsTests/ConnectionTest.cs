@@ -67,31 +67,20 @@ namespace Norm.Tests
                 Assert.Equal(32, connection.QueryTimeout);
             }
         }
-        [Fact]
-        public void OverridesExpando()
-        {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("expando=true"))))
-            {
-                Assert.Equal(true, connection.EnableExpandoProperties);
-                connection.LoadOptions("expando=false");
-                Assert.Equal(false, connection.EnableExpandoProperties);
-            }
-        }
+       
 
         [Fact]
         public void ResetsDefaults()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("querytimeout=30&strict=false&expando=false"))))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("querytimeout=30&strict=false"))))
             {
-                connection.LoadOptions("querytimeout=23&strict=true&expando=true");
+                connection.LoadOptions("querytimeout=23&strict=true");
                 Assert.Equal(true, connection.StrictMode);
                 Assert.Equal(23, connection.QueryTimeout);
-                Assert.Equal(true, connection.EnableExpandoProperties);
 
                 connection.ResetOptions();
                 Assert.Equal(false, connection.StrictMode);
                 Assert.Equal(30, connection.QueryTimeout);
-                Assert.Equal(false, connection.EnableExpandoProperties);
             }
         }
 
