@@ -339,7 +339,7 @@ namespace Norm.Tests
             Assert.Equal(obj2.ARex, hydratedObj2.ARex);
         }
 
-        [Fact]
+        [Fact(Skip="Slow test")]
         public void SerializationSpeedTest()
         {
             for (var i = 0; i < 5; i++)
