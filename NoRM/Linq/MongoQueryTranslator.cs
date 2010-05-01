@@ -343,16 +343,22 @@ namespace Norm.Linq
 
             switch (b.NodeType) {
                 case ExpressionType.And:
+                    _lastOperator = " & ";
+                    IsComplex = true;
+                    break;
                 case ExpressionType.AndAlso:
                     _lastOperator = " && ";
                     break;
                 case ExpressionType.Or:
+                    _lastOperator = " | ";
+                    IsComplex = true;
+                    break;
                 case ExpressionType.OrElse:
                     _lastOperator = " || ";
                     IsComplex = true;
                     break;
                 case ExpressionType.Equal:
-                    _lastOperator = " === ";//Should this be '===' instead? a la 'Javascript: The good parts'
+                    _lastOperator = " === ";
                     break;
                 case ExpressionType.NotEqual:
                     _lastOperator = " != ";
@@ -649,8 +655,7 @@ namespace Norm.Linq
                 if (m.Method.Name == "Contains")
                 {
                     return HandleMethodCall(m);
-                } 
-                
+                }
                 throw new NotSupportedException(string.Format("Subqueries with {0} are not currently supported", m.Method.Name));
             }
             else if (typeof(Enumerable).IsAssignableFrom(m.Method.DeclaringType))

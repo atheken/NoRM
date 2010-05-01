@@ -114,7 +114,39 @@ namespace Norm.Tests
                 Assert.Equal("1", list[0].Name);
             }
         }
-        
+
+        [Fact]
+        public void LinqQueriesShouldSupportBitwiseOr()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "1", Price = 10, Inventory = new List<InventoryChange>() { new InventoryChange() } });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => (x.Inventory.Count()|2) == 3).ToList();
+                Assert.Equal(1, list.Count);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportBitwiseAnd()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 ,Inventory = new List<InventoryChange>() { new InventoryChange() } });
+                session.Add(new TestProduct { Name = "2", Price = 20, Inventory = new List<InventoryChange>() { new InventoryChange() } });
+                session.Add(new TestProduct { Name = "3", Price = 30,Inventory = new List<InventoryChange>() {
+                    new InventoryChange(), new InventoryChange() } });
+
+                var list = session.Products.Where(x => (x.Inventory.Count() & 2) == 2).ToList();
+                Assert.Equal(1, list.Count);
+
+                list = session.Products.Where(x => (x.Inventory.Count() & 1) == 1).ToList();
+                Assert.Equal(2, list.Count);
+            }
+        }
+
         [Fact]
         public void LinqQueriesShouldSupportDivision()
         {
