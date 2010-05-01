@@ -315,7 +315,8 @@ namespace Norm.Tests
             Assert.Equal(obj1.ABoolean, hydratedObj1.ABoolean);
             Assert.Equal(obj1.Bytes, hydratedObj1.Bytes);
             Assert.Equal(obj1.AGuid, hydratedObj1.AGuid);
-            Assert.Equal(obj1.ADateTime.Value.Ticks, hydratedObj1.ADateTime.Value.Ticks);
+            Assert.Equal(obj1.ADateTime.Value.ToUniversalTime().Ticks, 
+                hydratedObj1.ADateTime.Value.ToUniversalTime().Ticks);
             Assert.Equal(obj1.Strings, hydratedObj1.Strings);
             Assert.Equal(obj1.Flags32, hydratedObj1.Flags32);
             Assert.Equal(obj1.Flags64, hydratedObj1.Flags64);
