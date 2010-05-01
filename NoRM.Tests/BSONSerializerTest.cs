@@ -83,7 +83,7 @@ namespace Norm.Tests
             Assert.Equal(null, hydratedObj1.ADateTime);
 
             //Mongo stores dates as long, therefore, we have to use double->long rounding.
-            Assert.Equal((long)(obj2.ADateTime.Value - DateTime.MinValue).TotalMilliseconds,
+            Assert.Equal((long)((obj2.ADateTime.Value.ToUniversalTime() - DateTime.MinValue)).TotalMilliseconds,
                 (long)(hydratedObj2.ADateTime.Value - DateTime.MinValue).TotalMilliseconds);
 
         }
