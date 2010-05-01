@@ -87,7 +87,7 @@ namespace Norm.Tests
         [Fact]
         public void CreatesDigestFromNonce()
         {
-            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("querytimeout=30&strict=false&expando=false", "ussrr", "ppaassss"))))
+            using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("querytimeout=30&strict=false", "ussrr", "ppaassss"))))
             {
                 Assert.Equal("08f11f775e2a8cf4248f0ae6126164f0", connection.Digest("1234abc"));
             }

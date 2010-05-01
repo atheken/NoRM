@@ -20,10 +20,10 @@ namespace Norm.Tests
         [Fact]
         public void Set_Profile_Level_Changes_Profile_Level_And_Reports_Change()
         {
-            using(var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
+            using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 int prev;
-                if (mAdmin.SetProfileLevel(3, out prev))
+                if (mAdmin.SetProfileLevel(2, out prev))
                 {
                     mAdmin.SetProfileLevel(prev);
                 }
@@ -43,9 +43,9 @@ namespace Norm.Tests
             }
 
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
-            {            
+            {
                 foreach (var db in admin.GetAllDatabases())
-                {                   
+                {
                     expected.Remove(db.Name);
                 }
             }
@@ -68,10 +68,10 @@ namespace Norm.Tests
             string version;
             using (var process = new Process())
             {
-                process.StartInfo = new ProcessStartInfo("mongod", "--version"){ RedirectStandardOutput = true, UseShellExecute = false};
+                process.StartInfo = new ProcessStartInfo("mongod", "--version") { RedirectStandardOutput = true, UseShellExecute = false };
                 process.Start();
-                using (var stream = process.StandardOutput) 
-                {                    
+                using (var stream = process.StandardOutput)
+                {
                     var data = stream.ReadToEnd();
                     gitVersion = Regex.Match(data, "git version: ([a-f0-9]+)\r\n").Groups[1].Value;
                     version = Regex.Match(data, "db version v([^,]+),").Groups[1].Value;
@@ -80,11 +80,11 @@ namespace Norm.Tests
 
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
-                var info = admin.BuildInfo(); 
+                var info = admin.BuildInfo();
                 Assert.Equal(1d, info.Ok);
                 Assert.Equal(gitVersion, info.GitVersion);
                 Assert.Equal(version, info.Version);
-            }            
+            }
         }
         [Fact]
         public void BuildInfoThrowsExceptionIfNotConnectedToAdmin()
@@ -109,7 +109,7 @@ namespace Norm.Tests
                 }
                 else
                 {
-                    Assert.Throws(typeof(MongoException),()=> admin.ForceSync(true));
+                    Assert.Throws(typeof(MongoException), () => admin.ForceSync(true));
                     Console.WriteLine("FSync is not supported on windows version of MongoDB and will throw an exception.");
                 }
             }
@@ -123,14 +123,14 @@ namespace Norm.Tests
                 Assert.Equal("This command is only valid when connected to admin", ex.Message);
             }
         }
-        
+
         [Fact]
         public void DropsDatabase()
         {
             //create another database
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                mongo.GetCollection<FakeObject>().Insert(new FakeObject());                
+                mongo.GetCollection<FakeObject>().Insert(new FakeObject());
             }
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
@@ -141,7 +141,7 @@ namespace Norm.Tests
             {
                 foreach (var db in admin.GetAllDatabases())
                 {
-                   Assert.NotEqual("NormTests", db.Name);
+                    Assert.NotEqual("NormTests", db.Name);
                 }
             }
         }
@@ -153,9 +153,9 @@ namespace Norm.Tests
             {
                 var status = admin.ServerStatus();
                 Assert.Equal(1d, status.Ok);
-            }            
-        } 
-        
+            }
+        }
+
         [Fact]
         public void ReturnsEmptyInProcessResponse()
         {
