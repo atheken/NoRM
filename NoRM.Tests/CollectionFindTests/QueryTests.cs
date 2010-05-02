@@ -59,6 +59,18 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void Count_With_Filter_Works()
+        {
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            var result = _collection.Count(new Person { Name = "AAA" });
+            Assert.Equal(1,result);
+        }
+
+        [Fact]
         public void DateTime_GreaterThan_Qualifier_Works()
         {
             _collection.Insert(new Person { Birthday = new DateTime(1910, 1, 1) });
