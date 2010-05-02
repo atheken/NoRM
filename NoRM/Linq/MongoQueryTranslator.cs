@@ -361,7 +361,7 @@ namespace Norm.Linq
                     _lastOperator = " === ";
                     break;
                 case ExpressionType.NotEqual:
-                    _lastOperator = " != ";
+                    _lastOperator = " !== ";
                     break;
                 case ExpressionType.LessThan:
                     _lastOperator = " < ";
@@ -486,7 +486,7 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            if (_lastOperator == " === ")
+                            if (_lastOperator == " === " || _lastOperator == " !== ")
                             {
                                 _sbWhere.Remove(_sbWhere.Length - 2, 1);
                             }
@@ -717,7 +717,7 @@ namespace Norm.Linq
 
             switch (_lastOperator)
             {
-                case " != ":
+                case " !== ":
                     FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
                     break;
                 case " === ":
