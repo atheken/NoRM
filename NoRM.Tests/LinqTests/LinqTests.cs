@@ -49,6 +49,19 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportIsNotNulls()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = null, Price = 20 });
+                session.Add(new TestProduct { Name = "test1", Price = 10 });
+                var products = session.Products.Where(p => p.Name != null).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportRegex()
         {
             using (var session = new Session())

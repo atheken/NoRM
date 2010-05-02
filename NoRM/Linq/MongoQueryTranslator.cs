@@ -708,49 +708,51 @@ namespace Norm.Linq
         private void SetFlyValue(object value)
         {
             // if the property has already been set, we can't set it again
-            // as fly uses Dictionaries. This means to BETWEEN style native queries
+            // as fly uses Dictionaries. This means you can't do BETWEEN style native queries
             if (FlyWeight.Contains(_lastFlyProperty))
             {
                 IsComplex = true;
                 return;
             }
 
-            if (_lastOperator != " === ")
+            switch (_lastOperator)
             {
-                // Can't do comparisons here unless the type is a double
-                // which is a limitation of mongo, apparently
-                // and won't work if we're doing date comparisons
-                if (value.GetType().IsAssignableFrom(typeof(double)))
-                {
-                    switch (_lastOperator)
+                case " != ":
+                    FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
+                    break;
+                case " === ":
+                    FlyWeight[_lastFlyProperty] = value;
+                    break;
+                default:
+                    // Can't do comparisons here unless the type is a double
+                    // which is a limitation of mongo, apparently
+                    // and won't work if we're doing date comparisons
+                    if (value != null && value.GetType().IsAssignableFrom(typeof(double)))
                     {
-                        case " > ":
-                            FlyWeight[_lastFlyProperty] = Q.GreaterThan((double)value);
-                            break;
-                        case " < ":
-                            FlyWeight[_lastFlyProperty] = Q.LessThan((double)value);
-                            break;
-                        case " <= ":
-                            FlyWeight[_lastFlyProperty] = Q.LessOrEqual((double)value);
-                            break;
-                        case " >= ":
-                            FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
-                            break;
-                        case " != ":
-                            FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
-                            break;
+                        switch (_lastOperator)
+                        {
+                            case " > ":
+                                FlyWeight[_lastFlyProperty] = Q.GreaterThan((double)value);
+                                break;
+                            case " < ":
+                                FlyWeight[_lastFlyProperty] = Q.LessThan((double)value);
+                                break;
+                            case " <= ":
+                                FlyWeight[_lastFlyProperty] = Q.LessOrEqual((double)value);
+                                break;
+                            case " >= ":
+                                FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
+                                break;
+                        }
                     }
-                }
-                else
-                {
-                    // Can't assign? Push to the $where
-                    IsComplex = true;
-                }
+                    else
+                    {
+                        // Can't assign? Push to the $where
+                        IsComplex = true;
+                    }
+                    break;
             }
-            else
-            {
-                FlyWeight[_lastFlyProperty] = value;
-            }
+
         }
 
         /// <summary>
