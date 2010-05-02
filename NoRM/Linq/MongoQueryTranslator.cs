@@ -332,7 +332,11 @@ namespace Norm.Linq
             {
                 var property = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
                 graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
-                typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
+
+                if (property.PropertyType.IsGenericType)
+                    typeToQuery = property.PropertyType.GetGenericArguments()[0];
+                else 
+                    typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
             }
 
             return graphParts;
