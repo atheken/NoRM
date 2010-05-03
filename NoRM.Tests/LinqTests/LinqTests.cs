@@ -5,7 +5,6 @@ using Norm.Linq;
 using Xunit;
 using Norm.Configuration;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 
 namespace Norm.Tests
 {
@@ -137,7 +136,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "1", Price = 10, Inventory = new List<InventoryChange>() { new InventoryChange() } });
                 session.Add(new TestProduct { Name = "3", Price = 30 });
 
-                var list = session.Products.Where(x => (x.Inventory.Count() | 2) == 3).ToList();
+                var list = session.Products.Where(x => (x.Inventory.Count()|2) == 3).ToList();
                 Assert.Equal(1, list.Count);
             }
         }
@@ -147,15 +146,10 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                session.Add(new TestProduct { Name = "1", Price = 10, Inventory = new List<InventoryChange>() { new InventoryChange() } });
+                session.Add(new TestProduct { Name = "1", Price = 10 ,Inventory = new List<InventoryChange>() { new InventoryChange() } });
                 session.Add(new TestProduct { Name = "2", Price = 20, Inventory = new List<InventoryChange>() { new InventoryChange() } });
-                session.Add(new TestProduct
-                {
-                    Name = "3",
-                    Price = 30,
-                    Inventory = new List<InventoryChange>() {
-                    new InventoryChange(), new InventoryChange() }
-                });
+                session.Add(new TestProduct { Name = "3", Price = 30,Inventory = new List<InventoryChange>() {
+                    new InventoryChange(), new InventoryChange() } });
 
                 var list = session.Products.Where(x => (x.Inventory.Count() & 2) == 2).ToList();
                 Assert.Equal(1, list.Count);
@@ -224,7 +218,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
                 var list = session.Products.Where(x => names.Contains(x.Name)).ToList();
                 Assert.Equal(2, list.Count);
-                Assert.Equal(30, list.Sum(x => x.Price));
+                Assert.Equal(30, list.Sum(x=>x.Price));
             }
         }
 
@@ -248,17 +242,27 @@ namespace Norm.Tests
             {
                 session.Add(new TestProduct { Name = "test1", Price = 20 });
                 session.Add(new TestProduct { Name = "test", Price = 10 });
-                var product = session.Products.Where(p => p.Price == 10).First();
+                var product = session.Products.Where(p => p.Price == 10).Single();
                 Assert.Equal(10, product.Price);
             }
         }
 
 
         [Fact]
+        public void FirstQualifierQueryIsExecutedWithSort()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "test1", Price = 20 });
+                session.Add(new TestProduct { Name = "test", Price = 10 });
+                var product = session.Products.OrderBy(x=>x.Price).First();
+                Assert.Equal(10, product.Price);
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportExternalObjectProperties()
         {
-            // NOTE: This one fails because there's no support for parsing the object's property.
-            // This even more complex when using a nested type like a product's supplier
             var external = new TestProduct { Price = 10 };
             using (var session = new Session())
             {
@@ -275,9 +279,7 @@ namespace Norm.Tests
         [Fact]
         public void LinqQueriesShouldSupportExternalObjectProperties2()
         {
-            // NOTE: This one fails because there's no support for parsing the object's property.
-            // This even more complex when using a nested type like a product's supplier
-            var another = new Supplier { Name = "test1" };
+            var another = new Supplier {Name = "test1"};
             var external = new TestProduct { Price = 10, Supplier = another };
             using (var session = new Session())
             {
@@ -312,7 +314,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "1", Price = 40 });
                 session.Add(new TestProduct { Name = "2", Price = 22 });
                 session.Add(new TestProduct { Name = "3", Price = 33 });
-                var products = session.Products.OrderBy(x => x.Price).ToList();
+                var products = session.Products.OrderBy(x=>x.Price).ToList();
                 Assert.Equal(22, products[0].Price);
                 Assert.Equal(40, products[2].Price);
             }
@@ -328,7 +330,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 33 });
                 session.Add(new TestProduct { Name = "2", Price = 50 });
                 session.Add(new TestProduct { Name = "1", Price = 50 });
-                var products = session.Products.OrderBy(x => x.Price).ThenBy(x => x.Name).ToList();
+                var products = session.Products.OrderBy(x => x.Price).ThenBy(x=>x.Name).ToList();
                 Assert.Equal(10, products[0].Price);
                 Assert.Equal(22, products[1].Price);
                 Assert.Equal(33, products[2].Price);
@@ -475,7 +477,7 @@ namespace Norm.Tests
                 Assert.Equal(3, products.Count);
             }
         }
-
+       
         [Fact]
         public void ThreeProductsShouldBeReturnedWhenSubstringUsedWithLength()
         {
@@ -484,7 +486,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "TestName1", Price = 10 });
                 session.Add(new TestProduct { Name = "TestName2", Price = 22 });
                 session.Add(new TestProduct { Name = "TestName3", Price = 33 });
-                var products = session.Products.Where(x => x.Name.Substring(2, 4) == "stNa").ToList();
+                var products = session.Products.Where(x => x.Name.Substring(2,4) == "stNa").ToList();
                 Assert.Equal(3, products.Count);
             }
         }
@@ -704,7 +706,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "TXesXt5", Price = 33 });
                 session.Add(new TestProduct { Name = "TeXst3", Price = 10 });
                 session.Add(new TestProduct { Name = "TXest4", Price = 22 });
-                var products = session.Products.Where(x => x.Name.Replace("X", "Y") == "TYesYt5").ToList();
+                var products = session.Products.Where(x => x.Name.Replace("X","Y") == "TYesYt5").ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(33, products[0].Price);
             }
@@ -898,7 +900,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test3X", Price = 10 });
                 session.Add(new TestProduct { Name = "Test4X", Price = 22 });
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
-
+                           
                 var products = session.Products.Where(x => x.Name.EndsWith("X")).ToList();
 
                 Assert.Equal(2, products.Count);
@@ -915,7 +917,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
 
                 var products = session.Products.Where(x => x.Name.StartsWith("X")).ToList();
-
+            
                 Assert.Equal(2, products.Count);
             }
         }
@@ -973,7 +975,7 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-
+                
                 session.Add(new TestProduct { Name = "Test1", Price = 10 });
                 session.Add(new TestProduct { Name = "Test2", Price = 22 });
                 session.Add(new TestProduct { Name = "Test3", Price = 33 });
@@ -1133,7 +1135,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "ATest", Price = 10 });
                 session.Add(new TestProduct { Name = "BTest", Price = 22 });
                 session.Add(new TestProduct { Name = "BTest", Price = 33 });
-                var productMax = session.Products.Where(x => x.Name == "BTest").Max(x => x.Price);
+                var productMax = session.Products.Where(x=>x.Name == "BTest").Max(x => x.Price);
                 Assert.Equal(33, productMax);
             }
         }
@@ -1195,7 +1197,7 @@ namespace Norm.Tests
 
                 Assert.Equal(1, dtos.Count);
                 Assert.Equal("Find This", dtos[0].Title);
-            }
+    }
         }
 
         [Fact]
