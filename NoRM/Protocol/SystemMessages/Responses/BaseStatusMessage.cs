@@ -1,4 +1,4 @@
-﻿using Norm.Configuration;
+using Norm.Configuration;
 using Norm.BSON;
 using System.Collections.Generic;
 using System.Linq;
