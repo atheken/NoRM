@@ -133,26 +133,7 @@ namespace Norm.Collections
         }
 
 
-        /// <summary>
-        /// The document count.
-        /// </summary>
-        /// <param name="query">The query.</param>
-        /// <returns>The count.</returns>
-        public long Count(object query)
-        {
-            long retval = 0;
-
-            var f = _db.GetCollection<Expando>("$cmd")
-                .FindOne(new { count = _collectionName, query = query });
-
-            if (f != null)
-            {
-                retval = (long)f.Get<double>("n");
-            }
-
-            return retval;
-        }
-
+       
         /// <summary>
         /// Deletes all indices on this collection.
         /// </summary>
