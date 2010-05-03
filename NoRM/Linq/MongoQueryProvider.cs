@@ -20,35 +20,17 @@ namespace Norm.Linq
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQueryProvider"/> class.
         /// </summary>
-        /// <param name="dbName">
-        /// The db name.
-        /// </param>
-        public MongoQueryProvider(string dbName)
-            : this(dbName, "127.0.0.1", "27017", string.Empty)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoQueryProvider"/> class.
-        /// </summary>
-        /// <param name="dbName">The db name.</param>
-        /// <param name="server">The server.</param>
-        /// <param name="port">The port.</param>
-        /// <param name="options">The options.</param>
-        public MongoQueryProvider(string dbName, string server, string port, string options)
-            : this(new Mongo(dbName, server, port, options))
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoQueryProvider"/> class.
-        /// </summary>
         /// <param name="server">
         /// The server.
         /// </param>
         public MongoQueryProvider(Mongo server)
         {
             _server = server;
+        }
+
+        public static MongoQueryProvider Create(String connectionString)
+        {
+            return new MongoQueryProvider(Mongo.Create(connectionString));
         }
 
         /// <summary>

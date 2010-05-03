@@ -196,6 +196,7 @@ namespace Norm.Collections
 
         }
 
+
         /// <summary>TODO::Description.</summary>
         public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
         {

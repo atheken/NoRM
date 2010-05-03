@@ -100,7 +100,7 @@ namespace Norm.Tests
 
         public Session()
         {
-            _provider = new MongoQueryProvider("NormTests");
+            _provider = MongoQueryProvider.Create("mongodb://127.0.0.1/NormTests?strict=false");
         }
 
         public MongoQueryProvider Provider
