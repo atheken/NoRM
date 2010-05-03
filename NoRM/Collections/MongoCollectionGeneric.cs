@@ -19,7 +19,7 @@ namespace Norm.Collections
     /// Mongo typed collection.
     /// </summary>
     /// <typeparam name="T">Collection type</typeparam>
-    public class MongoCollection<T> : IMongoCollection<T>
+    public partial class MongoCollection<T> : IMongoCollection<T>
     {
         /// <summary>
         /// This will have a different instance for each concrete version of <see cref="MongoCollection{T}"/>
