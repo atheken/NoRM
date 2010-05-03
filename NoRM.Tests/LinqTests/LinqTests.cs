@@ -243,11 +243,23 @@ namespace Norm.Tests
             {
                 session.Add(new TestProduct { Name = "test1", Price = 20 });
                 session.Add(new TestProduct { Name = "test", Price = 10 });
-                var product = session.Products.Where(p => p.Price == 10).First();
+                var product = session.Products.Where(p => p.Price == 10).Single();
                 Assert.Equal(10, product.Price);
             }
         }
 
+
+        [Fact]
+        public void FirstQualifierQueryIsExecutedWithSort()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "test1", Price = 20 });
+                session.Add(new TestProduct { Name = "test", Price = 10 });
+                var product = session.Products.OrderBy(x=>x.Price).First();
+                Assert.Equal(10, product.Price);
+            }
+        }
 
         [Fact]
         public void LinqQueriesShouldSupportExternalObjectProperties()
