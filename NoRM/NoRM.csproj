@@ -108,6 +108,7 @@
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />
     <Compile Include="Collections\MongoCollectionGeneric.cs" />
+    <Compile Include="Collections\MongoCollectionLINQ.cs" />
     <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
     <Compile Include="Commands\Modifiers\IModifierExpression.cs" />
     <Compile Include="Commands\Modifiers\ModifierExpression.cs" />
