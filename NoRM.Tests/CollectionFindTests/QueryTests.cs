@@ -58,6 +58,7 @@ namespace Norm.Tests
             Assert.Equal(4, result);
         }
 
+
         [Fact]
         public void Count_With_Filter_Works()
         {
@@ -67,7 +68,7 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.Count(new Person { Name = "AAA" });
-            Assert.Equal(1,result);
+            Assert.Equal(1, result);
         }
 
         [Fact]
@@ -81,6 +82,33 @@ namespace Norm.Tests
             Assert.Equal(1, find.Count());
         }
 
+        [Fact]
+        public void Element_Match_Matches()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var coll = db.GetCollection<Post>();
+                coll.Delete(new { });
+                coll.Insert(new Post
+                {
+                    Comments = new Comment[] { 
+                            new Comment { Text = "xabc" },
+                            new Comment { Text = "abc" } 
+                        }
+                },
+                    new Post { Tags = new String[] { "hello", "world" } },
+                    new Post
+                    {
+                        Comments = new Comment[] { 
+                            new Comment { Text = "xyz" },
+                            new Comment { Text = "abc" } 
+                        }
+                    });
+
+                Assert.Equal(1, coll.Find(new { Comments = Q.ElementMatch(new { Text = "xyz" }) }).Count());
+                Assert.Equal(2, coll.Find(new { Comments = Q.ElementMatch(new { Text = Q.Matches("^x") }) }).Count());
+            }
+        }
 
         [Fact]
         public void Where_Qualifier_Works()
