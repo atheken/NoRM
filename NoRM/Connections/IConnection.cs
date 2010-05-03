@@ -9,6 +9,11 @@ namespace Norm
     public interface IConnection : IDisposable
     {
         /// <summary>
+        /// The connection string used to create this connection.
+        /// </summary>
+        string ConnectionString { get; }
+
+        /// <summary>
         /// Gets the tcp client.
         /// </summary>
         TcpClient Client { get; }

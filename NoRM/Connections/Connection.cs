@@ -18,7 +18,7 @@ namespace Norm
         private bool _disposed;
         private int? _queryTimeout;
         private bool? _strictMode;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Connection"/> class.
         /// </summary>
@@ -34,6 +34,7 @@ namespace Norm
                 SendTimeout = builder.QueryTimeout * 1000
             };
             _client.Connect(builder.Servers[0].Host, builder.Servers[0].Port);
+            this.ConnectionString = builder.ToString();
         }
 
         /// <summary>
@@ -178,7 +179,7 @@ namespace Norm
             _queryTimeout = timeout;
         }
 
-       
+
         /// <summary>
         /// Sets the strict mode.
         /// </summary>
@@ -254,6 +255,12 @@ namespace Norm
         ~Connection()
         {
             Dispose(false);
+        }
+
+        public string ConnectionString
+        {
+            get;
+            private set;
         }
     }
 }
