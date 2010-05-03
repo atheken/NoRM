@@ -37,7 +37,7 @@ namespace Norm.Tests
             var count = _collection.Find();
             Assert.Equal(4, count.Count());
 
-            var query = new Flyweight();
+            var query = new Expando();
             query["$where"] = " function(){return this.ADouble > 1;} ";
             var results = _collection.Find(query);
             Assert.Equal(3, results.Count());

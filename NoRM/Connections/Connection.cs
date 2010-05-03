@@ -17,7 +17,6 @@ namespace Norm
         private readonly TcpClient _client;
         private bool _disposed;
         private int? _queryTimeout;
-        private bool? _enableExpandoProperties;
         private bool? _strictMode;
         
         /// <summary>
@@ -78,17 +77,6 @@ namespace Norm
         public int QueryTimeout
         {
             get { return _queryTimeout ?? _builder.QueryTimeout; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether expando properties are enabled.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if  expando properties are enabled.; otherwise, <c>false</c>.
-        /// </value>
-        public bool EnableExpandoProperties
-        {
-            get { return _enableExpandoProperties ?? _builder.EnableExpandoProperties; }
         }
 
         /// <summary>
@@ -159,7 +147,6 @@ namespace Norm
         public void ResetOptions()
         {
             _queryTimeout = null;
-            _enableExpandoProperties = null;
             _strictMode = null;
         }
 
@@ -191,15 +178,7 @@ namespace Norm
             _queryTimeout = timeout;
         }
 
-        /// <summary>
-        /// Sets the enable expando properties.
-        /// </summary>
-        /// <param name="enabled">if set to <c>true</c> [enabled].</param>
-        public void SetEnableExpandoProperties(bool enabled)
-        {
-            _enableExpandoProperties = enabled;
-        }
-
+       
         /// <summary>
         /// Sets the strict mode.
         /// </summary>

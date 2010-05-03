@@ -106,7 +106,7 @@ namespace Norm.Protocol.Messages
             }
             else
             {
-                var fly = new Flyweight();
+                var fly = new Expando();
 
                 //if (this.Query is Flyweight)
                 //{
@@ -115,7 +115,7 @@ namespace Norm.Protocol.Messages
                 //}
                 fly["query"] = this.Query;
 
-                //null for this is OK. needs to be here, though.
+                //null for this is WasSuccessful. needs to be here, though.
                 if (this.OrderBy != null)
                 {
                     fly["orderby"] = this.OrderBy;

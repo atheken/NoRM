@@ -13,16 +13,7 @@ namespace Norm
     {
         private readonly IConnection _connection;
         private readonly IConnectionProvider _connectionProvider;
-        private readonly MongoDatabase _database;
         private bool _disposed;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoAdmin"/> class.
-        /// </summary>
-        public MongoAdmin()
-            : this("mongodb://127.0.0.1:27017")
-        {
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoAdmin"/> class.
@@ -34,7 +25,7 @@ namespace Norm
         {
             this._connectionProvider = ConnectionProviderFactory.Create(connectionString);
             this._connection = this._connectionProvider.Open(null);
-            this._database = new MongoDatabase(this._connectionProvider.ConnectionString.Database, this._connection);
+            this.Database = new MongoDatabase(this._connectionProvider.ConnectionString.Database, this._connection);
         }
 
         /// <summary>
@@ -42,7 +33,8 @@ namespace Norm
         /// </summary>
         public MongoDatabase Database
         {
-            get { return this._database; }
+            get;
+            private set;
         }
 
         /// <summary>
@@ -61,7 +53,7 @@ namespace Norm
         /// </returns>
         public DroppedDatabaseResponse DropDatabase()
         {
-            return this._database.GetCollection<DroppedDatabaseResponse>("$cmd").FindOne(new DropDatabaseRequest());
+            return this.Database.GetCollection<DroppedDatabaseResponse>("$cmd").FindOne(new DropDatabaseRequest());
         }
 
         /// <summary>
@@ -71,7 +63,7 @@ namespace Norm
         /// </returns>
         public IEnumerable<CurrentOperationResponse> GetCurrentOperations()
         {
-            return this._database.GetCollection<CurrentOperationContainer>("$cmd.sys.inprog").FindOne(new object()).Responses;
+            return this.Database.GetCollection<CurrentOperationContainer>("$cmd.sys.inprog").FindOne(new object()).Responses;
         }
 
         /// <summary>
@@ -82,8 +74,8 @@ namespace Norm
         /// </returns>
         public bool ResetLastError()
         {
-            var result = this._database.GetCollection<GenericCommandResponse>("$cmd").FindOne(new { reseterror = 1d });
-            return result != null && result.Ok == 1.0;
+            var result = this.Database.GetCollection<GenericCommandResponse>("$cmd").FindOne(new { reseterror = 1d });
+            return result != null && result.WasSuccessful;
         }
 
         /// <summary>
@@ -93,7 +85,7 @@ namespace Norm
         /// </returns>
         public PreviousErrorResponse PreviousErrors()
         {
-            return this._database.GetCollection<PreviousErrorResponse>("$cmd").FindOne(new { getpreverror = 1d });
+            return this.Database.GetCollection<PreviousErrorResponse>("$cmd").FindOne(new { getpreverror = 1d });
         }
 
         /// <summary>
@@ -103,7 +95,7 @@ namespace Norm
         /// </returns>
         public AssertInfoResponse AssertionInfo()
         {
-            return this._database.GetCollection<AssertInfoResponse>("$cmd").FindOne(new { assertinfo = 1d });
+            return this.Database.GetCollection<AssertInfoResponse>("$cmd").FindOne(new { assertinfo = 1d });
         }
 
         /// <summary>
@@ -113,7 +105,7 @@ namespace Norm
         /// </returns>
         public ServerStatusResponse ServerStatus()
         {
-            return this._database.GetCollection<ServerStatusResponse>("$cmd").FindOne(new { serverStatus = 1d });
+            return this.Database.GetCollection<ServerStatusResponse>("$cmd").FindOne(new { serverStatus = 1d });
         }
 
         /// <summary>
@@ -123,17 +115,32 @@ namespace Norm
         /// <returns>The set profile level.</returns>
         public bool SetProfileLevel(int value)
         {
-            var result = this._database.GetCollection<ProfileLevelResponse>("$cmd").FindOne(new { profile = value });
-            return result != null && result.Ok == 1.0;
+            var result = this.Database.GetCollection<ProfileLevelResponse>("$cmd")
+                .FindOne(new { profile = value });
+            return result != null && result.WasSuccessful;
+        }
+
+        /// <summary>
+        /// Set the profiling currently defined for the server, default is 1.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The set profile level.</returns>
+        public bool SetProfileLevel(int value, out int previousLevel)
+        {
+            var result = this.Database.GetCollection<ProfileLevelResponse>("$cmd")
+                .FindOne(new { profile = value });
+            previousLevel = result.PreviousLevel;
+
+            return result != null && result.WasSuccessful;
         }
 
         /// <summary>
         /// Find out the profile level on the server.
         /// </summary>
         /// <returns></returns>
-        public double? GetProfileLevel()
+        public int GetProfileLevel()
         {
-            var result = this._database.GetCollection<ProfileLevelResponse>("$cmd").FindOne(new { profile = -1 });
+            var result = this.Database.GetCollection<ProfileLevelResponse>("$cmd").FindOne(new { profile = -1 });
             return result.PreviousLevel;
         }
 
@@ -145,9 +152,9 @@ namespace Norm
         /// <returns>The repair database.</returns>
         public bool RepairDatabase(bool preserveClonedFilesOnFailure, bool backupOriginalFiles)
         {
-            var result = this._database.GetCollection<GenericCommandResponse>("$cmd")
+            var result = this.Database.GetCollection<GenericCommandResponse>("$cmd")
                 .FindOne(new { repairDatabase = 1d, preserveClonedFilesOnFailure, backupOriginalFiles });
-            return result != null && result.Ok == 1.0;
+            return result != null && result.WasSuccessful;
         }
 
         /// <summary>
@@ -158,7 +165,7 @@ namespace Norm
         public GenericCommandResponse KillOperation(double operationId)
         {
             AssertConnectedToAdmin();
-            return _database.GetCollection<GenericCommandResponse>("$cmd.sys.killop").FindOne(new { op = operationId });
+            return Database.GetCollection<GenericCommandResponse>("$cmd.sys.killop").FindOne(new { op = operationId });
         }
 
         /// <summary>
@@ -168,8 +175,8 @@ namespace Norm
         public IEnumerable<DatabaseInfo> GetAllDatabases()
         {
             AssertConnectedToAdmin();
-            var response = this._database.GetCollection<ListDatabasesResponse>("$cmd").FindOne(new ListDatabasesRequest());
-            return response != null && response.Ok == 1.0 ? response.Databases : Enumerable.Empty<DatabaseInfo>();
+            var response = this.Database.GetCollection<ListDatabasesResponse>("$cmd").FindOne(new ListDatabasesRequest());
+            return response != null && response.WasSuccessful ? response.Databases : Enumerable.Empty<DatabaseInfo>();
         }
 
         /// <summary>
@@ -180,7 +187,7 @@ namespace Norm
         public ForceSyncResponse ForceSync(bool async)
         {
             AssertConnectedToAdmin();
-            return this._database.GetCollection<ForceSyncResponse>("$cmd").FindOne(new { fsync = 1d, async });
+            return this.Database.GetCollection<ForceSyncResponse>("$cmd").FindOne(new { fsync = 1d, async });
         }
 
         /// <summary>
@@ -190,7 +197,7 @@ namespace Norm
         public BuildInfoResponse BuildInfo()
         {
             AssertConnectedToAdmin();
-            return this._database.GetCollection<BuildInfoResponse>("$cmd").FindOne(new { buildinfo = 1d });
+            return this.Database.GetCollection<BuildInfoResponse>("$cmd").FindOne(new { buildinfo = 1d });
         }
 
         /// <summary>

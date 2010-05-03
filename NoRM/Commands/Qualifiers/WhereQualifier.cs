@@ -3,16 +3,17 @@
 namespace Norm.Commands.Qualifiers
 {
     /// <summary>
-    /// The where qualifier.
+    /// Provides a hook to create a $where qualifier for a query.
     /// </summary>
-    public class WhereQualifier : QualifierCommand
+    public class WhereQualifier : Expando
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WhereQualifier"/> class.
         /// </summary>
         /// <param name="inExpression">The in expression.</param>
-        public WhereQualifier(string inExpression) : base("$where", inExpression)
+        public WhereQualifier(string inExpression)
         {
+            this["$where"] = inExpression;
         }
     }
 }

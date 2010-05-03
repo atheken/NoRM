@@ -17,7 +17,6 @@ namespace Norm
               {
                   {"strict", (v, b) => b.SetStrictMode(bool.Parse(v))},
                   {"querytimeout", (v, b) => b.SetQueryTimeout(int.Parse(v))},
-                  {"expando", (v, b) => b.SetEnableExpandoProperties(bool.Parse(v))},
                   {"pooling", (v, b) => b.SetPooled(bool.Parse(v))},
                   {"poolsize", (v, b) => b.SetPoolSize(int.Parse(v))},
                   {"timeout", (v, b) => b.SetTimeout(int.Parse(v))},
@@ -56,11 +55,7 @@ namespace Norm
         /// </summary>
         public int QueryTimeout { get; private set; }
 
-        /// <summary>
-        /// Gets a value indicating whether to enable ExpandoProperties.
-        /// </summary>
-        public bool EnableExpandoProperties { get; private set; }
-
+       
         /// <summary>
         /// Gets a value indicating whether strict mode is enabled.
         /// </summary>
@@ -105,13 +100,7 @@ namespace Norm
                 }
                 catch (NullReferenceException)
                 {
-                    throw new MongoException("Connection string is missing");
-                }
-
-                if (string.IsNullOrEmpty(connection) ||
-                    !connection.StartsWith(PROTOCOL, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    throw new MongoException("Invalid connection string: the protocol must be mongodb://");
+                    throw new MongoException("Connection String must start with 'mongodb://' or be the name of a connection string in the app.config.");
                 }
             }
 
@@ -122,7 +111,6 @@ namespace Norm
             {
                 QueryTimeout = 30,
                 Timeout = 30,
-                EnableExpandoProperties = false,
                 StrictMode = true,
                 Pooled = true,
                 PoolSize = 25,
@@ -149,16 +137,6 @@ namespace Norm
             QueryTimeout = timeout;
         }
 
-        /// <summary>
-        /// Sets enable expando properties.
-        /// </summary>
-        /// <param name="enabled">
-        /// The enabled.
-        /// </param>
-        public void SetEnableExpandoProperties(bool enabled)
-        {
-            EnableExpandoProperties = enabled;
-        }
 
         /// <summary>
         /// Sets strict mode.

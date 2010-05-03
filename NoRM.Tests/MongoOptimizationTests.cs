@@ -50,7 +50,7 @@ namespace Norm.Tests
                 // db.Product.find({"Supplier.Name":"abc"})
 
                 // The following query is the same as running: db.Product.find({"Supplier.Name":"abc"}).explain()
-                var query = new Flyweight();
+                var query = new Expando();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
                 var result = session.Provider.DB.GetCollection<TestProduct>().Explain(query);
@@ -120,7 +120,7 @@ namespace Norm.Tests
                                     Supplier = new Supplier {Name = "Supplier", CreatedOn = DateTime.Now}
                                 });
 
-                var query = new Flyweight();
+                var query = new Expando();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
                 var result = session.Provider.DB
@@ -146,7 +146,7 @@ namespace Norm.Tests
                     Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                 });
 
-                var query = new Flyweight();
+                var query = new Expando();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
                 var result = session.Provider.DB.GetCollection<TestProduct>()

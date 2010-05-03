@@ -1,38 +1,60 @@
-﻿using Norm.Configuration;
+using Norm.Configuration;
+using Norm.BSON;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Norm.Responses
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Represents a message with an Ok status
     /// </summary>
     public class BaseStatusMessage : IExpando
     {
-        static BaseStatusMessage()
-        {
-            MongoConfiguration.Initialize(c => c.For<BaseStatusMessage>(a =>
-                       {
-                           a.ForProperty(auth => auth.Ok).UseAlias("ok");
-                       })
-                );
-        }
+        private Dictionary<string, object> _properties = new Dictionary<string, object>(0);
+        
+        /// <summary>
+        /// This is the raw value returned from the response. 
+        /// It is required for serializer support, use "WasSuccessful" if you need a boolean value.
+        /// </summary>
+        protected double? ok { get; set; }
 
         /// <summary>
-        /// The operation status
+        /// Did this message return correctly?
         /// </summary>
-        /// <value>The Ok property gets the Ok data member.</value>
-        public double? Ok { get; set; }
-
-        private IDictionary<string, object> _expando;
-        public IDictionary<string, object> Expando
+        /// <remarks>This maps to the "OK" value of the response.</remarks>
+        public bool WasSuccessful
         {
             get
             {
-                if (_expando == null) { _expando = new Dictionary<string, object>();}
-                return _expando;
+                return this.ok == 1d ? true : false;
             }
         }
+
+        /// <summary>
+        /// Additional, non-static properties of this message.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ExpandoProperty> AllProperties()
+        {
+            return this._properties.Select(j => new ExpandoProperty(j.Key, j.Value));
+        }
+
+        public void Delete(string propertyName)
+        {
+            this._properties.Remove(propertyName);
+        }
+
+        public object this[string propertyName]
+        {
+            get
+            {
+                return this._properties[propertyName];
+            }
+            set
+            {
+                this._properties[propertyName] = value;
+            }
+        }
+
     }
 }

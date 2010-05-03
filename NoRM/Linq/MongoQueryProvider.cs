@@ -109,7 +109,7 @@ namespace Norm.Linq
         /// <returns>Resulting object</returns>
         S IQueryProvider.Execute<S>(Expression expression)
         {
-            object result = Execute<S>(expression);
+            object result = ExecuteQuery<S>(expression);
             return (S)Convert.ChangeType(result, typeof(S));
         }
 
@@ -127,7 +127,7 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="expression">An expression tree that represents a LINQ query.</param>
         /// <returns>The execute.</returns>
-        public object Execute<T>(Expression expression)
+        public object ExecuteQuery<T>(Expression expression)
         {
             expression = PartialEvaluator.Eval(expression, this.CanBeEvaluatedLocally);
 
@@ -147,7 +147,6 @@ namespace Norm.Linq
                     map = "function(){if (" + qry + ") {emit(0, {val: this." + translator.AggregatePropName + ",tSize:1} )};}";
                 }
 
-                reduce = string.Empty;
                 finalize = "function(key, res){ return res.val; }";
             }
 
@@ -207,7 +206,18 @@ namespace Norm.Linq
 
         public object Execute(Expression expression)
         {
-            throw new NotSupportedException("Non generic Linq queries are not supported");
+            var elementType = LinqTypeHelper.GetElementType(expression.Type);
+            try
+            {
+                return typeof(MongoQueryProvider)
+                    .GetMethod("ExecuteQuery")
+                    .MakeGenericMethod(elementType)
+                    .Invoke(this, new object[] { expression });
+            }
+            catch (TargetInvocationException tie)
+            {
+                throw tie.InnerException;
+            }
         }
 
         private bool CanBeEvaluatedLocally(Expression expression)

@@ -32,7 +32,7 @@ namespace NoRM.Tests.DBTypeTests
             this._randomBytes.Position = 0;
             this._randomByteHash = _hasher.ComputeHash(_randomBytes);
             this._randomBytes.Position = 0;
-            this._db = new Mongo(TestHelper.ConnectionString());
+            this._db = Mongo.Create(TestHelper.ConnectionString());
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 admin.DropDatabase();

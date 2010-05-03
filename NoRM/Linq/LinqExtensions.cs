@@ -62,9 +62,19 @@ namespace Norm.Linq
             var translator = new MongoQueryTranslator();
             var index = translator.Translate(hint);
 
-            var proxy = (MongoQueryExecutor<T, Flyweight>)find;
+            var proxy = (MongoQueryExecutor<T, Expando>)find;
             proxy.AddHint(index, direction);
             return find;
+        }
+
+        /// <summary>
+        /// Escapes the double quotes.
+        /// </summary>
+        /// <param name="str">The string</param>
+        /// <returns>The escaped string.</returns>
+        public static object EscapeDoubleQuotes(this string str)
+        {
+            return str.Replace("\"", "\\\"");
         }
     }
 }

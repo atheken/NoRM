@@ -14,16 +14,13 @@ namespace Norm.Responses
         static ProfileLevelResponse()
         {
             MongoConfiguration.Initialize(c => c.For<ProfileLevelResponse>(a =>
-                                                   {
-                                                       a.ForProperty(auth => auth.PreviousLevel).UseAlias("was");
-                                                   })
-                );
+                 { a.ForProperty(auth => auth.PreviousLevel).UseAlias("was"); }));
         }
 
         /// <summary>
         /// Gets or sets the previous profiling level.
         /// </summary>
         /// <value>The previous level.</value>
-        public double? PreviousLevel { get; set; }
+        public int PreviousLevel { get; set; }
     }
 }

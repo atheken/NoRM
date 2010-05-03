@@ -9,8 +9,6 @@ namespace Norm
     /// </summary>
     public class Mongo : IDisposable
     {
-        private readonly IConnectionProvider _connectionProvider;
-        private readonly MongoDatabase _database;
         private readonly string _options;
         private IConnection _connection;
         private bool _disposed;
@@ -24,48 +22,8 @@ namespace Norm
         {
             var parsed = provider.ConnectionString;
             this._options = options;
-            this._connectionProvider = provider;
-            this._database = new MongoDatabase(parsed.Database, this.ServerConnection());
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Mongo"/> class.
-        /// </summary>
-        public Mongo() : this(string.Empty, "127.0.0.1", "27017", string.Empty)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Mongo"/> class.
-        /// </summary>
-        /// <param name="db">
-        /// The db.
-        /// </param>
-        public Mongo(string db) : this(db, "127.0.0.1", "27017", string.Empty)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Mongo"/> class.
-        /// </summary>
-        /// <param name="db">
-        /// The db.
-        /// </param>
-        /// <param name="server">
-        /// The server.
-        /// </param>
-        public Mongo(string db, string server) : this(db, server, "27017", string.Empty)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Mongo"/> class.
-        /// </summary>
-        /// <param name="db">The db.</param>
-        /// <param name="server">The server.</param>
-        /// <param name="port">The port.</param>
-        public Mongo(string db, string server, string port) : this(db, server, port, string.Empty)
-        {
+            this.ConnectionProvider = provider;
+            this.Database = new MongoDatabase(parsed.Database, this.ServerConnection());
         }
 
         /// <summary>
@@ -85,9 +43,9 @@ namespace Norm
             var cstring = string.Format("mongodb://{0}:{1}/", server, port);
 
             this._options = options;
-            this._connectionProvider = ConnectionProviderFactory.Create(cstring);
+            this.ConnectionProvider = ConnectionProviderFactory.Create(cstring);
 
-            this._database = new MongoDatabase(db, this.ServerConnection());
+            this.Database = new MongoDatabase(db, this.ServerConnection());
         }
 
         /// <summary>
@@ -95,7 +53,8 @@ namespace Norm
         /// </summary>
         public MongoDatabase Database
         {
-            get { return this._database; }
+            get;
+            private set;
         }
 
         /// <summary>
@@ -103,7 +62,8 @@ namespace Norm
         /// </summary>
         public IConnectionProvider ConnectionProvider
         {
-            get { return this._connectionProvider; }
+            get;
+            private set;
         }
 
         /// <summary>
@@ -143,7 +103,7 @@ namespace Norm
         /// <returns></returns>
         public MongoCollection<T> GetCollection<T>()
         {
-            return this._database.GetCollection<T>();
+            return this.Database.GetCollection<T>();
         }
 
         /// <summary>
@@ -154,7 +114,7 @@ namespace Norm
         /// <returns></returns>
         public MongoCollection<T> GetCollection<T>(string collectionName)
         {
-            return this._database.GetCollection<T>(collectionName);
+            return this.Database.GetCollection<T>(collectionName);
         }
 
         /// <summary>
@@ -164,7 +124,7 @@ namespace Norm
         /// </returns>
         public MapReduce CreateMapReduce()
         {
-            return new MapReduce(this._database);
+            return new MapReduce(this.Database);
         }
 
         /// <summary>
@@ -174,7 +134,7 @@ namespace Norm
         /// </returns>
         public LastErrorResponse LastError()
         {
-            return this._database.LastError();
+            return this.Database.LastError();
         }
 
         /// <summary>
@@ -186,7 +146,7 @@ namespace Norm
         {
             if (this._connection == null)
             {
-                this._connection = this._connectionProvider.Open(this._options);
+                this._connection = this.ConnectionProvider.Open(this._options);
             }
 
             return this._connection;
@@ -202,7 +162,7 @@ namespace Norm
         {
             if (!this._disposed && disposing && this._connection != null)
             {
-                this._connectionProvider.Close(this._connection);
+                this.ConnectionProvider.Close(this._connection);
             }
 
             this._disposed = true;

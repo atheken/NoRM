@@ -10,6 +10,7 @@ using Norm.Responses;
 using Norm.BSON.DbTypes;
 using Norm.Collections;
 using System.ComponentModel;
+using Norm.BSON;
 
 namespace Norm.Tests
 {
@@ -248,6 +249,7 @@ namespace Norm.Tests
         public Address Address { get; set; }
         public DateTime LastContact { get; set; }
         public List<String> Relatives { get; set; }
+        public DateTime Birthday { get; set; }
         public Person()
         {
             Id = ObjectId.NewObjectId();
@@ -267,16 +269,34 @@ namespace Norm.Tests
     {
         public string Street { get; set; }
         public string City { get; set; }
+        private Dictionary<String, object> _properties = new Dictionary<string, object>(0);
 
-        private IDictionary<string, object> _expando;
-        public IDictionary<string, object> Expando
+        /// <summary>
+        /// Additional, non-static properties of this message.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ExpandoProperty> AllProperties()
+        {
+            return this._properties.Select(j => new ExpandoProperty(j.Key, j.Value));
+        }
+
+        public void Delete(string propertyName)
+        {
+            this._properties.Remove(propertyName);
+        }
+
+        public object this[string propertyName]
         {
             get
             {
-                if (_expando == null) { _expando = new Dictionary<string, object>(); }
-                return _expando;
+                return this._properties[propertyName];
+            }
+            set
+            {
+                this._properties[propertyName] = value;
             }
         }
+
     } 
 
     internal class Supplier
@@ -453,15 +473,8 @@ namespace Norm.Tests
         [DefaultValue("Test")]
         public string Message { get; set; }
 
-        [DefaultValue(typeof(DateTime), "0001-01-01")]
+        [DefaultValue(typeof(DateTime),"00:00:00.0000000, January 1, 0001")]
         public DateTime MagicDate { get; set; }
-
-        public int ComplexProperty { get; set; }
-
-        public bool ShouldSerializeComplexProperty()
-        {
-            return this.ComplexProperty != 3;
-        }
     }
 
     public class GeneralDTO

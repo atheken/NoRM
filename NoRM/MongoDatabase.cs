@@ -118,7 +118,7 @@ namespace Norm
         {
             try
             {
-                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new { drop = collectionName }).Ok == 1;
+                return GetCollection<DroppedCollectionResponse>("$cmd").FindOne(new { drop = collectionName }).WasSuccessful;
             }
             catch (MongoException exception)
             {
@@ -140,7 +140,7 @@ namespace Norm
         {
             try
             {
-                return GetCollection<GenericCommandResponse>("$cmd").FindOne(new CreateCollectionRequest(options)).Ok == 1;
+                return GetCollection<GenericCommandResponse>("$cmd").FindOne(new CreateCollectionRequest(options)).WasSuccessful;
             }
             catch (MongoException exception)
             {

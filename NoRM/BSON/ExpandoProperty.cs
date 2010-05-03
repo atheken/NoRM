@@ -4,6 +4,10 @@ namespace Norm.BSON
     /// <summary>
     /// Expando Property
     /// </summary>
+    /// <remarks>
+    /// This is a glorified KeyValuePair - but this leaves 
+    /// us more "open" to hooking extra stuff on, if we need to at some later point.
+    /// </remarks>
     public class ExpandoProperty
     {
         /// <summary>

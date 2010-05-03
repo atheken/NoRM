@@ -7,6 +7,7 @@ using Norm.BSON;
 using Norm.Configuration;
 using System.Collections.Generic;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace Norm.Linq
 {
@@ -31,7 +32,7 @@ namespace Norm.Linq
         private StringBuilder _sbIndexed;
 
         /// <summary>TODO::Description.</summary>
-        public Flyweight SortFly { get; set; }
+        public Expando SortFly { get; set; }
 
         /// <summary>TODO::Description.</summary>
         public string SortDescendingBy { get; set; }
@@ -84,7 +85,7 @@ namespace Norm.Linq
         /// <summary>
         /// Gets FlyWeight.
         /// </summary>
-        public Flyweight FlyWeight { get; private set; }
+        public Expando FlyWeight { get; private set; }
 
         /// <summary>
         /// How many to skip.
@@ -134,8 +135,8 @@ namespace Norm.Linq
             UseScopedQualifier = useScopedQualifier;
             _sbWhere = new StringBuilder();
             _sbIndexed = new StringBuilder();
-            FlyWeight = new Flyweight();
-            SortFly = new Flyweight();
+            FlyWeight = new Expando();
+            SortFly = new Expando();
 
             Visit(exp);
 
@@ -151,7 +152,7 @@ namespace Norm.Linq
             {
                 // reset - need to use the where statement generated
                 // instead of the props set on the internal flyweight
-                FlyWeight = new Flyweight();
+                FlyWeight = new Expando();
                 if (where.StartsWith("function"))
                 {
                     FlyWeight["$where"] = where;
@@ -250,7 +251,7 @@ namespace Norm.Linq
                 var fixedName = fullName
                     .Skip(1)
                     .Where(x => x != "First()")
-                    .Select(x => System.Text.RegularExpressions.Regex.Replace(x, @"\[[0-9]+\]$", ""))
+                    .Select(x => Regex.Replace(x, @"\[[0-9]+\]$", ""))
                     .ToArray();
 
                 var expressionRootType = GetParameterExpression(m.Expression);
@@ -338,48 +339,84 @@ namespace Norm.Linq
         }
 
         /// <summary>TODO::Description.</summary>
-        private string GetBinaryOperator(BinaryExpression b) {
-            var result = "";
+        private void VisitBinaryOperator(BinaryExpression b) {
+
             switch (b.NodeType) {
                 case ExpressionType.And:
+                    _lastOperator = " & ";
+                    IsComplex = true;
+                    break;
                 case ExpressionType.AndAlso:
-                    result = " && ";
+                    _lastOperator = " && ";
                     break;
                 case ExpressionType.Or:
-                case ExpressionType.OrElse:
+                    _lastOperator = " | ";
                     IsComplex = true;
-                    result = " || ";
+                    break;
+                case ExpressionType.OrElse:
+                    _lastOperator = " || ";
+                    IsComplex = true;
                     break;
                 case ExpressionType.Equal:
-                    _lastOperator = " === ";//Should this be '===' instead? a la 'Javascript: The good parts'
-                    result =_lastOperator;
+                    _lastOperator = " === ";
                     break;
                 case ExpressionType.NotEqual:
                     _lastOperator = " != ";
-                    result =_lastOperator;
                     break;
                 case ExpressionType.LessThan:
                     _lastOperator = " < ";
-                    result = _lastOperator;
                     break;
                 case ExpressionType.LessThanOrEqual:
                     _lastOperator = " <= ";
-                    result = _lastOperator;
                     break;
                 case ExpressionType.GreaterThan:
                     _lastOperator = " > ";
-                    result = _lastOperator;
                     break;
                 case ExpressionType.GreaterThanOrEqual:
                     _lastOperator = " >= ";
-                    result = _lastOperator;
+                    break;
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                    _lastOperator = " + ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.Coalesce:
+                     _lastOperator = " || ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.Divide:
+                     _lastOperator = " / ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.ExclusiveOr:
+                     _lastOperator = " ^ ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.LeftShift:
+                     _lastOperator = " << ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                     _lastOperator = " * ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.RightShift:
+                     _lastOperator = " >> ";
+                    IsComplex = true;
+                    break;
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                     _lastOperator = " - ";
+                    IsComplex = true;
                     break;
                 default:
                     throw new NotSupportedException(
                         string.Format("The binary operator '{0}' is not supported", b.NodeType));
 
             }
-            return result;
+
+            _sbWhere.Append(_lastOperator);
         }
         /// <summary>
         /// Visits a binary expression.
@@ -393,7 +430,7 @@ namespace Norm.Linq
             ConditionalCount++;
             _sbWhere.Append("(");
             Visit(b.Left);
-            _sbWhere.Append(GetBinaryOperator(b));
+            VisitBinaryOperator(b);
             Visit(b.Right);
             _sbWhere.Append(")");
             return b;
@@ -442,7 +479,7 @@ namespace Norm.Linq
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.String:
-                        var sval = "'" + c.Value + "'";
+                        var sval = "\"" + c.Value.ToString().EscapeDoubleQuotes() + "\"";
                         _sbWhere.Append(sval);
                         SetFlyValue(c.Value);
                         break;
@@ -492,43 +529,66 @@ namespace Norm.Linq
 
             if (m.Method.DeclaringType == typeof(string))
             {
-                IsComplex = true;
                 switch (m.Method.Name)
                 {
                     case "StartsWith":
-                        _sbWhere.Append("(");
-                        Visit(m.Object);
-                        _sbWhere.Append(".indexOf(");
-                        Visit(m.Arguments[0]);
-                        _sbWhere.Append(")===0)");
-                        return m;
+                        {
+                            string value = (string)m.Arguments[0].GetConstantValue();
+
+                            _sbWhere.Append("(");
+                            Visit(m.Object);
+                            _sbWhere.AppendFormat(".indexOf(\"{0}\")===0)", value.EscapeDoubleQuotes());
+  
+                            SetFlyValue(new Regex("^" + value));
+
+                            return m;
+                        }
+                    case "EndsWith":
+                        {
+                            string value = (string)m.Arguments[0].GetConstantValue();
+
+                            //_sbWhere.Append("(");
+                            //Visit(m.Object);
+                            //_sbWhere.AppendFormat(".match(\"{0}$\")==\"{0}\")", value.EscapeDoubleQuotes());
+
+                            //Seems 10% quicker than above when complex query invoked
+                            _sbWhere.Append("((");
+                            Visit(m.Object);
+                            _sbWhere.AppendFormat(".length - {0}) >= 0 && ", value.Length);
+                            Visit(m.Object);
+                            _sbWhere.AppendFormat(".lastIndexOf(\"{0}\") === (", value.EscapeDoubleQuotes());
+                            Visit(m.Object);
+                            _sbWhere.AppendFormat(".length - {0}))", value.Length);
+
+                            SetFlyValue(new Regex(value + "$"));
+
+                            return m;
+                        }
                     case "Contains":
-                        _sbWhere.Append("(");
-                        Visit(m.Object);
-                        _sbWhere.Append(".indexOf(");
-                        Visit(m.Arguments[0]);
-                        _sbWhere.Append(")>-1)");
-                        return m;
+                        {
+                            string value = (string)m.Arguments[0].GetConstantValue();
+
+                            _sbWhere.Append("(");
+                            Visit(m.Object);
+                            _sbWhere.AppendFormat(".indexOf(\"{0}\")>-1)", value.EscapeDoubleQuotes());
+                            
+                            SetFlyValue(new Regex(value));
+
+                            return m;
+                        }
                     case "IndexOf":
                         Visit(m.Object);
                         _sbWhere.Append(".indexOf(");
                         Visit(m.Arguments[0]);
                         _sbWhere.Append(")");
+                        IsComplex = true;
                         return m;
                     case "LastIndexOf":
                         Visit(m.Object);
                         _sbWhere.Append(".lastIndexOf(");
                         Visit(m.Arguments[0]);
                         _sbWhere.Append(")");
-                        return m;
-                    case "EndsWith":
-                        _sbWhere.Append("(");
-                        Visit(m.Object);
-                        _sbWhere.Append(".match(");
-                        Visit(m.Arguments[0]);
-                        _sbWhere.Append("+'$')==");
-                        Visit(m.Arguments[0]);
-                        _sbWhere.Append(")");
+                        IsComplex = true;
                         return m;
                     case "IsNullOrEmpty":
                         _sbWhere.Append("(");
@@ -536,16 +596,19 @@ namespace Norm.Linq
                         _sbWhere.Append(" == '' ||  ");
                         Visit(m.Arguments[0]);
                         _sbWhere.Append(" == null  )");
+                        IsComplex = true;
                         return m;
                     case "ToLower":
                     case "ToLowerInvariant":
                         Visit(m.Object);
                         _sbWhere.Append(".toLowerCase()");
+                        IsComplex = true;
                         return m;
                     case "ToUpper":
                     case "ToUpperInvariant":
                         Visit(m.Object);
                         _sbWhere.Append(".toUpperCase()");
+                        IsComplex = true;
                         return m;
                     case "Substring":
                         Visit(m.Object);
@@ -557,6 +620,7 @@ namespace Norm.Linq
                             Visit(m.Arguments[1]);
                         }
                         _sbWhere.Append(")");
+                        IsComplex = true;
                         return m;
                     case "Replace":
                         Visit(m.Object);
@@ -565,8 +629,19 @@ namespace Norm.Linq
                         _sbWhere.Append(",'g'),");
                         Visit(m.Arguments[1]);
                         _sbWhere.Append(")");
+                        IsComplex = true;
                         return m;
                 }
+            }
+            else if (m.Method.DeclaringType == typeof(Regex))
+            {
+                if (m.Method.Name == "IsMatch")
+                {
+                    HandleRegexIsMatch(m);
+                    return m;
+                }
+
+                throw new NotSupportedException(string.Format("Only the static Regex.IsMatch is supported.", m.Method.Name));
             }
             else if (m.Method.DeclaringType == typeof(DateTime))
             {
@@ -580,8 +655,7 @@ namespace Norm.Linq
                 if (m.Method.Name == "Contains")
                 {
                     return HandleMethodCall(m);
-                } 
-                
+                }
                 throw new NotSupportedException(string.Format("Subqueries with {0} are not currently supported", m.Method.Name));
             }
             else if (typeof(Enumerable).IsAssignableFrom(m.Method.DeclaringType))
@@ -754,6 +828,44 @@ namespace Norm.Linq
         {
             Visit(m.Arguments[0]);
             _sbWhere.Append(".length");
+        }
+
+        private void HandleRegexIsMatch(MethodCallExpression m)
+        {
+            var options = RegexOptions.None;
+            var jsoptions = "g";
+            if (m.Arguments.Count == 3)
+            {
+                options = (RegexOptions)m.Arguments[2].GetConstantValue();
+                jsoptions = VisitRegexOptions(m, options);
+            }
+
+            string value = (string)m.Arguments[1].GetConstantValue();
+
+            _sbWhere.AppendFormat("(new RegExp(\"{0}\",\"{1}\")).test(", value.EscapeDoubleQuotes(), jsoptions);
+            Visit(m.Arguments[0]);
+            _sbWhere.Append(")");
+
+            SetFlyValue(new Regex(value, options));
+        }
+
+        private static string VisitRegexOptions(MethodCallExpression m, RegexOptions options)
+        {
+            RegexOptions[] allowedOptions = new RegexOptions[] { RegexOptions.IgnoreCase, RegexOptions.Multiline, RegexOptions.None };
+            foreach (RegexOptions Type in Enum.GetValues(typeof(RegexOptions)))
+            {
+                if ((options & Type) == Type && !allowedOptions.Contains(Type))
+                    throw new NotSupportedException(string.Format("Only the RegexOptions.Ignore and RegexOptions.Multiline options are supported.", m.Method.Name));
+            }
+
+            var jsoptions = "g";
+
+            if ((options & RegexOptions.IgnoreCase) == RegexOptions.IgnoreCase)
+                jsoptions += "i";
+            if ((options & RegexOptions.Multiline) == RegexOptions.Multiline)
+                jsoptions += "m";
+
+            return jsoptions;
         }
 
         /// <summary>

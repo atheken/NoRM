@@ -1,5 +1,8 @@
 ﻿using Norm.Configuration;
 using Norm.BSON;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Norm.Responses
 {
     /// <summary>TODO::Description.</summary>
@@ -8,32 +11,34 @@ namespace Norm.Responses
         static CurrentOperationContainer()
         {
             MongoConfiguration.Initialize(c => c.For<CurrentOperationContainer>(a =>
-                                                   {
-                                                       a.ForProperty(op => op.Responses).UseAlias("inprog");
-                                                   })
-                );
+              {
+                  a.ForProperty(op => op.Responses).UseAlias("inprog");
+              }));
         }
 
         /// <summary>TODO::Description.</summary>
-        public CurrentOperationResponse[] Responses{ get; set;}
+        public CurrentOperationResponse[] Responses { get; set; }
     }
 
     /// <summary>
     /// The current operation response.
     /// </summary>
-    public class CurrentOperationResponse : IFlyweight
+    public class CurrentOperationResponse : BaseStatusMessage
     {
         static CurrentOperationResponse()
         {
             MongoConfiguration.Initialize(c => c.For<CurrentOperationResponse>(a =>
-                                                   {
-                                                       a.ForProperty(op => op.OperationId).UseAlias("opid");
-                                                       a.ForProperty(op => op.Operation).UseAlias("op");
-                                                       a.ForProperty(op => op.Namespace).UseAlias("ns");
-                                                       a.ForProperty(op => op.SecondsRunning).UseAlias("secs_running");
-                                                   })
+                  {
+                      a.ForProperty(op => op.OperationId).UseAlias("opid");
+                      a.ForProperty(op => op.Operation).UseAlias("op");
+                      a.ForProperty(op => op.Namespace).UseAlias("ns");
+                      a.ForProperty(op => op.SecondsRunning).UseAlias("secs_running");
+                      a.ForProperty(op => op.Description).UseAlias("desc");
+                  })
                 );
         }
+
+        private Dictionary<string, object> _properties = new Dictionary<string, object>(0);
 
         /// <summary>TODO::Description.</summary>
         /// <value>The operation Id</value>
@@ -75,8 +80,6 @@ namespace Norm.Responses
         /// <value>How long it is/was running</value>
         public int? SecondsRunning { get; set; }
 
-        /// <summary>TODO::Description.</summary>
-        /// <value>The description.</value>
-        public string Desc { get; set; }
+        public string Description { get; set; }
     }
 }

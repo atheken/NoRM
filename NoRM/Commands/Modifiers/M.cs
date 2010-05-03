@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Norm.Commands.Modifiers;
 using Norm.Commands;
 
 namespace Norm
 {
-    using Commands.Modifiers;
-
-
     /// <summary>
     /// Shorthand to construct modifier operations
     /// for MongoDB fields.
@@ -23,7 +21,7 @@ namespace Norm
         /// </summary>
         /// <param name="amountToIncrementBy"></param>
         /// <returns></returns>
-        public static IncrementOperation Inc(int amountToIncrementBy)
+        public static IncrementOperation Increment(int amountToIncrementBy)
         {
             return new IncrementOperation(amountToIncrementBy);
         }

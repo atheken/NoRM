@@ -18,14 +18,9 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void DoesntSerializePropertyWithDefaultValueAndShouldSerialize()
+        public void Should_Not_Serialize_When_Default_Values_Specified()
         {
-            // create an instance  with the following values
-            // Id = 1
-            // Message = "Test"
-            // MagicDate = DateTime.MinValue (0001-01-01)
-            // ComplexProperty = 3
-            var o = new SerializerTest() { Id = 1, Message = "Test", ComplexProperty = 3 };
+            var o = new SerializerTest() { Id = 1, Message = "Test" };
             // when serialized it should produce a document {"Id": 1} 
             var o1 = BsonSerializer.Serialize(o);
             // create a object with value Id = 1
@@ -53,10 +48,10 @@ namespace Norm.Tests
         [Fact]
         public void SerializationOfFlyweightIsNotLossy()
         {
-            var testObj = new Flyweight();
+            var testObj = new Expando();
             testObj["astring"] = "stringval";
             var testBytes = BsonSerializer.Serialize(testObj);
-            var hydrated = BsonDeserializer.Deserialize<Flyweight>(testBytes);
+            var hydrated = BsonDeserializer.Deserialize<Expando>(testBytes);
             Assert.Equal(testObj["astring"], hydrated["astring"]);
         }
         
@@ -88,7 +83,7 @@ namespace Norm.Tests
             Assert.Equal(null, hydratedObj1.ADateTime);
 
             //Mongo stores dates as long, therefore, we have to use double->long rounding.
-            Assert.Equal((long)(obj2.ADateTime.Value - DateTime.MinValue).TotalMilliseconds,
+            Assert.Equal((long)((obj2.ADateTime.Value.ToUniversalTime() - DateTime.MinValue)).TotalMilliseconds,
                 (long)(hydratedObj2.ADateTime.Value - DateTime.MinValue).TotalMilliseconds);
 
         }
@@ -281,14 +276,14 @@ namespace Norm.Tests
         public void SerializationOfScopedCodeIsNotLossy()
         {
             var obj1 = new GeneralDTO {Code = new ScopedCode {CodeString = "function(){return 'hello world!'}"}};
-            var scope = new Flyweight();
+            var scope = new Expando();
             scope["$ns"] = "root";
             obj1.Code.Scope = scope;
 
             var obj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
 
             Assert.Equal(obj1.Code.CodeString, obj2.Code.CodeString);
-            Assert.Equal(((Flyweight)obj1.Code.Scope)["$ns"],((Flyweight)obj2.Code.Scope)["$ns"]);
+            Assert.Equal(((Expando)obj1.Code.Scope)["$ns"],((Expando)obj2.Code.Scope)["$ns"]);
         }
         [Fact]
         public void SerializesAndDeserializesAComplexObject()
@@ -320,7 +315,8 @@ namespace Norm.Tests
             Assert.Equal(obj1.ABoolean, hydratedObj1.ABoolean);
             Assert.Equal(obj1.Bytes, hydratedObj1.Bytes);
             Assert.Equal(obj1.AGuid, hydratedObj1.AGuid);
-            Assert.Equal(obj1.ADateTime.Value.Ticks, hydratedObj1.ADateTime.Value.Ticks);
+            Assert.Equal(obj1.ADateTime.Value.ToUniversalTime().Ticks, 
+                hydratedObj1.ADateTime.Value.ToUniversalTime().Ticks);
             Assert.Equal(obj1.Strings, hydratedObj1.Strings);
             Assert.Equal(obj1.Flags32, hydratedObj1.Flags32);
             Assert.Equal(obj1.Flags64, hydratedObj1.Flags64);
@@ -343,7 +339,7 @@ namespace Norm.Tests
             Assert.Equal(obj2.ARex, hydratedObj2.ARex);
         }
 
-        [Fact]
+        [Fact(Skip="Slow test")]
         public void SerializationSpeedTest()
         {
             for (var i = 0; i < 5; i++)
@@ -462,8 +458,8 @@ namespace Norm.Tests
             var expando = BsonDeserializer.Deserialize<ExpandoAddress>(bytes);
             Assert.Equal(expando.City, address.City);
             Assert.Equal(expando.Street, address.Street);
-            Assert.Equal(expando.Expando["State"], address.State);
-            Assert.Equal(expando.Expando["Zip"], address.Zip);
+            Assert.Equal(expando["State"], address.State);
+            Assert.Equal(expando["Zip"], address.Zip);
         }
         
     }

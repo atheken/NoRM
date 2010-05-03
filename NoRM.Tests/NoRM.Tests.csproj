@@ -71,6 +71,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CollectionFindTests\DocSizeTests.cs" />
     <Compile Include="CollectionFindTests\MongoSearchQualifierTests.cs" />
     <Compile Include="CollectionFindTests\QueryTests.cs" />
     <Compile Include="CollectionFindTests\WhereQualifierTests.cs" />
@@ -89,6 +90,8 @@
     <Compile Include="DBTypeTests\DBRefTests.cs" />
     <Compile Include="DBTypeTests\GridFSTests.cs" />
     <Compile Include="DBTypeTests\ObjectIdTests.cs" />
+    <Compile Include="ExpandoTests.cs" />
+    <Compile Include="GeneralTests.cs" />
     <Compile Include="IdPropertyFinderTests.cs" />
     <Compile Include="LinqTests\LinqAggregates.cs" />
     <Compile Include="LinqTests\LinqDeepGraph.cs" />

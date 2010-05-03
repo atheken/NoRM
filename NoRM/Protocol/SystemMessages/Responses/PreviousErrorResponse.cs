@@ -14,11 +14,11 @@ namespace Norm.Responses
         static PreviousErrorResponse()
         {
             MongoConfiguration.Initialize(c => c.For<PreviousErrorResponse>(a =>
-                                                   {
-                                                       a.ForProperty(auth => auth.NumberOfErrors).UseAlias("n");
-                                                       a.ForProperty(auth => auth.Error).UseAlias("err");
-                                                       a.ForProperty(auth => auth.NumberOfOperationsAgo).UseAlias("nPrev");
-                                                   })
+                 {
+                     a.ForProperty(auth => auth.NumberOfErrors).UseAlias("n");
+                     a.ForProperty(auth => auth.Error).UseAlias("err");
+                     a.ForProperty(auth => auth.NumberOfOperationsAgo).UseAlias("nPrev");
+                 })
                 );
         }
 

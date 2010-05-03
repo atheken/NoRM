@@ -7,68 +7,70 @@ namespace Norm.Tests
 {
     public class DbRefTests
     {
+        public DbRefTests()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                db.GetCollection<TestProduct>().Delete(new { });
+                db.GetCollection<ProductReference>().Delete(new { });
+                db.GetCollection<User3>().Delete(new { });
+                db.GetCollection<Role>().Delete(new { });
+            }
+        }
+
         [Fact]
         public void DbRefMapsToOtherDocumentsByOid()
         {
-            const string databaseName = "NormTests";
             var id = ObjectId.NewObjectId();
 
-            using (var session = new Session())
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
             {
-                session.Drop<TestProduct>();
-                session.Drop<ProductReference>();
 
-                session.Add(new TestProduct { _id = id, Name = "RefProduct" });
+                db.GetCollection<TestProduct>().Insert(new TestProduct { _id = id, Name = "RefProduct" });
 
                 var productReference = new DbReference<TestProduct>(id);
 
-                session.Add(new ProductReference
+                db.GetCollection<ProductReference>().Insert(new ProductReference
                     {
                         Id = ObjectId.NewObjectId(),
                         Name = "FullCart",
                         ProductsOrdered = new[] { productReference }
                     });
+
+                var reference = db.GetCollection<ProductReference>().Find(new { }).First();
+                var product = reference.ProductsOrdered[0].Fetch(() => db);
+                Assert.Equal(id.Value, product._id.Value);
             }
 
-            var server = Mongo.Create("mongodb://localhost/" + databaseName);
-            var reference = server.GetCollection<ProductReference>().Find().First();
-            var product = reference.ProductsOrdered[0].Fetch(() => server);
-
-            Assert.Equal(id.Value, product._id.Value);
         }
 
         [Fact]
         public void DbRefMapsToOtherDocumentsByCustomId()
         {
-            const string databaseName = "NormTests";
             const string userId = "Tim Berners-Lee";
             const string roleName = "Administrator";
 
-            using (var session = new Session())
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
             {
-                session.Drop<User3>();
-                session.Drop<Role>();
+                db.GetCollection<User3>().Insert(new User3
+                    {
+                        Id = userId,
+                        EmailAddress = "user@domain.com"
+                    });
+                db.GetCollection<Role>().Insert(new Role
+                {
+                    Id = roleName,
+                    Users = new List<DbReference<User3, string>>
+                        {
+                            new DbReference<User3, string>(userId)
+                        }
+                });
 
-                session.Add(new User3
-                                {
-                                    Id = userId,
-                                    EmailAddress = "user@domain.com"
-                                });
-                session.Add(new Role
-                                {
-                                    Id = roleName,
-                                    Users = new List<DbReference<User3, string>>
-                                                {
-                                                    new DbReference<User3, string>(userId)
-                                                }
-                                });
+                var role = db.GetCollection<Role>().Find().First();
+                var user = role.Users[0].Fetch(() => db);
+
+                Assert.Equal(userId, user.Id);
             }
-
-            var server = Mongo.Create("mongodb://localhost/" + databaseName);
-            var role = server.GetCollection<Role>().Find().First();
-            var user = role.Users[0].Fetch(() => server);
-
-            Assert.Equal(userId, user.Id);
         }
     }
 }

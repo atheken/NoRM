@@ -9,17 +9,12 @@ namespace Norm.BSON
     /// Arbitrary properties for all!
     /// </summary>
     /// <remarks>
-    /// Ok, so this is an abuse of the term "flyweight" - sorry.
+    /// This is a glorified dictionary, but so be it.
     /// </remarks>
-    public class Flyweight : IFlyweight
-    {    
-        private readonly Dictionary<string, bool?> _booleanProps = new Dictionary<string, bool?>(0, StringComparer.InvariantCultureIgnoreCase);
-        private readonly Dictionary<string, double?> _doubleProps = new Dictionary<string, double?>(0, StringComparer.InvariantCultureIgnoreCase);
-        private readonly Dictionary<string, int?> _intProps = new Dictionary<string, int?>(0, StringComparer.InvariantCultureIgnoreCase);
+    public class Expando : IExpando
+    {
         private Dictionary<string, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
-        private readonly Dictionary<string, long?> _longProps = new Dictionary<string, long?>(0, StringComparer.InvariantCultureIgnoreCase);
-        private readonly Dictionary<string, string> _stringProps = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
-        
+
         /// <summary>
         /// Get or set a property of this flyweight.
         /// </summary>
@@ -44,19 +39,16 @@ namespace Norm.BSON
         /// <returns></returns>
         public IEnumerable<ExpandoProperty> AllProperties()
         {
-            return _intProps.Select(y => new ExpandoProperty(y.Key, y.Value)).Concat(
-                _doubleProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                _longProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                _booleanProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                _stringProps.Select(y => new ExpandoProperty(y.Key, y.Value))).Concat(
-                _kitchenSinkProps.Select(y => new ExpandoProperty(y.Key, y.Value)));
+            return _kitchenSinkProps.Select(y => new ExpandoProperty(y.Key, y.Value));
         }
 
         /// <summary>TODO::Description.</summary>
-        public void ReverseKitchen() {
+        public void ReverseKitchen()
+        {
             var reversed = _kitchenSinkProps.Reverse();
             var newKitchen = new Dictionary<string, object>();
-            foreach (var item in reversed) {
+            foreach (var item in reversed)
+            {
                 newKitchen[item.Key] = item.Value;
             }
             _kitchenSinkProps = newKitchen;
@@ -77,7 +69,7 @@ namespace Norm.BSON
                 throw new InvalidOperationException("Can't find the property " + propertyName);
             }
 
-            return (T) retval;
+            return (T)retval;
         }
 
         /// <summary>
@@ -96,12 +88,7 @@ namespace Norm.BSON
         /// <param name="propertyName">The property name.</param>
         public void Delete(string propertyName)
         {
-            _booleanProps.Remove(propertyName);
-            _doubleProps.Remove(propertyName);
-            _intProps.Remove(propertyName);
-            _kitchenSinkProps.Remove(propertyName);
-            _longProps.Remove(propertyName);
-            _stringProps.Remove(propertyName);
+            this._kitchenSinkProps.Remove(propertyName);
         }
 
         /// <summary>
@@ -114,8 +101,8 @@ namespace Norm.BSON
         /// <param name="value">The value.</param>
         public void Set<T>(string propertyName, T value)
         {
-            Delete(propertyName);
-            _kitchenSinkProps[propertyName] = value;
+            this.Delete(propertyName);
+            this._kitchenSinkProps[propertyName] = value;
         }
 
         /// <summary>
@@ -133,8 +120,7 @@ namespace Norm.BSON
 
             try
             {
-                value = (T) _kitchenSinkProps[propertyName];
-
+                value = (T)this._kitchenSinkProps[propertyName];
                 retval = true;
             }
             catch
@@ -144,5 +130,6 @@ namespace Norm.BSON
 
             return retval;
         }
+        
     }
 }

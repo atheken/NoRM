@@ -15,7 +15,17 @@ namespace Norm.Tests
                 admin.DropDatabase();
             }      
         }
-        
+
+        [Fact]
+        public void Get_Last_Error_Returns()
+        {
+            using(var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var le = mongo.Database.LastError();
+                Assert.Equal(true,le.WasSuccessful);
+            }
+        }
+
         [Fact]
         public void CreateCollectionCreatesACappedCollection()
         {

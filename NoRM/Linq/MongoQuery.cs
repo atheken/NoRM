@@ -129,7 +129,7 @@ namespace Norm.Linq
         /// </returns>
         public virtual IEnumerator<T> GetEnumerator()
         {
-            return ((IEnumerable<T>)_provider.Execute<T>(_expression)).GetEnumerator();
+            return ((IEnumerable<T>)_provider.ExecuteQuery<T>(_expression)).GetEnumerator();
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="query">The query.</param>
         /// <returns></returns>
-        internal ExplainResponse Explain(Flyweight query)
+        internal ExplainResponse Explain(Expando query)
         {
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
             return this.GetCollection<ExplainResponse>(collectionName).Explain(query);

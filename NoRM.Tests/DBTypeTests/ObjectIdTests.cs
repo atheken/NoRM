@@ -1,10 +1,30 @@
 using Xunit;
 using System.ComponentModel;
+using System;
 
 namespace Norm.Tests
 {
     public class ObjectIdTests
     {
+        [Fact]
+        public void ObjectIDs_Can_Convert_To_And_From_Strings()
+        {
+            ObjectIdTypeConverter tc = new ObjectIdTypeConverter();
+            var obj = ObjectId.NewObjectId();
+
+            Assert.True(tc.CanConvertFrom(typeof(String)));
+            var conv = tc.ConvertFrom(obj.ToString());
+            Assert.Equal(obj, conv);
+            Assert.Throws<NotSupportedException>(()=>tc.ConvertFrom(Guid.NewGuid()));
+        }
+
+        [Fact]
+        public void ObjectIDs_Return_Unique_Hashcode()
+        {
+            var obj = ObjectId.NewObjectId();
+            Assert.NotEqual(0, obj.GetHashCode());
+        }
+
         [Fact]
         public void TryParseReturnsFalseIfObjectIdIsNull()
         {

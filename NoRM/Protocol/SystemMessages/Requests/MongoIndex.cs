@@ -28,7 +28,7 @@ namespace Norm.Protocol.SystemMessages.Requests
         /// The key.
         /// </summary>
         /// <value>The Key property gets/sets the Key data member.</value>
-        public Flyweight Key { get; set; }
+        public Expando Key { get; set; }
 
         /// <summary>
         /// The namespace the index resides within.
