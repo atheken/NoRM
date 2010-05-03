@@ -41,6 +41,9 @@ namespace Norm.Linq
         bool _whereWritten = false;
 
         /// <summary>TODO::Description.</summary>
+        bool _isDeepGraphWithArrays = false;
+
+        /// <summary>TODO::Description.</summary>
         public String AggregatePropName
         {
             get;
@@ -141,6 +144,9 @@ namespace Norm.Linq
             Visit(exp);
 
             TransformToFlyWeightWhere();
+
+            if (_isDeepGraphWithArrays && IsComplex)
+                throw new NotSupportedException("You cannot use deep graph resolution if the query is considered complex");
 
             return WhereExpression;
         }
@@ -251,8 +257,12 @@ namespace Norm.Linq
                 var fixedName = fullName
                     .Skip(1)
                     .Where(x => x != "First()")
+                    .Where(x => !x.StartsWith("get_Item("))
                     .Select(x => Regex.Replace(x, @"\[[0-9]+\]$", ""))
                     .ToArray();
+
+                if (!_isDeepGraphWithArrays)
+                    _isDeepGraphWithArrays = fullName.Length - fixedName.Length != 1;
 
                 var expressionRootType = GetParameterExpression(m.Expression);
                 if (expressionRootType != null)
@@ -304,7 +314,16 @@ namespace Norm.Linq
                 }
                 else if (parentExpression.NodeType == ExpressionType.Call)
                 {
-                    parentExpression = ((MemberExpression)(((MethodCallExpression)parentExpression).Arguments[0])).Expression;
+                    var expr = ((MethodCallExpression)parentExpression).Arguments[0];
+                    if (expr.NodeType == ExpressionType.MemberAccess)
+                    {
+                        parentExpression = ((MemberExpression)expr).Expression;
+                    }
+                    else if (expr.NodeType == ExpressionType.Constant)
+                    {
+                        parentExpression = ((MemberExpression)((MethodCallExpression)parentExpression).Object).Expression;
+                    }
+
                     expressionRoot = parentExpression is ParameterExpression;
                 }
                 else
@@ -332,7 +351,11 @@ namespace Norm.Linq
             {
                 var property = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
                 graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
-                typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
+
+                if (property.PropertyType.IsGenericType)
+                    typeToQuery = property.PropertyType.GetGenericArguments()[0];
+                else 
+                    typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
             }
 
             return graphParts;
