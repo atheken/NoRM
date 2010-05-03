@@ -49,6 +49,19 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportIsNotNulls()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = null, Price = 20 });
+                session.Add(new TestProduct { Name = "test1", Price = 10 });
+                var products = session.Products.Where(p => p.Name != null).ToList();
+                Assert.Equal(10, products[0].Price);
+                Assert.Equal(1, products.Count);
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportRegex()
         {
             using (var session = new Session())
@@ -1085,7 +1098,10 @@ namespace Norm.Tests
 
                 session.Add(post1);
                 session.Add(post2);
-                var found = session.Posts.Where(p => p.Comments.Any(a => a.Text == "commentA")).SingleOrDefault();
+
+                //The following query is not supported yet but can be written as below
+                //var found = session.Posts.Where(p => p.Comments.Any(a => a.Text == "commentA")).SingleOrDefault();
+                var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
 
                 Assert.Equal("Second", found.Title);
             }

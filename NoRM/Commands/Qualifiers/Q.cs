@@ -1,5 +1,6 @@
 ﻿using System;
 ﻿using Norm.Commands.Qualifiers;
+using System.Text.RegularExpressions;
 
 namespace Norm
 {
@@ -158,6 +159,27 @@ namespace Norm
         public static NotInQualifier<T> NotIn<T>(params T[] inSet)
         {
             return new NotInQualifier<T>(inSet);
+        }
+
+        /// <summary>
+        /// constructs a $elemMatch qualifier statement.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="matchDoc"></param>
+        /// <returns></returns>
+        public static ElementMatch<T> ElementMatch<T>(T matchDoc)
+        {
+            return new ElementMatch<T>(matchDoc);
+        }
+
+        /// <summary>
+        /// returns a constructed regex to be used to match the specified property name in the DB.
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        public static Regex Matches(String pattern)
+        {
+            return new Regex(pattern);
         }
 
         /// <summary>

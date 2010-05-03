@@ -19,7 +19,7 @@ namespace Norm.Collections
     /// Mongo typed collection.
     /// </summary>
     /// <typeparam name="T">Collection type</typeparam>
-    public class MongoCollection<T> : IMongoCollection<T>
+    public partial class MongoCollection<T> : IMongoCollection<T>
     {
         /// <summary>
         /// This will have a different instance for each concrete version of <see cref="MongoCollection{T}"/>
@@ -133,26 +133,7 @@ namespace Norm.Collections
         }
 
 
-        /// <summary>
-        /// The document count.
-        /// </summary>
-        /// <param name="query">The query.</param>
-        /// <returns>The count.</returns>
-        public long Count(object query)
-        {
-            long retval = 0;
-
-            var f = _db.GetCollection<Expando>("$cmd")
-                .FindOne(new { count = _collectionName, query = query });
-
-            if (f != null)
-            {
-                retval = (long)f.Get<double>("n");
-            }
-
-            return retval;
-        }
-
+       
         /// <summary>
         /// Deletes all indices on this collection.
         /// </summary>
