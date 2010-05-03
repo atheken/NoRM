@@ -1101,7 +1101,7 @@ namespace Norm.Tests
 
                 //The following query is not supported yet but can be written as below
                 //var found = session.Posts.Where(p => p.Comments.Any(a => a.Text == "commentA")).SingleOrDefault();
-                var found = session.Posts.Where(p => p.Comments[0].Text == "commentA" || p.Comments[0].Text == "commentA").SingleOrDefault();
+                var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
 
                 Assert.Equal("Second", found.Title);
             }
