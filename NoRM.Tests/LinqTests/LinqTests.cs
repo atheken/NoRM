@@ -5,7 +5,6 @@ using Norm.Linq;
 using Xunit;
 using Norm.Configuration;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 
 namespace Norm.Tests
 {
@@ -264,8 +263,6 @@ namespace Norm.Tests
         [Fact]
         public void LinqQueriesShouldSupportExternalObjectProperties()
         {
-            // NOTE: This one fails because there's no support for parsing the object's property.
-            // This even more complex when using a nested type like a product's supplier
             var external = new TestProduct { Price = 10 };
             using (var session = new Session())
             {
@@ -282,8 +279,6 @@ namespace Norm.Tests
         [Fact]
         public void LinqQueriesShouldSupportExternalObjectProperties2()
         {
-            // NOTE: This one fails because there's no support for parsing the object's property.
-            // This even more complex when using a nested type like a product's supplier
             var another = new Supplier {Name = "test1"};
             var external = new TestProduct { Price = 10, Supplier = another };
             using (var session = new Session())
