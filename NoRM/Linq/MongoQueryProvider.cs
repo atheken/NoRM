@@ -150,6 +150,16 @@ namespace Norm.Linq
                 finalize = "function(key, res){ return res.val; }";
             }
 
+            switch (translator.MethodCall)
+            {
+                case "SingleOrDefault":
+                case "FirstOrDefault":
+                case "Single":
+                case "First":
+                    translator.Take = 1;
+                    break;
+            }
+
             object result;
             switch (translator.MethodCall)
             {
@@ -176,18 +186,6 @@ namespace Norm.Linq
                     reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
                     result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
                     break;
-                case "SingleOrDefault":
-                case "FirstOrDefault":
-                    result = collection.FindOne(fly);
-                    break;
-                case "Single":
-                case "First":
-                    result = collection.FindOne(fly); 
-                    if (result == null)
-                    {
-                        throw new InvalidOperationException("Sequence contains no elements");
-                    }
-                    break;
                 default:
                     if (translator.SortFly.AllProperties().Count() > 0)
                     {
@@ -198,6 +196,15 @@ namespace Norm.Linq
                     {
                         result = collection.Find(fly, translator.Take, translator.Skip);
                     }
+
+                    switch (translator.MethodCall)
+                    {
+                        case "SingleOrDefault": result = ((IEnumerable<T>)result).SingleOrDefault(); break;
+                        case "FirstOrDefault": result = ((IEnumerable<T>)result).FirstOrDefault(); break;
+                        case "Single": result = ((IEnumerable<T>)result).Single(); break;
+                        case "First": result = ((IEnumerable<T>)result).First(); break;
+                    }
+
                     break;
             }
 
