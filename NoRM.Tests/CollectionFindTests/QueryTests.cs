@@ -48,7 +48,7 @@ namespace Norm.Tests
             Assert.Equal(3, result.Length);
         }
 
-        [Fact(Skip="Support not here yet..")]
+        [Fact]
         public void MongoCollection_Supports_LINQ()
         {
             _collection.Insert(new Person { Name = "BBB" });
@@ -56,8 +56,8 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "AAA" });
             _collection.Insert(new Person { Name = "DDD" });
 
-            //var result = _collection.Where(y => y.Name == "AAA").ToArray();
-            //Assert.Equal(1, result.Length);
+            var result = _collection.Where(y => y.Name == "AAA").ToArray();
+            Assert.Equal(1, result.Length);
         }
 
         [Fact]

@@ -47,6 +47,7 @@ namespace Norm.Collections
             _db = db;
             _connection = connection;
             _collectionName = collectionName;
+            //_queryContext = new MongoQuery<T>(MongoQueryProvider.Create(connection.ConnectionString));
         }
 
         /// <summary>
