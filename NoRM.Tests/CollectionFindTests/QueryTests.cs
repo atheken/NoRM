@@ -56,8 +56,8 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "AAA" });
             _collection.Insert(new Person { Name = "DDD" });
 
-            var result = _collection.Where(y => y.Name == "AAA").ToArray();
-            Assert.Equal(1, result.Length);
+            var result = _collection.Where(y => y.Name == "AAA");
+            Assert.Equal(1, result.ToArray().Length);
         }
 
         [Fact]

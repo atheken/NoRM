@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +47,7 @@ namespace Norm.Collections
             _db = db;
             _connection = connection;
             _collectionName = collectionName;
-            //_queryContext = new MongoQuery<T>(MongoQueryProvider.Create(connection.ConnectionString));
+            _queryContext = new MongoQuery<T>(MongoQueryProvider.Create(_connection.ConnectionString), _collectionName);
         }
 
         /// <summary>

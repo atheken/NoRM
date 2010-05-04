@@ -105,6 +105,8 @@ namespace Norm.Linq
             return Execute(expression);
         }
 
+        internal String CollectionName{get;set;}
+
         /// <summary>
         /// </summary>
         /// <param name="expression">An expression tree that represents a LINQ query.</param>
@@ -114,6 +116,7 @@ namespace Norm.Linq
             expression = PartialEvaluator.Eval(expression, this.CanBeEvaluatedLocally);
 
             var translator = new MongoQueryTranslator();
+            translator.CollectionName = this.CollectionName;
             var qry = translator.Translate(expression);
             var fly = translator.FlyWeight;
 

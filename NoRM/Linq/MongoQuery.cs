@@ -41,6 +41,7 @@ namespace Norm.Linq
             _provider = provider;
             _expression = Expression.Constant(this);
             _collectionName = collectionName;
+            _provider.CollectionName = collectionName;
         }
 
         /// <summary>

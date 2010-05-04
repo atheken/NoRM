@@ -483,7 +483,8 @@ namespace Norm.Linq
             {
                 // set the collection name
                 this.TypeName = q.ElementType.Name;
-                this.CollectionName = MongoConfiguration.GetCollectionName(q.ElementType);                
+                this.CollectionName = this.CollectionName ??
+                    MongoConfiguration.GetCollectionName(q.ElementType);                
 
                 // this is our Query wrapper - see if it has an expression
                 var qry = (IMongoQuery)c.Value;
