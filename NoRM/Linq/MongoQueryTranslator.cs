@@ -205,6 +205,7 @@ namespace Norm.Linq
 
                 _sbWhere.Append(alias);
                 _lastFlyProperty = alias;
+
                 return m;
             }
 
@@ -503,8 +504,8 @@ namespace Norm.Linq
                 switch (Type.GetTypeCode(c.Value.GetType()))
                 {
                     case TypeCode.Boolean:
-                        _sbWhere.Append(((bool)c.Value) ? 1 : 0);
-                        SetFlyValue(((bool)c.Value) ? 1 : 0);
+                        _sbWhere.Append(((bool)c.Value) ? "true" : "false");
+                        SetFlyValue(c.Value);
                         break;
                     case TypeCode.DateTime:
                         var val = "new Date(" + (long)((DateTime)c.Value).Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
@@ -839,7 +840,8 @@ namespace Norm.Linq
                 IsComplex = true;
             }
            
-            Visit(exp);
+            Visit(StripQuotes(exp));
+
             _whereWritten = true;
         }
 

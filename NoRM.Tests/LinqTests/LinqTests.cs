@@ -128,6 +128,51 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportBooleans()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true });
+
+                var list = session.Products.Where(x => x.IsAvailable).ToList();
+
+                Assert.Equal(1, list.Count);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportBooleansExplicitly()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true });
+
+                var list = session.Products.Where(x => x.IsAvailable == true).ToList();
+
+                Assert.Equal(2, list.Count);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportBooleansInComplexQuery()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true });
+
+                var list = session.Products.Where(x => x.IsAvailable || x.IsAvailable).ToList();
+
+                Assert.Equal(2, list.Count);
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportBitwiseOr()
         {
             using (var session = new Session())
