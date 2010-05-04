@@ -108,6 +108,7 @@
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />
     <Compile Include="Collections\MongoCollectionGeneric.cs" />
+    <Compile Include="Collections\MongoCollectionLINQ.cs" />
     <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
     <Compile Include="Commands\Modifiers\IModifierExpression.cs" />
     <Compile Include="Commands\Modifiers\ModifierExpression.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="Commands\Modifiers\SetOperation.cs" />
     <Compile Include="Commands\OrderBy.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
+    <Compile Include="Commands\Qualifiers\ElementMatch.cs" />
     <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterThanQualifier.cs" />

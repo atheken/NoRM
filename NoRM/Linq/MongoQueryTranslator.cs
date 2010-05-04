@@ -41,6 +41,9 @@ namespace Norm.Linq
         bool _whereWritten = false;
 
         /// <summary>TODO::Description.</summary>
+        bool _isDeepGraphWithArrays = false;
+
+        /// <summary>TODO::Description.</summary>
         public String AggregatePropName
         {
             get;
@@ -140,9 +143,22 @@ namespace Norm.Linq
 
             Visit(exp);
 
+            ProcessGuards();
             TransformToFlyWeightWhere();
 
             return WhereExpression;
+        }
+
+        private void ProcessGuards()
+        {
+            if (_isDeepGraphWithArrays && IsComplex)
+            {
+                var aggMethods = new[] { "Max", "Min", "Sum", "Average" };
+                if (aggMethods.Contains(MethodCall))
+                    throw new NotSupportedException("You cannot use deep graph resolution when using the following aggregates: " + string.Join(", ", aggMethods));
+
+                throw new NotSupportedException("You cannot use deep graph resolution if the query is considered complex");
+            }
         }
 
         private void TransformToFlyWeightWhere()
@@ -251,8 +267,12 @@ namespace Norm.Linq
                 var fixedName = fullName
                     .Skip(1)
                     .Where(x => x != "First()")
+                    .Where(x => !x.StartsWith("get_Item("))
                     .Select(x => Regex.Replace(x, @"\[[0-9]+\]$", ""))
                     .ToArray();
+
+                if (!_isDeepGraphWithArrays)
+                    _isDeepGraphWithArrays = fullName.Length - fixedName.Length != 1;
 
                 var expressionRootType = GetParameterExpression(m.Expression);
                 if (expressionRootType != null)
@@ -304,7 +324,16 @@ namespace Norm.Linq
                 }
                 else if (parentExpression.NodeType == ExpressionType.Call)
                 {
-                    parentExpression = ((MemberExpression)(((MethodCallExpression)parentExpression).Arguments[0])).Expression;
+                    var expr = ((MethodCallExpression)parentExpression).Arguments[0];
+                    if (expr.NodeType == ExpressionType.MemberAccess)
+                    {
+                        parentExpression = ((MemberExpression)expr).Expression;
+                    }
+                    else if (expr.NodeType == ExpressionType.Constant)
+                    {
+                        parentExpression = ((MemberExpression)((MethodCallExpression)parentExpression).Object).Expression;
+                    }
+
                     expressionRoot = parentExpression is ParameterExpression;
                 }
                 else
@@ -332,7 +361,11 @@ namespace Norm.Linq
             {
                 var property = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
                 graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
-                typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
+
+                if (property.PropertyType.IsGenericType)
+                    typeToQuery = property.PropertyType.GetGenericArguments()[0];
+                else 
+                    typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
             }
 
             return graphParts;
@@ -361,7 +394,7 @@ namespace Norm.Linq
                     _lastOperator = " === ";
                     break;
                 case ExpressionType.NotEqual:
-                    _lastOperator = " != ";
+                    _lastOperator = " !== ";
                     break;
                 case ExpressionType.LessThan:
                     _lastOperator = " < ";
@@ -486,7 +519,7 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            if (_lastOperator == " === ")
+                            if (_lastOperator == " === " || _lastOperator == " !== ")
                             {
                                 _sbWhere.Remove(_sbWhere.Length - 2, 1);
                             }
@@ -708,49 +741,51 @@ namespace Norm.Linq
         private void SetFlyValue(object value)
         {
             // if the property has already been set, we can't set it again
-            // as fly uses Dictionaries. This means to BETWEEN style native queries
+            // as fly uses Dictionaries. This means you can't do BETWEEN style native queries
             if (FlyWeight.Contains(_lastFlyProperty))
             {
                 IsComplex = true;
                 return;
             }
 
-            if (_lastOperator != " === ")
+            switch (_lastOperator)
             {
-                // Can't do comparisons here unless the type is a double
-                // which is a limitation of mongo, apparently
-                // and won't work if we're doing date comparisons
-                if (value.GetType().IsAssignableFrom(typeof(double)))
-                {
-                    switch (_lastOperator)
+                case " !== ":
+                    FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
+                    break;
+                case " === ":
+                    FlyWeight[_lastFlyProperty] = value;
+                    break;
+                default:
+                    // Can't do comparisons here unless the type is a double
+                    // which is a limitation of mongo, apparently
+                    // and won't work if we're doing date comparisons
+                    if (value != null && value.GetType().IsAssignableFrom(typeof(double)))
                     {
-                        case " > ":
-                            FlyWeight[_lastFlyProperty] = Q.GreaterThan((double)value);
-                            break;
-                        case " < ":
-                            FlyWeight[_lastFlyProperty] = Q.LessThan((double)value);
-                            break;
-                        case " <= ":
-                            FlyWeight[_lastFlyProperty] = Q.LessOrEqual((double)value);
-                            break;
-                        case " >= ":
-                            FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
-                            break;
-                        case " != ":
-                            FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
-                            break;
+                        switch (_lastOperator)
+                        {
+                            case " > ":
+                                FlyWeight[_lastFlyProperty] = Q.GreaterThan((double)value);
+                                break;
+                            case " < ":
+                                FlyWeight[_lastFlyProperty] = Q.LessThan((double)value);
+                                break;
+                            case " <= ":
+                                FlyWeight[_lastFlyProperty] = Q.LessOrEqual((double)value);
+                                break;
+                            case " >= ":
+                                FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
+                                break;
+                        }
                     }
-                }
-                else
-                {
-                    // Can't assign? Push to the $where
-                    IsComplex = true;
-                }
+                    else
+                    {
+                        // Can't assign? Push to the $where
+                        IsComplex = true;
+                    }
+                    break;
             }
-            else
-            {
-                FlyWeight[_lastFlyProperty] = value;
-            }
+
         }
 
         /// <summary>

@@ -34,6 +34,8 @@ namespace Norm.Tests
             _server.Dispose();
         }
 
+
+
         [Fact]
         public void FindUsesLimit()
         {
@@ -44,6 +46,18 @@ namespace Norm.Tests
 
             var result = _collection.Find(new { }, 3).ToArray();
             Assert.Equal(3, result.Length);
+        }
+
+        [Fact(Skip="broken")]
+        public void MongoCollection_Supports_LINQ()
+        {
+            _collection.Insert(new Person { Name = "BBB" });
+            _collection.Insert(new Person { Name = "CCC" });
+            _collection.Insert(new Person { Name = "AAA" });
+            _collection.Insert(new Person { Name = "DDD" });
+
+            //var result = _collection.Where(y => y.Name == "AAA").ToArray();
+            //Assert.Equal(1, result.Length);
         }
 
         [Fact]
@@ -58,6 +72,7 @@ namespace Norm.Tests
             Assert.Equal(4, result);
         }
 
+
         [Fact]
         public void Count_With_Filter_Works()
         {
@@ -66,8 +81,8 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "AAA" });
             _collection.Insert(new Person { Name = "DDD" });
 
-            var result = _collection.Count(new Person { Name = "AAA" });
-            Assert.Equal(1,result);
+            var result = _collection.Count(new { Name = "AAA" });
+            Assert.Equal(1, result);
         }
 
         [Fact]
@@ -81,6 +96,33 @@ namespace Norm.Tests
             Assert.Equal(1, find.Count());
         }
 
+        [Fact]
+        public void Element_Match_Matches()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var coll = db.GetCollection<Post>();
+                coll.Delete(new { });
+                coll.Insert(new Post
+                {
+                    Comments = new Comment[] { 
+                            new Comment { Text = "xabc" },
+                            new Comment { Text = "abc" } 
+                        }
+                },
+                    new Post { Tags = new String[] { "hello", "world" } },
+                    new Post
+                    {
+                        Comments = new Comment[] { 
+                            new Comment { Text = "xyz" },
+                            new Comment { Text = "abc" } 
+                        }
+                    });
+
+                Assert.Equal(1, coll.Find(new { Comments = Q.ElementMatch(new { Text = "xyz" }) }).Count());
+                Assert.Equal(2, coll.Find(new { Comments = Q.ElementMatch(new { Text = Q.Matches("^x") }) }).Count());
+            }
+        }
 
         [Fact]
         public void Where_Qualifier_Works()

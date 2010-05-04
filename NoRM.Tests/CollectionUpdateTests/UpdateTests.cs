@@ -26,6 +26,23 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void Save_Inserts_Or_Updates()
+        {
+            var c = new CheeseClubContact();
+            c.Id = ObjectId.NewObjectId();
+            _collection.Save(c);
+            var a = _collection.FindOne(new { c.Id });
+            //prove it was inserted.
+            Assert.Equal(c.Id, a.Id);
+
+            c.Name = "hello";
+            _collection.Save(c);
+            var b = _collection.FindOne(new { c.Id });
+            //prove that it was updated.
+            Assert.Equal(c.Name, b.Name);
+        }
+
+        [Fact]
         public void Update_Multiple_With_Lambda_Works()
         {
             _collection.Insert(new CheeseClubContact { Name = "Hello" }, new CheeseClubContact { Name = "World" });

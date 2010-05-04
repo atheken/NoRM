@@ -10,6 +10,12 @@ namespace Norm
     /// </summary>
     public class ConnectionStringBuilder : IOptionsContainer
     {
+        private String _connectionString;
+        public override string ToString()
+        {
+            return this._connectionString;
+        }
+
         private const string DEFAULT_DATABASE = "admin";
         private const int DEFAULT_PORT = 27017;
         private const string PROTOCOL = "mongodb://";
@@ -123,6 +129,7 @@ namespace Norm
                 .BuildServerList(sb);
 
             BuildOptions(builder, options);
+            builder._connectionString = connection;
             return builder;
         }
 

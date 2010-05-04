@@ -19,7 +19,7 @@ namespace Norm.Collections
     /// Mongo typed collection.
     /// </summary>
     /// <typeparam name="T">Collection type</typeparam>
-    public class MongoCollection<T> : IMongoCollection<T>
+    public partial class MongoCollection<T> : IMongoCollection<T>
     {
         /// <summary>
         /// This will have a different instance for each concrete version of <see cref="MongoCollection{T}"/>
@@ -47,6 +47,7 @@ namespace Norm.Collections
             _db = db;
             _connection = connection;
             _collectionName = collectionName;
+            //_queryContext = new MongoQuery<T>(MongoQueryProvider.Create(connection.ConnectionString));
         }
 
         /// <summary>
@@ -68,6 +69,30 @@ namespace Norm.Collections
                 }
 
                 return _updateable.Value;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to save or update an instance
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <remarks>
+        /// Only works when the Id property is of type ObjectId
+        /// </remarks>
+        public void Save(T entity)
+        {
+            AssertUpdatable();
+
+            var helper = TypeHelper.GetHelperForType(typeof(T));
+            var idProperty = helper.FindIdProperty();
+            var id = idProperty.Getter(entity);
+            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))
+            {
+                Insert(entity);
+            }
+            else
+            {
+                Update(new { Id = id }, entity, false, true);
             }
         }
 
@@ -133,25 +158,6 @@ namespace Norm.Collections
         }
 
 
-        /// <summary>
-        /// The document count.
-        /// </summary>
-        /// <param name="query">The query.</param>
-        /// <returns>The count.</returns>
-        public long Count(object query)
-        {
-            long retval = 0;
-
-            var f = _db.GetCollection<Expando>("$cmd")
-                .FindOne(new { count = _collectionName, query = query });
-
-            if (f != null)
-            {
-                retval = (long)f.Get<double>("n");
-            }
-
-            return retval;
-        }
 
         /// <summary>
         /// Deletes all indices on this collection.
@@ -214,6 +220,7 @@ namespace Norm.Collections
             Update(matchDocument, action, false, false);
 
         }
+
 
         /// <summary>TODO::Description.</summary>
         public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
