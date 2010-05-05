@@ -119,20 +119,27 @@ namespace Norm.Linq
             get { return _sbWhere.ToString(); }
         }
 
-        /// <summary>TODO::Description.</summary>
+        /// <summary>
+        /// Whether to use the "this" qualifier
+        /// </summary>
         public bool UseScopedQualifier { get; set; }
 
         /// <summary>
         /// Translates LINQ to MongoDB.
         /// </summary>
         /// <param name="exp">The expression.</param>
-        /// <returns>The translate.</returns>
+        /// <returns>The translated string</returns>
         public string Translate(Expression exp)
         {
             return Translate(exp, true);
         }
 
-        /// <summary>TODO::Description.</summary>
+        /// <summary>
+        /// Translates LINQ to MongoDB.
+        /// </summary>
+        /// <param name="exp">The expression.</param>
+        /// <param name="useScopedQualifier">Whether to use the "this" qualifier</param>
+        /// <returns>The translated string</returns>
         public string Translate(Expression exp, bool useScopedQualifier)
         {
             UseScopedQualifier = useScopedQualifier;
@@ -298,6 +305,122 @@ namespace Norm.Linq
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
         }
 
+        private string GetOperator(UnaryExpression u)
+        {
+            switch (u.NodeType)
+            {
+                case ExpressionType.Negate:
+                case ExpressionType.NegateChecked:
+                    return "-";
+                case ExpressionType.UnaryPlus:
+                    return "+";
+                case ExpressionType.Not:
+                    return IsBoolean(u.Operand.Type) ? "!" : "";
+                default:
+                    return "";
+            }
+        }
+
+        /// <summary>
+        /// Visits a Unary call.
+        /// </summary>
+        /// <param name="u">The expression.</param>
+        /// <returns></returns>
+        /// <exception cref="NotSupportedException">
+        /// </exception>
+        protected override Expression VisitUnary(UnaryExpression u)
+        {
+            string op = this.GetOperator(u);
+            switch (u.NodeType)
+            {
+                case ExpressionType.Not:
+                    if (IsBoolean(u.Operand.Type))
+                    {
+                        _sbWhere.Append(op);
+                        this.VisitPredicate(u.Operand, true);
+                    }
+                    else
+                    {
+                        _sbWhere.Append(op);
+                        this.Visit(u.Operand);
+                    }
+                    break;
+                case ExpressionType.Negate:
+                case ExpressionType.NegateChecked:
+                    _sbWhere.Append(op);
+                    this.Visit(u.Operand);
+                    break;
+                case ExpressionType.UnaryPlus:
+                    this.Visit(u.Operand);
+                    break;
+                case ExpressionType.Convert:
+                    // ignore conversions for now
+                    this.Visit(u.Operand);
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("The unary operator '{0}' is not supported", u.NodeType));
+            }
+            return u;
+        }
+
+        private bool IsBoolean(Type type)
+        {
+            return type == typeof(bool) || type == typeof(bool?);
+        }
+
+        private bool IsPredicate(Expression expr)
+        {
+            switch (expr.NodeType)
+            {
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                case ExpressionType.Or:
+                case ExpressionType.OrElse:
+                case ExpressionType.Call:
+                case ExpressionType.MemberAccess:
+                case ExpressionType.Convert:
+                    return !IsBoolean(((Expression)expr).Type);
+                case ExpressionType.Not:
+                case ExpressionType.Equal:
+                case ExpressionType.NotEqual:
+                case ExpressionType.LessThan:
+                case ExpressionType.LessThanOrEqual:
+                case ExpressionType.GreaterThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                case ExpressionType.Coalesce:
+                case ExpressionType.Divide:
+                case ExpressionType.ExclusiveOr:
+                case ExpressionType.LeftShift:
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked:
+                case ExpressionType.RightShift:
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                case ExpressionType.Constant:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private Expression VisitPredicate(Expression expr, bool IsNotOperator)
+        {
+            Visit(expr);
+            if (!IsPredicate(expr))
+            {
+                //_sbWhere.Append(" === true");
+                SetFlyValue(true && !IsNotOperator);
+            }
+            return expr;
+        }
+
+        private Expression VisitPredicate(Expression expr)
+        {
+            return VisitPredicate(expr, false);
+        }
+
         /// <summary>
         /// The get parameter expression.
         /// </summary>
@@ -347,12 +470,6 @@ namespace Norm.Linq
             return (ParameterExpression)parentExpression;
         }
 
-        /// <summary>
-        /// The get deep alias.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="graph">The graph.</param>
-        /// <returns></returns>
         private static string[] GetDeepAlias(Type type, string[] graph)
         {
             var graphParts = new string[graph.Length];
@@ -372,7 +489,6 @@ namespace Norm.Linq
             return graphParts;
         }
 
-        /// <summary>TODO::Description.</summary>
         private void VisitBinaryOperator(BinaryExpression b) {
 
             switch (b.NodeType) {
@@ -452,6 +568,7 @@ namespace Norm.Linq
 
             _sbWhere.Append(_lastOperator);
         }
+
         /// <summary>
         /// Visits a binary expression.
         /// </summary>
@@ -463,9 +580,9 @@ namespace Norm.Linq
         {
             ConditionalCount++;
             _sbWhere.Append("(");
-            Visit(b.Left);
+            VisitPredicate(b.Left);
             VisitBinaryOperator(b);
-            Visit(b.Right);
+            VisitPredicate(b.Right);
             _sbWhere.Append(")");
             return b;
         }
@@ -721,21 +838,6 @@ namespace Norm.Linq
         }
 
         /// <summary>
-        /// Strip quotes.
-        /// </summary>
-        /// <param name="e">The expression.</param>
-        /// <returns></returns>
-        private static Expression StripQuotes(Expression e)
-        {
-            while (e.NodeType == ExpressionType.Quote)
-            {
-                e = ((UnaryExpression)e).Operand;
-            }
-
-            return e;
-        }
-
-        /// <summary>
         /// The set flyweight value.
         /// </summary>
         /// <param name="value">The value.</param>
@@ -809,7 +911,7 @@ namespace Norm.Linq
 
         private void HandleSort(Expression exp, OrderBy orderby)
         {
-            var stripped = (LambdaExpression)StripQuotes(exp);
+            var stripped = (LambdaExpression)GetLambda(exp);
             var member = (MemberExpression)stripped.Body;
             this.SortFly[member.Member.Name] = orderby;
         }
@@ -818,7 +920,7 @@ namespace Norm.Linq
         {
             if (exp.Arguments.Count == 2)
             {
-                var stripped = (LambdaExpression)StripQuotes(exp.Arguments[1]);
+                var stripped = (LambdaExpression)GetLambda(exp.Arguments[1]);
                 var member = (MemberExpression)stripped.Body;
                 AggregatePropName = member.Member.Name;
             }
@@ -839,8 +941,8 @@ namespace Norm.Linq
                 _sbWhere.Append(" && ");
                 IsComplex = true;
             }
-           
-            Visit(StripQuotes(exp));
+
+            VisitPredicate(GetLambda(exp).Body);
 
             _whereWritten = true;
         }
@@ -953,7 +1055,7 @@ namespace Norm.Linq
                     this.MethodCall = m.Method.Name;
                     if (m.Arguments.Count > 1)
                     {
-                        var lambda = (LambdaExpression)StripQuotes(m.Arguments[1]);
+                        var lambda = (LambdaExpression)GetLambda(m.Arguments[1]);
                         if (lambda != null)
                         {
                             Visit(lambda.Body);

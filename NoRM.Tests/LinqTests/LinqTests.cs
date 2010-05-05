@@ -138,7 +138,24 @@ namespace Norm.Tests
 
                 var list = session.Products.Where(x => x.IsAvailable).ToList();
 
+                Assert.Equal(2, list.Count);
+                Assert.Equal(50, list.Sum(x=>x.Price));
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportBooleansWithNegation()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true });
+
+                var list = session.Products.Where(x => !x.IsAvailable).ToList();
+
                 Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Price);
             }
         }
 
@@ -154,6 +171,7 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => x.IsAvailable == true).ToList();
 
                 Assert.Equal(2, list.Count);
+                Assert.Equal(50, list.Sum(x => x.Price));
             }
         }
 
@@ -163,12 +181,47 @@ namespace Norm.Tests
             using (var session = new Session())
             {
                 session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
-                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false, IsStillAvailable = true });
                 session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true });
 
-                var list = session.Products.Where(x => x.IsAvailable || x.IsAvailable).ToList();
+                var list = session.Products.Where(x => !x.IsAvailable && (!x.IsAvailable || x.IsStillAvailable)).ToList();
 
-                Assert.Equal(2, list.Count);
+                Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Price);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportMultipleBooleans()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true, IsStillAvailable = true });
+                session.Add(new TestProduct { Name = "4", Price = 40 });
+
+                var list = session.Products.Where(x => x.IsAvailable && x.IsStillAvailable).ToList();
+
+                Assert.Equal(1, list.Count);
+                Assert.Equal(30, list[0].Price);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportMultipleBooleansWithNegation()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true, IsStillAvailable = true });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.IsAvailable && !x.IsStillAvailable).ToList();
+
+                Assert.Equal(1, list.Count);
+                Assert.Equal(20, list[0].Price);
             }
         }
 

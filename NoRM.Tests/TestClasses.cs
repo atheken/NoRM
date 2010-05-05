@@ -339,6 +339,7 @@ namespace Norm.Tests
         public Supplier Supplier { get; set; }
         public DateTime Available { get; set; }
         public bool IsAvailable { get; set; }
+        public bool IsStillAvailable { get; set; }
     }    
 
     internal class ProductSummary
