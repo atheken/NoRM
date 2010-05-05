@@ -198,22 +198,7 @@ namespace Norm.Linq
         {
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
-                var id = TypeHelper.GetHelperForType(m.Expression.Type).FindIdProperty();
-                if (id != null && id.Name == alias)
-                {
-                    alias = "_id";
-                }
-
-                if (UseScopedQualifier)
-                {
-                    _sbWhere.Append("this.");
-                }
-
-                _sbWhere.Append(alias);
-                _lastFlyProperty = alias;
-
-                return m;
+                return VisitAlias(m);
             }
 
             if (m.Member.DeclaringType == typeof(string))
@@ -270,39 +255,64 @@ namespace Norm.Linq
             else
             {
                 // this supports the "deep graph" name - "Product.Address.City"
-                var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-                
-                var fixedName = fullName
-                    .Skip(1)
-                    .Where(x => x != "First()")
-                    .Where(x => !x.StartsWith("get_Item("))
-                    .Select(x => Regex.Replace(x, @"\[[0-9]+\]$", ""))
-                    .ToArray();
-
-                if (!_isDeepGraphWithArrays)
-                    _isDeepGraphWithArrays = fullName.Length - fixedName.Length != 1;
-
-                var expressionRootType = GetParameterExpression(m.Expression);
-                if (expressionRootType != null)
-                {
-                    fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
-                }
-
-                if (UseScopedQualifier)
-                {
-                    _sbWhere.Append("this.");
-                }
-
-                string result = string.Join(".", fixedName);
-                
-                _sbWhere.Append(result);
-                _lastFlyProperty = result;
-
-                return m;
+                return VisitDeepAlias(m);
             }
 
             // if this is a property NOT on the object...
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
+        }
+
+        private Expression VisitDeepAlias(MemberExpression m)
+        {
+            var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                
+            var fixedName = fullName
+                .Skip(1)
+                .Where(x => x != "First()")
+                .Where(x => !x.StartsWith("get_Item("))
+                .Select(x => Regex.Replace(x, @"\[[0-9]+\]$", ""))
+                .ToArray();
+
+            if (!_isDeepGraphWithArrays)
+                _isDeepGraphWithArrays = fullName.Length - fixedName.Length != 1;
+
+            var expressionRootType = GetParameterExpression(m.Expression);
+            if (expressionRootType != null)
+            {
+                fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
+            }
+
+            if (UseScopedQualifier)
+            {
+                _sbWhere.Append("this.");
+            }
+
+            string result = string.Join(".", fixedName);
+                
+            _sbWhere.Append(result);
+            _lastFlyProperty = result;
+
+            return m;
+        }
+
+        private Expression VisitAlias(MemberExpression m)
+        {
+            var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
+            var id = TypeHelper.GetHelperForType(m.Expression.Type).FindIdProperty();
+            if (id != null && id.Name == alias)
+            {
+                alias = "_id";
+            }
+
+            if (UseScopedQualifier)
+            {
+                _sbWhere.Append("this.");
+            }
+
+            _sbWhere.Append(alias);
+            _lastFlyProperty = alias;
+
+            return m;
         }
 
         private string GetOperator(UnaryExpression u)
