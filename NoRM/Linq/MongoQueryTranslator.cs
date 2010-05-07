@@ -143,12 +143,22 @@ namespace Norm.Linq
 
             Visit(exp);
 
+            ProcessGuards();
             TransformToFlyWeightWhere();
 
-            if (_isDeepGraphWithArrays && IsComplex)
-                throw new NotSupportedException("You cannot use deep graph resolution if the query is considered complex");
-
             return WhereExpression;
+        }
+
+        private void ProcessGuards()
+        {
+            if (_isDeepGraphWithArrays && IsComplex)
+            {
+                var aggMethods = new[] { "Max", "Min", "Sum", "Average" };
+                if (aggMethods.Contains(MethodCall))
+                    throw new NotSupportedException("You cannot use deep graph resolution when using the following aggregates: " + string.Join(", ", aggMethods));
+
+                throw new NotSupportedException("You cannot use deep graph resolution if the query is considered complex");
+            }
         }
 
         private void TransformToFlyWeightWhere()

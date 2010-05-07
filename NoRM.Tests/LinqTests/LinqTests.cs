@@ -5,7 +5,6 @@ using Norm.Linq;
 using Xunit;
 using Norm.Configuration;
 using System.Text.RegularExpressions;
-using System.Diagnostics;
 
 namespace Norm.Tests
 {
@@ -243,17 +242,27 @@ namespace Norm.Tests
             {
                 session.Add(new TestProduct { Name = "test1", Price = 20 });
                 session.Add(new TestProduct { Name = "test", Price = 10 });
-                var product = session.Products.Where(p => p.Price == 10).First();
+                var product = session.Products.Where(p => p.Price == 10).Single();
                 Assert.Equal(10, product.Price);
             }
         }
 
 
         [Fact]
+        public void FirstQualifierQueryIsExecutedWithSort()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "test1", Price = 20 });
+                session.Add(new TestProduct { Name = "test", Price = 10 });
+                var product = session.Products.OrderBy(x=>x.Price).First();
+                Assert.Equal(10, product.Price);
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportExternalObjectProperties()
         {
-            // NOTE: This one fails because there's no support for parsing the object's property.
-            // This even more complex when using a nested type like a product's supplier
             var external = new TestProduct { Price = 10 };
             using (var session = new Session())
             {
@@ -270,8 +279,6 @@ namespace Norm.Tests
         [Fact]
         public void LinqQueriesShouldSupportExternalObjectProperties2()
         {
-            // NOTE: This one fails because there's no support for parsing the object's property.
-            // This even more complex when using a nested type like a product's supplier
             var another = new Supplier {Name = "test1"};
             var external = new TestProduct { Price = 10, Supplier = another };
             using (var session = new Session())
@@ -1250,7 +1257,7 @@ namespace Norm.Tests
         public void CanAQuerySupportArrayIdentifiers()
         {
             MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
-            using (var shoppers = new Shoppers(new MongoQueryProvider("test", "localhost", "27017", "")))
+            using (var shoppers = new Shoppers(MongoQueryProvider.Create("mongodb://localhost:27017/test")))
             {
                 shoppers.Drop<Shopper>();
                 shoppers.Add(new Shopper

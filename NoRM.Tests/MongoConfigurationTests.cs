@@ -43,7 +43,7 @@ namespace Norm.Tests
 
             //the mapping should cause the typehelper cache to be rebuilt with the new properties.
             MongoConfiguration.Initialize(cfg => cfg.For<User2>(j => j.ForProperty(k => k.LastName).UseAlias("LNAME")));
-            
+
             typeHelper = TypeHelper.GetHelperForType(typeof(User2));
             Assert.Equal("LastName", typeHelper.FindProperty("LNAME").Name);
         }
@@ -132,9 +132,9 @@ namespace Norm.Tests
         [Fact]
         public void Mongo_Configuration_With_Linq_Supports_Aliases()
         {
-            
+
             MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
-            using (var shoppers = new Shoppers(new MongoQueryProvider("test", "localhost", "27017", "")))
+            using (var shoppers = new Shoppers(MongoQueryProvider.Create("mongodb://localhost:27017/test")))
             {
                 shoppers.Drop<Shopper>();
                 shoppers.Add(new Shopper
@@ -176,7 +176,7 @@ namespace Norm.Tests
         public void Are_Queries_Fully_Linqified()
         {
             MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
-            using (var shoppers = new Shoppers(new MongoQueryProvider("test", "localhost", "27017", "")))
+            using (var shoppers = new Shoppers(MongoQueryProvider.Create("mongodb://localhost:27017/test")))
             {
                 shoppers.Drop<Shopper>();
                 shoppers.Add(new Shopper
@@ -229,7 +229,7 @@ namespace Norm.Tests
         [Fact]
         public void Can_correctly_determine_collection_name_when_discriminator_is_on_an_interface()
         {
-			var collectionName = MongoConfiguration.GetCollectionName(typeof(InterfaceDiscriminatedClass));
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(InterfaceDiscriminatedClass));
 
             Assert.Equal("IDiscriminated", collectionName);
         }

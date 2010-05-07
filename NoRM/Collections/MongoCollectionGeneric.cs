@@ -47,6 +47,7 @@ namespace Norm.Collections
             _db = db;
             _connection = connection;
             _collectionName = collectionName;
+            //_queryContext = new MongoQuery<T>(MongoQueryProvider.Create(connection.ConnectionString));
         }
 
         /// <summary>
@@ -68,6 +69,30 @@ namespace Norm.Collections
                 }
 
                 return _updateable.Value;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to save or update an instance
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <remarks>
+        /// Only works when the Id property is of type ObjectId
+        /// </remarks>
+        public void Save(T entity)
+        {
+            AssertUpdatable();
+
+            var helper = TypeHelper.GetHelperForType(typeof(T));
+            var idProperty = helper.FindIdProperty();
+            var id = idProperty.Getter(entity);
+            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))
+            {
+                Insert(entity);
+            }
+            else
+            {
+                Update(new { Id = id }, entity, false, true);
             }
         }
 
@@ -133,7 +158,7 @@ namespace Norm.Collections
         }
 
 
-       
+
         /// <summary>
         /// Deletes all indices on this collection.
         /// </summary>
@@ -195,6 +220,7 @@ namespace Norm.Collections
             Update(matchDocument, action, false, false);
 
         }
+
 
         /// <summary>TODO::Description.</summary>
         public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)

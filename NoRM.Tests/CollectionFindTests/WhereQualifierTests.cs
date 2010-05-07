@@ -13,7 +13,7 @@ namespace Norm.Tests
         private readonly MongoCollection<TestClass> _collection;
         public WhereQualifierTests()
         {
-            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");            
+            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
             _collection = _server.GetCollection<TestClass>("TestClasses");
         }
         public void Dispose()
@@ -29,10 +29,10 @@ namespace Norm.Tests
         [Fact]
         public void WhereExpressionShouldWorkWithFlyweight()
         {
-            _collection.Insert(new TestClass {ADouble = 1d});
-            _collection.Insert(new TestClass {ADouble = 2d});
-            _collection.Insert(new TestClass {ADouble = 3d});
-            _collection.Insert(new TestClass {ADouble = 4d});
+            _collection.Insert(new TestClass { ADouble = 1d });
+            _collection.Insert(new TestClass { ADouble = 2d });
+            _collection.Insert(new TestClass { ADouble = 3d });
+            _collection.Insert(new TestClass { ADouble = 4d });
 
             var count = _collection.Find();
             Assert.Equal(4, count.Count());
