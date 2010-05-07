@@ -12,7 +12,7 @@ namespace Norm.Protocol.Messages
     /// <typeparam name="T">Type to insert</typeparam>
     internal class InsertMessage<T> : Message
     {
-        private const int FOUR_MEGABYTES = 4*1024*1024;
+        private static readonly byte[] _opBytes = BitConverter.GetBytes((int)MongoOp.Insert);
         private readonly T[] _elementsToInsert;
 
         /// <summary>
@@ -23,8 +23,7 @@ namespace Norm.Protocol.Messages
         /// <param name="itemsToInsert">The items to insert.</param>
         public InsertMessage(IConnection connection, string collectionName, IEnumerable<T> itemsToInsert) : base(connection, collectionName)
         {
-            _elementsToInsert = itemsToInsert.ToArray();
-            _op = MongoOp.Insert;
+            _elementsToInsert = itemsToInsert.ToArray();            
         }
 
         /// <summary>
@@ -34,32 +33,22 @@ namespace Norm.Protocol.Messages
         /// </exception>
         public void Execute()
         {
-            var message = new List<byte[]>(_elementsToInsert.Length + 18)
-                              {
-                                  new byte[4], // allocate size for header
-                                  new byte[4], // allocate requestID;
-                                  new byte[4], // allocate responseID;
-                                  BitConverter.GetBytes((int) _op),
-                                  new byte[4], // allocate zero - because the docs told me to.
-                                  Encoding.UTF8.GetBytes(_collection).Concat(new byte[1]).ToArray(),
-                              };
-
-            foreach (var obj in _elementsToInsert)
-            {
-                var data = BsonSerializer.Serialize(obj);
-                if (data.Length > FOUR_MEGABYTES)
-                {
-                    throw new DocumentExceedsSizeLimitsException<T>(obj, data.Length);
-                }
-
-                message.Add(data);
+            var payload = new List<byte>();
+            foreach(var element in _elementsToInsert)
+            {                          
+                payload.AddRange(GetPayload(element));
             }
+            var collection = Encoding.UTF8.GetBytes(_collection);
+            var collectionLength = collection.Length + 1; //+1 is for collection's null terminator which we'll be adding in a bit
+            var length = 20 + payload.Count + collectionLength;
+            var header = new byte[length - payload.Count];
 
-            var size = message.Sum(y => y.Length);
-            message[0] = BitConverter.GetBytes(size);
-
-            var bytes = message.SelectMany(y => y).ToArray();
-            _connection.Write(bytes, 0, size);
+            Buffer.BlockCopy(BitConverter.GetBytes(length), 0, header, 0, 4);
+            Buffer.BlockCopy(_opBytes, 0, header, 12, 4);
+            Buffer.BlockCopy(collection, 0, header, 20, collection.Length);
+            
+            _connection.Write(header, 0, header.Length);
+            _connection.Write(payload.ToArray(), 0, payload.Count);     
         }
     }
 }

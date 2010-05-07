@@ -1,83 +1,56 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 
 namespace Norm.Protocol.Messages
 {
-    /// <summary>
-    /// Get more message.
-    /// </summary>
-    /// <typeparam name="T">Type to get
-    /// </typeparam>
+    /// <summary>Get more message.</summary>
+    /// <typeparam name="T">Type to get</typeparam>
     internal class GetMoreMessage<T> : Message
     {
-        private long _cursorId;
-        private int _limit;
+        private static readonly byte[] _opBytes = BitConverter.GetBytes((int) MongoOp.GetMore);
+        private static readonly byte[] _numberToGet = BitConverter.GetBytes(100);
+        private readonly long _cursorId;
+        private readonly int _limit;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetMoreMessage{T}"/> class.
-        /// </summary>
-        /// <param name="connection">
-        /// The connection.
-        /// </param>
-        /// <param name="fullyQualifiedCollectionName">
-        /// The fully qualified collection name.
-        /// </param>
-        /// <param name="cursorID">
-        /// The cursor id.
-        /// </param>
+        /// <summary>Initializes a new instance of the <see cref="GetMoreMessage{T}"/> class.</summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="fullyQualifiedCollectionName">The fully qualified collection name.</param>
+        /// <param name="cursorID">The cursor id.</param>
         /// <param name="limit"></param>
-        internal GetMoreMessage(IConnection connection,
-            string fullyQualifiedCollectionName, long cursorID, int limit) :
-            base(connection, fullyQualifiedCollectionName)
+        internal GetMoreMessage(IConnection connection, string fullyQualifiedCollectionName, long cursorID, int limit) : base(connection, fullyQualifiedCollectionName)
         {
-            _op = MongoOp.GetMore;
             _cursorId = cursorID;
             _limit = limit;
         }
 
-        /// <summary>
-        /// attempt to get more results.
-        /// </summary>
-        /// <returns>
-        /// </returns>
+        /// <summary>attempt to get more results.</summary>        
         public ReplyMessage<T> Execute()
         {
-            var requestBytes = new List<byte[]>(8){
-                  new byte[4],
-                  BitConverter.GetBytes(_requestID),
-                  new byte[4],
-                  BitConverter.GetBytes((int) _op),
-                  new byte[4],
-                  Encoding.UTF8.GetBytes(_collection)
-                  .Concat(new byte[1]).ToArray(),
-                  BitConverter.GetBytes(100),
-                  BitConverter.GetBytes(_cursorId)
-            };
-            var size = requestBytes.Sum(h => h.Length);
-            requestBytes[0] = BitConverter.GetBytes(size);
+            var collection = Encoding.UTF8.GetBytes(_collection);
+            var collectionLength = collection.Length + 1; //+1 is for collection's null terminator which we'll be adding in a bit
+            var length = 32 + collectionLength; 
+            var header = new byte[length];
 
-            _connection.Write(requestBytes.SelectMany(y => y).ToArray(), 0, size);
+            Buffer.BlockCopy(BitConverter.GetBytes(length), 0, header, 0, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(_requestID), 0, header, 4, 4);
+            Buffer.BlockCopy(_opBytes, 0, header, 12, 4);
+            Buffer.BlockCopy(collection, 0, header, 20, collection.Length);
+            Buffer.BlockCopy(_numberToGet, 0, header, 20 + collectionLength, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(_cursorId), 0, header, 24 + collectionLength, 8);
+            _connection.Write(header, 0, length);
 
             var stream = _connection.GetStream();
-
-            // so, the server can accepted the query,
-            // now we do the second part.
             while (!stream.DataAvailable)
             {
                 Thread.Sleep(1);
             }
-
             if (!stream.DataAvailable)
             {
-                throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " +
-                                           _connection.QueryTimeout.ToString());
+                throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + _connection.QueryTimeout.ToString());
             }
-
-            return new ReplyMessage<T>(_connection, _collection, new BinaryReader(new BufferedStream(stream)), this._op, this._limit);
+            return new ReplyMessage<T>(_connection, _collection, new BinaryReader(new BufferedStream(stream)), MongoOp.GetMore, this._limit);
         }
     }
 }

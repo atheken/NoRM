@@ -219,7 +219,6 @@
     <Compile Include="Protocol\Messages\InsertMessage.cs" />
     <Compile Include="Protocol\Messages\Message.cs" />
     <Compile Include="Protocol\MessageHeader.cs" />
-    <Compile Include="Protocol\Messages\QueryOptions.cs" />
     <Compile Include="Protocol\Messages\UpdateOption.cs" />
     <Compile Include="Protocol\MongoOp.cs" />
     <Compile Include="Protocol\Messages\ReplyMessage.cs" />

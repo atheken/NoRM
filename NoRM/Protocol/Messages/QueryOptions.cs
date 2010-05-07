@@ -1,4 +1,0 @@
-﻿
-namespace Norm.Protocol.Messages
-{
-}
