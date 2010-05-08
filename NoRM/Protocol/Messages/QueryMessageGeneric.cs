@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using Norm.BSON;
@@ -28,18 +26,15 @@ namespace Norm.Protocol.Messages
             //OplogReplay = 8 -- not for use by driver implementors
             NoCursorTimeout = 16
         }
-
-        private QueryOptions _queryOptions = QueryOptions.None;
+        private static readonly byte[] _opBytes = BitConverter.GetBytes((int)MongoOp.Query);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryMessage&lt;T, U&gt;"/> class.
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <param name="fullyQualifiedCollName">Name of the fully qualified coll.</param>
-        public QueryMessage(IConnection connection, string fullyQualifiedCollName)
-            : base(connection, fullyQualifiedCollName)
-        {
-            this._op = MongoOp.Query;
+        public QueryMessage(IConnection connection, string fullyQualifiedCollName) : base(connection, fullyQualifiedCollName)
+        {            
             NumberToTake = int.MaxValue;
         }
 
@@ -87,60 +82,26 @@ namespace Norm.Protocol.Messages
         /// <returns></returns>
         public ReplyMessage<T> Execute()
         {
-            var messageBytes = new List<byte[]>(9){
-                    new byte[4],
-                    BitConverter.GetBytes(this._requestID),
-                    BitConverter.GetBytes(0),
-                    BitConverter.GetBytes((int) MongoOp.Query),
-                    BitConverter.GetBytes((int) this._queryOptions),
-                    Encoding.UTF8.GetBytes(this._collection).Concat(new byte[1]).ToArray(),
-                    BitConverter.GetBytes(this.NumberToSkip),
-                    BitConverter.GetBytes(this.NumberToTake)
-            };
+            var payload1 = GetPayload();
+            var payload2 = (FieldSelection == null) ? new byte[0] : BsonSerializer.Serialize(FieldSelection);
+            
+            var collection = Encoding.UTF8.GetBytes(_collection);
+            var collectionLength = collection.Length + 1; //+1 is for collection's null terminator which we'll be adding in a bit
+            var headLength = 28 + collectionLength;
+            var length = headLength + payload1.Length + payload2.Length;
+            var header = new byte[headLength];
 
-            #region Message Body
-            //append the collection name and then null-terminate it.
-            if (this.Query != null && this.Query is ISystemQuery)
-            {
-                messageBytes.Add(BsonSerializer.Serialize(this.Query));
-            }
-            else
-            {
-                var fly = new Expando();
+            Buffer.BlockCopy(BitConverter.GetBytes(length), 0, header, 0, 4);
+            Buffer.BlockCopy(_opBytes, 0, header, 12, 4);
+            Buffer.BlockCopy(collection, 0, header, 20, collection.Length);
+            Buffer.BlockCopy(BitConverter.GetBytes(NumberToSkip), 0, header, 20 + collectionLength, 4);
+            Buffer.BlockCopy(BitConverter.GetBytes(NumberToTake), 0, header, 24 + collectionLength, 4);
 
-                //if (this.Query is Flyweight)
-                //{
-                //    var properties = (this.Query as Flyweight).AllProperties();
-                //    properties.ToList().ForEach(p => fly.Set(p.PropertyName, p.Value));
-                //}
-                fly["query"] = this.Query;
+            _connection.Write(header, 0, header.Length);
+            _connection.Write(payload1, 0, payload1.Length);
+            _connection.Write(payload2, 0, payload2.Length);
 
-                //null for this is WasSuccessful. needs to be here, though.
-                if (this.OrderBy != null)
-                {
-                    fly["orderby"] = this.OrderBy;
-                }                
-                //add more query options here, as needed.
-                messageBytes.Add(BsonSerializer.Serialize(fly));
-                
-                if (FieldSelection != null)
-                {
-                    messageBytes.Add(BsonSerializer.Serialize(FieldSelection));
-                }
-            }
-            #endregion
-
-            //now that we know the full size of the message, we can write it to the first array.
-            var size = messageBytes.Sum(y => y.Length);
-            messageBytes[0] = BitConverter.GetBytes(size);
-
-
-            var conn = _connection;
-            conn.Write(messageBytes.SelectMany(y => y).ToArray(), 0, size);
-
-            //so, the server can accepted the query, now we do the second part.
-
-            var stream = conn.GetStream();
+           var stream = _connection.GetStream();
             while (!stream.DataAvailable)
             {
                 Thread.Sleep(1);
@@ -148,9 +109,24 @@ namespace Norm.Protocol.Messages
 
             if (!stream.DataAvailable)
             {
-                throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + conn.QueryTimeout.ToString());
+                throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + _connection.QueryTimeout.ToString());
             }
-            return new ReplyMessage<T>(conn, this._collection, new BinaryReader(new BufferedStream(stream)), this._op, this.NumberToTake);
+            return new ReplyMessage<T>(_connection, this._collection, new BinaryReader(new BufferedStream(stream)), MongoOp.Query, this.NumberToTake);
+        }
+        
+        private byte[] GetPayload()
+        {
+            if (Query != null && Query is ISystemQuery)
+            {
+                return BsonSerializer.Serialize(Query);
+            }            
+            var fly = new Expando();
+            fly["query"] = Query;            
+            if (OrderBy != null)
+            {
+                fly["orderby"] = this.OrderBy;
+            }
+            return BsonSerializer.Serialize(fly);            
         }
     }
 }
