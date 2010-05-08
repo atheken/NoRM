@@ -253,11 +253,6 @@ namespace Norm.Linq
             return result;
         }
 
-        private T ExecuteMR<T>(string typeName, string map, string reduce)
-        {
-            return ExecuteMR<T>(typeName, map, reduce, null);
-        }
-        
         public void Dispose()
         {
             _server.Dispose();

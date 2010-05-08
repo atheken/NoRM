@@ -389,7 +389,7 @@ namespace Norm.Linq
                 case ExpressionType.Call:
                 case ExpressionType.MemberAccess:
                 case ExpressionType.Convert:
-                    return !IsBoolean(((Expression)expr).Type);
+                    return !IsBoolean(expr.Type);
                 case ExpressionType.Not:
                 case ExpressionType.Equal:
                 case ExpressionType.NotEqual:
@@ -921,7 +921,7 @@ namespace Norm.Linq
 
         private void HandleSort(Expression exp, OrderBy orderby)
         {
-            var stripped = (LambdaExpression)GetLambda(exp);
+            var stripped = GetLambda(exp);
             var member = (MemberExpression)stripped.Body;
             this.SortFly[member.Member.Name] = orderby;
         }
@@ -930,7 +930,7 @@ namespace Norm.Linq
         {
             if (exp.Arguments.Count == 2)
             {
-                var stripped = (LambdaExpression)GetLambda(exp.Arguments[1]);
+                var stripped = GetLambda(exp.Arguments[1]);
                 var member = (MemberExpression)stripped.Body;
                 AggregatePropName = member.Member.Name;
             }
@@ -1000,10 +1000,10 @@ namespace Norm.Linq
 
         private static string VisitRegexOptions(MethodCallExpression m, RegexOptions options)
         {
-            RegexOptions[] allowedOptions = new RegexOptions[] { RegexOptions.IgnoreCase, RegexOptions.Multiline, RegexOptions.None };
-            foreach (RegexOptions Type in Enum.GetValues(typeof(RegexOptions)))
+            var allowedOptions = new [] { RegexOptions.IgnoreCase, RegexOptions.Multiline, RegexOptions.None };
+            foreach (RegexOptions type in Enum.GetValues(typeof(RegexOptions)))
             {
-                if ((options & Type) == Type && !allowedOptions.Contains(Type))
+                if ((options & type) == type && !allowedOptions.Contains(type))
                     throw new NotSupportedException(string.Format("Only the RegexOptions.Ignore and RegexOptions.Multiline options are supported.", m.Method.Name));
             }
 
@@ -1065,7 +1065,7 @@ namespace Norm.Linq
                     this.MethodCall = m.Method.Name;
                     if (m.Arguments.Count > 1)
                     {
-                        var lambda = (LambdaExpression)GetLambda(m.Arguments[1]);
+                        var lambda = GetLambda(m.Arguments[1]);
                         if (lambda != null)
                         {
                             Visit(lambda.Body);
