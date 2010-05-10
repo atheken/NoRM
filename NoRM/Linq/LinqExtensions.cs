@@ -39,11 +39,11 @@ namespace Norm.Linq
         public static ExplainResponse Explain<T>(this IQueryable<T> expression)
         {
             var translator = new MongoQueryTranslator();
-            translator.Translate(expression.Expression, false);
+            var translationResults = translator.Translate(expression.Expression, false);
 
             if (expression is MongoQuery<T>)
             {
-                return (expression as MongoQuery<T>).Explain(translator.FlyWeight);
+                return (expression as MongoQuery<T>).Explain(translationResults.Where);
             }
 
             return null;
@@ -63,7 +63,7 @@ namespace Norm.Linq
             var index = translator.Translate(hint);
 
             var proxy = (MongoQueryExecutor<T, Expando>)find;
-            proxy.AddHint(index, direction);
+            proxy.AddHint(index.Query, direction);
             return find;
         }
 

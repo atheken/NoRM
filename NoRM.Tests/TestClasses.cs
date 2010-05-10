@@ -167,6 +167,7 @@ namespace Norm.Tests
         {
             _provider.DB.CreateCollection(new CreateCollectionOptions(name));
         }
+
     }
 
     internal class Post
@@ -338,6 +339,7 @@ namespace Norm.Tests
         public double Price { get; set; }
         public Supplier Supplier { get; set; }
         public DateTime Available { get; set; }
+        public int Quantity { get; set; }
         public bool IsAvailable { get; set; }
         public bool IsStillAvailable { get; set; }
     }    

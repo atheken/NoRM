@@ -16,105 +16,52 @@ namespace Norm.Linq
     /// </summary>
     public class MongoQueryTranslator : ExpressionVisitor
     {
-        /// <summary>TODO::Description.</summary>
+
         private int _takeCount = Int32.MaxValue;
-
-        /// <summary>TODO::Description.</summary>
         private string _lastFlyProperty = string.Empty;
-
-        /// <summary>TODO::Description.</summary>
         private string _lastOperator = " === ";
 
-        /// <summary>TODO::Description.</summary>
         private StringBuilder _sbWhere;
 
-        /// <summary>TODO::Description.</summary>
-        private StringBuilder _sbIndexed;
+        private Expando FlyWeight { get; set; }
+        private Expando SortFly { get; set; }
 
-        /// <summary>TODO::Description.</summary>
-        public Expando SortFly { get; set; }
-
-        /// <summary>TODO::Description.</summary>
-        public string SortDescendingBy { get; set; }
-
-        /// <summary>TODO::Description.</summary>
         bool _whereWritten = false;
-
-        /// <summary>TODO::Description.</summary>
         bool _isDeepGraphWithArrays = false;
 
-        /// <summary>TODO::Description.</summary>
-        public String AggregatePropName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>TODO::Description.</summary>
-        public String TypeName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>TODO::Description.</summary>
-        public string CollectionName{ get; set;}
-
-        /// <summary>TODO::Description.</summary>
-        public String MethodCall
-        {
-            get;
-            set;
-        }
+        private string AggregatePropName { get; set; }
+        private string TypeName { get; set; }
+        private string CollectionName { get; set; }
+        private string MethodCall { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether IsComplex.
         /// </summary>
-        public bool IsComplex { get; private set; }
-
-        /// <summary>
-        /// Gets optimized where clause.
-        /// </summary>
-        public string OptimizedWhere
-        {
-            get { return _sbIndexed.ToString(); }
-        }
+        private bool IsComplex { get; set; }
 
         /// <summary>
         /// Gets conditional count.
         /// </summary>
-        public int ConditionalCount { get; private set; }
-
-        /// <summary>
-        /// Gets FlyWeight.
-        /// </summary>
-        public Expando FlyWeight { get; private set; }
+        private int ConditionalCount { get; set; }
 
         /// <summary>
         /// How many to skip.
         /// </summary>
-        public int Skip { get; set; }
-
+        private int Skip { get; set; }
 
         /// <summary>
         /// How many to take (Int32.MaxValue) by default.
         /// </summary>
-        public int Take
+        private int Take
         {
-            get
-            {
-                return this._takeCount;
-            }
-            set
-            {
-                this._takeCount = value;
-            }
+            get { return _takeCount; }
+            set { _takeCount = value; }
         }
 
         /// <summary>
         /// Gets where expression.
         /// </summary>
-        public string WhereExpression
+        private string WhereExpression
         {
             get { return _sbWhere.ToString(); }
         }
@@ -129,7 +76,7 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="exp">The expression.</param>
         /// <returns>The translated string</returns>
-        public string Translate(Expression exp)
+        public QueryTranslationResults Translate(Expression exp)
         {
             return Translate(exp, true);
         }
@@ -140,11 +87,10 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         /// <param name="useScopedQualifier">Whether to use the "this" qualifier</param>
         /// <returns>The translated string</returns>
-        public string Translate(Expression exp, bool useScopedQualifier)
+        public QueryTranslationResults Translate(Expression exp, bool useScopedQualifier)
         {
             UseScopedQualifier = useScopedQualifier;
             _sbWhere = new StringBuilder();
-            _sbIndexed = new StringBuilder();
             FlyWeight = new Expando();
             SortFly = new Expando();
 
@@ -153,7 +99,19 @@ namespace Norm.Linq
             ProcessGuards();
             TransformToFlyWeightWhere();
 
-            return WhereExpression;
+            return new QueryTranslationResults
+                       {
+                           Where = FlyWeight,
+                           Sort = SortFly,
+                           Skip = Skip,
+                           Take = Take,
+                           CollectionName = CollectionName,
+                           MethodCall = MethodCall,
+                           AggregatePropName = AggregatePropName,
+                           IsComplex = IsComplex,
+                           TypeName = TypeName,
+                           Query = WhereExpression
+                       };
         }
 
         private void ProcessGuards()
@@ -839,7 +797,8 @@ namespace Norm.Linq
             {
                 if (m.Method.Name == "Count" && m.Arguments.Count == 1)
                 {
-                    return HandleMethodCall(m);
+                    HandleSubCount(m);
+                    return m;
                 }
 
                 throw new NotSupportedException(string.Format("Subqueries with {0} are not currently supported", m.Method.Name));
@@ -889,21 +848,26 @@ namespace Norm.Linq
                     // Can't do comparisons here unless the type is a double
                     // which is a limitation of mongo, apparently
                     // and won't work if we're doing date comparisons
-                    if (value != null && value.GetType().IsAssignableFrom(typeof(double)))
+                    if (value != null && (value.GetType().IsAssignableFrom(typeof(double))
+                        || value.GetType().IsAssignableFrom(typeof(int))
+                        || value.GetType().IsAssignableFrom(typeof(int?))
+                        || value.GetType().IsAssignableFrom(typeof(long))
+                        || value.GetType().IsAssignableFrom(typeof(DateTime))
+                        || value.GetType().IsAssignableFrom(typeof(DateTime?))))
                     {
                         switch (_lastOperator)
                         {
                             case " > ":
-                                FlyWeight[_lastFlyProperty] = Q.GreaterThan((double)value);
+                                FlyWeight[_lastFlyProperty] = Q.GreaterThan(value);
                                 break;
                             case " < ":
-                                FlyWeight[_lastFlyProperty] = Q.LessThan((double)value);
+                                FlyWeight[_lastFlyProperty] = Q.LessThan(value);
                                 break;
                             case " <= ":
-                                FlyWeight[_lastFlyProperty] = Q.LessOrEqual((double)value);
+                                FlyWeight[_lastFlyProperty] = Q.LessOrEqual(value);
                                 break;
                             case " >= ":
-                                FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
+                                FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual(value);
                                 break;
                         }
                     }
@@ -993,6 +957,7 @@ namespace Norm.Linq
         {
             Visit(m.Arguments[0]);
             _sbWhere.Append(".length");
+            IsComplex = true;
         }
 
         private void HandleRegexIsMatch(MethodCallExpression m)
@@ -1073,9 +1038,6 @@ namespace Norm.Linq
                 case "Average":
                     HandleAggregate(m);
                     break;
-                case "Count":
-                    HandleSubCount(m);
-                    return m;
                 default:
                     this.Take = 1;
                     this.MethodCall = m.Method.Name;

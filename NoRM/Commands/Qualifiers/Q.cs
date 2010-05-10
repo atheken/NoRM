@@ -56,6 +56,16 @@ namespace Norm
         }
 
         /// <summary>
+        /// Builds a $lt qualifier for the search.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public static LessThanQualifier LessThan(object value)
+        {
+            return new LessThanQualifier(value);
+        }
+ 
+        /// <summary>
         /// Builds a $lte qualifier for the search.
         /// </summary>
         /// <param name="value">The value.</param>
@@ -66,11 +76,31 @@ namespace Norm
         }
 
         /// <summary>
+        /// Builds a $lte qualifier for the search.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public static LessThanQualifier LessOrEqual(object value)
+        {
+            return new LessThanQualifier(value);
+        }
+
+        /// <summary>
         /// Builds a $gte qualifier for the search.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns></returns>
         public static GreaterOrEqualQualifier GreaterOrEqual(double value)
+        {
+            return new GreaterOrEqualQualifier(value);
+        }
+
+        /// <summary>
+        /// Builds a $gte qualifier for the search.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        public static GreaterOrEqualQualifier GreaterOrEqual(object value)
         {
             return new GreaterOrEqualQualifier(value);
         }
@@ -90,7 +120,7 @@ namespace Norm
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns></returns>
-        public static GreaterThanQualifier GreaterThan(DateTime value)
+        public static GreaterThanQualifier GreaterThan(object value)
         {
             return new GreaterThanQualifier(value);
         }

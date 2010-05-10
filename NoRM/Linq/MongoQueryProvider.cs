@@ -106,6 +106,7 @@ namespace Norm.Linq
         }
 
         /// <summary>
+        /// Executes the Linq expression
         /// </summary>
         /// <param name="expression">An expression tree that represents a LINQ query.</param>
         /// <returns>The execute.</returns>
@@ -114,85 +115,17 @@ namespace Norm.Linq
             expression = PartialEvaluator.Eval(expression, this.CanBeEvaluatedLocally);
 
             var translator = new MongoQueryTranslator();
-            var qry = translator.Translate(expression);
-            var fly = translator.FlyWeight;
+            var results = translator.Translate(expression);
 
-            // This is the actual Query mechanism...            
-            var collection = new MongoCollection<T>(translator.CollectionName, DB, DB.CurrentConnection);
-
-            string map = "", reduce = "", finalize = "";
-            if (!string.IsNullOrEmpty(translator.AggregatePropName))
-            {
-                map = "function(){emit(0, {val: this." + translator.AggregatePropName + ",tSize:1} )};";
-                if (!string.IsNullOrEmpty(qry))
-                {
-                    map = "function(){if (" + qry + ") {emit(0, {val: this." + translator.AggregatePropName + ",tSize:1} )};}";
-                }
-
-                finalize = "function(key, res){ return res.val; }";
-            }
-
-            switch (translator.MethodCall)
-            {
-                case "SingleOrDefault":
-                case "FirstOrDefault":
-                case "Single":
-                case "First":
-                    translator.Take = 1;
-                    break;
-            }
-
-            object result;
-            switch (translator.MethodCall)
-            {
-                case "Any":
-                    result = collection.Count(fly) > 0;
-                    break;
-                case "Count":
-                    result = collection.Count(fly);
-                    break;
-                case "Sum":
-                    reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; i++){ sum+=values[i].val;} return {val:sum};}";
-                    result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
-                    break;
-                case "Average":
-                    reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; i++){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
-                    finalize = "function(key, res){ return res.val / res.tSize; }";
-                    result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
-                    break;
-                case "Min":
-                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
-                    result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
-                    break;
-                case "Max":
-                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
-                    result = ExecuteMR<double>(translator.TypeName, map, reduce, finalize);
-                    break;
-                default:
-                    if (translator.SortFly.AllProperties().Count() > 0)
-                    {
-                        translator.SortFly.ReverseKitchen();
-                        result = collection.Find(fly, translator.SortFly, translator.Take, translator.Skip, collection.FullyQualifiedName);
-                    }
-                    else
-                    {
-                        result = collection.Find(fly, translator.Take, translator.Skip);
-                    }
-
-                    switch (translator.MethodCall)
-                    {
-                        case "SingleOrDefault": result = ((IEnumerable<T>)result).SingleOrDefault(); break;
-                        case "FirstOrDefault": result = ((IEnumerable<T>)result).FirstOrDefault(); break;
-                        case "Single": result = ((IEnumerable<T>)result).Single(); break;
-                        case "First": result = ((IEnumerable<T>)result).First(); break;
-                    }
-
-                    break;
-            }
-
-            return result;
+            var executor = new MongoQueryExecutor(_server, results);
+            return executor.Execute<T>();
         }
 
+        /// <summary>
+        /// Executes the Linq expression
+        /// </summary>
+        /// <param name="expression">An expression tree that represents a LINQ query.</param>
+        /// <returns>The execute.</returns>
         public object Execute(Expression expression)
         {
             var elementType = LinqTypeHelper.GetElementType(expression.Type);
@@ -231,26 +164,6 @@ namespace Norm.Linq
                 return true;
             return expression.NodeType != ExpressionType.Parameter &&
                    expression.NodeType != ExpressionType.Lambda;
-        }
-
-        /// <summary>
-        /// Actual execution of the MapReduce stuff (thanks Karl!)
-        /// </summary>
-        /// <typeparam name="T">Type to map and reduce</typeparam>
-        /// <param name="typeName">Name of the type.</param>
-        /// <param name="map">The map.</param>
-        /// <param name="reduce">The reduce.</param>
-        /// <param name="finalize">The finalize.</param>
-        /// <returns></returns>
-        private T ExecuteMR<T>(string typeName, string map, string reduce, string finalize)
-        {
-            var mr = Server.CreateMapReduce();
-            var response = mr.Execute(new MapReduceOptions(typeName) {Map = map, Reduce = reduce, Finalize = finalize});
-            var coll = response.GetCollection<MapReduceResult<T>>();
-            var r = coll.Find().FirstOrDefault();
-            T result = r.Value;
-            
-            return result;
         }
 
         public void Dispose()

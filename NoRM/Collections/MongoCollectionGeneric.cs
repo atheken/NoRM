@@ -341,7 +341,7 @@ namespace Norm.Collections
             var indexProperty = translator.Translate(index, false);
 
             var key = new Expando();
-            key.Set(indexProperty, direction);
+            key.Set(indexProperty.ComplexQuery, direction);
 
             var collection = _db.GetCollection<MongoIndex<T>>("system.indexes");
             collection.Insert(new MongoIndex<T>

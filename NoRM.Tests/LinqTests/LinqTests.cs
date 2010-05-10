@@ -258,7 +258,62 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportNativeComparisonWithInt()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Quantity = 10 });
+                session.Add(new TestProduct { Name = "2", Quantity = 20, Price = 10 });
+                session.Add(new TestProduct { Name = "3", Quantity = 30 });
+
+                var list = session.Products.Where(x => x.Quantity >= 20 && x.Price == 10).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(20, list[0].Quantity);
+
+                list = session.Products.Where(x => x.Quantity <= 20 && x.Price == 10).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(20, list[0].Quantity);
+                
+                list = session.Products.Where(x => x.Quantity < 20).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Quantity);
+
+                list = session.Products.Where(x => x.Quantity > 20).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(30, list[0].Quantity);
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportDateTime()
+        {
+            using (var session = new Session())
+            {
+                var date = new DateTime(2010, 3, 1, 15, 33, 33);
+                var datelater = new DateTime(2010, 3, 1, 15, 33, 34);
+
+                session.Add(new TestProduct { Name = "1", Price = 10, Available = datelater });
+                session.Add(new TestProduct { Name = "2", Price = 20, Available = date });
+                session.Add(new TestProduct { Name = "3", Price = 30, Available = date });
+
+                var list = session.Products.Where(x => x.Available > date).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Price);
+
+                var datefromdb = list[0].Available.ToLocalTime();
+
+                Assert.Equal(datelater.Year, datefromdb.Year);
+                Assert.Equal(datelater.Month, datefromdb.Month);
+                Assert.Equal(datelater.Day, datefromdb.Day);
+                Assert.Equal(datelater.Hour, datefromdb.Hour);
+                Assert.Equal(datelater.Minute, datefromdb.Minute);
+                Assert.Equal(datelater.Second, datefromdb.Second);
+
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportDateTimeInComplexQuery()
         {
             using (var session = new Session())
             {
