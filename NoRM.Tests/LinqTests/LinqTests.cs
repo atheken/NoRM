@@ -258,6 +258,60 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportDateTime()
+        {
+            using (var session = new Session())
+            {
+                var date = new DateTime(2010, 3, 1, 15, 33, 33);
+
+                session.Add(new TestProduct { Name = "1", Price = 10, Available = date });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Available == date || x.Price == 13).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Price);
+
+                var datefromdb = list[0].Available.ToLocalTime();
+
+                Assert.Equal(date.Year, datefromdb.Year);
+                Assert.Equal(date.Month, datefromdb.Month);
+                Assert.Equal(date.Day, datefromdb.Day);
+                Assert.Equal(date.Hour, datefromdb.Hour);
+                Assert.Equal(date.Minute, datefromdb.Minute);
+                Assert.Equal(date.Second, datefromdb.Second);
+
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportDateTimeNested()
+        {
+            using (var session = new Session())
+            {
+                var date = new DateTime(2010, 3, 1, 15, 33, 33);
+
+                session.Add(new TestProduct { Name = "1", Price = 10, Available = date });
+                session.Add(new TestProduct { Name = "2", Price = 20, Supplier = new Supplier { CreatedOn = date } });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Supplier.CreatedOn == date || x.Price == 13).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(20, list[0].Price);
+
+                var datefromdb = list[0].Supplier.CreatedOn.ToLocalTime();
+
+                Assert.Equal(date.Year, datefromdb.Year);
+                Assert.Equal(date.Month, datefromdb.Month);
+                Assert.Equal(date.Day, datefromdb.Day);
+                Assert.Equal(date.Hour, datefromdb.Hour);
+                Assert.Equal(date.Minute, datefromdb.Minute);
+                Assert.Equal(date.Second, datefromdb.Second);
+
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportDivision()
         {
             using (var session = new Session())

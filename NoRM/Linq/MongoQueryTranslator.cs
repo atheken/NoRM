@@ -282,6 +282,8 @@ namespace Norm.Linq
                 fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
             }
 
+            VisitDateTimeProperty(m);
+
             if (UseScopedQualifier)
             {
                 _sbWhere.Append("this.");
@@ -304,6 +306,8 @@ namespace Norm.Linq
                 alias = "_id";
             }
 
+            VisitDateTimeProperty(m);
+ 
             if (UseScopedQualifier)
             {
                 _sbWhere.Append("this.");
@@ -313,6 +317,18 @@ namespace Norm.Linq
             _lastFlyProperty = alias;
 
             return m;
+        }
+
+        private void VisitDateTimeProperty(MemberExpression m)
+        {
+            if (m.Member.MemberType == MemberTypes.Property || m.Member.MemberType == MemberTypes.Field)
+            {
+                var property = m.Member as PropertyInfo;
+                if (property != null && (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?)))
+                {
+                    _sbWhere.Append("+");
+                }
+            }
         }
 
         private string GetOperator(UnaryExpression u)
@@ -635,7 +651,7 @@ namespace Norm.Linq
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.DateTime:
-                        var val = "new Date(" + (long)((DateTime)c.Value).Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
+                        var val = "+new Date(" + (long)((DateTime)c.Value).ToUniversalTime().Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
                         _sbWhere.Append(val);
                         SetFlyValue(c.Value);
                         break;
