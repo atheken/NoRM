@@ -341,16 +341,16 @@ namespace Norm.Collections
             var indexProperty = translator.Translate(index, false);
 
             var key = new Expando();
-            key.Set(indexProperty.ComplexQuery, direction);
+            key.Set(indexProperty.Query, direction);
 
             var collection = _db.GetCollection<MongoIndex<T>>("system.indexes");
             collection.Insert(new MongoIndex<T>
-            {
-                Key = key,
-                Namespace = FullyQualifiedName,
-                Name = indexName,
-                Unique = isUnique
-            });
+                                  {
+                                      Key = key,
+                                      Namespace = FullyQualifiedName,
+                                      Name = indexName,
+                                      Unique = isUnique
+                                  });
         }
 
         /// <summary>
