@@ -363,7 +363,7 @@ namespace Norm.Linq
                 case ExpressionType.Call:
                 case ExpressionType.MemberAccess:
                 case ExpressionType.Convert:
-                    return !IsBoolean(expr.Type);
+                    return IsBoolean(expr.Type);
                 case ExpressionType.Not:
                 case ExpressionType.Equal:
                 case ExpressionType.NotEqual:
@@ -383,19 +383,19 @@ namespace Norm.Linq
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
                 case ExpressionType.Constant:
-                    return true;
-                default:
                     return false;
+                default:
+                    return true;
             }
         }
 
         private Expression VisitPredicate(Expression expr, bool IsNotOperator)
         {
             Visit(expr);
-            if (!IsPredicate(expr))
+            if (IsPredicate(expr))
             {
                 //_sbWhere.Append(" === true");
-                SetFlyValue(true && !IsNotOperator);
+                SetFlyValue(!IsNotOperator);
             }
             return expr;
         }
@@ -668,7 +668,7 @@ namespace Norm.Linq
                 {
                     case "StartsWith":
                         {
-                            string value = (string)m.Arguments[0].GetConstantValue();
+                            string value = m.Arguments[0].GetConstantValue<string>();
 
                             _sbWhere.Append("(");
                             Visit(m.Object);
@@ -680,7 +680,7 @@ namespace Norm.Linq
                         }
                     case "EndsWith":
                         {
-                            string value = (string)m.Arguments[0].GetConstantValue();
+                            string value = m.Arguments[0].GetConstantValue<string>();
 
                             //_sbWhere.Append("(");
                             //Visit(m.Object);
@@ -701,7 +701,7 @@ namespace Norm.Linq
                         }
                     case "Contains":
                         {
-                            string value = (string)m.Arguments[0].GetConstantValue();
+                            string value = m.Arguments[0].GetConstantValue<string>();
 
                             _sbWhere.Append("(");
                             Visit(m.Object);
@@ -789,8 +789,10 @@ namespace Norm.Linq
             {
                 if (m.Method.Name == "Contains")
                 {
-                    return HandleMethodCall(m);
+                    HandleContains(m);
+                    return m;
                 }
+
                 throw new NotSupportedException(string.Format("Subqueries with {0} are not currently supported", m.Method.Name));
             }
             else if (typeof(Enumerable).IsAssignableFrom(m.Method.DeclaringType))
@@ -887,7 +889,7 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         private void HandleSkip(Expression exp)
         {
-            this.Skip = (int)exp.GetConstantValue();
+            this.Skip = exp.GetConstantValue<int>();
         }
 
         /// <summary>
@@ -896,7 +898,7 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         private void HandleTake(Expression exp)
         {
-            this.Take = (int)exp.GetConstantValue();
+            this.Take = exp.GetConstantValue<int>();
         }
 
         private void HandleSort(Expression exp, OrderBy orderby)
@@ -939,7 +941,7 @@ namespace Norm.Linq
 
         private void HandleContains(MethodCallExpression m)
         {
-            var collection = (IEnumerable)m.Object.GetConstantValue();
+            var collection = m.Object.GetConstantValue<IEnumerable>();
 
             _sbWhere.Append("(");
             foreach (var item in collection)
@@ -966,11 +968,11 @@ namespace Norm.Linq
             var jsoptions = "g";
             if (m.Arguments.Count == 3)
             {
-                options = (RegexOptions)m.Arguments[2].GetConstantValue();
+                options = m.Arguments[2].GetConstantValue<RegexOptions>();
                 jsoptions = VisitRegexOptions(m, options);
             }
 
-            string value = (string)m.Arguments[1].GetConstantValue();
+            string value = m.Arguments[1].GetConstantValue<string>();
 
             _sbWhere.AppendFormat("(new RegExp(\"{0}\",\"{1}\")).test(", value.EscapeDoubleQuotes(), jsoptions);
             Visit(m.Arguments[0]);
@@ -1015,9 +1017,6 @@ namespace Norm.Linq
                 case "Where":
                     TranslateToWhere(m);
                     break;
-                case "Contains":
-                    HandleContains(m);
-                    return m;
                 case "OrderBy":
                 case "ThenBy":
                     HandleSort(m.Arguments[1], OrderBy.Ascending);

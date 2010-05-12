@@ -18,13 +18,13 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="exp">The exp.</param>
         /// <returns>The get constant value.</returns>
-        public static object GetConstantValue(this Expression exp)
+        public static T GetConstantValue<T>(this Expression exp)
         {
-            object result = null;
+            T result = default(T);
             if (exp is ConstantExpression)
             {
                 var c = (ConstantExpression) exp;
-                result = c.Value;
+                result = (T)c.Value;
             }
 
             return result;
@@ -72,7 +72,7 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="str">The string</param>
         /// <returns>The escaped string.</returns>
-        public static object EscapeDoubleQuotes(this string str)
+        public static string EscapeDoubleQuotes(this string str)
         {
             return str.Replace("\"", "\\\"");
         }
