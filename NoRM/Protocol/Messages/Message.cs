@@ -1,5 +1,4 @@
-﻿using Norm.Protocol.Messages;
-using Norm.Responses;
+﻿using Norm.BSON;
 
 namespace Norm.Protocol
 {
@@ -8,6 +7,8 @@ namespace Norm.Protocol
     /// </summary>
     public class Message
     {
+        protected const int FOUR_MEGABYTES = 4 * 1024 * 1024;
+        
         /// <summary>TODO::Description.</summary>
         protected string _collection;
 
@@ -18,13 +19,12 @@ namespace Norm.Protocol
         protected int _messageLength;
 
         /// <summary>TODO::Description.</summary>
-        protected MongoOp _op = MongoOp.Message;
-
-        /// <summary>TODO::Description.</summary>
         protected int _requestID;
 
         /// <summary>TODO::Description.</summary>
         protected int _responseID;
+
+        protected MongoOp _op;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Message"/> class.
@@ -39,6 +39,16 @@ namespace Norm.Protocol
         {
             _connection = connection;
             _collection = fullyQualifiedCollName;
+        }
+        
+        protected static byte[] GetPayload<X>(X data)
+        {
+            var payload = BsonSerializer.Serialize(data);
+            if (payload.Length > FOUR_MEGABYTES)
+            {
+                throw new DocumentExceedsSizeLimitsException<X>(data, payload.Length);
+            }
+            return payload;
         }
     }
 }

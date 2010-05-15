@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Norm.BSON;
 
 namespace Norm.Protocol.Messages
@@ -13,8 +12,9 @@ namespace Norm.Protocol.Messages
     /// </typeparam>
     public class ReplyMessage<T> : Message, IDisposable
     {
-        private List<T> _results = null;
-        private int _limit;
+        private readonly List<T> _results;
+        private readonly int _limit;
+        
         private MongoOp _originalOperation;
         /// <summary>
         /// Initializes a new instance of the <see cref="ReplyMessage{T}"/> class.

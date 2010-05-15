@@ -128,6 +128,104 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportBooleans()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true });
+
+                var list = session.Products.Where(x => x.IsAvailable).ToList();
+
+                Assert.Equal(2, list.Count);
+                Assert.Equal(50, list.Sum(x=>x.Price));
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportBooleansWithNegation()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true });
+
+                var list = session.Products.Where(x => !x.IsAvailable).ToList();
+
+                Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Price);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportBooleansExplicitly()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true });
+
+                var list = session.Products.Where(x => x.IsAvailable == true).ToList();
+
+                Assert.Equal(2, list.Count);
+                Assert.Equal(50, list.Sum(x => x.Price));
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportBooleansInComplexQuery()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false, IsStillAvailable = true });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true });
+
+                var list = session.Products.Where(x => !x.IsAvailable && (!x.IsAvailable || x.IsStillAvailable)).ToList();
+
+                Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Price);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportMultipleBooleans()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true, IsStillAvailable = true });
+                session.Add(new TestProduct { Name = "4", Price = 40 });
+
+                var list = session.Products.Where(x => x.IsAvailable && x.IsStillAvailable).ToList();
+
+                Assert.Equal(1, list.Count);
+                Assert.Equal(30, list[0].Price);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportMultipleBooleansWithNegation()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "2", Price = 20, IsAvailable = true });
+                session.Add(new TestProduct { Name = "1", Price = 10, IsAvailable = false });
+                session.Add(new TestProduct { Name = "3", Price = 30, IsAvailable = true, IsStillAvailable = true });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.IsAvailable && !x.IsStillAvailable).ToList();
+
+                Assert.Equal(1, list.Count);
+                Assert.Equal(20, list[0].Price);
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportBitwiseOr()
         {
             using (var session = new Session())
@@ -156,6 +254,60 @@ namespace Norm.Tests
 
                 list = session.Products.Where(x => (x.Inventory.Count() & 1) == 1).ToList();
                 Assert.Equal(2, list.Count);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportDateTime()
+        {
+            using (var session = new Session())
+            {
+                var date = new DateTime(2010, 3, 1, 15, 33, 33);
+
+                session.Add(new TestProduct { Name = "1", Price = 10, Available = date });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Available == date || x.Price == 13).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Price);
+
+                var datefromdb = list[0].Available.ToLocalTime();
+
+                Assert.Equal(date.Year, datefromdb.Year);
+                Assert.Equal(date.Month, datefromdb.Month);
+                Assert.Equal(date.Day, datefromdb.Day);
+                Assert.Equal(date.Hour, datefromdb.Hour);
+                Assert.Equal(date.Minute, datefromdb.Minute);
+                Assert.Equal(date.Second, datefromdb.Second);
+
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportDateTimeNested()
+        {
+            using (var session = new Session())
+            {
+                var date = new DateTime(2010, 3, 1, 15, 33, 33);
+
+                session.Add(new TestProduct { Name = "1", Price = 10, Available = date });
+                session.Add(new TestProduct { Name = "2", Price = 20, Supplier = new Supplier { CreatedOn = date } });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+
+                var list = session.Products.Where(x => x.Supplier.CreatedOn == date || x.Price == 13).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(20, list[0].Price);
+
+                var datefromdb = list[0].Supplier.CreatedOn.ToLocalTime();
+
+                Assert.Equal(date.Year, datefromdb.Year);
+                Assert.Equal(date.Month, datefromdb.Month);
+                Assert.Equal(date.Day, datefromdb.Day);
+                Assert.Equal(date.Hour, datefromdb.Hour);
+                Assert.Equal(date.Minute, datefromdb.Minute);
+                Assert.Equal(date.Second, datefromdb.Second);
+
             }
         }
 
