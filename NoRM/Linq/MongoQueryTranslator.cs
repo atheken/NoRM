@@ -997,7 +997,7 @@ namespace Norm.Linq
                 _prefixAlias = string.Empty;
 
                 if (IsComplex)
-                    throw new Exception("Subqueries with Any not supported with complex queries");
+                    throw new NotSupportedException("Subqueries with Any are not supported with complex queries");
             }
         }
 
