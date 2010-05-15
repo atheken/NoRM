@@ -205,6 +205,7 @@ namespace Norm.Tests
     internal class Comment
     {
         public string Text { get; set; }
+        public string Name { get; set; }
     }
 
     internal class CheeseClubContact

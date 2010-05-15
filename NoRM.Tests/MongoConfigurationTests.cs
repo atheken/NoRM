@@ -203,7 +203,7 @@ namespace Norm.Tests
                     }
                 });
 
-                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers.First().Name == "Supplier1").ToList();
+                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers.Any(y=>y.Name == "Supplier1")).ToList();
                 Assert.Equal("John", deepQuery[0].Name);
                 Assert.Equal("Cart1", deepQuery[0].Cart.Name);
                 Assert.Equal(1, deepQuery.Count);

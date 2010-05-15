@@ -1303,21 +1303,56 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void CanQueryWithinEmbeddedArray()
+        public void CanQueryWithinEmbeddedArrayUsingAny()
         {
             using (var session = new Session())
             {
                 var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
-                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA" }, new Comment { Text = "commentB" } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1" }, new Comment { Text = "commentB", Name = "name2" } } };
 
                 session.Add(post1);
                 session.Add(post2);
 
-                //The following query is not supported yet but can be written as below
-                //var found = session.Posts.Where(p => p.Comments.Any(a => a.Text == "commentA")).SingleOrDefault();
-                var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
+                var found = session.Posts.Where(p => p.Comments.Any(x => x.Text == "commentA")).SingleOrDefault();
+                //var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
 
                 Assert.Equal("Second", found.Title);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingAnyWithNoParameters()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Comments = new List<Comment>() };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1" }, new Comment { Text = "commentB", Name = "name2" } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var found = session.Posts.Where(p => p.Comments.Any()).SingleOrDefault();
+
+                Assert.Equal("Second", found.Title);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingArrayIdentifiers()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1" }, new Comment { Text = "commentB", Name = "name2" } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
+                Assert.Equal("Second", found.Title);
+
+                found = session.Posts.Where(p => p.Comments[1].Text == "comment2").SingleOrDefault();
+                Assert.Equal("First", found.Title);
             }
         }
 
@@ -1491,7 +1526,7 @@ namespace Norm.Tests
                     }
                 });
 
-                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers[0].Name == "Supplier4").ToList();
+                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers.Any(y=>y.Name == "Supplier4")).ToList();
                 Assert.Equal("Jane", deepQuery[0].Name);
                 Assert.Equal("Cart2", deepQuery[0].Cart.Name);
                 Assert.Equal(1, deepQuery.Count);
