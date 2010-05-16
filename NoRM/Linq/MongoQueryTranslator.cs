@@ -16,105 +16,53 @@ namespace Norm.Linq
     /// </summary>
     public class MongoQueryTranslator : ExpressionVisitor
     {
-        /// <summary>TODO::Description.</summary>
+
         private int _takeCount = Int32.MaxValue;
-
-        /// <summary>TODO::Description.</summary>
         private string _lastFlyProperty = string.Empty;
-
-        /// <summary>TODO::Description.</summary>
         private string _lastOperator = " === ";
+        private string _prefixAlias = string.Empty;
 
-        /// <summary>TODO::Description.</summary>
         private StringBuilder _sbWhere;
 
-        /// <summary>TODO::Description.</summary>
-        private StringBuilder _sbIndexed;
+        private Expando FlyWeight { get; set; }
+        private Expando SortFly { get; set; }
 
-        /// <summary>TODO::Description.</summary>
-        public Expando SortFly { get; set; }
-
-        /// <summary>TODO::Description.</summary>
-        public string SortDescendingBy { get; set; }
-
-        /// <summary>TODO::Description.</summary>
         bool _whereWritten = false;
-
-        /// <summary>TODO::Description.</summary>
         bool _isDeepGraphWithArrays = false;
 
-        /// <summary>TODO::Description.</summary>
-        public String AggregatePropName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>TODO::Description.</summary>
-        public String TypeName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>TODO::Description.</summary>
-        public string CollectionName{ get; set;}
-
-        /// <summary>TODO::Description.</summary>
-        public String MethodCall
-        {
-            get;
-            set;
-        }
+        private string AggregatePropName { get; set; }
+        private string TypeName { get; set; }
+        private string CollectionName { get; set; }
+        private string MethodCall { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether IsComplex.
         /// </summary>
-        public bool IsComplex { get; private set; }
-
-        /// <summary>
-        /// Gets optimized where clause.
-        /// </summary>
-        public string OptimizedWhere
-        {
-            get { return _sbIndexed.ToString(); }
-        }
+        private bool IsComplex { get; set; }
 
         /// <summary>
         /// Gets conditional count.
         /// </summary>
-        public int ConditionalCount { get; private set; }
-
-        /// <summary>
-        /// Gets FlyWeight.
-        /// </summary>
-        public Expando FlyWeight { get; private set; }
+        private int ConditionalCount { get; set; }
 
         /// <summary>
         /// How many to skip.
         /// </summary>
-        public int Skip { get; set; }
-
+        private int Skip { get; set; }
 
         /// <summary>
         /// How many to take (Int32.MaxValue) by default.
         /// </summary>
-        public int Take
+        private int Take
         {
-            get
-            {
-                return this._takeCount;
-            }
-            set
-            {
-                this._takeCount = value;
-            }
+            get { return _takeCount; }
+            set { _takeCount = value; }
         }
 
         /// <summary>
         /// Gets where expression.
         /// </summary>
-        public string WhereExpression
+        private string WhereExpression
         {
             get { return _sbWhere.ToString(); }
         }
@@ -129,7 +77,7 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="exp">The expression.</param>
         /// <returns>The translated string</returns>
-        public string Translate(Expression exp)
+        public QueryTranslationResults Translate(Expression exp)
         {
             return Translate(exp, true);
         }
@@ -140,11 +88,10 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         /// <param name="useScopedQualifier">Whether to use the "this" qualifier</param>
         /// <returns>The translated string</returns>
-        public string Translate(Expression exp, bool useScopedQualifier)
+        public QueryTranslationResults Translate(Expression exp, bool useScopedQualifier)
         {
             UseScopedQualifier = useScopedQualifier;
             _sbWhere = new StringBuilder();
-            _sbIndexed = new StringBuilder();
             FlyWeight = new Expando();
             SortFly = new Expando();
 
@@ -153,7 +100,19 @@ namespace Norm.Linq
             ProcessGuards();
             TransformToFlyWeightWhere();
 
-            return WhereExpression;
+            return new QueryTranslationResults
+                       {
+                           Where = FlyWeight,
+                           Sort = SortFly,
+                           Skip = Skip,
+                           Take = Take,
+                           CollectionName = CollectionName,
+                           MethodCall = MethodCall,
+                           AggregatePropName = AggregatePropName,
+                           IsComplex = IsComplex,
+                           TypeName = TypeName,
+                           Query = WhereExpression
+                       };
         }
 
         private void ProcessGuards()
@@ -198,7 +157,19 @@ namespace Norm.Linq
         {
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
-                return VisitAlias(m);
+                var alias = VisitAlias(m);
+                
+                VisitDateTimeProperty(m);
+
+                if (UseScopedQualifier)
+                {
+                    _sbWhere.Append("this.");
+                }
+
+                _sbWhere.Append(alias);
+                _lastFlyProperty = alias;
+
+                return m;
             }
 
             if (m.Member.DeclaringType == typeof(string))
@@ -255,22 +226,33 @@ namespace Norm.Linq
             else
             {
                 // this supports the "deep graph" name - "Product.Address.City"
-                return VisitDeepAlias(m);
+                string deepAlias = VisitDeepAlias(m);
+
+                VisitDateTimeProperty(m);
+                if (UseScopedQualifier)
+                {
+                    _sbWhere.Append("this.");
+                }
+
+                _sbWhere.Append(deepAlias);
+                _lastFlyProperty = deepAlias;
+
+                return m;
             }
 
             // if this is a property NOT on the object...
             throw new NotSupportedException(string.Format("The member '{0}' is not supported", m.Member.Name));
         }
 
-        private Expression VisitDeepAlias(MemberExpression m)
+        private string VisitDeepAlias(MemberExpression m)
         {
             var fullName = m.ToString().Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-                
+
             var fixedName = fullName
                 .Skip(1)
-                .Where(x => x != "First()")
-                .Where(x => !x.StartsWith("get_Item("))
-                .Select(x => Regex.Replace(x, @"\[[0-9]+\]$", ""))
+                .Select(x => Regex.Replace(x, @"get_Item\(([0-9]+)\)$", "$1|Ind"))
+                .Select(x => Regex.Replace(x, @"\[([0-9]+)\]$", "$1|Ind"))
+                .Select(x => x.Replace("First()", "0|Ind"))
                 .ToArray();
 
             if (!_isDeepGraphWithArrays)
@@ -282,22 +264,12 @@ namespace Norm.Linq
                 fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
             }
 
-            VisitDateTimeProperty(m);
+            string result = string.Join(".", fixedName.Select(x=>x.Replace("|Ind","")).ToArray());
 
-            if (UseScopedQualifier)
-            {
-                _sbWhere.Append("this.");
-            }
-
-            string result = string.Join(".", fixedName);
-                
-            _sbWhere.Append(result);
-            _lastFlyProperty = result;
-
-            return m;
+            return result;
         }
 
-        private Expression VisitAlias(MemberExpression m)
+        private string VisitAlias(MemberExpression m)
         {
             var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
             var id = TypeHelper.GetHelperForType(m.Expression.Type).FindIdProperty();
@@ -306,17 +278,7 @@ namespace Norm.Linq
                 alias = "_id";
             }
 
-            VisitDateTimeProperty(m);
- 
-            if (UseScopedQualifier)
-            {
-                _sbWhere.Append("this.");
-            }
-
-            _sbWhere.Append(alias);
-            _lastFlyProperty = alias;
-
-            return m;
+            return alias;
         }
 
         private void VisitDateTimeProperty(MemberExpression m)
@@ -363,25 +325,25 @@ namespace Norm.Linq
                     if (IsBoolean(u.Operand.Type))
                     {
                         _sbWhere.Append(op);
-                        this.VisitPredicate(u.Operand, true);
+                        VisitPredicate(u.Operand, true);
                     }
                     else
                     {
                         _sbWhere.Append(op);
-                        this.Visit(u.Operand);
+                        Visit(u.Operand);
                     }
                     break;
                 case ExpressionType.Negate:
                 case ExpressionType.NegateChecked:
                     _sbWhere.Append(op);
-                    this.Visit(u.Operand);
+                    Visit(u.Operand);
                     break;
                 case ExpressionType.UnaryPlus:
-                    this.Visit(u.Operand);
+                    Visit(u.Operand);
                     break;
                 case ExpressionType.Convert:
                     // ignore conversions for now
-                    this.Visit(u.Operand);
+                    Visit(u.Operand);
                     break;
                 default:
                     throw new NotSupportedException(string.Format("The unary operator '{0}' is not supported", u.NodeType));
@@ -402,10 +364,10 @@ namespace Norm.Linq
                 case ExpressionType.AndAlso:
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
-                case ExpressionType.Call:
                 case ExpressionType.MemberAccess:
                 case ExpressionType.Convert:
-                    return !IsBoolean(expr.Type);
+                    return IsBoolean(expr.Type);
+                case ExpressionType.Call:
                 case ExpressionType.Not:
                 case ExpressionType.Equal:
                 case ExpressionType.NotEqual:
@@ -425,19 +387,19 @@ namespace Norm.Linq
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
                 case ExpressionType.Constant:
-                    return true;
-                default:
                     return false;
+                default:
+                    return true;
             }
         }
 
         private Expression VisitPredicate(Expression expr, bool IsNotOperator)
         {
             Visit(expr);
-            if (!IsPredicate(expr))
+            if (IsPredicate(expr))
             {
                 //_sbWhere.Append(" === true");
-                SetFlyValue(true && !IsNotOperator);
+                SetFlyValue(!IsNotOperator);
             }
             return expr;
         }
@@ -503,6 +465,12 @@ namespace Norm.Linq
 
             for (var i = 0; i < graph.Length; i++)
             {
+                if (graph[i].EndsWith("|Ind"))
+                {
+                    graphParts[i] = graph[i];
+                    continue;
+                }
+
                 var property = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
                 graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
 
@@ -710,7 +678,7 @@ namespace Norm.Linq
                 {
                     case "StartsWith":
                         {
-                            string value = (string)m.Arguments[0].GetConstantValue();
+                            string value = m.Arguments[0].GetConstantValue<string>();
 
                             _sbWhere.Append("(");
                             Visit(m.Object);
@@ -722,7 +690,7 @@ namespace Norm.Linq
                         }
                     case "EndsWith":
                         {
-                            string value = (string)m.Arguments[0].GetConstantValue();
+                            string value = m.Arguments[0].GetConstantValue<string>();
 
                             //_sbWhere.Append("(");
                             //Visit(m.Object);
@@ -743,7 +711,7 @@ namespace Norm.Linq
                         }
                     case "Contains":
                         {
-                            string value = (string)m.Arguments[0].GetConstantValue();
+                            string value = m.Arguments[0].GetConstantValue<string>();
 
                             _sbWhere.Append("(");
                             Visit(m.Object);
@@ -831,15 +799,23 @@ namespace Norm.Linq
             {
                 if (m.Method.Name == "Contains")
                 {
-                    return HandleMethodCall(m);
+                    HandleContains(m);
+                    return m;
                 }
+
                 throw new NotSupportedException(string.Format("Subqueries with {0} are not currently supported", m.Method.Name));
             }
             else if (typeof(Enumerable).IsAssignableFrom(m.Method.DeclaringType))
             {
                 if (m.Method.Name == "Count" && m.Arguments.Count == 1)
                 {
-                    return HandleMethodCall(m);
+                    HandleSubCount(m);
+                    return m;
+                }
+                if (m.Method.Name == "Any")
+                {
+                    HandleSubAny(m);
+                    return m;
                 }
 
                 throw new NotSupportedException(string.Format("Subqueries with {0} are not currently supported", m.Method.Name));
@@ -869,6 +845,11 @@ namespace Norm.Linq
         /// <param name="value">The value.</param>
         private void SetFlyValue(object value)
         {
+            if (!string.IsNullOrEmpty(_prefixAlias))
+            {
+                _lastFlyProperty = _prefixAlias + "." + _lastFlyProperty;
+            }
+            
             // if the property has already been set, we can't set it again
             // as fly uses Dictionaries. This means you can't do BETWEEN style native queries
             if (FlyWeight.Contains(_lastFlyProperty))
@@ -889,21 +870,26 @@ namespace Norm.Linq
                     // Can't do comparisons here unless the type is a double
                     // which is a limitation of mongo, apparently
                     // and won't work if we're doing date comparisons
-                    if (value != null && value.GetType().IsAssignableFrom(typeof(double)))
+                    if (value != null && (value.GetType().IsAssignableFrom(typeof(double))
+                        || value.GetType().IsAssignableFrom(typeof(int))
+                        || value.GetType().IsAssignableFrom(typeof(int?))
+                        || value.GetType().IsAssignableFrom(typeof(long))
+                        || value.GetType().IsAssignableFrom(typeof(DateTime))
+                        || value.GetType().IsAssignableFrom(typeof(DateTime?))))
                     {
                         switch (_lastOperator)
                         {
                             case " > ":
-                                FlyWeight[_lastFlyProperty] = Q.GreaterThan((double)value);
+                                FlyWeight[_lastFlyProperty] = Q.GreaterThan(value);
                                 break;
                             case " < ":
-                                FlyWeight[_lastFlyProperty] = Q.LessThan((double)value);
+                                FlyWeight[_lastFlyProperty] = Q.LessThan(value);
                                 break;
                             case " <= ":
-                                FlyWeight[_lastFlyProperty] = Q.LessOrEqual((double)value);
+                                FlyWeight[_lastFlyProperty] = Q.LessOrEqual(value);
                                 break;
                             case " >= ":
-                                FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual((double)value);
+                                FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual(value);
                                 break;
                         }
                     }
@@ -923,7 +909,7 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         private void HandleSkip(Expression exp)
         {
-            this.Skip = (int)exp.GetConstantValue();
+            this.Skip = exp.GetConstantValue<int>();
         }
 
         /// <summary>
@@ -932,7 +918,7 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         private void HandleTake(Expression exp)
         {
-            this.Take = (int)exp.GetConstantValue();
+            this.Take = exp.GetConstantValue<int>();
         }
 
         private void HandleSort(Expression exp, OrderBy orderby)
@@ -975,7 +961,7 @@ namespace Norm.Linq
 
         private void HandleContains(MethodCallExpression m)
         {
-            var collection = (IEnumerable)m.Object.GetConstantValue();
+            var collection = m.Object.GetConstantValue<IEnumerable>();
 
             _sbWhere.Append("(");
             foreach (var item in collection)
@@ -993,6 +979,26 @@ namespace Norm.Linq
         {
             Visit(m.Arguments[0]);
             _sbWhere.Append(".length");
+            IsComplex = true;
+        }
+
+        private void HandleSubAny(MethodCallExpression m)
+        {
+            if (m.Arguments.Count == 1)
+            {
+                Visit(m.Arguments[0]);
+                _sbWhere.Append(".length > 0");
+                IsComplex = true;
+            }
+            else if (m.Arguments.Count == 2)
+            {
+                _prefixAlias = VisitDeepAlias((MemberExpression)m.Arguments[0]);
+                Visit(m.Arguments[1]);
+                _prefixAlias = string.Empty;
+
+                if (IsComplex)
+                    throw new NotSupportedException("Subqueries with Any are not supported with complex queries");
+            }
         }
 
         private void HandleRegexIsMatch(MethodCallExpression m)
@@ -1001,11 +1007,11 @@ namespace Norm.Linq
             var jsoptions = "g";
             if (m.Arguments.Count == 3)
             {
-                options = (RegexOptions)m.Arguments[2].GetConstantValue();
+                options = m.Arguments[2].GetConstantValue<RegexOptions>();
                 jsoptions = VisitRegexOptions(m, options);
             }
 
-            string value = (string)m.Arguments[1].GetConstantValue();
+            string value = m.Arguments[1].GetConstantValue<string>();
 
             _sbWhere.AppendFormat("(new RegExp(\"{0}\",\"{1}\")).test(", value.EscapeDoubleQuotes(), jsoptions);
             Visit(m.Arguments[0]);
@@ -1050,9 +1056,6 @@ namespace Norm.Linq
                 case "Where":
                     TranslateToWhere(m);
                     break;
-                case "Contains":
-                    HandleContains(m);
-                    return m;
                 case "OrderBy":
                 case "ThenBy":
                     HandleSort(m.Arguments[1], OrderBy.Ascending);
@@ -1073,9 +1076,6 @@ namespace Norm.Linq
                 case "Average":
                     HandleAggregate(m);
                     break;
-                case "Count":
-                    HandleSubCount(m);
-                    return m;
                 default:
                     this.Take = 1;
                     this.MethodCall = m.Method.Name;
