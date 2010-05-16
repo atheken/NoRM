@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +47,7 @@ namespace Norm.Collections
             _db = db;
             _connection = connection;
             _collectionName = collectionName;
-            //_queryContext = new MongoQuery<T>(MongoQueryProvider.Create(connection.ConnectionString));
+            //_queryContext = new MongoQuery<T>(MongoQueryProvider.Create(_connection.ConnectionString), _collectionName);
         }
 
         /// <summary>
@@ -341,16 +341,16 @@ namespace Norm.Collections
             var indexProperty = translator.Translate(index, false);
 
             var key = new Expando();
-            key.Set(indexProperty, direction);
+            key.Set(indexProperty.Query, direction);
 
             var collection = _db.GetCollection<MongoIndex<T>>("system.indexes");
             collection.Insert(new MongoIndex<T>
-            {
-                Key = key,
-                Namespace = FullyQualifiedName,
-                Name = indexName,
-                Unique = isUnique
-            });
+                                  {
+                                      Key = key,
+                                      Namespace = FullyQualifiedName,
+                                      Name = indexName,
+                                      Unique = isUnique
+                                  });
         }
 
         /// <summary>

@@ -258,7 +258,62 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void LinqQueriesShouldSupportNativeComparisonWithInt()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Quantity = 10 });
+                session.Add(new TestProduct { Name = "2", Quantity = 20, Price = 10 });
+                session.Add(new TestProduct { Name = "3", Quantity = 30 });
+
+                var list = session.Products.Where(x => x.Quantity >= 20 && x.Price == 10).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(20, list[0].Quantity);
+
+                list = session.Products.Where(x => x.Quantity <= 20 && x.Price == 10).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(20, list[0].Quantity);
+                
+                list = session.Products.Where(x => x.Quantity < 20).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Quantity);
+
+                list = session.Products.Where(x => x.Quantity > 20).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(30, list[0].Quantity);
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportDateTime()
+        {
+            using (var session = new Session())
+            {
+                var date = new DateTime(2010, 3, 1, 15, 33, 33);
+                var datelater = new DateTime(2010, 3, 1, 15, 33, 34);
+
+                session.Add(new TestProduct { Name = "1", Price = 10, Available = datelater });
+                session.Add(new TestProduct { Name = "2", Price = 20, Available = date });
+                session.Add(new TestProduct { Name = "3", Price = 30, Available = date });
+
+                var list = session.Products.Where(x => x.Available > date).ToList();
+                Assert.Equal(1, list.Count);
+                Assert.Equal(10, list[0].Price);
+
+                var datefromdb = list[0].Available.ToLocalTime();
+
+                Assert.Equal(datelater.Year, datefromdb.Year);
+                Assert.Equal(datelater.Month, datefromdb.Month);
+                Assert.Equal(datelater.Day, datefromdb.Day);
+                Assert.Equal(datelater.Hour, datefromdb.Hour);
+                Assert.Equal(datelater.Minute, datefromdb.Minute);
+                Assert.Equal(datelater.Second, datefromdb.Second);
+
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportDateTimeInComplexQuery()
         {
             using (var session = new Session())
             {
@@ -1248,21 +1303,56 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void CanQueryWithinEmbeddedArray()
+        public void CanQueryWithinEmbeddedArrayUsingAny()
         {
             using (var session = new Session())
             {
                 var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
-                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA" }, new Comment { Text = "commentB" } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1" }, new Comment { Text = "commentB", Name = "name2" } } };
 
                 session.Add(post1);
                 session.Add(post2);
 
-                //The following query is not supported yet but can be written as below
-                //var found = session.Posts.Where(p => p.Comments.Any(a => a.Text == "commentA")).SingleOrDefault();
-                var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
+                var found = session.Posts.Where(p => p.Comments.Any(x => x.Text == "commentA")).SingleOrDefault();
+                //var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
 
                 Assert.Equal("Second", found.Title);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingAnyWithNoParameters()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Comments = new List<Comment>() };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1" }, new Comment { Text = "commentB", Name = "name2" } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var found = session.Posts.Where(p => p.Comments.Any()).SingleOrDefault();
+
+                Assert.Equal("Second", found.Title);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingArrayIdentifiers()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1" }, new Comment { Text = "commentB", Name = "name2" } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
+                Assert.Equal("Second", found.Title);
+
+                found = session.Posts.Where(p => p.Comments[1].Text == "comment2").SingleOrDefault();
+                Assert.Equal("First", found.Title);
             }
         }
 
@@ -1436,7 +1526,7 @@ namespace Norm.Tests
                     }
                 });
 
-                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers[0].Name == "Supplier4").ToList();
+                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers.Any(y=>y.Name == "Supplier4")).ToList();
                 Assert.Equal("Jane", deepQuery[0].Name);
                 Assert.Equal("Cart2", deepQuery[0].Cart.Name);
                 Assert.Equal(1, deepQuery.Count);
