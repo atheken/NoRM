@@ -50,7 +50,7 @@ namespace Norm.Linq
         /// The provider.
         /// </param>
         public MongoQuery(MongoQueryProvider provider)
-			: this(provider, MongoConfiguration.GetCollectionName(typeof(T)))
+            : this(provider, MongoConfiguration.GetCollectionName(typeof(T)))
         {
         }
 
@@ -151,7 +151,7 @@ namespace Norm.Linq
         {
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
             return this.GetCollection<ExplainResponse>(collectionName).Explain(query);
-         }
+        }
 
         /// <summary>TODO::Description.</summary>
         private MongoCollection<TCollection> GetCollection<TCollection>()
