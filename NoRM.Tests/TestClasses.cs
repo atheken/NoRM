@@ -121,6 +121,11 @@ namespace Norm.Tests
             get { return new MongoQuery<Post>(_provider); }
         }
 
+        public QueryTranslationResults TranslationResults
+        {
+            get { return (_provider as IMongoQueryResults).TranslationResults; }
+        }
+
         #region IDisposable Members
 
         public void Dispose()

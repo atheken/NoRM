@@ -80,9 +80,9 @@ namespace Norm
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns></returns>
-        public static LessThanQualifier LessOrEqual(object value)
+        public static LessOrEqualQualifier LessOrEqual(object value)
         {
-            return new LessThanQualifier(value);
+            return new LessOrEqualQualifier(value);
         }
 
         /// <summary>

@@ -24,6 +24,7 @@ namespace Norm.Linq
             if (exp is ConstantExpression)
             {
                 var c = (ConstantExpression) exp;
+
                 result = (T)c.Value;
             }
 

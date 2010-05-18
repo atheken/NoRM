@@ -114,7 +114,7 @@ namespace Norm.Linq
             var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce, Finalize = finalize });
             var coll = response.GetCollection<MapReduceResult<T>>();
             var r = coll.Find().FirstOrDefault();
-            T result = r.Value;
+            T result = r != null ? r.Value : default(T);
 
             return result;
         }

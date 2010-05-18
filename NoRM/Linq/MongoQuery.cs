@@ -182,5 +182,6 @@ namespace Norm.Linq
 
             return _expression.ToString();
         }
+
     }
 }

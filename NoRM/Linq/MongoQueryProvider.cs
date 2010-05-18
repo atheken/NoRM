@@ -13,9 +13,10 @@ namespace Norm.Linq
     /// <summary>
     /// The mongo query provider.
     /// </summary>
-    public class MongoQueryProvider : IQueryProvider, IDisposable
+    public class MongoQueryProvider : IQueryProvider, IDisposable, IMongoQueryResults
     {
         private readonly Mongo _server;
+        private QueryTranslationResults _results;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQueryProvider"/> class.
@@ -117,6 +118,8 @@ namespace Norm.Linq
             var translator = new MongoQueryTranslator();
             var results = translator.Translate(expression);
 
+            _results = results;
+
             var executor = new MongoQueryExecutor(_server, results);
             return executor.Execute<T>();
         }
@@ -170,5 +173,11 @@ namespace Norm.Linq
         {
             _server.Dispose();
         }
+
+        QueryTranslationResults IMongoQueryResults.TranslationResults
+        {
+            get { return _results; }
+        }
+
     }
 }

@@ -360,10 +360,6 @@ namespace Norm.Linq
         {
             switch (expr.NodeType)
             {
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
                 case ExpressionType.MemberAccess:
                 case ExpressionType.Convert:
                     return IsBoolean(expr.Type);
@@ -464,73 +460,89 @@ namespace Norm.Linq
 
         private void VisitBinaryOperator(BinaryExpression b) {
 
+            string currentOperator;
+
             switch (b.NodeType) {
                 case ExpressionType.And:
-                    _lastOperator = " & ";
+                    currentOperator = " & ";
                     IsComplex = true;
                     break;
                 case ExpressionType.AndAlso:
-                    _lastOperator = " && ";
+                    currentOperator = " && ";
                     break;
                 case ExpressionType.Or:
-                    _lastOperator = " | ";
+                    currentOperator = " | ";
                     IsComplex = true;
                     break;
                 case ExpressionType.OrElse:
-                    _lastOperator = " || ";
+                    currentOperator = " || ";
                     IsComplex = true;
                     break;
                 case ExpressionType.Equal:
                     _lastOperator = " === ";
+                    currentOperator = _lastOperator;
                     break;
                 case ExpressionType.NotEqual:
                     _lastOperator = " !== ";
+                    currentOperator = _lastOperator;
                     break;
                 case ExpressionType.LessThan:
                     _lastOperator = " < ";
+                    currentOperator = _lastOperator;
                     break;
                 case ExpressionType.LessThanOrEqual:
                     _lastOperator = " <= ";
+                    currentOperator = _lastOperator;
                     break;
                 case ExpressionType.GreaterThan:
                     _lastOperator = " > ";
+                    currentOperator = _lastOperator;
                     break;
                 case ExpressionType.GreaterThanOrEqual:
                     _lastOperator = " >= ";
+                    currentOperator = _lastOperator;
                     break;
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                     _lastOperator = " + ";
+                    currentOperator = _lastOperator;
                     IsComplex = true;
                     break;
                 case ExpressionType.Coalesce:
-                     _lastOperator = " || ";
+                    _lastOperator = " || ";
+                    currentOperator = _lastOperator;
                     IsComplex = true;
                     break;
                 case ExpressionType.Divide:
-                     _lastOperator = " / ";
+                    _lastOperator = " / ";
+                    currentOperator = _lastOperator;
                     IsComplex = true;
                     break;
                 case ExpressionType.ExclusiveOr:
-                     _lastOperator = " ^ ";
+                    _lastOperator = " ^ ";
+                    currentOperator = _lastOperator;
                     IsComplex = true;
                     break;
                 case ExpressionType.LeftShift:
-                     _lastOperator = " << ";
+                    _lastOperator = " << ";
+                    currentOperator = _lastOperator;
                     IsComplex = true;
                     break;
                 case ExpressionType.Multiply:
                 case ExpressionType.MultiplyChecked:
-                     _lastOperator = " * ";
+                    _lastOperator = " * ";
+                    currentOperator = _lastOperator;
                     IsComplex = true;
                     break;
                 case ExpressionType.RightShift:
-                     _lastOperator = " >> ";
+                    _lastOperator = " >> ";
+                    currentOperator = _lastOperator;
                     IsComplex = true;
                     break;
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
-                     _lastOperator = " - ";
+                    _lastOperator = " - ";
+                    currentOperator = _lastOperator;
                     IsComplex = true;
                     break;
                 default:
@@ -539,7 +551,7 @@ namespace Norm.Linq
 
             }
 
-            _sbWhere.Append(_lastOperator);
+            _sbWhere.Append(currentOperator);
         }
 
         /// <summary>
@@ -586,7 +598,7 @@ namespace Norm.Linq
             }
             else if (c.Value == null)
             {
-                _sbWhere.Append("null");
+                _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
                 SetFlyValue(null);
             }
             else
@@ -594,17 +606,15 @@ namespace Norm.Linq
                 switch (Type.GetTypeCode(c.Value.GetType()))
                 {
                     case TypeCode.Boolean:
-                        _sbWhere.Append(((bool)c.Value) ? "true" : "false");
-                        SetFlyValue(c.Value);
+                        _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
+                        //SetFlyValue(c.Value);
                         break;
                     case TypeCode.DateTime:
-                        var val = "+(" + (long)((DateTime)c.Value).ToUniversalTime().Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
-                        _sbWhere.Append(val);
+                        _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.String:
-                        var sval = "\"" + c.Value.ToString().EscapeDoubleQuotes() + "\"";
-                        _sbWhere.Append(sval);
+                        _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
                         SetFlyValue(c.Value);
                         break;
                     case TypeCode.Object:
@@ -614,12 +624,12 @@ namespace Norm.Linq
                             {
                                 _sbWhere.Remove(_sbWhere.Length - 2, 1);
                             }
-                            _sbWhere.AppendFormat("'{0}'", c.Value);
+                            _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
                             SetFlyValue(c.Value);
                         }
                         else if (c.Value is Guid)
                         {
-                            _sbWhere.AppendFormat("'{0}'", c.Value);
+                            _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
                             SetFlyValue(c.Value);
                         }
                         else
@@ -628,13 +638,40 @@ namespace Norm.Linq
                         }
                         break;
                     default:
-                        _sbWhere.Append(c.Value);
+                        _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
                         SetFlyValue(c.Value);
                         break;
                 }
             }
 
             return c;
+        }
+
+        private string GetJavaScriptConstantValue(object value)
+        {
+            if (value == null)
+                return "null";
+
+            switch (Type.GetTypeCode(value.GetType()))
+            {
+                case TypeCode.Boolean:
+                    return ((bool)value) ? "true" : "false";
+                case TypeCode.DateTime:
+                    return "+(" + (long)((DateTime)value).ToUniversalTime().Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
+                case TypeCode.String:
+                    return "\"" + value.ToString().EscapeDoubleQuotes() + "\"";
+                case TypeCode.Object:
+                    if (value is ObjectId || value is Guid)
+                    {
+                        return string.Format("\"{0}\"", value);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(string.Format("The constant for '{0}' is not supported", value));
+                    }
+                default:
+                    return value.ToString();
+            }
         }
 
         /// <summary>
@@ -882,6 +919,17 @@ namespace Norm.Linq
 
         }
 
+        private void SetFlyValue(string key, object value)
+        {
+            if (FlyWeight.Contains(key))
+            {
+                IsComplex = true;
+                return;
+            }
+
+            FlyWeight[key] = value;
+        }
+
         /// <summary>
         /// Handles skip.
         /// </summary>
@@ -945,13 +993,18 @@ namespace Norm.Linq
             _sbWhere.Append("(");
             foreach (var item in collection)
             {
-                Visit(m.Arguments[0]);
+                if (UseScopedQualifier)
+                    _sbWhere.Append("this.");
+
+                _sbWhere.Append(VisitDeepAlias((MemberExpression)m.Arguments[0]));
                 _sbWhere.Append(" === ");
-                Visit(Expression.Constant(item));
+                _sbWhere.Append(GetJavaScriptConstantValue(item));
                 _sbWhere.Append(" || ");
             }
             _sbWhere.Remove(_sbWhere.Length - 4, 4);
             _sbWhere.Append(")");
+
+            SetFlyValue(VisitDeepAlias((MemberExpression)m.Arguments[0]), Q.In(collection.Cast<object>().ToArray()));
         }
 
         private void HandleSubCount(MethodCallExpression m)
