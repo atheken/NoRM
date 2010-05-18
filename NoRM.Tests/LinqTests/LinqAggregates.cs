@@ -104,24 +104,6 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void SumShouldReturn30WhenThreeProductsInDBWIthSumPrice60AndNameContains1or22()
-        {
-            using (var session = new Session())
-            {
-                var names = new List<string>();
-                names.Add("1");
-                names.Add("2");
-
-                session.Add(new TestProduct { Name = "1", Price = 10 });
-                session.Add(new TestProduct { Name = "2", Price = 20 });
-                session.Add(new TestProduct { Name = "3", Price = 30 });
-                var result = session.Products.Where(x => names.Contains(x.Name)).ToList();
-                Assert.Equal(2, result.Count);
-                Assert.Equal(false, session.TranslationResults.IsComplex);
-            }
-        }
-
-        [Fact]
         public void AvgShouldReturn20WhenThreeProductsInDBWIthSumPrice60()
         {
             using (var session = new Session())
