@@ -206,6 +206,13 @@ namespace Norm.Tests
     {
         public string Text { get; set; }
         public string Name { get; set; }
+        public IList<Tag> CommentTags { get; set; }
+        public IList<string> CommentTagsSimple { get; set; }
+    }
+
+    internal class Tag
+    {
+        public string TagName { get; set; }
     }
 
     internal class CheeseClubContact

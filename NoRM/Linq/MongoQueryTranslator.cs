@@ -20,7 +20,7 @@ namespace Norm.Linq
         private int _takeCount = Int32.MaxValue;
         private string _lastFlyProperty = string.Empty;
         private string _lastOperator = " === ";
-        private string _prefixAlias = string.Empty;
+        private List<string> _prefixAlias = new List<string>();
 
         private StringBuilder _sbWhere;
 
@@ -367,29 +367,8 @@ namespace Norm.Linq
                 case ExpressionType.MemberAccess:
                 case ExpressionType.Convert:
                     return IsBoolean(expr.Type);
-                case ExpressionType.Call:
-                case ExpressionType.Not:
-                case ExpressionType.Equal:
-                case ExpressionType.NotEqual:
-                case ExpressionType.LessThan:
-                case ExpressionType.LessThanOrEqual:
-                case ExpressionType.GreaterThan:
-                case ExpressionType.GreaterThanOrEqual:
-                case ExpressionType.Add:
-                case ExpressionType.AddChecked:
-                case ExpressionType.Coalesce:
-                case ExpressionType.Divide:
-                case ExpressionType.ExclusiveOr:
-                case ExpressionType.LeftShift:
-                case ExpressionType.Multiply:
-                case ExpressionType.MultiplyChecked:
-                case ExpressionType.RightShift:
-                case ExpressionType.Subtract:
-                case ExpressionType.SubtractChecked:
-                case ExpressionType.Constant:
+                 default:
                     return false;
-                default:
-                    return true;
             }
         }
 
@@ -845,11 +824,11 @@ namespace Norm.Linq
         /// <param name="value">The value.</param>
         private void SetFlyValue(object value)
         {
-            if (!string.IsNullOrEmpty(_prefixAlias))
+            if (_prefixAlias.Count > 0)
             {
-                _lastFlyProperty = _prefixAlias + "." + _lastFlyProperty;
+                _lastFlyProperty = (string.Join(".", _prefixAlias.ToArray()) + "." + _lastFlyProperty).TrimEnd('.');
             }
-            
+                      
             // if the property has already been set, we can't set it again
             // as fly uses Dictionaries. This means you can't do BETWEEN style native queries
             if (FlyWeight.Contains(_lastFlyProperty))
@@ -992,9 +971,9 @@ namespace Norm.Linq
             }
             else if (m.Arguments.Count == 2)
             {
-                _prefixAlias = VisitDeepAlias((MemberExpression)m.Arguments[0]);
+                _prefixAlias.Add(VisitDeepAlias((MemberExpression)m.Arguments[0]));
                 Visit(m.Arguments[1]);
-                _prefixAlias = string.Empty;
+                _prefixAlias.RemoveAt(_prefixAlias.Count - 1);
 
                 if (IsComplex)
                     throw new NotSupportedException("Subqueries with Any are not supported with complex queries");

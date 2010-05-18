@@ -1303,6 +1303,23 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void CanQueryWithinSimpleEmbeddedArray()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Tags = new List<string> { "tag1", "tag2" } };
+                var post2 = new Post { Title = "Second", Tags = new List<string> { "tag3", "tag4" } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var found = session.Posts.Where(p => p.Tags.Any(x => x == "tag3")).SingleOrDefault();
+
+                Assert.Equal("Second", found.Title);
+            }
+        }
+
+        [Fact]
         public void CanQueryWithinEmbeddedArrayUsingAny()
         {
             using (var session = new Session())
@@ -1314,7 +1331,23 @@ namespace Norm.Tests
                 session.Add(post2);
 
                 var found = session.Posts.Where(p => p.Comments.Any(x => x.Text == "commentA")).SingleOrDefault();
-                //var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
+
+                Assert.Equal("Second", found.Title);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingTwoAnys()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA" }, new Comment { Text = "commentB", CommentTags = new List<Tag>{ new Tag{ TagName = "Cool" }, new Tag { TagName = "Yes" } } } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var found = session.Posts.Where(p => p.Comments.Any(x => x.CommentTags.Any(y => y.TagName == "Cool"))).SingleOrDefault();
 
                 Assert.Equal("Second", found.Title);
             }
