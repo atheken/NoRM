@@ -250,7 +250,7 @@ namespace Norm.Linq
 
             var fixedName = fullName
                 .Skip(1)
-                .Select(x => Regex.Replace(x, @"get_Item\(([0-9]+)\)$", "$1|Ind"))
+                .Select(x => Regex.Replace(x, @"^get_Item\(([0-9]+)\)$", "$1|Ind"))
                 .Select(x => Regex.Replace(x, @"\[([0-9]+)\]$", "$1|Ind"))
                 .Select(x => x.Replace("First()", "0|Ind"))
                 .ToArray();
