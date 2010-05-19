@@ -324,6 +324,7 @@ namespace Norm.Tests
         public string Name { get; set; }
         public DateTime CreatedOn { get; set; }
         public Address Address { get; set; }
+        public int RefNum { get; set; }
     }   
 
     internal class InventoryChange

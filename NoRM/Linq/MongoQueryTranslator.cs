@@ -951,8 +951,11 @@ namespace Norm.Linq
         private void HandleSort(Expression exp, OrderBy orderby)
         {
             var stripped = GetLambda(exp);
-            var member = (MemberExpression)stripped.Body;
-            this.SortFly[member.Member.Name] = orderby;
+            var member = stripped.Body as MemberExpression;
+            if (member == null)
+                throw new NotSupportedException("Order clause supplied is not supported");
+
+            this.SortFly[VisitDeepAlias(member)] = orderby;
         }
 
         private void HandleAggregate(MethodCallExpression exp)
@@ -960,8 +963,11 @@ namespace Norm.Linq
             if (exp.Arguments.Count == 2)
             {
                 var stripped = GetLambda(exp.Arguments[1]);
-                var member = (MemberExpression)stripped.Body;
-                AggregatePropName = member.Member.Name;
+                var member = stripped.Body as MemberExpression;
+                if (member == null)
+                    throw new NotSupportedException("Aggregate clause supplied is not supported");
+
+                AggregatePropName = VisitDeepAlias(member);
             }
         }
 
@@ -978,11 +984,9 @@ namespace Norm.Linq
             if (_whereWritten)
             {
                 _sbWhere.Append(" && ");
-                IsComplex = true;
             }
 
             VisitPredicate(GetLambda(exp).Body);
-
             _whereWritten = true;
         }
 

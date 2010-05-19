@@ -360,7 +360,7 @@ namespace Norm.Tests
                 var names = new List<string>();
                 names.Add("1");
                 names.Add("2");
-
+                
                 session.Add(new TestProduct { Name = "1", Price = 10 });
                 session.Add(new TestProduct { Name = "2", Price = 20 });
                 session.Add(new TestProduct { Name = "3", Price = 30 });
@@ -615,8 +615,9 @@ namespace Norm.Tests
                 Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
+
         [Fact]
-        public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhere()
+        public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhereComplexQuery()
         {
             using (var session = new Session())
             {
@@ -630,6 +631,22 @@ namespace Norm.Tests
                 Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhere()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 22 });
+                session.Add(new TestProduct { Name = "3", Price = 33 });
+                var result = session.Products.Where(x => x.Price < 30);
+                result = result.Where(x => x.Name.Contains("2"));
+                Assert.Equal(22, result.SingleOrDefault().Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
         [Fact]
         public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPrice()
         {
@@ -641,6 +658,21 @@ namespace Norm.Tests
                 var products = session.Products.OrderBy(x=>x.Price).ToList();
                 Assert.Equal(22, products[0].Price);
                 Assert.Equal(40, products[2].Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByDeepAlias()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 40, Supplier = new Supplier { Name = "1" } });
+                session.Add(new TestProduct { Name = "2", Price = 22, Supplier = new Supplier { Name = "2" } });
+                session.Add(new TestProduct { Name = "3", Price = 33, Supplier = new Supplier { Name = "3" } });
+                var products = session.Products.OrderBy(x => x.Supplier.Name).ToList();
+                Assert.Equal(40, products[0].Price);
+                Assert.Equal(33, products[2].Price);
                 Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
@@ -1576,6 +1608,20 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "CTest", Price = 33 });
                 var productMax = session.Products.Max(x => x.Price);
                 Assert.Equal(33, productMax);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void MapReduceMaxDeepQuery()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "ATest", Price = 10, Supplier = new Supplier { RefNum = 3 } });
+                session.Add(new TestProduct { Name = "BTest", Price = 22, Supplier = new Supplier { RefNum = 2 } });
+                session.Add(new TestProduct { Name = "CTest", Price = 33, Supplier = new Supplier { RefNum = 1 } });
+                var productMax = session.Products.Max(x => x.Supplier.RefNum);
+                Assert.Equal(3, productMax);
                 Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
