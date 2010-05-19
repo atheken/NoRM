@@ -29,6 +29,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Supplier.Name == "Steve").ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -43,6 +44,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33, Supplier = new Supplier { Name = "Steve", CreatedOn = new DateTime(2002, 2, 1) } });
                 var products = session.Products.Where(x => x.Supplier.CreatedOn.Year < 2001).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -57,6 +59,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33, Supplier = new Supplier { Name = "Steve", CreatedOn = new DateTime(2002, 2, 1) } });
                 var products = session.Products.Where(x => x.Supplier.Address.State == "HI").ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -71,6 +74,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33, Supplier = new Supplier { Name = "Steve", CreatedOn = new DateTime(2002, 2, 1) } });
                 var products = session.Products.Where(x => x.Supplier.Address.State == "HI" && x.Price == 10).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -85,6 +89,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33, Supplier = new Supplier { Name = "Steve", CreatedOn = new DateTime(2002, 2, 1) } });
                 var products = session.Products.Where(x => x.Supplier.Address.State == "HI" || x.Price == 33).ToList();
                 Assert.Equal(2, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -111,6 +116,7 @@ namespace Norm.Tests
                 
                 Assert.Equal(1, products.Count());
                 Assert.Equal("Test3", products[0].Name);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
     }

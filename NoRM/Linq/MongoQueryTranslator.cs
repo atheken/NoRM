@@ -988,23 +988,32 @@ namespace Norm.Linq
 
         private void HandleContains(MethodCallExpression m)
         {
-            var collection = m.Object.GetConstantValue<IEnumerable>();
+            var collection = m.Object.GetConstantValue<IEnumerable>().Cast<object>().ToArray();
+            var member = VisitDeepAlias((MemberExpression)m.Arguments[0]);
 
-            _sbWhere.Append("(");
-            foreach (var item in collection)
+            if (collection.Length > 0)
             {
-                if (UseScopedQualifier)
-                    _sbWhere.Append("this.");
+                _sbWhere.Append("(");
+                foreach (var item in collection)
+                {
+                    if (UseScopedQualifier)
+                        _sbWhere.Append("this.");
 
-                _sbWhere.Append(VisitDeepAlias((MemberExpression)m.Arguments[0]));
-                _sbWhere.Append(" === ");
-                _sbWhere.Append(GetJavaScriptConstantValue(item));
-                _sbWhere.Append(" || ");
+                    _sbWhere.Append(member);
+                    _sbWhere.Append(" === ");
+                    _sbWhere.Append(GetJavaScriptConstantValue(item));
+                    _sbWhere.Append(" || ");
+                }
+                _sbWhere.Remove(_sbWhere.Length - 4, 4);
+                _sbWhere.Append(")");
             }
-            _sbWhere.Remove(_sbWhere.Length - 4, 4);
-            _sbWhere.Append(")");
+            else
+            {
+                //Handle no items in the contains list
+                _sbWhere.Append("(1===2)");
+            }
 
-            SetFlyValue(VisitDeepAlias((MemberExpression)m.Arguments[0]), Q.In(collection.Cast<object>().ToArray()));
+            SetFlyValue(member, Q.In(collection));
         }
 
         private void HandleSubCount(MethodCallExpression m)
