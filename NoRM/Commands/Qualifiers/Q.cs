@@ -217,9 +217,9 @@ namespace Norm
         /// </summary>
         /// <param name="value">if set to <c>true</c> [value].</param>
         /// <returns></returns>
-        public static ExistsQuallifier Exists(bool value)
+        public static ExistsQualifier Exists(bool value)
         {
-            return new ExistsQuallifier(value);
+            return new ExistsQualifier(value);
         }
     }
 }

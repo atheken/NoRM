@@ -121,7 +121,7 @@
     <Compile Include="Commands\OrderBy.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ElementMatch.cs" />
-    <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
+    <Compile Include="Commands\Qualifiers\ExistsQualifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterThanQualifier.cs" />
     <Compile Include="Commands\Qualifiers\InQualifier.cs" />
