@@ -35,28 +35,6 @@ namespace Norm.Linq
             // This is the actual Query mechanism...            
             var collection = new MongoCollection<T>(_translationResults.CollectionName, _mongo.Database, _mongo.Database.CurrentConnection);
 
-            string map = "", reduce = "", finalize = "";
-            if (!string.IsNullOrEmpty(_translationResults.AggregatePropName))
-            {
-                map = "function(){emit(0, {val: this." + _translationResults.AggregatePropName + ",tSize:1} )};";
-                if (!string.IsNullOrEmpty(_translationResults.Query))
-                {
-                    map = "function(){if (" + _translationResults.Query + ") {emit(0, {val: this." + _translationResults.AggregatePropName + ",tSize:1} )};}";
-                }
-
-                finalize = "function(key, res){ return res.val; }";
-            }
-
-            switch (_translationResults.MethodCall)
-            {
-                case "SingleOrDefault":
-                case "FirstOrDefault":
-                case "Single":
-                case "First":
-                    _translationResults.Take = 1;
-                    break;
-            }
-
             object result;
             switch (_translationResults.MethodCall)
             {
@@ -67,38 +45,28 @@ namespace Norm.Linq
                     result = collection.Count(_translationResults.Where);
                     break;
                 case "Sum":
-                    reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; i++){ sum+=values[i].val;} return {val:sum};}";
-                    result = ExecuteMapReduce<double>(_translationResults.TypeName, map, reduce, finalize);
+                    result = ExecuteMapReduce<double>(_translationResults.TypeName, BuildSumMapReduce());
                     break;
                 case "Average":
-                    reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; i++){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
-                    finalize = "function(key, res){ return res.val / res.tSize; }";
-                    result = ExecuteMapReduce<double>(_translationResults.TypeName, map, reduce, finalize);
+                    result = ExecuteMapReduce<double>(_translationResults.TypeName, BuildAverageMapReduce());
                     break;
                 case "Min":
-                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
-                    result = ExecuteMapReduce<double>(_translationResults.TypeName, map, reduce, finalize);
+                    result = ExecuteMapReduce<double>(_translationResults.TypeName, BuildMinMapReduce());
                     break;
                 case "Max":
-                    reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
-                    result = ExecuteMapReduce<double>(_translationResults.TypeName, map, reduce, finalize);
+                    result = ExecuteMapReduce<double>(_translationResults.TypeName, BuildMaxMapReduce());
                     break;
                 default:
-                    if (_translationResults.Sort.AllProperties().Count() > 0)
-                    {
-                        _translationResults.Sort.ReverseKitchen();
-                        result = collection.Find(_translationResults.Where, _translationResults.Sort, _translationResults.Take, _translationResults.Skip, collection.FullyQualifiedName);
-                    }
-                    else
-                    {
-                        result = collection.Find(_translationResults.Where, _translationResults.Take, _translationResults.Skip);
-                    }
+                    _translationResults.Take = IsSingleResultMethod(_translationResults.MethodCall) ? 1 : _translationResults.Take;
+                    _translationResults.Sort.ReverseKitchen();
+
+                    result = collection.Find(_translationResults.Where, _translationResults.Sort, _translationResults.Take, _translationResults.Skip, collection.FullyQualifiedName);
 
                     switch (_translationResults.MethodCall)
                     {
                         case "SingleOrDefault": result = ((IEnumerable<T>)result).SingleOrDefault(); break;
-                        case "FirstOrDefault": result = ((IEnumerable<T>)result).FirstOrDefault(); break;
                         case "Single": result = ((IEnumerable<T>)result).Single(); break;
+                        case "FirstOrDefault": result = ((IEnumerable<T>)result).FirstOrDefault(); break;
                         case "First": result = ((IEnumerable<T>)result).First(); break;
                     }
 
@@ -107,16 +75,79 @@ namespace Norm.Linq
 
             return result;
         }
-        
-        private T ExecuteMapReduce<T>(string typeName, string map, string reduce, string finalize)
+
+        private MapReduceParameters InitializeDefaultMapReduceParameters()
+        {
+            var map = "";
+            var finalize = "";
+
+            if (!string.IsNullOrEmpty(_translationResults.AggregatePropName))
+            {
+                map = "function(){emit(0, {val:this." + _translationResults.AggregatePropName + ",tSize:1} )};";
+                if (!string.IsNullOrEmpty(_translationResults.Query))
+                {
+                    map = "function(){if (" + _translationResults.Query + ") {emit(0, {val:this." + _translationResults.AggregatePropName + ",tSize:1} )};}";
+                }
+
+                finalize = "function(key, res){ return res.val; }";
+            }
+
+            return new MapReduceParameters { Map = map, Reduce = string.Empty, Finalize = finalize };
+        }
+
+        private MapReduceParameters BuildSumMapReduce()
+        {
+            var parameters = InitializeDefaultMapReduceParameters();
+            parameters.Reduce = "function(key, values){var sum = 0; for(var i = 0; i < values.length; i++){ sum+=values[i].val;} return {val:sum};}";
+
+            return parameters;
+        }
+
+        private MapReduceParameters BuildAverageMapReduce()
+        {
+            var parameters = InitializeDefaultMapReduceParameters();
+
+            parameters.Reduce = "function(key, values){var sum = 0, tot = 0; for(var i = 0; i < values.length; i++){sum += values[i].val; tot += values[i].tSize; } return {val:sum,tSize:tot};}";
+            parameters.Finalize = "function(key, res){ return res.val / res.tSize; }";
+
+            return parameters;
+        }
+
+        private MapReduceParameters BuildMinMapReduce()
+        {
+            var parameters = InitializeDefaultMapReduceParameters();
+            parameters.Reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least > values[i].val){least=values[i].val;}} return {val:least};}";
+
+            return parameters;
+        }
+
+        private MapReduceParameters BuildMaxMapReduce()
+        {
+            var parameters = InitializeDefaultMapReduceParameters();
+            parameters.Reduce = "function(key, values){var least = 0; for(var i = 0; i < values.length; i++){if(i==0 || least < values[i].val){least=values[i].val;}} return {val:least};}";
+
+            return parameters;
+        }
+
+        private T ExecuteMapReduce<T>(string typeName, MapReduceParameters parameters)
         {
             var mr = _mongo.CreateMapReduce();
-            var response = mr.Execute(new MapReduceOptions(typeName) { Map = map, Reduce = reduce, Finalize = finalize });
+            var response = mr.Execute(new MapReduceOptions(typeName) { Map = parameters.Map, Reduce = parameters.Reduce, Finalize = parameters.Finalize });
             var coll = response.GetCollection<MapReduceResult<T>>();
             var r = coll.Find().FirstOrDefault();
             T result = r != null ? r.Value : default(T);
 
             return result;
+        }
+
+        private bool IsAggregateMethod(string method)
+        {
+            return (new[] { "Min", "Max", "Average", "Sum" }).Contains(method);
+        }
+
+        private bool IsSingleResultMethod(string method)
+        {
+            return (new[] { "Single", "SingleOrDefault", "First", "FirstOrDefault" }).Contains(method);
         }
     }
 }
