@@ -4,12 +4,12 @@ using Norm.BSON;
 
 namespace Norm
 {
-	/// <summary>
-	/// Flags a type as having a discriminator.  Apply to a base type to enable multiple-inheritance.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-	public class MongoDiscriminatedAttribute : Attribute
-	{
+    /// <summary>
+    /// Flags a type as having a discriminator.  Apply to a base type to enable multiple-inheritance.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
+    public class MongoDiscriminatedAttribute : Attribute
+    {
         private static readonly Type AttributeType = typeof(MongoDiscriminatedAttribute);
         private static readonly Type RootType = typeof(object);
 
@@ -37,5 +37,5 @@ namespace Norm
 
             return null;
         }
-	}
+    }
 }
