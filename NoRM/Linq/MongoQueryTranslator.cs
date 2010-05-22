@@ -659,11 +659,7 @@ namespace Norm.Linq
                 case TypeCode.DateTime:
                     return "+(" + (long)((DateTime)value).ToUniversalTime().Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
                 case TypeCode.String:
-<<<<<<< HEAD
                     return "\"" + value.ToString().EscapeJavaScriptString() + "\"";
-=======
-                    return "\"" + value.ToString().EscapeDoubleQuotes() + "\"";
->>>>>>> 76a4940092daf6ddb43923aa6dd3a19d37392998
                 case TypeCode.Object:
                     if (value is ObjectId || value is Guid)
                     {
@@ -996,7 +992,6 @@ namespace Norm.Linq
 
         private void HandleContains(MethodCallExpression m)
         {
-<<<<<<< HEAD
             var collection = m.Object.GetConstantValue<IEnumerable>().Cast<object>().ToArray();
             var member = VisitDeepAlias((MemberExpression)m.Arguments[0]);
 
@@ -1023,25 +1018,6 @@ namespace Norm.Linq
             }
 
             SetFlyValue(member, Q.In(collection));
-=======
-            var collection = m.Object.GetConstantValue<IEnumerable>();
-
-            _sbWhere.Append("(");
-            foreach (var item in collection)
-            {
-                if (UseScopedQualifier)
-                    _sbWhere.Append("this.");
-
-                _sbWhere.Append(VisitDeepAlias((MemberExpression)m.Arguments[0]));
-                _sbWhere.Append(" === ");
-                _sbWhere.Append(GetJavaScriptConstantValue(item));
-                _sbWhere.Append(" || ");
-            }
-            _sbWhere.Remove(_sbWhere.Length - 4, 4);
-            _sbWhere.Append(")");
-
-            SetFlyValue(VisitDeepAlias((MemberExpression)m.Arguments[0]), Q.In(collection.Cast<object>().ToArray()));
->>>>>>> 76a4940092daf6ddb43923aa6dd3a19d37392998
         }
 
         private void HandleSubCount(MethodCallExpression m)
