@@ -1276,6 +1276,34 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void OneProductsShouldBeReturnedWhenContainsUsesRegexEscapeChar()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "TestX3", Price = 10 });
+                session.Add(new TestProduct { Name = "Test+X4", Price = 22 });
+                session.Add(new TestProduct { Name = "Test5", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Contains("+X")).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenReplaceContainsRegexEscapeChar()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "TestX3", Price = 10 });
+                session.Add(new TestProduct { Name = "Test+X4", Price = 22 });
+                session.Add(new TestProduct { Name = "Test5", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Replace("+X","X") == "TestX4").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
         public void OneProductsShouldBeReturnedWhenContainsMatchesFirstCharacter()
         {
             using (var session = new Session())

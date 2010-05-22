@@ -659,7 +659,7 @@ namespace Norm.Linq
                 case TypeCode.DateTime:
                     return "+(" + (long)((DateTime)value).ToUniversalTime().Subtract(BsonHelper.EPOCH).TotalMilliseconds + ")";
                 case TypeCode.String:
-                    return "\"" + value.ToString().EscapeDoubleQuotes() + "\"";
+                    return "\"" + value.ToString().EscapeJavaScriptString() + "\"";
                 case TypeCode.Object:
                     if (value is ObjectId || value is Guid)
                     {
@@ -698,9 +698,9 @@ namespace Norm.Linq
 
                             _sbWhere.Append("(");
                             Visit(m.Object);
-                            _sbWhere.AppendFormat(".indexOf(\"{0}\")===0)", value.EscapeDoubleQuotes());
+                            _sbWhere.AppendFormat(".indexOf(\"{0}\")===0)", value.EscapeJavaScriptString());
   
-                            SetFlyValue(new Regex("^" + value));
+                            SetFlyValue(new Regex("^" + Regex.Escape(value)));
 
                             return m;
                         }
@@ -717,11 +717,11 @@ namespace Norm.Linq
                             Visit(m.Object);
                             _sbWhere.AppendFormat(".length - {0}) >= 0 && ", value.Length);
                             Visit(m.Object);
-                            _sbWhere.AppendFormat(".lastIndexOf(\"{0}\") === (", value.EscapeDoubleQuotes());
+                            _sbWhere.AppendFormat(".lastIndexOf(\"{0}\") === (", value.EscapeJavaScriptString());
                             Visit(m.Object);
                             _sbWhere.AppendFormat(".length - {0}))", value.Length);
 
-                            SetFlyValue(new Regex(value + "$"));
+                            SetFlyValue(new Regex(Regex.Escape(value) + "$"));
 
                             return m;
                         }
@@ -731,9 +731,9 @@ namespace Norm.Linq
 
                             _sbWhere.Append("(");
                             Visit(m.Object);
-                            _sbWhere.AppendFormat(".indexOf(\"{0}\")>-1)", value.EscapeDoubleQuotes());
-                            
-                            SetFlyValue(new Regex(value));
+                            _sbWhere.AppendFormat(".indexOf(\"{0}\")>-1)", value.EscapeJavaScriptString());
+
+                            SetFlyValue(new Regex(Regex.Escape(value)));
 
                             return m;
                         }
@@ -786,7 +786,7 @@ namespace Norm.Linq
                     case "Replace":
                         Visit(m.Object);
                         _sbWhere.Append(".replace(new RegExp(");
-                        Visit(m.Arguments[0]);
+                        _sbWhere.Append(GetJavaScriptConstantValue(Regex.Escape(m.Arguments[0].GetConstantValue<string>())));
                         _sbWhere.Append(",'g'),");
                         Visit(m.Arguments[1]);
                         _sbWhere.Append(")");
@@ -1058,7 +1058,7 @@ namespace Norm.Linq
 
             string value = m.Arguments[1].GetConstantValue<string>();
 
-            _sbWhere.AppendFormat("(new RegExp(\"{0}\",\"{1}\")).test(", value.EscapeDoubleQuotes(), jsoptions);
+            _sbWhere.AppendFormat("(new RegExp(\"{0}\",\"{1}\")).test(", value.EscapeJavaScriptString(), jsoptions);
             Visit(m.Arguments[0]);
             _sbWhere.Append(")");
 
