@@ -24,6 +24,7 @@ namespace Norm.Linq
             if (exp is ConstantExpression)
             {
                 var c = (ConstantExpression) exp;
+
                 result = (T)c.Value;
             }
 
@@ -72,9 +73,9 @@ namespace Norm.Linq
         /// </summary>
         /// <param name="str">The string</param>
         /// <returns>The escaped string.</returns>
-        public static string EscapeDoubleQuotes(this string str)
+        public static string EscapeJavaScriptString(this string str)
         {
-            return str.Replace("\"", "\\\"");
+            return str.Replace("\\", "\\\\").Replace("\"", "\\\"");
         }
     }
 }

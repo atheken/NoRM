@@ -121,6 +121,11 @@ namespace Norm.Tests
             get { return new MongoQuery<Post>(_provider); }
         }
 
+        public QueryTranslationResults TranslationResults
+        {
+            get { return (_provider as IMongoQueryResults).TranslationResults; }
+        }
+
         #region IDisposable Members
 
         public void Dispose()
@@ -206,6 +211,13 @@ namespace Norm.Tests
     {
         public string Text { get; set; }
         public string Name { get; set; }
+        public IList<Tag> CommentTags { get; set; }
+        public IList<string> CommentTagsSimple { get; set; }
+    }
+
+    internal class Tag
+    {
+        public string TagName { get; set; }
     }
 
     internal class CheeseClubContact
@@ -312,6 +324,7 @@ namespace Norm.Tests
         public string Name { get; set; }
         public DateTime CreatedOn { get; set; }
         public Address Address { get; set; }
+        public int RefNum { get; set; }
     }   
 
     internal class InventoryChange

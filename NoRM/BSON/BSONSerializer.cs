@@ -462,7 +462,10 @@ namespace Norm.BSON
                 options = string.Concat(options, 's');
             }
 
-            options = string.Concat(options, 'u'); // all .net regex are unicode regex, therefore:
+            //reports that this is causing perf issues
+            //http://groups.google.com/group/norm-mongodb/browse_thread/thread/eead4b09a6a771c 
+            //options = string.Concat(options, 'u'); // all .net regex are unicode regex, therefore:
+            
             if ((regex.Options & RegexOptions.IgnorePatternWhitespace) == RegexOptions.IgnorePatternWhitespace)
             {
                 options = string.Concat(options, 'w');

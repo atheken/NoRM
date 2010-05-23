@@ -27,6 +27,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 33 });
                 var result = session.Products.Count();
                 Assert.Equal(3, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
         [Fact]
@@ -39,6 +40,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 33 });
                 var result = session.Products.Where(x => x.Price > 20).Count();
                 Assert.Equal(2, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
    
@@ -53,6 +55,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 33, _id = ObjectId.NewObjectId() });
                 var result = session.Products.Where(x => x._id == target).Count();
                 Assert.Equal(1, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }        
         [Fact]
@@ -65,6 +68,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "asdasddds", Price = 30 });
                 var result = session.Products.Sum(x => x.Price);
                 Assert.Equal(60, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
         [Fact]
@@ -77,6 +81,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Where(x => x.Price < 30).Sum(x => x.Price);
                 Assert.Equal(30, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -94,6 +99,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Where(x => names.Contains(x.Name)).Sum(x => x.Price);
                 Assert.Equal(30, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -107,6 +113,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Average(x => x.Price);
                 Assert.Equal(20, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -120,6 +127,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Where(x => x.Price < 30).Average(x => x.Price);
                 Assert.Equal(15, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -135,6 +143,7 @@ namespace Norm.Tests
 
                 var result = session.Products.Average(x => x.Price);
                 Assert.Equal(500.5, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -148,6 +157,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Min(x => x.Price);
                 Assert.Equal(10, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -161,6 +171,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
                 var result = session.Products.Max(x => x.Price);
                 Assert.Equal(30, result);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
         [Fact]
@@ -173,6 +184,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
 
                 Assert.True(session.Products.Any(x => x.Price == 10));
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -185,7 +197,8 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "2", Price = 20 });
                 session.Add(new TestProduct { Name = "3", Price = 30 });
 
-                Assert.True(session.Products.Where(x=>x.Price < 30).Any(x => x.Price == 10));
+                Assert.True(session.Products.Where(x => x.Price < 30).Any(x => x.Price == 10));
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -199,6 +212,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
 
                 Assert.True(session.Products.Any());
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -212,6 +226,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "3", Price = 30 });
 
                 Assert.False(session.Products.Any(x => x.Price == 100));
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 

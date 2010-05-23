@@ -121,7 +121,7 @@
     <Compile Include="Commands\OrderBy.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ElementMatch.cs" />
-    <Compile Include="Commands\Qualifiers\ExistsQuallifier.cs" />
+    <Compile Include="Commands\Qualifiers\ExistsQualifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterOrEqualQualifier.cs" />
     <Compile Include="Commands\Qualifiers\GreaterThanQualifier.cs" />
     <Compile Include="Commands\Qualifiers\InQualifier.cs" />
@@ -161,8 +161,10 @@
     <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\IMongoQuery.cs" />
+    <Compile Include="Linq\IMongoQueryResults.cs" />
     <Compile Include="Linq\LinqExtensions.cs" />
     <Compile Include="Linq\LinqTypeHelper.cs" />
+    <Compile Include="Linq\MapReduceParameters.cs" />
     <Compile Include="Linq\MapReduceResult.cs" />
     <Compile Include="Linq\MongoQuery.cs" />
     <Compile Include="Linq\MongoQueryExecutor.cs" />

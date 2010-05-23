@@ -31,6 +31,8 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "test", Price = 10 });
                 var product = session.Products.Where(p => p.Price == external).FirstOrDefault();
                 Assert.Equal(10, product.Price);
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -44,6 +46,8 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => p.Name == null).ToList();
                 Assert.Equal(20, products[0].Price);
                 Assert.Equal(1, products.Count);
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -57,6 +61,8 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => p.Name != null).ToList();
                 Assert.Equal(10, products[0].Price);
                 Assert.Equal(1, products.Count);
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -70,6 +76,8 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => Regex.IsMatch(p.Name, "test1")).ToList();
                 Assert.Equal(10, products[0].Price);
                 Assert.Equal(1, products.Count);
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -83,6 +91,8 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => Regex.IsMatch(p.Name, "^te") && p.Price == 10).ToList();
                 Assert.Equal(10, products[0].Price);
                 Assert.Equal(1, products.Count);
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -96,6 +106,8 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => Regex.IsMatch(p.Name, "TEST1", RegexOptions.Multiline | RegexOptions.IgnoreCase)).ToList();
                 Assert.Equal(10, products[0].Price);
                 Assert.Equal(1, products.Count);
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -109,6 +121,8 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => Regex.IsMatch(p.Name, "TEST1", RegexOptions.Multiline | RegexOptions.IgnoreCase) && p.Name.StartsWith("tes")).ToList();
                 Assert.Equal(10, products[0].Price);
                 Assert.Equal(1, products.Count);
+
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -124,6 +138,8 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => x.Price * 2 == 20).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal("1", list[0].Name);
+
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -140,6 +156,8 @@ namespace Norm.Tests
 
                 Assert.Equal(2, list.Count);
                 Assert.Equal(50, list.Sum(x=>x.Price));
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -156,6 +174,8 @@ namespace Norm.Tests
 
                 Assert.Equal(1, list.Count);
                 Assert.Equal(10, list[0].Price);
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -172,6 +192,8 @@ namespace Norm.Tests
 
                 Assert.Equal(2, list.Count);
                 Assert.Equal(50, list.Sum(x => x.Price));
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -188,6 +210,8 @@ namespace Norm.Tests
 
                 Assert.Equal(1, list.Count);
                 Assert.Equal(10, list[0].Price);
+
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -205,6 +229,8 @@ namespace Norm.Tests
 
                 Assert.Equal(1, list.Count);
                 Assert.Equal(30, list[0].Price);
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -222,6 +248,8 @@ namespace Norm.Tests
 
                 Assert.Equal(1, list.Count);
                 Assert.Equal(20, list[0].Price);
+
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -236,6 +264,8 @@ namespace Norm.Tests
 
                 var list = session.Products.Where(x => (x.Inventory.Count()|2) == 3).ToList();
                 Assert.Equal(1, list.Count);
+
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -251,9 +281,11 @@ namespace Norm.Tests
 
                 var list = session.Products.Where(x => (x.Inventory.Count() & 2) == 2).ToList();
                 Assert.Equal(1, list.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
 
                 list = session.Products.Where(x => (x.Inventory.Count() & 1) == 1).ToList();
                 Assert.Equal(2, list.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -269,18 +301,90 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => x.Quantity >= 20 && x.Price == 10).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal(20, list[0].Quantity);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
 
                 list = session.Products.Where(x => x.Quantity <= 20 && x.Price == 10).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal(20, list[0].Quantity);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
                 
                 list = session.Products.Where(x => x.Quantity < 20).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal(10, list[0].Quantity);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
 
                 list = session.Products.Where(x => x.Quantity > 20).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal(30, list[0].Quantity);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportContainsWithComplexQueryWithNoList()
+        {
+            using (var session = new Session())
+            {
+                var names = new List<string>();
+
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+                var result = session.Products.Where(x => names.Contains(x.Name) || x.Name == "7").ToList();
+                Assert.Equal(0, result.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportNativeContainsQueryUsingDollarInWithNoList()
+        {
+            using (var session = new Session())
+            {
+                var names = new List<string>();
+
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+                var result = session.Products.Where(x => names.Contains(x.Name)).ToList();
+                Assert.Equal(0, result.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportNativeContainsQueryUsingDollarIn()
+        {
+            using (var session = new Session())
+            {
+                var names = new List<string>();
+                names.Add("1");
+                names.Add("2");
+                
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+                var result = session.Products.Where(x => names.Contains(x.Name)).ToList();
+                Assert.Equal(2, result.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void LinqQueriesShouldSupportNativeContainsQueryComplexQuery()
+        {
+            using (var session = new Session())
+            {
+                var names = new List<string>();
+                names.Add("1");
+                names.Add("2");
+
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 20 });
+                session.Add(new TestProduct { Name = "3", Price = 30 });
+                var result = session.Products.Where(x => names.Contains(x.Name) || x.Name == "3").ToList();
+                Assert.Equal(3, result.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -299,6 +403,7 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => x.Available > date).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal(10, list[0].Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
 
                 var datefromdb = list[0].Available.ToLocalTime();
 
@@ -326,6 +431,7 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => x.Available == date || x.Price == 13).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal(10, list[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
 
                 var datefromdb = list[0].Available.ToLocalTime();
 
@@ -353,6 +459,7 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => x.Supplier.CreatedOn == date || x.Price == 13).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal(20, list[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
 
                 var datefromdb = list[0].Supplier.CreatedOn.ToLocalTime();
 
@@ -378,6 +485,7 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => x.Price / 2 == 10).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal("2", list[0].Name);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -393,6 +501,7 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => x.Price + 2 == 32).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal("3", list[0].Name);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -408,6 +517,7 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => x.Price - 6 == 24).ToList();
                 Assert.Equal(1, list.Count);
                 Assert.Equal("3", list[0].Name);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -426,6 +536,7 @@ namespace Norm.Tests
                 var list = session.Products.Where(x => names.Contains(x.Name)).ToList();
                 Assert.Equal(2, list.Count);
                 Assert.Equal(30, list.Sum(x=>x.Price));
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -439,6 +550,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => Regex.IsMatch(p.Name, "^te") && p.Name == "test1").ToList();
                 Assert.Equal(10, products[0].Price);
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -451,6 +563,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "test", Price = 10 });
                 var product = session.Products.Where(p => p.Price == 10).Single();
                 Assert.Equal(10, product.Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -464,6 +577,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "test", Price = 10 });
                 var product = session.Products.OrderBy(x=>x.Price).First();
                 Assert.Equal(10, product.Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -480,6 +594,7 @@ namespace Norm.Tests
                     .ToList();
 
                 Assert.Equal(10, product[0].Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -497,10 +612,12 @@ namespace Norm.Tests
                     .SingleOrDefault();
 
                 Assert.Equal(10, product.Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
+
         [Fact]
-        public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhere()
+        public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhereComplexQuery()
         {
             using (var session = new Session())
             {
@@ -511,8 +628,25 @@ namespace Norm.Tests
                 var result = products.Where(x => x.Price < 30);
                 result = result.Where(x => x.Name.Contains("2"));
                 Assert.Equal(22, result.SingleOrDefault().Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenThreeInDBWithChainedWhere()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 10 });
+                session.Add(new TestProduct { Name = "2", Price = 22 });
+                session.Add(new TestProduct { Name = "3", Price = 33 });
+                var result = session.Products.Where(x => x.Price < 30);
+                result = result.Where(x => x.Name.Contains("2"));
+                Assert.Equal(22, result.SingleOrDefault().Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
         [Fact]
         public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByPrice()
         {
@@ -524,6 +658,22 @@ namespace Norm.Tests
                 var products = session.Products.OrderBy(x=>x.Price).ToList();
                 Assert.Equal(22, products[0].Price);
                 Assert.Equal(40, products[2].Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void ThreeProductsShouldBeReturnedWhenThreeInDBOrderedByDeepAlias()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "1", Price = 40, Supplier = new Supplier { Name = "1" } });
+                session.Add(new TestProduct { Name = "2", Price = 22, Supplier = new Supplier { Name = "2" } });
+                session.Add(new TestProduct { Name = "3", Price = 33, Supplier = new Supplier { Name = "3" } });
+                var products = session.Products.OrderBy(x => x.Supplier.Name).ToList();
+                Assert.Equal(40, products[0].Price);
+                Assert.Equal(33, products[2].Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -545,6 +695,7 @@ namespace Norm.Tests
                 Assert.Equal(50, products[4].Price);
                 Assert.Equal("1", products[3].Name);
                 Assert.Equal("2", products[4].Name);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -566,6 +717,7 @@ namespace Norm.Tests
                 Assert.Equal(50, products[4].Price);
                 Assert.Equal("2", products[3].Name);
                 Assert.Equal("1", products[4].Name);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -582,6 +734,7 @@ namespace Norm.Tests
                 var products = session.Products.OrderByDescending(x => x.Price).Skip(3).Take(1).ToList();
                 Assert.Equal(22, products[0].Price);
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -599,6 +752,7 @@ namespace Norm.Tests
                 Assert.Equal(50, products[0].Price);
                 Assert.Equal("5", products[0].Name);
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -613,6 +767,7 @@ namespace Norm.Tests
                 var products = session.Products.OrderByDescending(x => x.Price).ToList();
                 Assert.Equal(33, products[0].Price);
                 Assert.Equal(10, products[2].Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -627,6 +782,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.ToLower() == "test2").ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(22, products[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -641,6 +797,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.ToLowerInvariant() == "test2").ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(22, products[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -655,6 +812,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.ToUpper() == "TEST3").ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(33, products[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -669,6 +827,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.ToUpperInvariant() == "TEST3").ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(33, products[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -682,6 +841,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test1", Price = 33 });
                 var products = session.Products.Where(x => x.Name.ToUpper().Contains("EST")).ToList();
                 Assert.Equal(3, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
        
@@ -695,6 +855,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "TestName3", Price = 33 });
                 var products = session.Products.Where(x => x.Name.Substring(2,4) == "stNa").ToList();
                 Assert.Equal(3, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -709,6 +870,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.Substring(2) == "stName2").ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(22, products[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -724,6 +886,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest4", Price = 22 });
                 var products = session.Products.Where(x => x.Name.StartsWith("X") || x.Name.EndsWith("X")).ToList();
                 Assert.Equal(4, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -737,6 +900,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Price == 10).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -750,6 +914,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Price > 10).ToList();
                 Assert.Equal(2, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -763,6 +928,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Price == 10 && x.Name == "Test3").ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
         [Fact]
@@ -775,6 +941,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Price > 10 && x.Price < 30).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -787,6 +954,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test4X", Price = 22, Available = new DateTime(2000, 2, 6) });
                 var products = session.Products.Where(x => x.Available.Day == 5).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -800,6 +968,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Available == new DateTime(2000, 2, 5)).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal("Test3X", products[0].Name);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -817,6 +986,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(6) });
                 var products = session.Products.Where(x => x.Available.DayOfWeek == DayOfWeek.Monday).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -831,6 +1001,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1) });
                 var products = session.Products.Where(x => x.Available > DateTime.Now).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -845,6 +1016,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(2) });
                 var products = session.Products.Where(x => x.Available > DateTime.Now.AddDays(1)).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -857,6 +1029,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test4X", Price = 22, Available = new DateTime(2001, 3, 6) });
                 var products = session.Products.Where(x => x.Available.Month == 2).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -869,6 +1042,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test4X", Price = 22, Available = new DateTime(2001, 2, 6) });
                 var products = session.Products.Where(x => x.Available.Year == 2000).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -884,6 +1058,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "TXest4", Price = 22 });
                 var products = session.Products.Where(x => x.Name.IndexOf("X") == 2).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -900,6 +1075,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.LastIndexOf("X") == 6).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(33, products[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -916,6 +1092,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.Replace("X","Y") == "TYesYt5").ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(33, products[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -931,6 +1108,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest4", Price = 22 });
                 var products = session.Products.Where(x => string.IsNullOrEmpty(x.Name)).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -946,6 +1124,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest4", Price = 22 });
                 var products = session.Products.Where(x => string.IsNullOrEmpty(x.Name)).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -961,6 +1140,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest4", Price = 22 });
                 var products = session.Products.Where(x => x.Name.StartsWith("X") && x.Name.EndsWith("X")).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -974,6 +1154,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test3", Price = 33 });
                 var products = session.Products.ToList();
                 Assert.Equal(3, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -988,6 +1169,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "XTest4", Price = 22, Available = DateTime.Now.AddDays(1) });
                 var products = session.Products.Where(x => x.Available < DateTime.Now).ToList();
                 Assert.Equal(3, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1001,6 +1183,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test3", Price = 33 });
                 var result = session.Products.Where(x => x.Price != 22);
                 Assert.Equal(2, result.Count());
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1015,6 +1198,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test3", Price = 33 });
                 var result = session.Products.ToList();
                 Assert.Equal(3, result.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1028,6 +1212,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test3", Price = 33 });
                 var result = session.Products.SingleOrDefault(x => x.Price == 22);
                 Assert.Equal(22, result.Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1043,6 +1228,7 @@ namespace Norm.Tests
                 Assert.Equal(1, results.Length);
                 Assert.Equal(22, results[0].Price);
                 Assert.Equal("Test3", results[0].Name);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1051,12 +1237,13 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
+                var target = 22;
                 session.Add(new TestProduct { Name = "Test1", Price = 10 });
                 session.Add(new TestProduct { Name = "Test2", Price = 22 });
-                var target = 22;
                 session.Add(new TestProduct { Name = "Test3", Price = 33 });
                 var result = session.Products.SingleOrDefault(x => x.Price == target);
                 Assert.Equal(target, result.Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1070,6 +1257,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Price > 10 || x.Price > 30).ToList();
                 Assert.Equal(2, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1083,6 +1271,35 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Name.Contains("X")).ToList();
                 Assert.Equal(2, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenContainsUsesRegexEscapeChar()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "TestX3", Price = 10 });
+                session.Add(new TestProduct { Name = "Test+X4", Price = 22 });
+                session.Add(new TestProduct { Name = "Test5", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Contains("+X")).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhenReplaceContainsRegexEscapeChar()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "TestX3", Price = 10 });
+                session.Add(new TestProduct { Name = "Test+X4", Price = 22 });
+                session.Add(new TestProduct { Name = "Test5", Price = 33 });
+                var products = session.Products.Where(x => x.Name.Replace("+X","X") == "TestX4").ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1096,6 +1313,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "CTest", Price = 33 });
                 var products = session.Products.Where(x => x.Name.Contains("B")).ToList();
                 Assert.Equal(1, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1111,6 +1329,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.EndsWith("X")).ToList();
 
                 Assert.Equal(2, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1126,6 +1345,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.StartsWith("X")).ToList();
             
                 Assert.Equal(2, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1142,6 +1362,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.StartsWith("X\"Test") && x.Name.EndsWith("X")).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(33, products[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1158,6 +1379,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.EndsWith("\"5X")).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(33, products[0].Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1174,6 +1396,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(x => x.Name.EndsWith("\"5X") && x.Name.StartsWith("X")).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(33, products[0].Price);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1191,6 +1414,7 @@ namespace Norm.Tests
                 Assert.Equal(22.0, products[0].Price);
                 Assert.Equal(33.0, products[1].Price);
                 Assert.Equal(2, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1208,6 +1432,7 @@ namespace Norm.Tests
                 Assert.Equal(33, products[0].Price);
                 Assert.Equal(44, products[1].Price);
                 Assert.Equal(2, products.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1224,6 +1449,7 @@ namespace Norm.Tests
                 Assert.Equal(10, products[0].Price);
                 Assert.Equal(44, products[1].Price);
                 Assert.Equal(2, products.Length);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1239,6 +1465,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => p._id == targetId).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(targetId, products[0]._id);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1254,6 +1481,7 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => p._id == targetId && p.Available.Day == 6).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(targetId, products[0]._id);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
         [Fact]
@@ -1269,6 +1497,7 @@ namespace Norm.Tests
                 Assert.Equal(2, products.Count);
                 Assert.NotEqual(targetId, products[0]._id);
                 Assert.NotEqual(targetId, products[1]._id);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1284,6 +1513,7 @@ namespace Norm.Tests
                 var posts = session.Posts.Where(p => p.Id == targetId).ToList();
                 Assert.Equal(1, posts.Count);
                 Assert.Equal(targetId, posts[0].Id);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1299,6 +1529,25 @@ namespace Norm.Tests
                 var products = session.Products.Where(p => p.UniqueID == targetId).ToList();
                 Assert.Equal(1, products.Count);
                 Assert.Equal(targetId, products[0].UniqueID);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinSimpleEmbeddedArray()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Tags = new List<string> { "tag1", "tag2" } };
+                var post2 = new Post { Title = "Second", Tags = new List<string> { "tag3", "tag4" } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var found = session.Posts.Where(p => p.Tags.Any(x => x == "tag3")).SingleOrDefault();
+
+                Assert.Equal("Second", found.Title);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1314,9 +1563,27 @@ namespace Norm.Tests
                 session.Add(post2);
 
                 var found = session.Posts.Where(p => p.Comments.Any(x => x.Text == "commentA")).SingleOrDefault();
-                //var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
 
                 Assert.Equal("Second", found.Title);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingTwoAnys()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1" }, new Comment { Text = "comment2" } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA" }, new Comment { Text = "commentB", CommentTags = new List<Tag>{ new Tag{ TagName = "Cool" }, new Tag { TagName = "Yes" } } } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var found = session.Posts.Where(p => p.Comments.Any(x => x.CommentTags.Any(y => y.TagName == "Cool"))).SingleOrDefault();
+
+                Assert.Equal("Second", found.Title);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1334,6 +1601,7 @@ namespace Norm.Tests
                 var found = session.Posts.Where(p => p.Comments.Any()).SingleOrDefault();
 
                 Assert.Equal("Second", found.Title);
+                Assert.Equal(true, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1350,9 +1618,11 @@ namespace Norm.Tests
 
                 var found = session.Posts.Where(p => p.Comments[0].Text == "commentA").SingleOrDefault();
                 Assert.Equal("Second", found.Title);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
 
                 found = session.Posts.Where(p => p.Comments[1].Text == "comment2").SingleOrDefault();
                 Assert.Equal("First", found.Title);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1366,6 +1636,21 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "CTest", Price = 33 });
                 var productMax = session.Products.Max(x => x.Price);
                 Assert.Equal(33, productMax);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void MapReduceMaxDeepQuery()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "ATest", Price = 10, Supplier = new Supplier { RefNum = 3 } });
+                session.Add(new TestProduct { Name = "BTest", Price = 22, Supplier = new Supplier { RefNum = 2 } });
+                session.Add(new TestProduct { Name = "CTest", Price = 33, Supplier = new Supplier { RefNum = 1 } });
+                var productMax = session.Products.Max(x => x.Supplier.RefNum);
+                Assert.Equal(3, productMax);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1379,6 +1664,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "BTest", Price = 33 });
                 var productMax = session.Products.Where(x=>x.Name == "BTest").Max(x => x.Price);
                 Assert.Equal(33, productMax);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1392,6 +1678,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "BTest", Price = 33 });
                 var productMax = session.Products.Where(x => x.Name == "BTest").Min(x => x.Price);
                 Assert.Equal(22, productMax);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1419,6 +1706,7 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "BTest", Price = 33 });
                 var noProducct = session.Products.Where(x => x.Name == "ZTest").FirstOrDefault();
                 Assert.Equal(null, noProducct);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1439,7 +1727,8 @@ namespace Norm.Tests
 
                 Assert.Equal(1, dtos.Count);
                 Assert.Equal("Find This", dtos[0].Title);
-    }
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
         }
 
         [Fact]
@@ -1456,6 +1745,7 @@ namespace Norm.Tests
                 var dtos = query.ToList();
 
                 Assert.Equal(1, dtos.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1473,6 +1763,7 @@ namespace Norm.Tests
                 var dtos = query.ToList();
 
                 Assert.Equal(1, dtos.Count);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1492,6 +1783,7 @@ namespace Norm.Tests
 
                 Assert.Equal(1, dtos.Count);
                 Assert.Equal(obj.Id, dtos.Single().Id);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -1530,6 +1822,7 @@ namespace Norm.Tests
                 Assert.Equal("Jane", deepQuery[0].Name);
                 Assert.Equal("Cart2", deepQuery[0].Cart.Name);
                 Assert.Equal(1, deepQuery.Count);
+                Assert.Equal(false, (shoppers.Provider as IMongoQueryResults).TranslationResults.IsComplex);
             }
         }
     }

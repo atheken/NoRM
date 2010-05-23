@@ -5,13 +5,13 @@ namespace Norm.Commands.Qualifiers
     /// <summary>
     /// The exists quallifier.
     /// </summary>
-    public class ExistsQuallifier : QualifierCommand
+    public class ExistsQualifier : QualifierCommand
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ExistsQuallifier"/> class.
+        /// Initializes a new instance of the <see cref="ExistsQualifier"/> class.
         /// </summary>
         /// <param name="doesExist">The does exist.</param>
-        internal ExistsQuallifier(bool doesExist) : base("$exists", doesExist)
+        internal ExistsQualifier(bool doesExist) : base("$exists", doesExist)
         {
         }
     }

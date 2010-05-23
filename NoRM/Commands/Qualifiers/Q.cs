@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 ﻿using Norm.Commands.Qualifiers;
 using System.Text.RegularExpressions;
 
@@ -80,9 +80,9 @@ namespace Norm
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns></returns>
-        public static LessThanQualifier LessOrEqual(object value)
+        public static LessOrEqualQualifier LessOrEqual(object value)
         {
-            return new LessThanQualifier(value);
+            return new LessOrEqualQualifier(value);
         }
 
         /// <summary>
@@ -217,9 +217,9 @@ namespace Norm
         /// </summary>
         /// <param name="value">if set to <c>true</c> [value].</param>
         /// <returns></returns>
-        public static ExistsQuallifier Exists(bool value)
+        public static ExistsQualifier Exists(bool value)
         {
-            return new ExistsQuallifier(value);
+            return new ExistsQualifier(value);
         }
     }
 }

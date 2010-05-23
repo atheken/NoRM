@@ -4,50 +4,38 @@ using Norm.BSON;
 
 namespace Norm
 {
-	/// <summary>
-	/// Flags a type as having a discriminator.  Apply to a base type to enable multiple-inheritance.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-	public class MongoDiscriminatedAttribute : Attribute
-	{
-		/// <summary>
-		/// Finds the sub-type or interface from the given type that declares itself as a discriminating base class
-		/// </summary>
-		/// <param name="type"></param>
-		/// <returns></returns>
-		public static Type GetDiscriminatingTypeFor(Type type)
-		{
-			var usingType = type;
+    /// <summary>
+    /// Flags a type as having a discriminator.  Apply to a base type to enable multiple-inheritance.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
+    public class MongoDiscriminatedAttribute : Attribute
+    {
+        private static readonly Type AttributeType = typeof(MongoDiscriminatedAttribute);
+        private static readonly Type RootType = typeof(object);
 
-			while (usingType != typeof(object))
-			{
-				var discriminator = GetDiscriminatedAttribute(usingType);
-				if (discriminator != null)
-					return usingType;
+        /// <summary>
+        /// Finds the sub-type or interface from the given type that declares itself as a discriminating base class
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static Type GetDiscriminatingTypeFor(Type type)
+        {
+            var current = type;
+            while (current != RootType)
+            {
+                if (current.IsDefined(AttributeType, false))
+                    return current;
 
-				usingType = usingType.BaseType;
-			}
+                current = current.BaseType;
+            }
 
-			foreach (var iface in type.GetInterfaces())
-			{
-				var discriminator = GetDiscriminatedAttribute(iface);
+            foreach (var @interface in type.GetInterfaces())
+            {
+                if (@interface.IsDefined(AttributeType, false))
+                    return @interface;
+            }
 
-				if (discriminator != null)
-					return iface;
-			}
-			return null;
-		}
-
-		/// <summary>
-		/// Determines whether the type given directly declares itself as saving sub-types with a discriminator
-		/// </summary>
-		/// <param name="usingType"></param>
-		/// <returns></returns>
-		private static MongoDiscriminatedAttribute GetDiscriminatedAttribute(Type usingType)
-		{
-			return usingType.GetCustomAttributes(BsonHelper.MongoDiscriminatedAttribute, false)
-				.OfType<MongoDiscriminatedAttribute>()
-				.FirstOrDefault();
-		}
-	}
+            return null;
+        }
+    }
 }
