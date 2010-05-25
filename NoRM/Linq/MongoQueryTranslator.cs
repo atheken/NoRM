@@ -318,7 +318,7 @@ namespace Norm.Linq
         /// </exception>
         protected override Expression VisitUnary(UnaryExpression u)
         {
-            string op = this.GetOperator(u);
+            string op = GetOperator(u);
             switch (u.NodeType)
             {
                 case ExpressionType.Not:
@@ -585,8 +585,8 @@ namespace Norm.Linq
             if (q != null)
             {
                 // set the collection name
-                this.TypeName = q.ElementType.Name;
-                this.CollectionName = MongoConfiguration.GetCollectionName(q.ElementType);                
+                TypeName = q.ElementType.Name;
+                CollectionName = MongoConfiguration.GetCollectionName(q.ElementType);                
 
                 // this is our Query wrapper - see if it has an expression
                 var qry = (IMongoQuery)c.Value;
@@ -683,9 +683,9 @@ namespace Norm.Linq
         /// </exception>
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            if (string.IsNullOrEmpty(this.MethodCall))
+            if (string.IsNullOrEmpty(MethodCall))
             {
-                this.MethodCall = m.Method.Name;
+                MethodCall = m.Method.Name;
             }
 
             if (m.Method.DeclaringType == typeof(string))
@@ -867,7 +867,6 @@ namespace Norm.Linq
             }
 
             SetFlyValue(_lastFlyProperty, value);
-
         }
 
         private bool CanGetQualifier(string op, object value)
@@ -876,9 +875,13 @@ namespace Norm.Linq
                 return true;
             
             if (value != null && (value.GetType().IsAssignableFrom(typeof(double))
+                        || value.GetType().IsAssignableFrom(typeof(double?))
                         || value.GetType().IsAssignableFrom(typeof(int))
                         || value.GetType().IsAssignableFrom(typeof(int?))
                         || value.GetType().IsAssignableFrom(typeof(long))
+                        || value.GetType().IsAssignableFrom(typeof(long?))
+                        || value.GetType().IsAssignableFrom(typeof(float))
+                        || value.GetType().IsAssignableFrom(typeof(float?))
                         || value.GetType().IsAssignableFrom(typeof(DateTime))
                         || value.GetType().IsAssignableFrom(typeof(DateTime?))))
             {
@@ -950,7 +953,7 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         private void HandleSkip(Expression exp)
         {
-            this.Skip = exp.GetConstantValue<int>();
+            Skip = exp.GetConstantValue<int>();
         }
 
         /// <summary>
@@ -959,7 +962,7 @@ namespace Norm.Linq
         /// <param name="exp">The expression.</param>
         private void HandleTake(Expression exp)
         {
-            this.Take = exp.GetConstantValue<int>();
+            Take = exp.GetConstantValue<int>();
         }
 
         private void HandleSort(Expression exp, OrderBy orderby)
@@ -969,7 +972,7 @@ namespace Norm.Linq
             if (member == null)
                 throw new NotSupportedException("Order clause supplied is not supported");
 
-            this.SortFly[VisitDeepAlias(member)] = orderby;
+            SortFly[VisitDeepAlias(member)] = orderby;
         }
 
         private void HandleAggregate(MethodCallExpression exp)
@@ -1136,8 +1139,8 @@ namespace Norm.Linq
                     HandleAggregate(m);
                     break;
                 default:
-                    this.Take = 1;
-                    this.MethodCall = m.Method.Name;
+                    Take = 1;
+                    MethodCall = m.Method.Name;
                     if (m.Arguments.Count > 1)
                     {
                         var lambda = GetLambda(m.Arguments[1]);

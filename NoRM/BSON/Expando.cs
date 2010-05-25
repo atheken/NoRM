@@ -134,11 +134,11 @@ namespace Norm.BSON
         /// <summary>
         /// Merges one Expando with the current Expando
         /// </summary>
-        /// <param name="newValues">The Expando to be merged</param>
+        /// <param name="expando">The Expando to be merged</param>
         /// <returns>The current expando instance</returns>
-        public Expando Merge(Expando newValues)
+        public Expando Merge(Expando expando)
         {
-            foreach (var item in newValues.AllProperties())
+            foreach (var item in expando.AllProperties())
             {
                 this[item.PropertyName] = item.Value;
             }
