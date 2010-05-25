@@ -628,7 +628,7 @@ namespace Norm.Tests
                 var result = products.Where(x => x.Price < 30);
                 result = result.Where(x => x.Name.Contains("2"));
                 Assert.Equal(22, result.SingleOrDefault().Price);
-                Assert.Equal(true, session.TranslationResults.IsComplex);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 
@@ -931,6 +931,7 @@ namespace Norm.Tests
                 Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
+
         [Fact]
         public void OneProductsShouldBeReturnedWhen3InDbWithPriceGreaterThan10LessThan30()
         {
@@ -941,7 +942,22 @@ namespace Norm.Tests
                 session.Add(new TestProduct { Name = "Test5", Price = 33 });
                 var products = session.Products.Where(x => x.Price > 10 && x.Price < 30).ToList();
                 Assert.Equal(1, products.Count);
-                Assert.Equal(true, session.TranslationResults.IsComplex);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
+            }
+        }
+
+        [Fact]
+        public void OneProductsShouldBeReturnedWhen3InDbWithPriceGreaterThan10LessThan40AndNot33()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Name = "Test3", Price = 10 });
+                session.Add(new TestProduct { Name = "Test4", Price = 22 });
+                session.Add(new TestProduct { Name = "Test5", Price = 33 });
+                var products = session.Products.Where(x => x.Price > 10 && x.Price < 40 && x.Price != 33).ToList();
+                Assert.Equal(1, products.Count);
+                Assert.Equal(22, products[0].Price);
+                Assert.Equal(false, session.TranslationResults.IsComplex);
             }
         }
 

@@ -865,69 +865,83 @@ namespace Norm.Linq
             {
                 _lastFlyProperty = (string.Join(".", _prefixAlias.ToArray()) + "." + _lastFlyProperty).TrimEnd('.');
             }
-                      
-            // if the property has already been set, we can't set it again
-            // as fly uses Dictionaries. This means you can't do BETWEEN style native queries
-            if (FlyWeight.Contains(_lastFlyProperty))
-            {
-                IsComplex = true;
-                return;
-            }
 
-            switch (_lastOperator)
-            {
-                case " !== ":
-                    FlyWeight[_lastFlyProperty] = Q.NotEqual(value);
-                    break;
-                case " === ":
-                    FlyWeight[_lastFlyProperty] = value;
-                    break;
-                default:
-                    // Can't do comparisons here unless the type is a double
-                    // which is a limitation of mongo, apparently
-                    // and won't work if we're doing date comparisons
-                    if (value != null && (value.GetType().IsAssignableFrom(typeof(double))
+            SetFlyValue(_lastFlyProperty, value);
+
+        }
+
+        private bool CanGetQualifier(string op, object value)
+        {
+            if (op == " !== " || op == " === ")
+                return true;
+            
+            if (value != null && (value.GetType().IsAssignableFrom(typeof(double))
                         || value.GetType().IsAssignableFrom(typeof(int))
                         || value.GetType().IsAssignableFrom(typeof(int?))
                         || value.GetType().IsAssignableFrom(typeof(long))
                         || value.GetType().IsAssignableFrom(typeof(DateTime))
                         || value.GetType().IsAssignableFrom(typeof(DateTime?))))
-                    {
-                        switch (_lastOperator)
-                        {
-                            case " > ":
-                                FlyWeight[_lastFlyProperty] = Q.GreaterThan(value);
-                                break;
-                            case " < ":
-                                FlyWeight[_lastFlyProperty] = Q.LessThan(value);
-                                break;
-                            case " <= ":
-                                FlyWeight[_lastFlyProperty] = Q.LessOrEqual(value);
-                                break;
-                            case " >= ":
-                                FlyWeight[_lastFlyProperty] = Q.GreaterOrEqual(value);
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        // Can't assign? Push to the $where
-                        IsComplex = true;
-                    }
-                    break;
+            {
+                switch (op)
+                {
+                    case " > ":
+                    case " < ":
+                    case " <= ":
+                    case " >= ":
+                        return true;
+                }
             }
 
+            return false;
+        }
+
+        private object GetQualifier(string op, object value)
+        {
+            switch (op)
+            {
+                case " === ":
+                    return value;
+                case " !== ":
+                    return Q.NotEqual(value).AsExpando();
+                case " > ":
+                    return Q.GreaterThan(value).AsExpando();
+                case " < ":
+                    return Q.LessThan(value).AsExpando();
+                case " <= ":
+                    return Q.LessOrEqual(value).AsExpando();
+                case " >= ":
+                    return Q.GreaterOrEqual(value).AsExpando();
+            }
+
+            return null;
         }
 
         private void SetFlyValue(string key, object value)
         {
-            if (FlyWeight.Contains(key))
+            if (!CanGetQualifier(_lastOperator, value))
             {
                 IsComplex = true;
                 return;
             }
 
-            FlyWeight[key] = value;
+            if (FlyWeight.Contains(key))
+            {
+                var existing = FlyWeight[key] as Expando;
+                if (existing != null)
+                {
+                    var newq = GetQualifier(_lastOperator, value) as Expando;
+                    if (newq != null)
+                    {
+                        existing.Merge(newq);
+                        return;
+                    }
+                }
+
+                IsComplex = true;
+                return;
+            }
+
+            FlyWeight[key] = GetQualifier(_lastOperator, value);
         }
 
         /// <summary>
@@ -1017,7 +1031,7 @@ namespace Norm.Linq
                 _sbWhere.Append("(1===2)");
             }
 
-            SetFlyValue(member, Q.In(collection));
+            SetFlyValue(member, Q.In(collection).AsExpando());
         }
 
         private void HandleSubCount(MethodCallExpression m)
