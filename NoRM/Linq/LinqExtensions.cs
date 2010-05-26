@@ -77,5 +77,17 @@ namespace Norm.Linq
         {
             return str.Replace("\\", "\\\\").Replace("\"", "\\\"");
         }
+
+        /// <summary>
+        /// Converts a QualifierCommand into an Expando object
+        /// </summary>
+        /// <param name="qualifier"></param>
+        /// <returns>Qualifer Command as Expando object</returns>
+        public static Expando AsExpando(this QualifierCommand qualifier)
+        {
+            var expando = new Expando();
+            expando[qualifier.CommandName] = qualifier.ValueForCommand;
+            return expando;
+        }
     }
 }

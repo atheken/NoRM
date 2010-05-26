@@ -130,6 +130,21 @@ namespace Norm.BSON
 
             return retval;
         }
+
+        /// <summary>
+        /// Merges one Expando with the current Expando
+        /// </summary>
+        /// <param name="expando">The Expando to be merged</param>
+        /// <returns>The current expando instance</returns>
+        public Expando Merge(Expando expando)
+        {
+            foreach (var item in expando.AllProperties())
+            {
+                this[item.PropertyName] = item.Value;
+            }
+
+            return this;
+        }
         
     }
 }
