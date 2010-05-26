@@ -4,6 +4,7 @@ using Norm.Configuration;
 using System.Collections.Generic;
 using System;
 using Norm.Protocol.Messages;
+using Norm.BSON;
 
 namespace Norm.Tests
 {
@@ -19,6 +20,24 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("strict=false")))
             {
                 mongo.Database.DropCollection("Fake");
+            }
+        }
+
+        [Fact]
+        public void Find_On_Unspecified_Type_Returns_Expando_When_No_Discriminator_Available()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                db.Database.GetCollection("helloWorld").Insert(new { _id = 1 });
+                db.Database.DropCollection("helloWorld");
+                var coll = db.Database.GetCollection("helloWorld");
+                coll.Insert(new IntId { Id = 5, Name = "hi there" },
+                    new { Id = Guid.NewGuid(), Value = "22" },
+                    new { _id = ObjectId.NewObjectId(), Key = 578 });
+
+                var allObjs = coll.Find().ToArray();
+                Assert.True(allObjs.All(y => y is Expando));
+                Assert.Equal(3, allObjs.Length);
             }
         }
 

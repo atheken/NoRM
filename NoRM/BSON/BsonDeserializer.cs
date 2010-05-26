@@ -249,6 +249,11 @@ namespace Norm.BSON
             object instance = null;
             TypeHelper typeHelper = null;
 
+            if (type == typeof(Object))
+            {
+                //override the requested type so that some reasonable things happen.
+                type = typeof(Expando);
+            }
             if (type.IsInterface == false && type.IsAbstract == false)
             {
                 instance = Activator.CreateInstance(type, true);
@@ -282,7 +287,7 @@ namespace Norm.BSON
                 {
                     throw new MongoException("Could not find the type to instantiate in the document, and " + type.Name + " is an interface or abstract type. Add a MongoDiscriminatedAttribute to the type or base type, or try to work with a concrete type next time.");
                 }
-                
+
                 processedNonTypeProperties = true;
 
                 var property = (name == "_id" || name == "$id")

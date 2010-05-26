@@ -58,16 +58,22 @@ namespace Norm.Collections
         {
             get
             {
-                if (CanUpdateWithoutId(typeof(T)))
-                {
-                    return true;
-                }
-
                 if (_updateable == null)
                 {
-                    _updateable = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty() != null;
-                }
+                    var retval = false;
 
+                    var t = typeof(T);
+                    if (t == typeof(Object) || t.GetInterface("IUpdateWithoutId") != null)
+                    {
+                        retval = true;
+                    }
+
+                    if (!retval)
+                    {
+                        retval = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty() != null;
+                    }
+                    _updateable = retval;
+                }
                 return _updateable.Value;
             }
         }
@@ -345,12 +351,12 @@ namespace Norm.Collections
 
             var collection = _db.GetCollection<MongoIndex<T>>("system.indexes");
             collection.Insert(new MongoIndex<T>
-                                  {
-                                      Key = key,
-                                      Namespace = FullyQualifiedName,
-                                      Name = indexName,
-                                      Unique = isUnique
-                                  });
+            {
+                Key = key,
+                Namespace = FullyQualifiedName,
+                Name = indexName,
+                Unique = isUnique
+            });
         }
 
         /// <summary>
@@ -602,36 +608,22 @@ namespace Norm.Collections
         /// <param name="entities">The entities.</param>
         private static void TrySettingId(IEnumerable<T> entities)
         {
-            if (CanUpdateWithoutId(typeof(T)))
+            if (typeof(T) != typeof(Object) && typeof(T).GetInterface("IUpdateWithoutId") == null)
             {
-                return;
-            }
-
-            var idProperty = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty();
-            if (!typeof(ObjectId).IsAssignableFrom(idProperty.Type) || idProperty.Setter == null)
-            {
-                return;
-            }
-
-            foreach (var entity in entities)
-            {
-                var value = idProperty.Getter(entity);
-                if (value == null)
+                var idProperty = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty();
+                if (idProperty != null && typeof(ObjectId).IsAssignableFrom(idProperty.Type) && idProperty.Setter != null)
                 {
-                    idProperty.Setter(entity, ObjectId.NewObjectId());
+                    foreach (var entity in entities)
+                    {
+                        var value = idProperty.Getter(entity);
+                        if (value == null)
+                        {
+                            idProperty.Setter(entity, ObjectId.NewObjectId());
+                        }
+                    }
                 }
             }
-            return;
         }
 
-        /// <summary>
-        /// Checks whether type implements IUpdateWithoutId.
-        /// </summary>
-        /// <param name="type">The type to check.</param>
-        /// <returns>True if implemented; otherwise false.</returns>
-        private static bool CanUpdateWithoutId(Type type)
-        {
-            return typeof(T).GetInterface("IUpdateWithoutId") != null;
-        }
     }
 }
