@@ -1,6 +1,7 @@
 using System;
 ﻿using Norm.Commands.Qualifiers;
 using System.Text.RegularExpressions;
+using Norm.BSON;
 
 namespace Norm
 {
@@ -12,7 +13,7 @@ namespace Norm
     /// This should remain in the Norm namespace so that it's available 
     /// automatically when someone is using a MongoCollection.
     /// </remarks>
-    public class Q
+    public static class Q
     {
         /// <summary>
         /// Construct an "equals" qualifier testing for Null.
@@ -33,6 +34,17 @@ namespace Norm
         public static NotEqualQualifier IsNotNull()
         {
             return Q.NotEqual(new bool?());
+        }
+
+        public static Expando And(this QualifierCommand baseCommand, params QualifierCommand[] additionalQualifiers)
+        {
+            var retval = new Expando();
+            retval[baseCommand.CommandName] = baseCommand.ValueForCommand;
+            foreach (var q in additionalQualifiers)
+            {
+                retval[q.CommandName] = q.ValueForCommand;
+            }
+            return retval;
         }
 
         /// <summary>

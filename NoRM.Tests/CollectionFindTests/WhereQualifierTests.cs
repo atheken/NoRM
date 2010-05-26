@@ -27,6 +27,20 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void MultiQualifier()
+        {
+            _collection.Insert(new TestClass { AInteger = 78 },
+                new TestClass { AInteger = 79 },
+                new TestClass { AInteger = 80 },
+                new TestClass { AInteger = 81 });
+
+            var result = _collection.Find(new { AInteger = Q.LessThan(81).And(Q.GreaterThan(78)) }).ToArray();
+            Assert.Equal(2,result.Length);
+            Assert.Equal(79, result[0].AInteger);
+            Assert.Equal(80, result[1].AInteger);
+        }
+
+        [Fact]
         public void WhereExpressionShouldWorkWithFlyweight()
         {
             _collection.Insert(new TestClass { ADouble = 1d });

@@ -35,7 +35,6 @@ namespace Norm.Tests
         }
 
 
-
         [Fact]
         public void FindUsesLimit()
         {
