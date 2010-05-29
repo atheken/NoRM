@@ -333,30 +333,78 @@ namespace Norm.Collections
             return _db.GetCollectionStatistics(_collectionName);
         }
 
-        /// <summary>
-        /// Creates an index for a given collection.
-        /// </summary>
-        /// <param name="index">The property to index.</param>
-        /// <param name="indexName">The index Name.</param>
-        /// <param name="isUnique">Unique index flag.</param>
-        /// <param name="direction">Ascending or descending.</param>
-        public void CreateIndex(Expression<Func<T, object>> index, string indexName, bool isUnique, IndexOption direction)
+        
+        private String RecurseMemberExpression(MemberExpression mex)
         {
-            var translator = new MongoQueryTranslator();
-            // Index values should contain the full namespace without "this."
-            var indexProperty = translator.Translate(index, false);
-
-            var key = new Expando();
-            key.Set(indexProperty.Query, direction);
-
-            var collection = _db.GetCollection<MongoIndex<T>>("system.indexes");
-            collection.Insert(new MongoIndex<T>
+            var retval = "";
+            var parentEx = mex.Expression as MemberExpression;
+            if (parentEx != null)
             {
-                Key = key,
-                Namespace = FullyQualifiedName,
-                Name = indexName,
-                Unique = isUnique
-            });
+                //we need to recurse because we're not at the root yet.
+                retval += this.RecurseMemberExpression(parentEx) + ".";
+            }
+            retval += MongoConfiguration.GetPropertyAlias(mex.Expression.Type, mex.Member.Name);
+            return retval;
+        }
+
+        /// <summary>
+        /// Asynchronously creates an index on this collection.
+        /// It is highly recommended that you use the overload of this method that accepts an expression unless you need the granularity that this method provides.
+        /// </summary>
+        /// <param name="key">The document properties that participate in this index. Each property of "key" should be 
+        /// set to either "IndexOption.Ascending" or "IndexOption.Descending", the properties can be deep aliases, like "Suppiler.Name",
+        /// but remember that this will make no effort to check that what you put in for values match the MongoConfiguration.</param>
+        /// <param name="indexName">The name of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this key. 
+        /// MongoDB will potentially optimize the index based on this being true.</param>
+        public void CreateIndex(Expando key, String indexName, bool isUnique)
+        {
+            var collection = _db.GetCollection<MongoIndex>("system.indexes");
+            collection.Insert(
+                new MongoIndex
+                {
+                    Key = key,
+                    Namespace = FullyQualifiedName,
+                    Name = indexName,
+                    Unique = isUnique
+                });
+        }
+
+        /// <summary>
+        /// Asynchronously creates an index on this collection.
+        /// </summary>
+        /// <param name="index">This is an expression of the elements in the type you wish to index, so you can do something like:
+        /// <code>
+        /// y=>y.MyIndexedProperty
+        /// </code>
+        /// or, if you have a multi-key index, you can do this:
+        /// <code>
+        /// y=> new { y.PropertyA, y.PropertyB.Property1, y.PropertyC }
+        /// </code>
+        /// This will automatically map the MongoConfiguration aliases.
+        /// </param>
+        /// <param name="indexName">The name of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this key. 
+        /// MongoDB will potentially optimize the index based on this being true.</param>
+        /// <param name="direction">Should all of the elements in the index be sorted Ascending, or Decending, if you need to sort each property differently, 
+        /// you should use the Expando overload of this method for greater granularity.</param>
+        public void CreateIndex<U>(Expression<Func<T, U>> index, string indexName, bool isUnique, IndexOption direction)
+        {
+            var exp = index.Body as NewExpression;
+            var key = new Expando();
+            if (exp != null)
+            {
+                foreach (var x in exp.Arguments.OfType<MemberExpression>())
+                {
+                    key[this.RecurseMemberExpression(x)] = direction;
+                }
+            }
+            else if (index.Body is MemberExpression)
+            {
+                var me = index.Body as MemberExpression;
+                key[this.RecurseMemberExpression(me)] = direction;
+            }
+            this.CreateIndex(key, indexName, isUnique);
         }
 
         /// <summary>

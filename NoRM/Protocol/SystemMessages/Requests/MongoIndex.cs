@@ -9,12 +9,12 @@ namespace Norm.Protocol.SystemMessages.Requests
     /// Describes an index to insert into the db.
     /// </summary>
     /// <typeparam name="T">Collection type for indexing</typeparam>
-    public class MongoIndex<T> : IUpdateWithoutId, ISystemQuery
+    public class MongoIndex : IUpdateWithoutId, ISystemQuery
     {
         static MongoIndex()
         {
             MongoConfiguration.Initialize(c =>
-                c.For<MongoIndex<T>>(a =>
+                c.For<MongoIndex>(a =>
                      {
                          a.ForProperty(auth => auth.Key).UseAlias("key");
                          a.ForProperty(auth => auth.Namespace).UseAlias("ns");

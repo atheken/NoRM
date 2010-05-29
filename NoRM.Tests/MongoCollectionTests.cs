@@ -41,7 +41,7 @@ namespace Norm.Tests
             }
         }
 
-        [Fact(Skip="This times out, but I don't know why..")]
+        [Fact(Skip = "This times out, but I don't know why..")]
         public void Get_Collection_Statistics_Works()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("timeout=3")))
@@ -151,7 +151,8 @@ namespace Norm.Tests
                     Price = 10,
                     Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                 });
-                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+                session.Provider.DB.GetCollection<TestProduct>()
+                    .CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
 
                 int i;
                 session.Provider.DB.GetCollection<TestProduct>().DeleteIndices(out i);
@@ -159,6 +160,18 @@ namespace Norm.Tests
                 //it's TWO because there's always an index on _id by default.
                 Assert.Equal(2, i);
 
+            }
+        }
+        [Fact]
+        public void Collection_Creates_Complex_Index()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                MongoConfiguration.Initialize(j => j.For<TestProduct>(k =>
+                    k.ForProperty(x => x.Inventory).UseAlias("inv")));
+
+                var prods = db.GetCollection<TestProduct>();
+                prods.CreateIndex(j => new { j.Available, j.Inventory.Count }, "complexIndex", true, IndexOption.Ascending);
             }
         }
 
