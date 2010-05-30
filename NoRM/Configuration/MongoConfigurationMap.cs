@@ -76,7 +76,7 @@ namespace Norm.Configuration
         {
             var map = MongoTypeConfiguration.PropertyMaps;
             var retval = propertyName;//default to the original.
-
+            var discriminator = MongoDiscriminatedAttribute.GetDiscriminatingTypeFor(type);
             if (IsIdPropertyForType(type, propertyName) && !IsDbReference(type))
             {
                 retval = "_id";
@@ -84,6 +84,12 @@ namespace Norm.Configuration
             else if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
             {
                 retval = map[type][propertyName].Alias;             
+            }
+            else if (discriminator != null && discriminator != type )
+            {
+                //if we are are inheriting
+                //checked for ID and in the current type helper.
+                retval = this.GetPropertyAlias(discriminator, propertyName);
             }
             return retval;
         }
