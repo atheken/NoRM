@@ -103,6 +103,10 @@ namespace Norm.Tests
         [Fact]
         public void Find_Subset_Returns_Appropriate_Subset()
         {
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
+            {
+                admin.SetProfileLevel(2);
+            }
             using (var db = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var coll = db.GetCollection<TestProduct>();
@@ -121,8 +125,10 @@ namespace Norm.Tests
                     }
                 });
 
+               
                 var subset = db.GetCollection<TestProduct>().Find(new { }, new { }, Int32.MaxValue, 0,
                     j => new { j.Supplier.Name, j.Price, j._id }).ToArray();
+
 
                 Assert.Equal("Bob's house of pancakes", subset[0].Name);
                 Assert.Equal(42.42f, subset[0].Price);

@@ -21,6 +21,8 @@ namespace Norm.Collections
     /// <typeparam name="T">Collection type</typeparam>
     public partial class MongoCollection<T> : IMongoCollection<T>
     {
+        private static Dictionary<int, object> _compiledTransforms = new Dictionary<int, object>();
+
         /// <summary>
         /// This will have a different instance for each concrete version of <see cref="MongoCollection{T}"/>
         /// </summary>
@@ -526,7 +528,13 @@ namespace Norm.Collections
                 FieldSelection = fieldSelectionExpando.AllProperties().Select(y => y.PropertyName)
             };
 
-            return new MongoQueryExecutor<T, U, Z>(qm, fieldSelection.Compile());
+            object projection = null;
+            if (!_compiledTransforms.TryGetValue(fieldSelection.GetHashCode(), out projection))
+            {
+                projection = fieldSelection.Compile();
+                _compiledTransforms[fieldSelection.GetHashCode()] = projection;
+            }
+            return new MongoQueryExecutor<T, U, Z>(qm, (Func<T,Z>) projection);
         }
 
 
