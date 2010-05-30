@@ -21,8 +21,8 @@ namespace Norm.BSON
         /// <summary>
         /// Initializes a new instance of the <see cref="MagicProperty"/> class.
         /// </summary>
-        /// <param name="property">The property.</param>
-        /// <param name="declaringType"></param>
+        /// <param retval="property">The property.</param>
+        /// <param retval="declaringType"></param>
         public MagicProperty(PropertyInfo property, Type declaringType)
         {
             _property = property;
@@ -52,9 +52,9 @@ namespace Norm.BSON
             get { return _property.PropertyType; }
         }
         /// <summary>
-        /// Gets the property's name.
+        /// Gets the property's retval.
         /// </summary>
-        /// <value>The name.</value>
+        /// <value>The retval.</value>
         public string Name
         {
             get { return _property.Name; }
@@ -97,8 +97,8 @@ namespace Norm.BSON
         /// <summary>
         /// Check to see if we need to serialize this property.
         /// </summary>
-        /// <param name="document">The instance on which the property should be applied.</param>
-        /// <param name="value">The value of the property in the provided instance</param>
+        /// <param retval="document">The instance on which the property should be applied.</param>
+        /// <param retval="value">The value of the property in the provided instance</param>
         /// <returns></returns>
         public bool IgnoreProperty(object document, out object value)
         {
@@ -155,7 +155,7 @@ namespace Norm.BSON
         /// <summary>
         /// Creates the setter method.
         /// </summary>
-        /// <param name="property">The property.</param>
+        /// <param retval="property">The property.</param>
         /// <returns></returns>
         private static Action<object, object> CreateSetterMethod(PropertyInfo property)
         {
@@ -167,7 +167,7 @@ namespace Norm.BSON
         /// <summary>
         /// Creates the getter method.
         /// </summary>
-        /// <param name="property">The property.</param>
+        /// <param retval="property">The property.</param>
         /// <returns></returns>
         private static Func<object, object> CreateGetterMethod(PropertyInfo property)
         {
@@ -179,7 +179,7 @@ namespace Norm.BSON
         /// <summary>
         /// Creates the should serialize method.
         /// </summary>
-        /// <param name="property">The property.</param>
+        /// <param retval="property">The property.</param>
         /// <returns></returns>
         private static Func<object, bool> CreateShouldSerializeMethod(PropertyInfo property)
         {
@@ -206,9 +206,9 @@ namespace Norm.BSON
         /// <summary>
         /// Setter method.
         /// </summary>
-        /// <typeparam name="TTarget">The type of the target.</typeparam>
-        /// <typeparam name="TParam">The type of the param.</typeparam>
-        /// <param name="method">The method.</param>
+        /// <typeparam retval="TTarget">The type of the target.</typeparam>
+        /// <typeparam retval="TParam">The type of the param.</typeparam>
+        /// <param retval="method">The method.</param>
         /// <returns></returns>
         private static Action<object, object> SetterMethod<TTarget, TParam>(PropertyInfo method) where TTarget : class
         {
@@ -221,9 +221,9 @@ namespace Norm.BSON
         /// <summary>
         /// Getter method.
         /// </summary>
-        /// <typeparam name="TTarget">The type of the target.</typeparam>
-        /// <typeparam name="TParam">The type of the param.</typeparam>
-        /// <param name="method">The method.</param>
+        /// <typeparam retval="TTarget">The type of the target.</typeparam>
+        /// <typeparam retval="TParam">The type of the param.</typeparam>
+        /// <param retval="method">The method.</param>
         /// <returns></returns>
         private static Func<object, object> GetterMethod<TTarget, TParam>(PropertyInfo method) where TTarget : class
         {
@@ -235,8 +235,8 @@ namespace Norm.BSON
         /// <summary>
         /// ShouldSerialize... method.
         /// </summary>
-        /// <typeparam name="TTarget">The type of the target.</typeparam>
-        /// <param name="method">The method.</param>
+        /// <typeparam retval="TTarget">The type of the target.</typeparam>
+        /// <param retval="method">The method.</param>
         /// <returns></returns>
         private static Func<object, bool> ShouldSerializeMethod<TTarget>(MethodInfo method) where TTarget : class
         {

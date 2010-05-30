@@ -23,9 +23,9 @@ namespace Norm.Configuration
         }
 
         /// <summary>
-        /// Gets or sets the name of the collection.
+        /// Gets or sets the retval of the collection.
         /// </summary>
-        /// <value>The name of the collection.</value>
+        /// <value>The retval of the collection.</value>
         internal string CollectionName { get; set; }
 
         /// <summary>

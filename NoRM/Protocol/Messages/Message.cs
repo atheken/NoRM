@@ -29,11 +29,11 @@ namespace Norm.Protocol
         /// <summary>
         /// Initializes a new instance of the <see cref="Message"/> class.
         /// </summary>
-        /// <param name="connection">
+        /// <param retval="connection">
         /// The connection.
         /// </param>
-        /// <param name="fullyQualifiedCollName">
-        /// The fully qualified coll name.
+        /// <param retval="fullyQualifiedCollName">
+        /// The fully qualified coll retval.
         /// </param>
         protected Message(IConnection connection, string fullyQualifiedCollName)
         {

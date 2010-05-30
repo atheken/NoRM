@@ -75,7 +75,7 @@ namespace Norm.Linq
         /// <summary>
         /// Translates LINQ to MongoDB.
         /// </summary>
-        /// <param name="exp">The expression.</param>
+        /// <param retval="exp">The expression.</param>
         /// <returns>The translated string</returns>
         public QueryTranslationResults Translate(Expression exp)
         {
@@ -85,8 +85,8 @@ namespace Norm.Linq
         /// <summary>
         /// Translates LINQ to MongoDB.
         /// </summary>
-        /// <param name="exp">The expression.</param>
-        /// <param name="useScopedQualifier">Whether to use the "this" qualifier</param>
+        /// <param retval="exp">The expression.</param>
+        /// <param retval="useScopedQualifier">Whether to use the "this" qualifier</param>
         /// <returns>The translated string</returns>
         public QueryTranslationResults Translate(Expression exp, bool useScopedQualifier)
         {
@@ -149,7 +149,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits member access.
         /// </summary>
-        /// <param name="m">The expression.</param>
+        /// <param retval="m">The expression.</param>
         /// <returns></returns>
         /// <exception cref="NotSupportedException">
         /// </exception>
@@ -225,7 +225,7 @@ namespace Norm.Linq
             }
             else
             {
-                // this supports the "deep graph" name - "Product.Address.City"
+                // this supports the "deep graph" retval - "Product.Address.City"
                 string deepAlias = VisitDeepAlias(m);
 
                 VisitDateTimeProperty(m);
@@ -272,7 +272,7 @@ namespace Norm.Linq
         private string VisitAlias(MemberExpression m)
         {
             var alias = MongoConfiguration.GetPropertyAlias(m.Expression.Type, m.Member.Name);
-            var id = TypeHelper.GetHelperForType(m.Expression.Type).FindIdProperty();
+            var id = ReflectionHelper.GetHelperForType(m.Expression.Type).FindIdProperty();
             if (id != null && id.Name == alias)
             {
                 alias = "_id";
@@ -312,7 +312,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a Unary call.
         /// </summary>
-        /// <param name="u">The expression.</param>
+        /// <param retval="u">The expression.</param>
         /// <returns></returns>
         /// <exception cref="NotSupportedException">
         /// </exception>
@@ -387,7 +387,7 @@ namespace Norm.Linq
         /// <summary>
         /// The get parameter expression.
         /// </summary>
-        /// <param name="expression">
+        /// <param retval="expression">
         /// The expression.
         /// </param>
         /// <returns>
@@ -446,7 +446,7 @@ namespace Norm.Linq
                     continue;
                 }
 
-                var property = BSON.TypeHelper.FindProperty(typeToQuery, graph[i]);
+                var property = BSON.ReflectionHelper.FindProperty(typeToQuery, graph[i]);
                 graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
 
                 if (property.PropertyType.IsGenericType)
@@ -557,7 +557,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a binary expression.
         /// </summary>
-        /// <param name="b">The expression.</param>
+        /// <param retval="b">The expression.</param>
         /// <returns></returns>
         /// <exception cref="NotSupportedException">
         /// </exception>
@@ -575,7 +575,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a constant.
         /// </summary>
-        /// <param name="c">The expression.</param>
+        /// <param retval="c">The expression.</param>
         /// <returns></returns>
         /// <exception cref="NotSupportedException">
         /// </exception>
@@ -584,7 +584,7 @@ namespace Norm.Linq
             var q = c.Value as IQueryable;
             if (q != null)
             {
-                // set the collection name
+                // set the collection retval
                 TypeName = q.ElementType.Name;
                 CollectionName = MongoConfiguration.GetCollectionName(q.ElementType);                
 
@@ -677,7 +677,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a method call.
         /// </summary>
-        /// <param name="m">The expression.</param>
+        /// <param retval="m">The expression.</param>
         /// <returns></returns>
         /// <exception cref="NotSupportedException">
         /// </exception>
@@ -848,7 +848,7 @@ namespace Norm.Linq
         /// <summary>
         /// Determines if it's a callable method.
         /// </summary>
-        /// <param name="methodName">The method name.</param>
+        /// <param retval="methodName">The method retval.</param>
         /// <returns>The is callable method.</returns>
         private static bool IsCallableMethod(string methodName)
         {
@@ -858,7 +858,7 @@ namespace Norm.Linq
         /// <summary>
         /// The set flyweight value.
         /// </summary>
-        /// <param name="value">The value.</param>
+        /// <param retval="value">The value.</param>
         private void SetFlyValue(object value)
         {
             if (_prefixAlias.Count > 0)
@@ -950,7 +950,7 @@ namespace Norm.Linq
         /// <summary>
         /// Handles skip.
         /// </summary>
-        /// <param name="exp">The expression.</param>
+        /// <param retval="exp">The expression.</param>
         private void HandleSkip(Expression exp)
         {
             Skip = exp.GetConstantValue<int>();
@@ -959,7 +959,7 @@ namespace Norm.Linq
         /// <summary>
         /// Handles take.
         /// </summary>
-        /// <param name="exp">The expression.</param>
+        /// <param retval="exp">The expression.</param>
         private void HandleTake(Expression exp)
         {
             Take = exp.GetConstantValue<int>();
@@ -1104,7 +1104,7 @@ namespace Norm.Linq
         /// <summary>
         /// The handle method call.
         /// </summary>
-        /// <param name="m">The expression.</param>
+        /// <param retval="m">The expression.</param>
         /// <returns></returns>
         private Expression HandleMethodCall(MethodCallExpression m)
         {

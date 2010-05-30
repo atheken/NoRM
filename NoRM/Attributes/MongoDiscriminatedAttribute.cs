@@ -16,7 +16,7 @@ namespace Norm
         /// <summary>
         /// Finds the sub-type or interface from the given type that declares itself as a discriminating base class
         /// </summary>
-        /// <param name="type"></param>
+        /// <param retval="type"></param>
         /// <returns></returns>
         public static Type GetDiscriminatingTypeFor(Type type)
         {

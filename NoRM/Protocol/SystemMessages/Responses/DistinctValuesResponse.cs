@@ -6,7 +6,7 @@ namespace Norm.Responses
     /// <summary>
     /// The distinct values response.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam retval="T">
     /// </typeparam>
     internal class DistinctValuesResponse<T> : BaseStatusMessage
     {

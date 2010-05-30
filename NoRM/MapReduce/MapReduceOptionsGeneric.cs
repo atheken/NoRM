@@ -5,7 +5,7 @@ namespace Norm
     /// <summary>
     /// Map/reduce options for a given type
     /// </summary>
-    /// <typeparam name="T">Type to map and recude</typeparam>
+    /// <typeparam retval="T">Type to map and recude</typeparam>
     public class MapReduceOptions<T> : MapReduceOptions
     {
         /// <summary>

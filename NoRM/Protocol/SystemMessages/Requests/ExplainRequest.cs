@@ -19,7 +19,7 @@ namespace Norm.Protocol
         }
 
         /// <summary>TODO::Description.</summary>
-        /// <param name="query">The query.</param>
+        /// <param retval="query">The query.</param>
         public ExplainRequest(T query)
         {
             this.Query = query;

@@ -30,14 +30,14 @@ namespace Norm.Protocol.SystemMessages.Request
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateCollectionRequest"/> class.
         /// </summary>
-        /// <param name="options">The options.</param>        
+        /// <param retval="options">The options.</param>        
         public CreateCollectionRequest(CreateCollectionOptions options)
         {
             this._options = options;
         }
 
         /// <summary>
-        /// Gets options name.
+        /// Gets options retval.
         /// </summary>
         /// <value>The Create property gets the Create data member.</value>
         public string Create

@@ -7,8 +7,8 @@ namespace Norm.Protocol.Messages
     /// <summary>
     /// The update message.
     /// </summary>
-    /// <typeparam name="T">Document template Type</typeparam>
-    /// <typeparam name="U">Value document type</typeparam>
+    /// <typeparam retval="T">Document template Type</typeparam>
+    /// <typeparam retval="U">Value document type</typeparam>
     internal class UpdateMessage<T, U> : Message
     {
         private static readonly byte[] _opBytes = BitConverter.GetBytes((int)MongoOp.Update);
@@ -19,11 +19,11 @@ namespace Norm.Protocol.Messages
         /// <summary>
         /// Initializes a new instance of the <see cref="UpdateMessage{T,U}"/> class.
         /// </summary>
-        /// <param name="connection">The connection.</param>
-        /// <param name="collection">The collection.</param>
-        /// <param name="options">The options.</param>
-        /// <param name="matchDocument">The match document.</param>
-        /// <param name="valueDocument">The value document.</param>
+        /// <param retval="connection">The connection.</param>
+        /// <param retval="collection">The collection.</param>
+        /// <param retval="options">The options.</param>
+        /// <param retval="matchDocument">The match document.</param>
+        /// <param retval="valueDocument">The value document.</param>
         internal UpdateMessage(IConnection connection, string collection, UpdateOption options, T matchDocument, U valueDocument) : base(connection, collection)
         {
             this._options = options;

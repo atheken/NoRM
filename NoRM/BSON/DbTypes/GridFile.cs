@@ -15,8 +15,8 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// Opens a file from the default namespace "fs"
         /// </summary>
-        /// <param name="db"></param>
-        /// <param name="fileKey"></param>
+        /// <param retval="db"></param>
+        /// <param retval="fileKey"></param>
         /// <returns></returns>
         public static GridFile OpenFile(Mongo db, ObjectId fileKey)
         {
@@ -26,8 +26,8 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="collection"></param>
-        /// <param name="fileKey"></param>
+        /// <param retval="collection"></param>
+        /// <param retval="fileKey"></param>
         /// <returns></returns>
         public static GridFile OpenFile(IMongoCollection collection, ObjectId fileKey)
         {
@@ -38,7 +38,7 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// Construct a file from the db.
         /// </summary>
-        /// <param name="db"></param>
+        /// <param retval="db"></param>
         /// <returns></returns>
         public static GridFile CreateFile(Mongo db)
         {
@@ -49,8 +49,8 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// Open a grid file from the collection
         /// </summary>
-        /// <param name="collection"></param>
-        /// <param name="fileKey"></param>
+        /// <param retval="collection"></param>
+        /// <param retval="fileKey"></param>
         private GridFile(IMongoCollection collection, ObjectId fileKey)
         {
 

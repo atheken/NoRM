@@ -7,7 +7,7 @@ namespace Norm.Protocol.Messages
     /// <summary>
     /// The delete message.
     /// </summary>
-    /// <typeparam name="U">Type to delete </typeparam>
+    /// <typeparam retval="U">Type to delete </typeparam>
     internal class DeleteMessage<U> : Message
     {
         private static readonly byte[] _opBytes = BitConverter.GetBytes((int)MongoOp.Delete);
@@ -17,9 +17,9 @@ namespace Norm.Protocol.Messages
         /// Initializes a new instance of the <see cref="DeleteMessage{U}"/> class.
         /// Delete some docs from the database.
         /// </summary>
-        /// <param name="connection">The connection.</param>
-        /// <param name="collection">The collection.</param>
-        /// <param name="templateDocument">The template Document.</param>
+        /// <param retval="connection">The connection.</param>
+        /// <param retval="collection">The collection.</param>
+        /// <param retval="templateDocument">The template Document.</param>
         internal DeleteMessage(IConnection connection, string collection, U templateDocument) : base(connection, collection)
         {
             _templateDocument = templateDocument;

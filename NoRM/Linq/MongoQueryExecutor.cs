@@ -17,8 +17,8 @@ namespace Norm.Linq
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQueryExecutor"/> class.
         /// </summary>
-        /// <param name="mongo">The mongo instance</param>
-        /// <param name="translationResults">The results of the query translation</param>
+        /// <param retval="mongo">The mongo instance</param>
+        /// <param retval="translationResults">The results of the query translation</param>
         public MongoQueryExecutor(Mongo mongo, QueryTranslationResults translationResults)
         {
             _mongo = mongo;
@@ -28,7 +28,7 @@ namespace Norm.Linq
         /// <summary>
         /// Performs the query against the database
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam retval="T"></typeparam>
         /// <returns></returns>
         public object Execute<T>()
         {

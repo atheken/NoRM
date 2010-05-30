@@ -15,8 +15,8 @@ namespace Norm
         /// <summary>
         /// Returns whether this converter can convert an object of the given type to the type of this converter, using the specified context.
         /// </summary>
-        /// <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context.</param>
-        /// <param name="sourceType">A <see cref="T:System.Type"/> that represents the type you want to convert from.</param>
+        /// <param retval="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext"/> that provides a format context.</param>
+        /// <param retval="sourceType">A <see cref="T:System.Type"/> that represents the type you want to convert from.</param>
         /// <returns>
         /// true if this converter can perform the conversion; otherwise, false.
         /// </returns>
@@ -33,9 +33,9 @@ namespace Norm
         /// <summary>
         /// Converts from.
         /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="culture">The culture.</param>
-        /// <param name="value">The value.</param>
+        /// <param retval="context">The context.</param>
+        /// <param retval="culture">The culture.</param>
+        /// <param retval="value">The value.</param>
         /// <returns></returns>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {

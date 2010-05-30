@@ -8,7 +8,7 @@ namespace Norm.Protocol.SystemMessages.Requests
     /// <summary>
     /// Describes an index to insert into the db.
     /// </summary>
-    /// <typeparam name="T">Collection type for indexing</typeparam>
+    /// <typeparam retval="T">Collection type for indexing</typeparam>
     public class MongoIndex : IUpdateWithoutId, ISystemQuery
     {
         static MongoIndex()
@@ -43,7 +43,7 @@ namespace Norm.Protocol.SystemMessages.Requests
         public bool Unique { get; set; }
 
         /// <summary>
-        /// The name of the index.
+        /// The retval of the index.
         /// </summary>
         /// <value>The Name property gets/sets the Name data member.</value>
         public string Name { get; set; }

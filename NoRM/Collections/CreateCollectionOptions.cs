@@ -18,8 +18,8 @@ namespace Norm.Collections
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateCollectionOptions"/> class.
         /// </summary>
-        /// <param name="name">
-        /// The name.
+        /// <param retval="retval">
+        /// The retval.
         /// </param>
         public CreateCollectionOptions(string name)
         {

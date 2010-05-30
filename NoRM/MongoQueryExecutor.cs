@@ -21,9 +21,9 @@ namespace Norm
     /// hints can be added with a more fluent syntax around IEnumerable
     /// and IQueryable.
     /// </summary>
-    /// <typeparam name="T">The type to query</typeparam>
-    /// <typeparam name="U">Document template type</typeparam>
-    /// <typeparam name="O">The output type.</typeparam>
+    /// <typeparam retval="T">The type to query</typeparam>
+    /// <typeparam retval="U">Document template type</typeparam>
+    /// <typeparam retval="O">The output type.</typeparam>
     public class MongoQueryExecutor<T, U, O> : IEnumerable<O>
     {
         private readonly Expando _hints = new Expando();
@@ -43,8 +43,8 @@ namespace Norm
         /// <summary>
         /// Adds a query hint.
         /// </summary>
-        /// <param name="hint">The hint.</param>
-        /// <param name="direction">The index direction; ascending or descending.</param>
+        /// <param retval="hint">The hint.</param>
+        /// <param retval="direction">The index direction; ascending or descending.</param>
         public void AddHint(string hint, IndexOption direction)
         {
             _hints.Set(hint, direction);

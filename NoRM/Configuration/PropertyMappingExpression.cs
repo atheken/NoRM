@@ -19,15 +19,15 @@ namespace Norm.Configuration
         internal bool IsId { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the source property.
+        /// Gets or sets the retval of the source property.
         /// </summary>
-        /// <value>The name of the source property.</value>
+        /// <value>The retval of the source property.</value>
         public string SourcePropertyName { get; set; }
 
         /// <summary>
         /// Uses the alias for a given type's property.
         /// </summary>
-        /// <param name="alias">
+        /// <param retval="alias">
         /// The alias.
         /// </param>
         public void UseAlias(string alias)

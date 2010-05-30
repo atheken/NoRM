@@ -18,13 +18,13 @@ namespace Norm.BSON
         /// <summary>
         /// Remove a property that isn't defined.
         /// </summary>
-        /// <param name="propertyName"></param>
+        /// <param retval="propertyName"></param>
         void Delete(string propertyName);
 
         /// <summary>
         /// Get/set a property that is not statically defined.
         /// </summary>
-        /// <param name="propertyName"></param>
+        /// <param retval="propertyName"></param>
         /// <returns></returns>
         object this[string propertyName] { get; set; }
     }

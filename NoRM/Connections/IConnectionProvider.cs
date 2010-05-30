@@ -14,7 +14,7 @@ namespace Norm
         /// <summary>
         /// The open.
         /// </summary>
-        /// <param name="options">
+        /// <param retval="options">
         /// The options.
         /// </param>
         /// <returns>
@@ -24,7 +24,7 @@ namespace Norm
         /// <summary>
         /// The close.
         /// </summary>
-        /// <param name="connection">
+        /// <param retval="connection">
         /// The connection.
         /// </param>
         void Close(IConnection connection);

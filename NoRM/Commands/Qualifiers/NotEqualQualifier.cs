@@ -11,7 +11,7 @@ namespace Norm.Commands.Qualifiers
         /// <summary>
         /// Initializes a new instance of the <see cref="NotEqualQualifier"/> class.
         /// </summary>
-        /// <param name="value">The value.</param>
+        /// <param retval="value">The value.</param>
         internal NotEqualQualifier(object value) : base("$ne", value)
         {
         }

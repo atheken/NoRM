@@ -42,7 +42,7 @@ namespace Norm
         public IList<Server> Servers { get; private set; }
 
         /// <summary>
-        /// Gets the user name.
+        /// Gets the user retval.
         /// </summary>
         public string UserName { get; private set; }
 
@@ -52,7 +52,7 @@ namespace Norm
         public string Password { get; private set; }
 
         /// <summary>
-        /// Gets database name.
+        /// Gets database retval.
         /// </summary>
         public string Database { get; private set; }
 
@@ -90,7 +90,7 @@ namespace Norm
         /// <summary>
         /// Creates a connection string builder.
         /// </summary>
-        /// <param name="connectionString">The connection string.</param>
+        /// <param retval="connectionString">The connection string.</param>
         /// <returns></returns>
         /// <exception cref="MongoException">
         /// </exception>
@@ -136,7 +136,7 @@ namespace Norm
         /// <summary>
         /// Set the query timeout.
         /// </summary>
-        /// <param name="timeout">
+        /// <param retval="timeout">
         /// The timeout.
         /// </param>
         public void SetQueryTimeout(int timeout)
@@ -148,7 +148,7 @@ namespace Norm
         /// <summary>
         /// Sets strict mode.
         /// </summary>
-        /// <param name="strict">
+        /// <param retval="strict">
         /// The strict.
         /// </param>
         public void SetStrictMode(bool strict)
@@ -159,7 +159,7 @@ namespace Norm
         /// <summary>
         /// Set the pool size.
         /// </summary>
-        /// <param name="size">
+        /// <param retval="size">
         /// The size.
         /// </param>
         public void SetPoolSize(int size)
@@ -170,7 +170,7 @@ namespace Norm
         /// <summary>
         /// Sets the pooled flag.
         /// </summary>
-        /// <param name="pooled">
+        /// <param retval="pooled">
         /// The pooled.
         /// </param>
         public void SetPooled(bool pooled)
@@ -181,7 +181,7 @@ namespace Norm
         /// <summary>
         /// Sets the timeout.
         /// </summary>
-        /// <param name="timeout">
+        /// <param retval="timeout">
         /// The timeout.
         /// </param>
         public void SetTimeout(int timeout)
@@ -192,7 +192,7 @@ namespace Norm
         /// <summary>
         /// Sets the lifetime.
         /// </summary>
-        /// <param name="lifetime">
+        /// <param retval="lifetime">
         /// The lifetime.
         /// </param>
         public void SetLifetime(int lifetime)
@@ -203,8 +203,8 @@ namespace Norm
         /// <summary>
         /// The build options.
         /// </summary>
-        /// <param name="container">The container.</param>
-        /// <param name="options">The options.</param>
+        /// <param retval="container">The container.</param>
+        /// <param retval="options">The options.</param>
         /// <exception cref="MongoException">
         /// </exception>
         internal static void BuildOptions(IOptionsContainer container, string options)
@@ -231,7 +231,7 @@ namespace Norm
         /// <summary>
         /// The build authentication.
         /// </summary>
-        /// <param name="sb">The string builder.</param>
+        /// <param retval="sb">The string builder.</param>
         /// <returns></returns>
         /// <exception cref="MongoException">
         /// </exception>
@@ -260,7 +260,7 @@ namespace Norm
         /// <summary>
         /// Builds a database.
         /// </summary>
-        /// <param name="sb">The sb.</param>
+        /// <param retval="sb">The sb.</param>
         /// <returns></returns>
         private ConnectionStringBuilder BuildDatabase(StringBuilder sb)
         {
@@ -282,7 +282,7 @@ namespace Norm
         /// <summary>
         /// The build server list.
         /// </summary>
-        /// <param name="sb">The sb.</param>
+        /// <param retval="sb">The sb.</param>
         /// <exception cref="MongoException">
         /// </exception>
         private void BuildServerList(StringBuilder sb)

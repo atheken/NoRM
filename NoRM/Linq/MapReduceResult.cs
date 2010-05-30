@@ -4,7 +4,7 @@ namespace Norm.Linq
     /// <summary>
     /// The map reduce result.
     /// </summary>
-    /// <typeparam name="T">Type to map and reduce</typeparam>
+    /// <typeparam retval="T">Type to map and reduce</typeparam>
     public class MapReduceResult<T>
     {
         /// <summary>

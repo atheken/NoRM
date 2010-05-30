@@ -16,8 +16,8 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="Mongo"/> class.
         /// </summary>
-        /// <param name="provider">The provider.</param>
-        /// <param name="options">The options.</param>
+        /// <param retval="provider">The provider.</param>
+        /// <param retval="options">The options.</param>
         public Mongo(IConnectionProvider provider, string options)
         {
             var parsed = provider.ConnectionString;
@@ -29,10 +29,10 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="Mongo"/> class.
         /// </summary>
-        /// <param name="db">The db.</param>
-        /// <param name="server">The server.</param>
-        /// <param name="port">The port.</param>
-        /// <param name="options">The options.</param>
+        /// <param retval="db">The db.</param>
+        /// <param retval="server">The server.</param>
+        /// <param retval="port">The port.</param>
+        /// <param retval="options">The options.</param>
         public Mongo(string db, string server, string port, string options)
         {
             if (string.IsNullOrEmpty(options))
@@ -69,7 +69,7 @@ namespace Norm
         /// <summary>
         /// Parses a connection.
         /// </summary>
-        /// <param name="connectionString">The connection string.</param>
+        /// <param retval="connectionString">The connection string.</param>
         /// <returns></returns>
         public static Mongo Create(string connectionString)
         {
@@ -79,8 +79,8 @@ namespace Norm
         /// <summary>
         /// The parse connection.
         /// </summary>
-        /// <param name="connectionString">The connection string.</param>
-        /// <param name="options">The options.</param>
+        /// <param retval="connectionString">The connection string.</param>
+        /// <param retval="options">The options.</param>
         /// <returns></returns>
         public static Mongo Create(string connectionString, string options)
         {
@@ -99,7 +99,7 @@ namespace Norm
         /// <summary>
         /// Gets a typed collection.
         /// </summary>
-        /// <typeparam name="T">Type of collection</typeparam>
+        /// <typeparam retval="T">Type of collection</typeparam>
         /// <returns></returns>
         public MongoCollection<T> GetCollection<T>()
         {
@@ -109,8 +109,8 @@ namespace Norm
         /// <summary>
         /// Gets a typed collection.
         /// </summary>
-        /// <typeparam name="T">Type of collection</typeparam>
-        /// <param name="collectionName">The collection name.</param>
+        /// <typeparam retval="T">Type of collection</typeparam>
+        /// <param retval="collectionName">The collection retval.</param>
         /// <returns></returns>
         public MongoCollection<T> GetCollection<T>(string collectionName)
         {
@@ -155,7 +155,7 @@ namespace Norm
         /// <summary>
         /// The dispose.
         /// </summary>
-        /// <param name="disposing">
+        /// <param retval="disposing">
         /// The disposing.
         /// </param>
         protected virtual void Dispose(bool disposing)

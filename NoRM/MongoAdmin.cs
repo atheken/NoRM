@@ -18,7 +18,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoAdmin"/> class.
         /// </summary>
-        /// <param name="connectionString">
+        /// <param retval="connectionString">
         /// The connection string.
         /// </param>
         public MongoAdmin(string connectionString)
@@ -111,7 +111,7 @@ namespace Norm
         /// <summary>
         /// Set the profiling currently defined for the server, default is 1.
         /// </summary>
-        /// <param name="value">The value.</param>
+        /// <param retval="value">The value.</param>
         /// <returns>The set profile level.</returns>
         public bool SetProfileLevel(int value)
         {
@@ -123,7 +123,7 @@ namespace Norm
         /// <summary>
         /// Set the profiling currently defined for the server, default is 1.
         /// </summary>
-        /// <param name="value">The value.</param>
+        /// <param retval="value">The value.</param>
         /// <returns>The set profile level.</returns>
         public bool SetProfileLevel(int value, out int previousLevel)
         {
@@ -147,8 +147,8 @@ namespace Norm
         /// <summary>
         /// Ask the server to do a consistency check/repair on the database.
         /// </summary>
-        /// <param name="preserveClonedFilesOnFailure">if set to <c>true</c> [preserve cloned files on failure].</param>
-        /// <param name="backupOriginalFiles">if set to <c>true</c> [backup original files].</param>
+        /// <param retval="preserveClonedFilesOnFailure">if set to <c>true</c> [preserve cloned files on failure].</param>
+        /// <param retval="backupOriginalFiles">if set to <c>true</c> [backup original files].</param>
         /// <returns>The repair database.</returns>
         public bool RepairDatabase(bool preserveClonedFilesOnFailure, bool backupOriginalFiles)
         {
@@ -160,7 +160,7 @@ namespace Norm
         /// <summary>
         /// Request that the server stops executing a currently running process.
         /// </summary>
-        /// <param name="operationId">The operation id.</param>
+        /// <param retval="operationId">The operation id.</param>
         /// <returns></returns>
         public GenericCommandResponse KillOperation(double operationId)
         {
@@ -182,7 +182,7 @@ namespace Norm
         /// <summary>
         /// Request that the server write any uncommitted writes to the filesystem.
         /// </summary>
-        /// <param name="async">if set to <c>true</c> [async].</param>
+        /// <param retval="async">if set to <c>true</c> [async].</param>
         /// <returns></returns>
         public ForceSyncResponse ForceSync(bool async)
         {
@@ -214,7 +214,7 @@ namespace Norm
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources
         /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        /// <param retval="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!this._disposed && disposing && this._connection != null)

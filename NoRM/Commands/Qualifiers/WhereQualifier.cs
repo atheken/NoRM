@@ -10,7 +10,7 @@ namespace Norm.Commands.Qualifiers
         /// <summary>
         /// Initializes a new instance of the <see cref="WhereQualifier"/> class.
         /// </summary>
-        /// <param name="inExpression">The in expression.</param>
+        /// <param retval="inExpression">The in expression.</param>
         public WhereQualifier(string inExpression)
         {
             this["$where"] = inExpression;

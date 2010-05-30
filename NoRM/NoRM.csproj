@@ -102,7 +102,7 @@
     <Compile Include="BSON\Document.cs" />
     <Compile Include="BSON\DocumentExceedsSizeLimitsException.cs" />
     <Compile Include="BSON\ModifierCommand.cs" />
-    <Compile Include="BSON\TypeHelper.cs" />
+    <Compile Include="BSON\ReflectionHelper.cs" />
     <Compile Include="Collections\CreateCollectionOptions.cs" />
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />

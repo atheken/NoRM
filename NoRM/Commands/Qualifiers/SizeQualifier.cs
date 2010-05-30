@@ -10,7 +10,7 @@ namespace Norm.Commands.Qualifiers
         /// <summary>
         /// Initializes a new instance of the <see cref="SizeQualifier"/> class.
         /// </summary>
-        /// <param name="value">
+        /// <param retval="value">
         /// The value.
         /// </param>
         internal SizeQualifier(double value) : base("$size", value)

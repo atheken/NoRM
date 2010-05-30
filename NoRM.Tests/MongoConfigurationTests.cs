@@ -37,13 +37,13 @@ namespace Norm.Tests
         [Fact]
         public void Mongo_Configuration_Should_Notify_TypeHelper()
         {
-            var typeHelper = TypeHelper.GetHelperForType(typeof(User2));
+            var typeHelper = ReflectionHelper.GetHelperForType(typeof(User2));
             Assert.Equal("LastName", typeHelper.FindProperty("LastName").Name);
 
             //the mapping should cause the typehelper cache to be rebuilt with the new properties.
             MongoConfiguration.Initialize(cfg => cfg.For<User2>(j => j.ForProperty(k => k.LastName).UseAlias("LNAME")));
 
-            typeHelper = TypeHelper.GetHelperForType(typeof(User2));
+            typeHelper = ReflectionHelper.GetHelperForType(typeof(User2));
             Assert.Equal("LastName", typeHelper.FindProperty("LNAME").Name);
         }
 

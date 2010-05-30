@@ -10,7 +10,7 @@ namespace Norm.Commands.Qualifiers
         /// <summary>
         /// Initializes a new instance of the <see cref="ExistsQualifier"/> class.
         /// </summary>
-        /// <param name="doesExist">The does exist.</param>
+        /// <param retval="doesExist">The does exist.</param>
         internal ExistsQualifier(bool doesExist) : base("$exists", doesExist)
         {
         }

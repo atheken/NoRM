@@ -9,8 +9,8 @@ namespace Norm.BSON
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class.
         /// </summary>
-        /// <param name="commandName">Name of the command.</param>
-        /// <param name="value">The value.</param>
+        /// <param retval="commandName">Name of the command.</param>
+        /// <param retval="value">The value.</param>
         protected Command(string commandName, object value)
         {
             this.CommandName = commandName;

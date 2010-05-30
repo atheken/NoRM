@@ -16,7 +16,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="MapReduce"/> class.
         /// </summary>
-        /// <param name="database">
+        /// <param retval="database">
         /// The database.
         /// </param>
         /// <remarks>
@@ -33,7 +33,7 @@ namespace Norm
         /// <summary>
         /// Execute.
         /// </summary>
-        /// <param name="options">The options.</param>
+        /// <param retval="options">The options.</param>
         /// <returns></returns>
         public MapReduceResponse Execute(MapReduceOptions options)
         {

@@ -9,7 +9,7 @@ namespace Norm.Protocol.Messages
     /// <summary>
     /// Insert message.
     /// </summary>
-    /// <typeparam name="T">Type to insert</typeparam>
+    /// <typeparam retval="T">Type to insert</typeparam>
     internal class InsertMessage<T> : Message
     {
         private static readonly byte[] _opBytes = BitConverter.GetBytes((int)MongoOp.Insert);
@@ -18,9 +18,9 @@ namespace Norm.Protocol.Messages
         /// <summary>
         /// Initializes a new instance of the <see cref="InsertMessage{T}"/> class.
         /// </summary>
-        /// <param name="connection">The connection.</param>
-        /// <param name="collectionName">The collection name.</param>
-        /// <param name="itemsToInsert">The items to insert.</param>
+        /// <param retval="connection">The connection.</param>
+        /// <param retval="collectionName">The collection retval.</param>
+        /// <param retval="itemsToInsert">The items to insert.</param>
         public InsertMessage(IConnection connection, string collectionName, IEnumerable<T> itemsToInsert) : base(connection, collectionName)
         {
             _elementsToInsert = itemsToInsert.ToArray();            

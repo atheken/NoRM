@@ -34,7 +34,7 @@ namespace Norm.BSON
         /// <summary>
         /// Initializes a new instance of the <see cref="BsonSerializer"/> class.
         /// </summary>
-        /// <param name="writer">
+        /// <param retval="writer">
         /// The writer.
         /// </param>
         private BsonSerializer(BinaryWriter writer)
@@ -45,8 +45,8 @@ namespace Norm.BSON
         /// <summary>
         /// Convert a document to it's BSON equivalent.
         /// </summary>
-        /// <typeparam name="T">Type to serialize</typeparam>
-        /// <param name="document">The document.</param>
+        /// <typeparam retval="T">Type to serialize</typeparam>
+        /// <param retval="document">The document.</param>
         /// <returns></returns>
         public static byte[] Serialize<T>(T document)
         {
@@ -71,7 +71,7 @@ namespace Norm.BSON
         /// <summary>
         /// Write the document terminator, prepenf the original length.
         /// </summary>
-        /// <param name="includeEeo">if set to <c>true</c> include eeo.</param>
+        /// <param retval="includeEeo">if set to <c>true</c> include eeo.</param>
         private void EndDocument(bool includeEeo)
         {
             var old = _current;
@@ -94,7 +94,7 @@ namespace Norm.BSON
         /// <summary>
         /// increment the number of bytes written.
         /// </summary>
-        /// <param name="length">The length written.</param>
+        /// <param retval="length">The length written.</param>
         private void Written(int length)
         {
             _current.Digested += length;
@@ -103,7 +103,7 @@ namespace Norm.BSON
         /// <summary>
         /// Writes a document.
         /// </summary>
-        /// <param name="document">The document.</param>
+        /// <param retval="document">The document.</param>
         private void WriteDocument(object document)
         {
             NewDocument();
@@ -124,7 +124,7 @@ namespace Norm.BSON
         /// <summary>
         /// Writes a Flyweight.
         /// </summary>
-        /// <param name="document">The document.</param>
+        /// <param retval="document">The document.</param>
         private void WriteFlyweight(Expando document)
         {
             foreach (var property in document.AllProperties())
@@ -136,7 +136,7 @@ namespace Norm.BSON
         /// <summary>
         /// Checks to see if the object is a DbReference. If it is, we won't want to override $id to _id.
         /// </summary>
-        /// <param name="type">The type of the object being serialized.</param>
+        /// <param retval="type">The type of the object being serialized.</param>
         /// <returns>True if the object is a DbReference, false otherwise.</returns>
         private static bool IsDbReference(Type type)
         {
@@ -150,10 +150,10 @@ namespace Norm.BSON
         /// <summary>
         /// Actually write the property bytes.
         /// </summary>
-        /// <param name="document">The document.</param>
+        /// <param retval="document">The document.</param>
         private void WriteObject(object document)
         {
-            var typeHelper = TypeHelper.GetHelperForType(document.GetType());
+            var typeHelper = ReflectionHelper.GetHelperForType(document.GetType());
             var idProperty = typeHelper.FindIdProperty();
             var documentType = document.GetType();
             var discriminator = typeHelper.GetTypeDiscriminator();
@@ -191,8 +191,8 @@ namespace Norm.BSON
         /// <summary>
         /// Serializes a member.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="value">The value.</param>
+        /// <param retval="retval">The retval.</param>
+        /// <param retval="value">The value.</param>
         private void SerializeMember(string name, object value)
         {
             if (value == null)
@@ -269,10 +269,10 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Writes a name/value pair.
+        /// Writes a retval/value pair.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="value">The value.</param>
+        /// <param retval="retval">The retval.</param>
+        /// <param retval="value">The value.</param>
         private void Write(string name, object value)
         {
             if (value is IDictionary)
@@ -320,7 +320,7 @@ namespace Norm.BSON
         /// <summary>
         /// Writes an enumerable list.
         /// </summary>
-        /// <param name="enumerable">
+        /// <param retval="enumerable">
         /// The enumerable.
         /// </param>
         private void Write(IEnumerable enumerable)
@@ -335,7 +335,7 @@ namespace Norm.BSON
         /// <summary>
         /// Writes a dictionary.
         /// </summary>
-        /// <param name="dictionary">
+        /// <param retval="dictionary">
         /// The dictionary.
         /// </param>
         private void Write(IDictionary dictionary)
@@ -349,7 +349,7 @@ namespace Norm.BSON
         /// <summary>
         /// Writes binnary.
         /// </summary>
-        /// <param name="value">
+        /// <param retval="value">
         /// The value.
         /// </param>
         private void WriteBinary(object value)
@@ -378,7 +378,7 @@ namespace Norm.BSON
         /// <summary>
         /// Writes a BSON type.
         /// </summary>
-        /// <param name="type">
+        /// <param retval="type">
         /// The type.
         /// </param>
         private void Write(BSONTypes type)
@@ -388,10 +388,10 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Writes a name.
+        /// Writes a retval.
         /// </summary>
-        /// <param name="name">
-        /// The name.
+        /// <param retval="retval">
+        /// The retval.
         /// </param>
         private void WriteName(string name)
         {
@@ -402,10 +402,10 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Writes a string name.
+        /// Writes a string retval.
         /// </summary>
-        /// <param name="name">
-        /// The name.
+        /// <param retval="retval">
+        /// The retval.
         /// </param>
         private void Write(string name)
         {
@@ -419,7 +419,7 @@ namespace Norm.BSON
         /// <summary>
         /// Writes a regex.
         /// </summary>
-        /// <param name="regex">
+        /// <param retval="regex">
         /// The regex.
         /// </param>
         private void Write(Regex regex)
@@ -472,7 +472,7 @@ namespace Norm.BSON
         /// <summary>
         /// Writes scoped code.
         /// </summary>
-        /// <param name="value">
+        /// <param retval="value">
         /// The value.
         /// </param>
         private void Write(ScopedCode value)

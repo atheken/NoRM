@@ -11,8 +11,8 @@ namespace Norm.Protocol.Messages
     /// <summary>
     /// A query to the db.
     /// </summary>
-    /// <typeparam name="T">The response type.</typeparam>
-    /// <typeparam name="U">The request type.</typeparam>
+    /// <typeparam retval="T">The response type.</typeparam>
+    /// <typeparam retval="U">The request type.</typeparam>
     public class QueryMessage<T, U> : Message
     {
         /// <summary>
@@ -32,8 +32,8 @@ namespace Norm.Protocol.Messages
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryMessage&lt;T, U&gt;"/> class.
         /// </summary>
-        /// <param name="connection">The connection.</param>
-        /// <param name="fullyQualifiedCollName">Name of the fully qualified coll.</param>
+        /// <param retval="connection">The connection.</param>
+        /// <param retval="fullyQualifiedCollName">Name of the fully qualified coll.</param>
         public QueryMessage(IConnection connection, string fullyQualifiedCollName)
             : base(connection, fullyQualifiedCollName)
         {

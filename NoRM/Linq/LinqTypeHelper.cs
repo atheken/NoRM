@@ -12,7 +12,7 @@ namespace Norm.Linq
         /// <summary>
         /// Find IEnumerable.
         /// </summary>
-        /// <param name="seqType">The seq type.</param>
+        /// <param retval="seqType">The seq type.</param>
         /// <returns></returns>
         public static Type FindIEnumerable(Type seqType)
         {
@@ -61,7 +61,7 @@ namespace Norm.Linq
         /// <summary>
         /// The get sequence type.
         /// </summary>
-        /// <param name="elementType">The element type.</param>
+        /// <param retval="elementType">The element type.</param>
         /// <returns></returns>
         public static Type GetSequenceType(Type elementType)
         {
@@ -71,7 +71,7 @@ namespace Norm.Linq
         /// <summary>
         /// The get element type.
         /// </summary>
-        /// <param name="seqType">The seq type.</param>
+        /// <param retval="seqType">The seq type.</param>
         /// <returns></returns>
         public static Type GetElementType(Type seqType)
         {
@@ -84,7 +84,7 @@ namespace Norm.Linq
         /// <summary>
         /// The is nullable type.
         /// </summary>
-        /// <param name="type">The type.</param>
+        /// <param retval="type">The type.</param>
         /// <returns>nullable type.</returns>
         public static bool IsNullableType(Type type)
         {
@@ -94,7 +94,7 @@ namespace Norm.Linq
         /// <summary>
         /// The is null assignable.
         /// </summary>
-        /// <param name="type">The type.</param>
+        /// <param retval="type">The type.</param>
         /// <returns>null assignable.</returns>
         public static bool IsNullAssignable(Type type)
         {
@@ -104,7 +104,7 @@ namespace Norm.Linq
         /// <summary>
         /// The get non nullable type.
         /// </summary>
-        /// <param name="type">The type.</param>
+        /// <param retval="type">The type.</param>
         /// <returns></returns>
         public static Type GetNonNullableType(Type type)
         {
@@ -116,7 +116,7 @@ namespace Norm.Linq
         /// <summary>
         /// The get member type.
         /// </summary>
-        /// <param name="mi">The mi.</param>
+        /// <param retval="mi">The mi.</param>
         /// <returns></returns>
         public static Type GetMemberType(MemberInfo mi)
         {

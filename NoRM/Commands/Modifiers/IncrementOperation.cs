@@ -10,7 +10,7 @@ namespace Norm.Commands
         /// <summary>
         /// Initializes a new instance of the <see cref="IncrementOperation"/> class.
         /// </summary>
-        /// <param name="amountToIncrement">The amount to increment.</param>
+        /// <param retval="amountToIncrement">The amount to increment.</param>
         public IncrementOperation(int amountToIncrement) : base("$inc", amountToIncrement)
         {
         }

@@ -10,7 +10,7 @@ using Norm.Protocol;
 using Norm.Protocol.Messages;
 using Norm.Protocol.SystemMessages.Requests;
 using Norm.Responses;
-using TypeHelper = Norm.BSON.TypeHelper;
+using TypeHelper = Norm.BSON.ReflectionHelper;
 using Norm.Commands.Modifiers;
 
 namespace Norm.Collections
@@ -18,7 +18,7 @@ namespace Norm.Collections
     /// <summary>
     /// Mongo typed collection.
     /// </summary>
-    /// <typeparam name="T">Collection type</typeparam>
+    /// <typeparam retval="T">Collection type</typeparam>
     public partial class MongoCollection<T> : IMongoCollection<T>
     {
         private static Dictionary<int, object> _compiledTransforms = new Dictionary<int, object>();
@@ -41,9 +41,9 @@ namespace Norm.Collections
         /// Initializes a new instance of the <see cref="MongoCollection{T}"/> class.
         /// Represents a strongly-typed set of documents in the db.
         /// </summary>
-        /// <param name="collectionName">The collection Name.</param>
-        /// <param name="db">The db.</param>
-        /// <param name="connection">The connection.</param>
+        /// <param retval="collectionName">The collection Name.</param>
+        /// <param retval="db">The db.</param>
+        /// <param retval="connection">The connection.</param>
         public MongoCollection(string collectionName, MongoDatabase db, IConnection connection)
         {
             _db = db;
@@ -83,7 +83,7 @@ namespace Norm.Collections
         /// <summary>
         /// Attempts to save or update an instance
         /// </summary>
-        /// <param name="entity">The entity.</param>
+        /// <param retval="entity">The entity.</param>
         /// <remarks>
         /// Only works when the Id property is of type ObjectId
         /// </remarks>
@@ -107,8 +107,8 @@ namespace Norm.Collections
         /// <summary>
         /// Get a child collection of the specified type.
         /// </summary>
-        /// <typeparam name="U">Type of collection</typeparam>
-        /// <param name="collectionName">The collection Name.</param>
+        /// <typeparam retval="U">Type of collection</typeparam>
+        /// <param retval="collectionName">The collection Name.</param>
         /// <returns></returns>
         public MongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new()
         {
@@ -118,10 +118,10 @@ namespace Norm.Collections
         /// <summary>
         /// Overload of Update that updates one document and doesn't upsert if no matches are found.
         /// </summary>
-        /// <typeparam name="X">Document to match</typeparam>
-        /// <typeparam name="U">Value document</typeparam>
-        /// <param name="matchDocument">The match Document.</param>
-        /// <param name="valueDocument">The value Document.</param>
+        /// <typeparam retval="X">Document to match</typeparam>
+        /// <typeparam retval="U">Value document</typeparam>
+        /// <param retval="matchDocument">The match Document.</param>
+        /// <param retval="valueDocument">The value Document.</param>
         public void UpdateOne<X, U>(X matchDocument, U valueDocument)
         {
             Update(matchDocument, valueDocument, false, false);
@@ -130,12 +130,12 @@ namespace Norm.Collections
         /// <summary>
         /// The update.
         /// </summary>
-        /// <typeparam name="X">Document to match</typeparam>
-        /// <typeparam name="U">Value document</typeparam>
-        /// <param name="matchDocument">The match document.</param>
-        /// <param name="valueDocument">The value document.</param>
-        /// <param name="updateMultiple">The update multiple.</param>
-        /// <param name="upsert">The upsert.</param>
+        /// <typeparam retval="X">Document to match</typeparam>
+        /// <typeparam retval="U">Value document</typeparam>
+        /// <param retval="matchDocument">The match document.</param>
+        /// <param retval="valueDocument">The value document.</param>
+        /// <param retval="updateMultiple">The update multiple.</param>
+        /// <param retval="upsert">The upsert.</param>
         /// <exception cref="NotSupportedException">
         /// </exception>
         public void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert)
@@ -158,7 +158,7 @@ namespace Norm.Collections
         }
 
         /// <summary>
-        /// The name of this collection, including the database prefix.
+        /// The retval of this collection, including the database prefix.
         /// </summary>
         public string FullyQualifiedName
         {
@@ -170,7 +170,7 @@ namespace Norm.Collections
         /// <summary>
         /// Deletes all indices on this collection.
         /// </summary>
-        /// <param name="numberDeleted">
+        /// <param retval="numberDeleted">
         /// </param>
         /// <returns>
         /// The delete indices.
@@ -183,9 +183,9 @@ namespace Norm.Collections
         /// <summary>
         /// Deletes the specified index for the collection.
         /// </summary>
-        /// <param name="indexName">
+        /// <param retval="indexName">
         /// </param>
-        /// <param name="numberDeleted">
+        /// <param retval="numberDeleted">
         /// </param>
         /// <returns>
         /// The delete index.
@@ -210,10 +210,10 @@ namespace Norm.Collections
         /// This will do a search on the collection using the specified template.
         /// If no documents are found, default(T) will be returned.
         /// </summary>
-        /// <typeparam name="U">A type that has each member set to the value to search.
+        /// <typeparam retval="U">A type that has each member set to the value to search.
         /// Keep in mind that all the properties must either be concrete values, or the
         /// special "Qualifier"-type values.</typeparam>
-        /// <param name="template">The template.</param>
+        /// <param retval="template">The template.</param>
         /// <returns>
         /// The first document that matched the template, or default(T)
         /// </returns>
@@ -259,8 +259,8 @@ namespace Norm.Collections
         /// <summary>
         /// Return all documents matching the template
         /// </summary>
-        /// <typeparam name="U">Type of document to find.</typeparam>
-        /// <param name="template">The template.</param>
+        /// <typeparam retval="U">Type of document to find.</typeparam>
+        /// <param retval="template">The template.</param>
         /// <returns></returns>
         /// <remarks>
         /// Ok, not all documents, just all documents up to Int32.MaxValue - if you bring that many back, you've crashed. Sorry.
@@ -273,9 +273,9 @@ namespace Norm.Collections
         /// <summary>
         /// Get the documents that match the specified template.
         /// </summary>
-        /// <typeparam name="U">Type of document to find.</typeparam>
-        /// <param name="template">The template.</param>
-        /// <param name="limit">The number to return from this command.</param>
+        /// <typeparam retval="U">Type of document to find.</typeparam>
+        /// <param retval="template">The template.</param>
+        /// <param retval="limit">The number to return from this command.</param>
         /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit)
         {
@@ -283,22 +283,22 @@ namespace Norm.Collections
         }
 
         /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
-        /// <typeparam name="U">Type of document to find.</typeparam>
-        /// <param name="template">The template.</param>
-        /// <param name="limit">The number to return from this command.</param>
-        /// <param name="skip">The skip step.</param>
+        /// <typeparam retval="U">Type of document to find.</typeparam>
+        /// <param retval="template">The template.</param>
+        /// <param retval="limit">The number to return from this command.</param>
+        /// <param retval="skip">The skip step.</param>
         public IEnumerable<T> Find<U>(U template, int limit, int skip)
         {
             return Find(template, limit, skip, this.FullyQualifiedName);
         }
 
         /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
-        /// <typeparam name="U">Type of document to find.</typeparam>
-        /// <typeparam name="O">Type of document to find.</typeparam>
-        /// <param name="template">The template.</param>
-        /// <param name="orderby">How to order the results</param>
-        /// <param name="limit">The number to return from this command.</param>
-        /// <param name="skip">The skip step.</param>
+        /// <typeparam retval="U">Type of document to find.</typeparam>
+        /// <typeparam retval="O">Type of document to find.</typeparam>
+        /// <param retval="template">The template.</param>
+        /// <param retval="orderby">How to order the results</param>
+        /// <param retval="limit">The number to return from this command.</param>
+        /// <param retval="skip">The skip step.</param>
         public IEnumerable<T> Find<U, O>(U template, O orderby, int limit, int skip)
         {
             return this.Find(template, orderby, limit, skip, this.FullyQualifiedName);
@@ -307,10 +307,10 @@ namespace Norm.Collections
         /// <summary>
         /// The find.
         /// </summary>
-        /// <typeparam name="U">Type of document to find.</typeparam>
-        /// <param name="template">The template.</param>
-        /// <param name="limit">The limit.</param>
-        /// <param name="fullyQualifiedName">The fully qualified name.</param>
+        /// <typeparam retval="U">Type of document to find.</typeparam>
+        /// <param retval="template">The template.</param>
+        /// <param retval="limit">The limit.</param>
+        /// <param retval="fullyQualifiedName">The fully qualified retval.</param>
         /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName)
         {
@@ -336,9 +336,9 @@ namespace Norm.Collections
         }
 
         /// <summary>
-        /// Returns the fully qualified and mapped name from the member expression.
+        /// Returns the fully qualified and mapped retval from the member expression.
         /// </summary>
-        /// <param name="mex"></param>
+        /// <param retval="mex"></param>
         /// <returns></returns>
         private String RecurseMemberExpression(MemberExpression mex)
         {
@@ -357,11 +357,11 @@ namespace Norm.Collections
         /// Asynchronously creates an index on this collection.
         /// It is highly recommended that you use the overload of this method that accepts an expression unless you need the granularity that this method provides.
         /// </summary>
-        /// <param name="fieldSelectionExpando">The document properties that participate in this index. Each property of "fieldSelectionExpando" should be 
+        /// <param retval="fieldSelectionExpando">The document properties that participate in this index. Each property of "fieldSelectionExpando" should be 
         /// set to either "IndexOption.Ascending" or "IndexOption.Descending", the properties can be deep aliases, like "Suppiler.Name",
         /// but remember that this will make no effort to check that what you put in for values match the MongoConfiguration.</param>
-        /// <param name="indexName">The name of the index as it should appear in the special "system.indexes" child collection.</param>
-        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
         /// MongoDB will potentially optimize the index based on this being true.</param>
         public void CreateIndex(Expando key, String indexName, bool isUnique)
         {
@@ -379,7 +379,7 @@ namespace Norm.Collections
         /// <summary>
         /// Asynchronously creates an index on this collection.
         /// </summary>
-        /// <param name="index">This is an expression of the elements in the type you wish to index, so you can do something like:
+        /// <param retval="index">This is an expression of the elements in the type you wish to index, so you can do something like:
         /// <code>
         /// y=>y.MyIndexedProperty
         /// </code>
@@ -389,10 +389,10 @@ namespace Norm.Collections
         /// </code>
         /// This will automatically map the MongoConfiguration aliases.
         /// </param>
-        /// <param name="indexName">The name of the index as it should appear in the special "system.indexes" child collection.</param>
-        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
         /// MongoDB will potentially optimize the index based on this being true.</param>
-        /// <param name="direction">Should all of the elements in the index be sorted Ascending, or Decending, if you need to sort each property differently, 
+        /// <param retval="direction">Should all of the elements in the index be sorted Ascending, or Decending, if you need to sort each property differently, 
         /// you should use the Expando overload of this method for greater granularity.</param>
         public void CreateIndex<U>(Expression<Func<T, U>> index, string indexName, bool isUnique, IndexOption direction)
         {
@@ -416,9 +416,9 @@ namespace Norm.Collections
         /// <summary>
         /// Gets the distinct values for the specified fieldSelectionExpando.
         /// </summary>
-        /// <typeparam name="U">You better know that every value that could come back
+        /// <typeparam retval="U">You better know that every value that could come back
         /// is of this type, or BAD THINGS will happen.</typeparam>
-        /// <param name="keyName">Name of the fieldSelectionExpando.</param>
+        /// <param retval="keyName">Name of the fieldSelectionExpando.</param>
         /// <returns></returns>
         public IEnumerable<U> Distinct<U>(string keyName)
         {
@@ -429,9 +429,9 @@ namespace Norm.Collections
         /// <summary>
         /// Delete the documents that mact the specified template.
         /// </summary>
-        /// <typeparam name="U">a document that has properties
+        /// <typeparam retval="U">a document that has properties
         /// that match what you want to delete.</typeparam>
-        /// <param name="template">The template.</param>
+        /// <param retval="template">The template.</param>
         public void Delete<U>(U template)
         {
             var dm = new DeleteMessage<U>(_connection, FullyQualifiedName, template);
@@ -453,11 +453,11 @@ namespace Norm.Collections
         /// <summary>
         /// Finds documents
         /// </summary>
-        /// <typeparam name="U">Type of document to find.</typeparam>
-        /// <param name="template">The template.</param>
-        /// <param name="limit">The limit.</param>
-        /// <param name="skip">The skip.</param>
-        /// <param name="fullyQualifiedName">The fully qualified name.</param>
+        /// <typeparam retval="U">Type of document to find.</typeparam>
+        /// <param retval="template">The template.</param>
+        /// <param retval="limit">The limit.</param>
+        /// <param retval="skip">The skip.</param>
+        /// <param retval="fullyQualifiedName">The fully qualified retval.</param>
         /// <returns></returns>
         public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
         {
@@ -474,13 +474,13 @@ namespace Norm.Collections
         /// 
         /// new {Name=1, Date-1}
         /// </remarks>
-        /// <typeparam name="U"></typeparam>
-        /// <typeparam name="S"></typeparam>
-        /// <param name="template">Passing null for this means it will be ignored.</param>
-        /// <param name="orderBy">Passing null for this means it will be ignored.</param>
-        /// <param name="limit">The maximum number of documents to return.</param>
-        /// <param name="skip">The number to skip before returning any.</param>
-        /// <param name="fullyQualifiedName">The collection from which to pull the documents.</param>
+        /// <typeparam retval="U"></typeparam>
+        /// <typeparam retval="S"></typeparam>
+        /// <param retval="template">Passing null for this means it will be ignored.</param>
+        /// <param retval="orderBy">Passing null for this means it will be ignored.</param>
+        /// <param retval="limit">The maximum number of documents to return.</param>
+        /// <param retval="skip">The number to skip before returning any.</param>
+        /// <param retval="fullyQualifiedName">The collection from which to pull the documents.</param>
         /// <returns></returns>
         public IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName)
         {
@@ -541,10 +541,10 @@ namespace Norm.Collections
         /// <summary>
         /// Finds documents that match the template, and ordered according to the orderby document.
         /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <typeparam name="S"></typeparam>
-        /// <param name="template">The spec document</param>
-        /// <param name="orderBy">The order specification</param>
+        /// <typeparam retval="U"></typeparam>
+        /// <typeparam retval="S"></typeparam>
+        /// <param retval="template">The spec document</param>
+        /// <param retval="orderBy">The order specification</param>
         /// <returns>A set of documents ordered correctly and matching the spec.</returns>
         public IEnumerable<T> Find<U, S>(U template, S orderBy)
         {
@@ -553,8 +553,8 @@ namespace Norm.Collections
         /// <summary>
         /// Generates a query explain plan.
         /// </summary>
-        /// <typeparam name="U">The type of the template document (probably an anonymous type..</typeparam>
-        /// <param name="template">The template of the query to explain.</param>
+        /// <typeparam retval="U">The type of the template document (probably an anonymous type..</typeparam>
+        /// <param retval="template">The template of the query to explain.</param>
         /// <returns></returns>
         public ExplainResponse Explain<U>(U template)
         {
@@ -565,8 +565,8 @@ namespace Norm.Collections
         /// <summary>
         /// A count using the specified filter.
         /// </summary>
-        /// <typeparam name="U">Document type</typeparam>
-        /// <param name="query">The query.</param>
+        /// <typeparam retval="U">Document type</typeparam>
+        /// <param retval="query">The query.</param>
         /// <returns>The count.</returns>
         public long Count<U>(U query)
         {
@@ -583,7 +583,7 @@ namespace Norm.Collections
         /// <summary>
         /// Inserts documents
         /// </summary>
-        /// <param name="documentsToInsert">
+        /// <param retval="documentsToInsert">
         /// The documents to insert.
         /// </param>
         public void Insert(params T[] documentsToInsert)
@@ -594,7 +594,7 @@ namespace Norm.Collections
         /// <summary>
         /// Inserts documents
         /// </summary>
-        /// <param name="documentsToInsert">
+        /// <param retval="documentsToInsert">
         /// The documents to insert.
         /// </param>
         /// <exception cref="NotSupportedException">
@@ -619,9 +619,9 @@ namespace Norm.Collections
         /// <summary>
         /// Executes the MapReduce on this collection
         /// </summary>
-        /// <typeparam name="X">The return type</typeparam>
-        /// <param name="map"></param>
-        /// <param name="reduce"></param>
+        /// <typeparam retval="X">The return type</typeparam>
+        /// <param retval="map"></param>
+        /// <param retval="reduce"></param>
         /// <returns></returns>
         public IEnumerable<X> MapReduce<X>(string map, string reduce)
         {
@@ -631,11 +631,11 @@ namespace Norm.Collections
         /// <summary>
         /// Executes the map reduce with an applied template
         /// </summary>
-        /// <typeparam name="U">The type of the template</typeparam>
-        /// <typeparam name="X">The return type</typeparam>
-        /// <param name="template"></param>
-        /// <param name="map"></param>
-        /// <param name="reduce"></param>
+        /// <typeparam retval="U">The type of the template</typeparam>
+        /// <typeparam retval="X">The return type</typeparam>
+        /// <param retval="template"></param>
+        /// <param retval="map"></param>
+        /// <param retval="reduce"></param>
         /// <returns></returns>
         public IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce)
         {
@@ -646,12 +646,12 @@ namespace Norm.Collections
         /// <summary>
         /// Executes the map reduce with an applied template and finalize
         /// </summary>
-        /// <typeparam name="U">The type of the template</typeparam>
-        /// <typeparam name="X">The return type</typeparam>
-        /// <param name="template">The template</param>
-        /// <param name="map"></param>
-        /// <param name="reduce"></param>
-        /// <param name="finalize"></param>
+        /// <typeparam retval="U">The type of the template</typeparam>
+        /// <typeparam retval="X">The return type</typeparam>
+        /// <param retval="template">The template</param>
+        /// <param retval="map"></param>
+        /// <param retval="reduce"></param>
+        /// <param retval="finalize"></param>
         /// <returns></returns>
         public IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce, string finalize)
         {
@@ -662,8 +662,8 @@ namespace Norm.Collections
         /// <summary>
         /// Executes the map reduce with any options
         /// </summary>
-        /// <typeparam name="X">The return type</typeparam>
-        /// <param name="options">The options</param>
+        /// <typeparam retval="X">The return type</typeparam>
+        /// <param retval="options">The options</param>
         /// <returns></returns>
         public IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options)
         {
@@ -687,7 +687,7 @@ namespace Norm.Collections
         /// <summary>
         /// Tries the setting id property.
         /// </summary>
-        /// <param name="entities">The entities.</param>
+        /// <param retval="entities">The entities.</param>
         private static void TrySettingId(IEnumerable<T> entities)
         {
             if (typeof(T) != typeof(Object) && typeof(T).GetInterface("IUpdateWithoutId") == null)

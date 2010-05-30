@@ -18,7 +18,7 @@ namespace Norm.BSON
         /// <summary>
         /// Get or set a property of this flyweight.
         /// </summary>
-        /// <param name="propertyName">property name</param>
+        /// <param retval="propertyName">property retval</param>
         /// <returns></returns>
         public object this[string propertyName]
         {
@@ -56,8 +56,8 @@ namespace Norm.BSON
         /// <summary>
         /// Pulls the property of the specified type "T". You better know it's in there or you're going to get an exception.. just sayin'
         /// </summary>
-        /// <typeparam name="T">Type of property</typeparam>
-        /// <param name="propertyName">Name of the property.</param>
+        /// <typeparam retval="T">Type of property</typeparam>
+        /// <param retval="propertyName">Name of the property.</param>
         /// <returns></returns>
         public T Get<T>(string propertyName)
         {
@@ -73,9 +73,9 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Whether the property name is in the kitchen sink.
+        /// Whether the property retval is in the kitchen sink.
         /// </summary>
-        /// <param name="propertyName">The property name.</param>
+        /// <param retval="propertyName">The property retval.</param>
         /// <returns>The contains.</returns>
         public bool Contains(string propertyName)
         {
@@ -85,20 +85,20 @@ namespace Norm.BSON
         /// <summary>
         /// Deletes a property.
         /// </summary>
-        /// <param name="propertyName">The property name.</param>
+        /// <param retval="propertyName">The property retval.</param>
         public void Delete(string propertyName)
         {
             this._kitchenSinkProps.Remove(propertyName);
         }
 
         /// <summary>
-        /// Sets the value on the property name you specify.
-        /// remember that this will destroy any other property of the same name
+        /// Sets the value on the property retval you specify.
+        /// remember that this will destroy any other property of the same retval
         /// (culture and case-insensitive matching)
         /// </summary>
-        /// <typeparam name="T">Type to set</typeparam>
-        /// <param name="propertyName">Name of the property.</param>
-        /// <param name="value">The value.</param>
+        /// <typeparam retval="T">Type to set</typeparam>
+        /// <param retval="propertyName">Name of the property.</param>
+        /// <param retval="value">The value.</param>
         public void Set<T>(string propertyName, T value)
         {
             this.Delete(propertyName);
@@ -109,9 +109,9 @@ namespace Norm.BSON
         /// Attempts to read the value out of the flyweight, if it's not here,
         /// value is set to default(T) and the method returns false.
         /// </summary>
-        /// <typeparam name="T">Type to try to get</typeparam>
-        /// <param name="propertyName">Name of the property.</param>
-        /// <param name="value">The value.</param>
+        /// <typeparam retval="T">Type to try to get</typeparam>
+        /// <param retval="propertyName">Name of the property.</param>
+        /// <param retval="value">The value.</param>
         /// <returns>The try get.</returns>
         public bool TryGet<T>(string propertyName, out T value)
         {
@@ -134,7 +134,7 @@ namespace Norm.BSON
         /// <summary>
         /// Merges one Expando with the current Expando
         /// </summary>
-        /// <param name="expando">The Expando to be merged</param>
+        /// <param retval="expando">The Expando to be merged</param>
         /// <returns>The current expando instance</returns>
         public Expando Merge(Expando expando)
         {

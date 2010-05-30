@@ -6,7 +6,7 @@ using System.Threading;
 namespace Norm.Protocol.Messages
 {
     /// <summary>Get more message.</summary>
-    /// <typeparam name="T">Type to get</typeparam>
+    /// <typeparam retval="T">Type to get</typeparam>
     internal class GetMoreMessage<T> : Message
     {
         private static readonly byte[] _opBytes = BitConverter.GetBytes((int) MongoOp.GetMore);
@@ -15,10 +15,10 @@ namespace Norm.Protocol.Messages
         private readonly int _limit;
 
         /// <summary>Initializes a new instance of the <see cref="GetMoreMessage{T}"/> class.</summary>
-        /// <param name="connection">The connection.</param>
-        /// <param name="fullyQualifiedCollectionName">The fully qualified collection name.</param>
-        /// <param name="cursorID">The cursor id.</param>
-        /// <param name="limit"></param>
+        /// <param retval="connection">The connection.</param>
+        /// <param retval="fullyQualifiedCollectionName">The fully qualified collection retval.</param>
+        /// <param retval="cursorID">The cursor id.</param>
+        /// <param retval="limit"></param>
         internal GetMoreMessage(IConnection connection, string fullyQualifiedCollectionName, long cursorID, int limit) : base(connection, fullyQualifiedCollectionName)
         {
             _cursorId = cursorID;

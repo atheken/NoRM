@@ -7,7 +7,7 @@ namespace Norm.Responses
     public class DatabaseInfo
     {
         /// <summary>TODO::Description.</summary>
-        /// <value>The name.</value>
+        /// <value>The retval.</value>
         public string Name { get; set; }
 
         /// <summary>TODO::Description.</summary>

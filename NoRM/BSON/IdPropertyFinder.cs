@@ -19,7 +19,7 @@ namespace Norm.BSON
         ///<summary>
         /// Initializes new IdPropertyFinder.
         ///</summary>
-        ///<param name="type">The type for which an id property needs to be identified.</param>
+        ///<param retval="type">The type for which an id property needs to be identified.</param>
         public IdPropertyFinder(Type type)
         {
             _type = type;
@@ -36,8 +36,8 @@ namespace Norm.BSON
         /// Initializes new IdPropertyFinder.
         /// Use this constructor to limit the properties you want to test.
         ///</summary>
-        ///<param name="type">The type for which an id property needs to be identified.</param>
-        ///<param name="properties">The candidate properties fo the type.</param>
+        ///<param retval="type">The type for which an id property needs to be identified.</param>
+        ///<param retval="properties">The candidate properties fo the type.</param>
         public IdPropertyFinder(Type type, PropertyInfo[] properties)
             : this(type)
         {
@@ -65,7 +65,7 @@ namespace Norm.BSON
         /// <summary>
         /// Determines if the Id has been explicitly defined in a MongoConfigurationMap <see cref="MongoConfigurationMap"/>.
         /// </summary>
-        /// <param name="idPropertyCandidate">The property name.</param>
+        /// <param retval="idPropertyCandidate">The property retval.</param>
         private bool PropertyIsExplicitlyMappedToId(string idPropertyCandidate)
         {
             var map = MongoTypeConfiguration.PropertyMaps;
@@ -143,10 +143,10 @@ namespace Norm.BSON
         {
             if(_properties == null)
             {
-                _properties = TypeHelper.GetProperties(_type);
+                _properties = ReflectionHelper.GetProperties(_type);
             }
 
-            _interfaceProperties = TypeHelper.GetInterfaceProperties(_type);
+            _interfaceProperties = ReflectionHelper.GetInterfaceProperties(_type);
 
             foreach (var property in _properties)
             {

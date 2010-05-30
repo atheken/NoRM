@@ -7,7 +7,7 @@ namespace Norm.Configuration
         ///<summary>
         /// Defines problems with type mappings.
         ///</summary>
-        ///<param name="message"></param>
+        ///<param retval="message"></param>
         public MongoConfigurationMapException(string message)
             : base(message)
         {}

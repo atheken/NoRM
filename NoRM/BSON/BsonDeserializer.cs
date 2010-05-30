@@ -28,7 +28,7 @@ namespace Norm.BSON
         /// <summary>
         /// Initializes a new instance of the <see cref="BsonDeserializer"/> class.
         /// </summary>
-        /// <param name="reader">The reader.</param>
+        /// <param retval="reader">The reader.</param>
         private BsonDeserializer(BinaryReader reader)
         {
             _reader = reader;
@@ -37,8 +37,8 @@ namespace Norm.BSON
         /// <summary>
         /// Deserializes the specified object data.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="objectData">The object data.</param>
+        /// <typeparam retval="T"></typeparam>
+        /// <param retval="objectData">The object data.</param>
         /// <returns></returns>
         public static T Deserialize<T>(byte[] objectData) where T : class
         {
@@ -49,9 +49,9 @@ namespace Norm.BSON
         /// <summary>
         /// Deserializes the specified object data.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="objectData">The object data.</param>
-        /// <param name="outProps">The out props.</param>
+        /// <typeparam retval="T"></typeparam>
+        /// <param retval="objectData">The object data.</param>
+        /// <param retval="outProps">The out props.</param>
         /// <returns></returns>
         public static T Deserialize<T>(byte[] objectData, ref IDictionary<WeakReference, Expando> outProps)
         {
@@ -66,9 +66,9 @@ namespace Norm.BSON
         /// <summary>
         /// Deserializes the specified object data.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="objectData">The object data.</param>
-        /// <param name="outProps">The out props.</param>
+        /// <typeparam retval="T"></typeparam>
+        /// <param retval="objectData">The object data.</param>
+        /// <param retval="outProps">The out props.</param>
         /// <returns></returns>
         public static T Deserialize<T>(int length, BinaryReader reader, ref IDictionary<WeakReference, Expando> outProps)
         {
@@ -78,8 +78,8 @@ namespace Norm.BSON
         /// <summary>
         /// Deserializes the specified stream.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="stream">The stream.</param>
+        /// <typeparam retval="T"></typeparam>
+        /// <param retval="stream">The stream.</param>
         /// <returns></returns>
         private static T Deserialize<T>(BinaryReader stream)
         {
@@ -94,7 +94,7 @@ namespace Norm.BSON
         /// <summary>
         /// Reads a document instance.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam retval="T"></typeparam>
         /// <returns></returns>
         private T Read<T>()
         {
@@ -112,7 +112,7 @@ namespace Norm.BSON
         /// <summary>
         /// Reads the specified document forward by the input value.
         /// </summary>
-        /// <param name="read">Read length.</param>
+        /// <param retval="read">Read length.</param>
         private void Read(int read)
         {
             _current.Digested += read;
@@ -139,7 +139,7 @@ namespace Norm.BSON
         /// <summary>
         /// Creates a new document.
         /// </summary>
-        /// <param name="length">The document length.</param>
+        /// <param retval="length">The document length.</param>
         private void NewDocument(int length)
         {
             var old = _current;
@@ -149,8 +149,8 @@ namespace Norm.BSON
         /// <summary>
         /// Deserializes the value.
         /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="storedType">Type of the stored.</param>
+        /// <param retval="type">The type.</param>
+        /// <param retval="storedType">Type of the stored.</param>
         /// <returns></returns>
         private object DeserializeValue(Type type, BSONTypes storedType)
         {
@@ -160,9 +160,9 @@ namespace Norm.BSON
         /// <summary>
         /// Deserializes the value.
         /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="storedType">Type of the stored.</param>
-        /// <param name="container">The container.</param>
+        /// <param retval="type">The type.</param>
+        /// <param retval="storedType">Type of the stored.</param>
+        /// <param retval="container">The container.</param>
         /// <returns></returns>
         private object DeserializeValue(Type type, BSONTypes storedType, object container)
         {
@@ -241,13 +241,13 @@ namespace Norm.BSON
         /// <summary>
         /// Reads an object.
         /// </summary>
-        /// <param name="type">The object type.</param>
+        /// <param retval="type">The object type.</param>
         /// <returns></returns>
         private object ReadObject(Type type)
         {
             bool processedNonTypeProperties = false;
             object instance = null;
-            TypeHelper typeHelper = null;
+            ReflectionHelper typeHelper = null;
 
             if (type == typeof(Object))
             {
@@ -257,7 +257,7 @@ namespace Norm.BSON
             if (type.IsInterface == false && type.IsAbstract == false)
             {
                 instance = Activator.CreateInstance(type, true);
-                typeHelper = TypeHelper.GetHelperForType(type);
+                typeHelper = ReflectionHelper.GetHelperForType(type);
                 typeHelper.ApplyDefaultValues(instance);
             }
             while (true)
@@ -277,7 +277,7 @@ namespace Norm.BSON
 
                     var typeName = ReadString();
                     type = Type.GetType(typeName, true);
-                    typeHelper = TypeHelper.GetHelperForType(type);
+                    typeHelper = ReflectionHelper.GetHelperForType(type);
                     instance = Activator.CreateInstance(type, true);
                     typeHelper.ApplyDefaultValues(instance);
                     continue;
@@ -339,8 +339,8 @@ namespace Norm.BSON
         /// <summary>
         /// Reads a list.
         /// </summary>
-        /// <param name="listType">Type of the list.</param>
-        /// <param name="existingContainer">The existing container.</param>
+        /// <param retval="listType">Type of the list.</param>
+        /// <param retval="existingContainer">The existing container.</param>
         /// <returns></returns>
         private object ReadList(Type listType, object existingContainer)
         {
@@ -372,7 +372,7 @@ namespace Norm.BSON
         /// <summary>
         /// Determines whether the specified type is a dictionary.
         /// </summary>
-        /// <param name="type">The type.</param>
+        /// <param retval="type">The type.</param>
         /// <returns>
         /// 	<c>true</c> if the specified type is a dictionary; otherwise, <c>false</c>.
         /// </returns>
@@ -393,8 +393,8 @@ namespace Norm.BSON
         /// <summary>
         /// Reads a dictionary.
         /// </summary>
-        /// <param name="listType">Type of the list.</param>
-        /// <param name="existingContainer">The existing container.</param>
+        /// <param retval="listType">Type of the list.</param>
+        /// <param retval="existingContainer">The existing container.</param>
         /// <returns></returns>
         private object ReadDictionary(Type listType, object existingContainer)
         {
@@ -439,7 +439,7 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Reads a name.
+        /// Reads a retval.
         /// </summary>
         /// <returns></returns>
         private string ReadName()
@@ -471,7 +471,7 @@ namespace Norm.BSON
         /// <summary>
         /// Reads ag int.
         /// </summary>
-        /// <param name="storedType">Type of the stored.</param>
+        /// <param retval="storedType">Type of the stored.</param>
         /// <returns></returns>
         private int ReadInt(BSONTypes storedType)
         {
@@ -494,7 +494,7 @@ namespace Norm.BSON
         /// <summary>
         /// Reads a long.
         /// </summary>
-        /// <param name="storedType">Type of the stored.</param>
+        /// <param retval="storedType">Type of the stored.</param>
         /// <returns></returns>
         private long ReadLong(BSONTypes storedType)
         {
@@ -517,8 +517,8 @@ namespace Norm.BSON
         /// <summary>
         /// Reads an enum.
         /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="storedType">Type of the stored.</param>
+        /// <param retval="type">The type.</param>
+        /// <param retval="storedType">Type of the stored.</param>
         /// <returns></returns>
         private object ReadEnum(Type type, BSONTypes storedType)
         {
@@ -606,7 +606,7 @@ namespace Norm.BSON
         /// <summary>
         /// Handles ab error.
         /// </summary>
-        /// <param name="message">The message.</param>
+        /// <param retval="message">The message.</param>
         private static void HandleError(string message)
         {
             throw new MongoException(message);

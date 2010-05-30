@@ -30,7 +30,7 @@ namespace Norm.Configuration
         /// you may use it for client code, but you should *NEVER* call it with types
         /// defined in the Norm library.
         /// </remarks>
-        /// <typeparam name="T">The type from which to remove mappings.</typeparam>
+        /// <typeparam retval="T">The type from which to remove mappings.</typeparam>
         internal static void RemoveMappings<T>()
         {
             var t = typeof(T);

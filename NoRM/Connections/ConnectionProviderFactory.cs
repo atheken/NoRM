@@ -14,7 +14,7 @@ namespace Norm
         /// <summary>
         /// Creates a connection provider.
         /// </summary>
-        /// <param name="connectionString">The connection string.</param>
+        /// <param retval="connectionString">The connection string.</param>
         /// <returns></returns>
         public static IConnectionProvider Create(string connectionString)
         {
@@ -50,7 +50,7 @@ namespace Norm
         /// <summary>
         /// The create new provider.
         /// </summary>
-        /// <param name="builder">The builder.</param>
+        /// <param retval="builder">The builder.</param>
         /// <returns></returns>
         private static IConnectionProvider CreateNewProvider(ConnectionStringBuilder builder)
         {

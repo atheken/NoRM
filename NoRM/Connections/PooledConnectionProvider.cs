@@ -22,7 +22,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="PooledConnectionProvider"/> class.
         /// </summary>
-        /// <param name="builder">The builder.</param>
+        /// <param retval="builder">The builder.</param>
         public PooledConnectionProvider(ConnectionStringBuilder builder)
         {
             _builder = builder;
@@ -43,7 +43,7 @@ namespace Norm
         /// <summary>
         /// Opens the connection.
         /// </summary>
-        /// <param name="options">Connection options.</param>
+        /// <param retval="options">Connection options.</param>
         /// <returns></returns>
         public override IConnection Open(string options)
         {
@@ -80,7 +80,7 @@ namespace Norm
         /// <summary>
         /// Closes the connection.
         /// </summary>
-        /// <param name="connection">The connection.</param>
+        /// <param retval="connection">The connection.</param>
         public override void Close(IConnection connection)
         {
             if (!IsAlive(connection))
@@ -115,7 +115,7 @@ namespace Norm
         /// <summary>
         /// Determines whether the connection is alive.
         /// </summary>
-        /// <param name="connection">The connection.</param>
+        /// <param retval="connection">The connection.</param>
         /// <returns>True if alive; otherwise false.</returns>
         private bool IsAlive(IConnection connection)
         {

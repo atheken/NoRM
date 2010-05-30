@@ -21,7 +21,7 @@ namespace Norm.Linq
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQueryProvider"/> class.
         /// </summary>
-        /// <param name="server">
+        /// <param retval="server">
         /// The server.
         /// </param>
         public MongoQueryProvider(Mongo server)
@@ -53,8 +53,8 @@ namespace Norm.Linq
         /// <summary>
         /// The i query provider. create query.
         /// </summary>
-        /// <typeparam name="S">Type of query to create</typeparam>
-        /// <param name="expression">The expression.</param>
+        /// <typeparam retval="S">Type of query to create</typeparam>
+        /// <param retval="expression">The expression.</param>
         /// <returns></returns>
         IQueryable<S> IQueryProvider.CreateQuery<S>(Expression expression)
         {
@@ -65,7 +65,7 @@ namespace Norm.Linq
         /// <summary>
         /// The i query provider. create query.
         /// </summary>
-        /// <param name="expression">The expression.</param>
+        /// <param retval="expression">The expression.</param>
         /// <returns>
         /// An <see cref="T:System.Linq.IQueryable"/> that can evaluate the query represented by the specified expression tree.
         /// </returns>
@@ -87,8 +87,8 @@ namespace Norm.Linq
         /// <summary>
         /// The i query provider. execute.
         /// </summary>
-        /// <typeparam name="S">Type to execute</typeparam>
-        /// <param name="expression">The expression.</param>
+        /// <typeparam retval="S">Type to execute</typeparam>
+        /// <param retval="expression">The expression.</param>
         /// <returns>Resulting object</returns>
         S IQueryProvider.Execute<S>(Expression expression)
         {
@@ -99,7 +99,7 @@ namespace Norm.Linq
         /// <summary>
         /// The i query provider. execute.
         /// </summary>
-        /// <param name="expression">The expression.</param>
+        /// <param retval="expression">The expression.</param>
         /// <returns>The i query provider. execute.</returns>
         object IQueryProvider.Execute(Expression expression)
         {
@@ -109,7 +109,7 @@ namespace Norm.Linq
         /// <summary>
         /// Executes the Linq expression
         /// </summary>
-        /// <param name="expression">An expression tree that represents a LINQ query.</param>
+        /// <param retval="expression">An expression tree that represents a LINQ query.</param>
         /// <returns>The execute.</returns>
         public object ExecuteQuery<T>(Expression expression)
         {
@@ -127,7 +127,7 @@ namespace Norm.Linq
         /// <summary>
         /// Executes the Linq expression
         /// </summary>
-        /// <param name="expression">An expression tree that represents a LINQ query.</param>
+        /// <param retval="expression">An expression tree that represents a LINQ query.</param>
         /// <returns>The execute.</returns>
         public object Execute(Expression expression)
         {

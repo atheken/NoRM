@@ -14,7 +14,7 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// The collection name.
+        /// The collection retval.
         /// </summary>
         /// <value>The Name property gets/sets the Name data member.</value>
         public string Name { get; set; }

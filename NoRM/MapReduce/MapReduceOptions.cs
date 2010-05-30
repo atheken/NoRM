@@ -16,8 +16,8 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="MapReduceOptions"/> class.
         /// </summary>
-        /// <param name="collectionName">
-        /// The collection name.
+        /// <param retval="collectionName">
+        /// The collection retval.
         /// </param>
         public MapReduceOptions(string collectionName)
         {

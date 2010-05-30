@@ -16,7 +16,7 @@ namespace Norm.Linq
         /// <summary>
         /// Gets the constant value.
         /// </summary>
-        /// <param name="exp">The exp.</param>
+        /// <param retval="exp">The exp.</param>
         /// <returns>The get constant value.</returns>
         public static T GetConstantValue<T>(this Expression exp)
         {
@@ -34,8 +34,8 @@ namespace Norm.Linq
         /// <summary>
         /// Asks Mongo for an explain plan for a linq query.
         /// </summary>
-        /// <typeparam name="T">Type to explain</typeparam>
-        /// <param name="expression">The expression.</param>
+        /// <typeparam retval="T">Type to explain</typeparam>
+        /// <param retval="expression">The expression.</param>
         /// <returns>Query explain plan</returns>
         public static ExplainResponse Explain<T>(this IQueryable<T> expression)
         {
@@ -53,10 +53,10 @@ namespace Norm.Linq
         /// <summary>
         /// Adds a query hint.
         /// </summary>
-        /// <typeparam name="T">Document type</typeparam>
-        /// <param name="find">The type of document being enumerated.</param>
-        /// <param name="hint">The query hint expression.</param>
-        /// <param name="direction">Ascending or descending.</param>
+        /// <typeparam retval="T">Document type</typeparam>
+        /// <param retval="find">The type of document being enumerated.</param>
+        /// <param retval="hint">The query hint expression.</param>
+        /// <param retval="direction">Ascending or descending.</param>
         /// <returns></returns>
         public static IEnumerable<T> Hint<T>(this IEnumerable<T> find, Expression<Func<T, object>> hint, IndexOption direction)
         {
@@ -71,7 +71,7 @@ namespace Norm.Linq
         /// <summary>
         /// Escapes the double quotes.
         /// </summary>
-        /// <param name="str">The string</param>
+        /// <param retval="str">The string</param>
         /// <returns>The escaped string.</returns>
         public static string EscapeJavaScriptString(this string str)
         {
@@ -81,7 +81,7 @@ namespace Norm.Linq
         /// <summary>
         /// Converts a QualifierCommand into an Expando object
         /// </summary>
-        /// <param name="qualifier"></param>
+        /// <param retval="qualifier"></param>
         /// <returns>Qualifer Command as Expando object</returns>
         public static Expando AsExpando(this QualifierCommand qualifier)
         {

@@ -13,7 +13,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="QueuedConnectionProvider"/> class.
         /// </summary>
-        /// <param name="builder">
+        /// <param retval="builder">
         /// The builder.
         /// </param>
         public QueuedConnectionProvider(ConnectionStringBuilder builder)
@@ -38,7 +38,7 @@ namespace Norm
         /// <summary>
         /// Opens a connection.
         /// </summary>
-        /// <param name="options">
+        /// <param retval="options">
         /// Connection options.
         /// </param>
         /// <returns>
@@ -74,7 +74,7 @@ namespace Norm
         /// <summary>
         /// Closes a connection.
         /// </summary>
-        /// <param name="connection">
+        /// <param retval="connection">
         /// The connection.
         /// </param>
         public override void Close(IConnection connection)
@@ -96,7 +96,7 @@ namespace Norm
         /// Adds connections to the pool on startup so subsequent calls
         /// don't have the latency of creating a TCP connection.  
         /// </summary>
-        /// <param name="poolSize">
+        /// <param retval="poolSize">
         /// Size of the pool.
         /// </param>
         private void PreQueueConnections(int poolSize)

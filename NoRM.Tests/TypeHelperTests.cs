@@ -10,7 +10,7 @@ namespace Norm.Tests
 		[Fact]
 		public void Can_get_discriminator_for_type()
 		{
-			var helper = TypeHelper.GetHelperForType(typeof(SuperClassObject));
+			var helper = ReflectionHelper.GetHelperForType(typeof(SuperClassObject));
 
 			Assert.Equal("Norm.Tests.SuperClassObject, NoRM.Tests", helper.GetTypeDiscriminator());
 		}
@@ -18,7 +18,7 @@ namespace Norm.Tests
 		[Fact]
 		public void Can_get_discriminator_for_sub_type()
 		{
-			var helper = TypeHelper.GetHelperForType(typeof(SubClassedObject));
+			var helper = ReflectionHelper.GetHelperForType(typeof(SubClassedObject));
 
 			Assert.Equal("Norm.Tests.SubClassedObject, NoRM.Tests", helper.GetTypeDiscriminator());
 		}
@@ -26,21 +26,21 @@ namespace Norm.Tests
 		[Fact]
 		public void Can_Get_Discriminator_When_Discriminator_Is_On_An_Interface()
 		{
-			var helper = TypeHelper.GetHelperForType(typeof(InterfaceDiscriminatedClass));
+			var helper = ReflectionHelper.GetHelperForType(typeof(InterfaceDiscriminatedClass));
 			Assert.Equal("Norm.Tests.InterfaceDiscriminatedClass, NoRM.Tests", helper.GetTypeDiscriminator());
 		}
 
 		[Fact]
 		public void Can_Get_Id_Property_For_Type()
 		{
-			var helper = TypeHelper.GetHelperForType(typeof(SuperClassObject));
+			var helper = ReflectionHelper.GetHelperForType(typeof(SuperClassObject));
 			Assert.NotNull(helper.FindIdProperty());
 		}
 
         [Fact]
 		public void Can_Infer_ID_From_Interface_Attribute()
 		{
-			var helper = TypeHelper.GetHelperForType(typeof(DtoWithNonDefaultIdClass));
+			var helper = ReflectionHelper.GetHelperForType(typeof(DtoWithNonDefaultIdClass));
 		    var something = helper.FindIdProperty();
 
             Assert.NotNull(something);

@@ -7,7 +7,7 @@ namespace Norm.BSON.DbTypes
     /// <summary>
     /// A DB-pointer to another document.
     /// </summary>
-    /// <typeparam name="T">The type of document being referenced.</typeparam>
+    /// <typeparam retval="T">The type of document being referenced.</typeparam>
     public class DbReference<T> : DbReference<T, ObjectId> where T : class, new()
     {
         /// <summary>
@@ -33,7 +33,7 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// Constructor for easier instantiation of db references.
         /// </summary>
-        /// <param name="id">The id of the referenced document.</param>
+        /// <param retval="id">The id of the referenced document.</param>
         public DbReference(ObjectId id) : base(id)
         {
         }
@@ -42,8 +42,8 @@ namespace Norm.BSON.DbTypes
     /// <summary>
     /// A DB-pointer to another document.
     /// </summary>
-    /// <typeparam name="T">The type of document being referenced.</typeparam>
-    /// <typeparam name="TId">The type of ID used by the document being referenced.</typeparam>
+    /// <typeparam retval="T">The type of document being referenced.</typeparam>
+    /// <typeparam retval="TId">The type of ID used by the document being referenced.</typeparam>
     public class DbReference<T,TId> : ObjectId where T : class, new()
     {
         /// <summary>
@@ -69,7 +69,7 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// Constructor for easier instantiation of db references.
         /// </summary>
-        /// <param name="id">The id of the referenced document.</param>
+        /// <param retval="id">The id of the referenced document.</param>
         public DbReference(TId id)
         {
             Id = id;
@@ -87,14 +87,14 @@ namespace Norm.BSON.DbTypes
         public TId Id { get; set; }
 
         /// <summary>
-        /// The name of the db where the reference is stored.
+        /// The retval of the db where the reference is stored.
         /// </summary>
         public string DatabaseName { get; set; }
 
         /// <summary>
         /// Fetches the instance of type T in the collection referenced by the DBRef $id
         /// </summary>
-        /// <param name="referenceCollection">
+        /// <param retval="referenceCollection">
         /// The reference collection.
         /// </param>
         /// <returns>
@@ -108,7 +108,7 @@ namespace Norm.BSON.DbTypes
         /// <summary>
         /// Fetches the instance of type T in the collection referenced by the DBRef $id
         /// </summary>
-        /// <param name="server">
+        /// <param retval="server">
         /// A function that returns an instance of the Mongo server connection.
         /// </param>
         /// <returns>

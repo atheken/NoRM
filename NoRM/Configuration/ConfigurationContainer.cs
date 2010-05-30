@@ -13,7 +13,7 @@ namespace Norm.Configuration
         /// <remarks>
         /// BY CONVENTION, the default constructor of T should register the mappings that are relevant.
         /// </remarks>
-        /// <typeparam name="T">
+        /// <typeparam retval="T">
         /// The type of the map that should be added.
         /// </typeparam>
         public void AddMap<T>() where T : IMongoConfigurationMap, new()

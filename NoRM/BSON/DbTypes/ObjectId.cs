@@ -21,7 +21,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectId"/> class.
         /// </summary>
-        /// <param name="value">
+        /// <param retval="value">
         /// The value.
         /// </param>
         public ObjectId(string value)
@@ -32,7 +32,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectId"/> class.
         /// </summary>
-        /// <param name="value">
+        /// <param retval="value">
         /// The value.
         /// </param>
         internal ObjectId(byte[] value)
@@ -68,10 +68,10 @@ namespace Norm
         /// <summary>
         /// Tries the parse.
         /// </summary>
-        /// <param name="value">
+        /// <param retval="value">
         /// The value.
         /// </param>
-        /// <param name="id">
+        /// <param retval="id">
         /// The id.
         /// </param>
         /// <returns>
@@ -99,8 +99,8 @@ namespace Norm
         /// <summary>
         /// Implements the operator ==.
         /// </summary>
-        /// <param name="a">A.</param>
-        /// <param name="b">The b.</param>
+        /// <param retval="a">A.</param>
+        /// <param retval="b">The b.</param>
         /// <returns>The result of the operator.</returns>
         public static bool operator ==(ObjectId a, ObjectId b)
         {
@@ -120,8 +120,8 @@ namespace Norm
         /// <summary>
         /// Implements the operator !=.
         /// </summary>
-        /// <param name="a">A.</param>
-        /// <param name="b">The b.</param>
+        /// <param retval="a">A.</param>
+        /// <param retval="b">The b.</param>
         /// <returns>The result of the operator.</returns>
         public static bool operator !=(ObjectId a, ObjectId b)
         {
@@ -158,7 +158,7 @@ namespace Norm
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
         /// </summary>
-        /// <param name="o">
+        /// <param retval="o">
         /// The <see cref="System.Object"/> to compare with this instance.
         /// </param>
         /// <returns>
@@ -173,7 +173,7 @@ namespace Norm
         /// <summary>
         /// Equalses the specified other.
         /// </summary>
-        /// <param name="other">
+        /// <param retval="other">
         /// The other.
         /// </param>
         /// <returns>
@@ -187,7 +187,7 @@ namespace Norm
         /// <summary>
         /// Decodes a HexString to bytes.
         /// </summary>
-        /// <param name="val">
+        /// <param retval="val">
         /// The hex encoding string that should be converted to bytes.
         /// </param>
         /// <returns>

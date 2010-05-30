@@ -11,7 +11,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="NormalConnectionProvider"/> class.
         /// </summary>
-        /// <param name="builder">
+        /// <param retval="builder">
         /// The builder.
         /// </param>
         public NormalConnectionProvider(ConnectionStringBuilder builder)
@@ -30,7 +30,7 @@ namespace Norm
         /// <summary>
         /// Opens the connection
         /// </summary>
-        /// <param name="options">
+        /// <param retval="options">
         /// The options.
         /// </param>
         /// <returns>
@@ -43,7 +43,7 @@ namespace Norm
         /// <summary>
         /// Closes the connection.
         /// </summary>
-        /// <param name="connection">
+        /// <param retval="connection">
         /// The connection.
         /// </param>
         public override void Close(IConnection connection)

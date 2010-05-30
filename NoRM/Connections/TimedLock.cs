@@ -20,7 +20,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="TimedLock"/> struct.
         /// </summary>
-        /// <param name="o">
+        /// <param retval="o">
         /// The object to lock.
         /// </param>
         private TimedLock(object o)
@@ -34,7 +34,7 @@ namespace Norm
         /// <summary>
         /// Lock an object.
         /// </summary>
-        /// <param name="o">The object to lock.</param>
+        /// <param retval="o">The object to lock.</param>
         /// <returns></returns>
         public static TimedLock Lock(object o)
         {
@@ -44,8 +44,8 @@ namespace Norm
         /// <summary>
         /// The object to lock.
         /// </summary>
-        /// <param name="o">The object to lock.</param>
-        /// <param name="timeout">The timeout.</param>
+        /// <param retval="o">The object to lock.</param>
+        /// <param retval="timeout">The timeout.</param>
         /// <returns></returns>
         /// <exception cref="LockTimeoutException">
         /// </exception>
@@ -151,7 +151,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
         /// </summary>
-        /// <param name="message">
+        /// <param retval="message">
         /// The message.
         /// </param>
         public LockTimeoutException(string message) : base(message)
@@ -161,10 +161,10 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
         /// </summary>
-        /// <param name="message">
+        /// <param retval="message">
         /// The message.
         /// </param>
-        /// <param name="innerException">
+        /// <param retval="innerException">
         /// The inner exception.
         /// </param>
         public LockTimeoutException(string message, Exception innerException) : base(message, innerException)
@@ -176,7 +176,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
         /// </summary>
-        /// <param name="blockingStackTrace">The blocking stack trace.</param>
+        /// <param retval="blockingStackTrace">The blocking stack trace.</param>
         public LockTimeoutException(StackTrace blockingStackTrace)
         {
             BlockingStackTrace = blockingStackTrace;
@@ -187,8 +187,8 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="LockTimeoutException"/> class.
         /// </summary>
-        /// <param name="info">The info.</param>
-        /// <param name="context">The context.</param>
+        /// <param retval="info">The info.</param>
+        /// <param retval="context">The context.</param>
         protected LockTimeoutException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }

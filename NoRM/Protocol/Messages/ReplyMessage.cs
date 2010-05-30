@@ -8,7 +8,7 @@ namespace Norm.Protocol.Messages
     /// <summary>
     /// The reply message.
     /// </summary>
-    /// <typeparam name="T">
+    /// <typeparam retval="T">
     /// </typeparam>
     public class ReplyMessage<T> : Message, IDisposable
     {
@@ -20,11 +20,11 @@ namespace Norm.Protocol.Messages
         /// Initializes a new instance of the <see cref="ReplyMessage{T}"/> class.
         /// Processes a response stream.
         /// </summary>
-        /// <param name="connection">The connection.</param>
-        /// <param name="fullyQualifiedCollestionName">The fully Qualified Collestion Name.</param>
-        /// <param name="reply">The reply.</param>
-        /// <param name="originalOperation"></param>
-        /// <param name="limit"></param>
+        /// <param retval="connection">The connection.</param>
+        /// <param retval="fullyQualifiedCollestionName">The fully Qualified Collestion Name.</param>
+        /// <param retval="reply">The reply.</param>
+        /// <param retval="originalOperation"></param>
+        /// <param retval="limit"></param>
         internal ReplyMessage(IConnection connection, string fullyQualifiedCollestionName, BinaryReader reply, MongoOp originalOperation, int limit)
             : base(connection, fullyQualifiedCollestionName)
         {

@@ -5,22 +5,26 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Norm.Attributes;
 using Norm.Configuration;
+using System.Text.RegularExpressions;
 
 namespace Norm.BSON
 {
     /// <summary>
     /// Convenience methods for type reflection.
     /// </summary>
-    public class TypeHelper
+    /// <remarks>
+    /// This was formerly "Norm.BSON.TypeHelper" but the name was in conflict with a BCL type, so it has been changed to "ReflectionHelper"
+    /// </remarks>
+    public class ReflectionHelper
     {
         private static readonly object _lock = new object();
-        private static readonly IDictionary<Type, TypeHelper> _cachedTypeLookup = new Dictionary<Type, TypeHelper>();
+        private static readonly IDictionary<Type, ReflectionHelper> _cachedTypeLookup = new Dictionary<Type, ReflectionHelper>();
 
         private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);
         private readonly IDictionary<string, MagicProperty> _properties;
         private readonly Type _type;
 
-        static TypeHelper()
+        static ReflectionHelper()
         {
             //register to be notified of type configuration changes.
             MongoConfiguration.TypeConfigurationChanged += new Action<Type>(TypeConfigurationChanged);
@@ -28,7 +32,7 @@ namespace Norm.BSON
 
         static void TypeConfigurationChanged(Type theType)
         {
-            //clear the cache to prevent TypeHelper from getting the wrong thing.
+            //clear the cache to prevent ReflectionHelper from getting the wrong thing.
             if (_cachedTypeLookup.ContainsKey(theType))
             {
                 _cachedTypeLookup.Remove(theType);
@@ -36,9 +40,34 @@ namespace Norm.BSON
         }
 
         /// <summary>
+        /// A regex that gets everything up tot the first backtick, useful when searching for a good starting name.
+        /// </summary>
+        private static readonly Regex _rxGenericTypeNameFinder = new Regex("[^`]+", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Given a type, this will produce a mongodb save version of the name, for example:
+        /// 
+        /// Product&lt;UKSupplier&gt; will become "Product_UKSupplier" - this is helpful for generic typed collections.
+        /// </summary>
+        /// <param name="t"></param>
+        public static string GetScrubbedGenericName(Type t)
+        {
+            String retval = t.Name;
+            if (t.IsGenericType)
+            {
+                retval = _rxGenericTypeNameFinder.Match(t.Name).Value;
+                foreach (var a in t.GetGenericArguments())
+                {
+                    retval += "_" + GetScrubbedGenericName(a);
+                }
+            }
+            return retval;
+        }
+
+        /// <summary>
         /// Returns the PropertyInfo for properties defined as Instance, Public, NonPublic, or FlattenHierarchy
         /// </summary>
-        /// <param name="type">The type.</param>
+        /// <param retval="type">The type.</param>
         public static PropertyInfo[] GetProperties(Type type)
         {
             return type.GetProperties(BindingFlags.Instance | BindingFlags.Public |
@@ -65,10 +94,10 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeHelper"/> class.
+        /// Initializes a new instance of the <see cref="ReflectionHelper"/> class.
         /// </summary>
-        /// <param name="type">The type.</param>
-        public TypeHelper(Type type)
+        /// <param retval="type">The type.</param>
+        public ReflectionHelper(Type type)
         {
             _type = type;
             var properties = GetProperties(type);
@@ -83,18 +112,18 @@ namespace Norm.BSON
         /// <summary>
         /// The get helper for type.
         /// </summary>
-        /// <param name="type">The type.</param>
+        /// <param retval="type">The type.</param>
         /// <returns></returns>
-        public static TypeHelper GetHelperForType(Type type)
+        public static ReflectionHelper GetHelperForType(Type type)
         {
-            TypeHelper helper;
+            ReflectionHelper helper;
             if (!_cachedTypeLookup.TryGetValue(type, out helper))
             {
                 lock (_lock)
                 {
                     if (!_cachedTypeLookup.TryGetValue(type, out helper))
                     {
-                        helper = new TypeHelper(type);
+                        helper = new ReflectionHelper(type);
                         _cachedTypeLookup[type] = helper;
                     }
                 }
@@ -106,8 +135,8 @@ namespace Norm.BSON
         /// Lifted from AutoMaper.  Finds a property using a lambda expression
         /// (i.e. x => x.Name)
         /// </summary>
-        /// <param name="lambdaExpression">The lambda expression.</param>
-        /// <returns>Property name</returns>
+        /// <param retval="lambdaExpression">The lambda expression.</param>
+        /// <returns>Property retval</returns>
         public static string FindProperty(LambdaExpression lambdaExpression)
         {
             Expression expressionToCheck = lambdaExpression;
@@ -151,8 +180,8 @@ namespace Norm.BSON
         /// <summary>
         /// Finds a property.
         /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="name">The name.</param>
+        /// <param retval="type">The type.</param>
+        /// <param retval="retval">The retval.</param>
         /// <returns></returns>
         public static PropertyInfo FindProperty(Type type, string name)
         {
@@ -174,9 +203,9 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Returns the magic property for the specified name, or null if it doesn't exist.
+        /// Returns the magic property for the specified retval, or null if it doesn't exist.
         /// </summary>
-        /// <param name="name">The name.</param>
+        /// <param retval="retval">The retval.</param>
         /// <returns></returns>
         public MagicProperty FindProperty(string name)
         {
@@ -196,7 +225,7 @@ namespace Norm.BSON
         ///<summary>
         /// Returns the property defined as the Id for the entity either by convention or explicitly. 
         ///</summary>
-        ///<param name="type">The type.</param>
+        ///<param retval="type">The type.</param>
         ///<returns></returns>
         public static PropertyInfo FindIdProperty(Type type)
         {
@@ -206,8 +235,8 @@ namespace Norm.BSON
         /// <summary>
         /// Loads magic properties.
         /// </summary>
-        /// <param name="properties">The properties.</param>
-        /// <param name="idProperty">The id property.</param>
+        /// <param retval="properties">The properties.</param>
+        /// <param retval="idProperty">The id property.</param>
         /// <returns></returns>
         private static IDictionary<string, MagicProperty> LoadMagicProperties(IEnumerable<PropertyInfo> properties, PropertyInfo idProperty)
         {
@@ -248,8 +277,8 @@ namespace Norm.BSON
         /// <summary>
         /// Apply default values to the properties in the instance
         /// </summary>
-        /// <param name="typeHelper"></param>
-        /// <param name="instance"></param>
+        /// <param retval="typeHelper"></param>
+        /// <param retval="instance"></param>
         public void ApplyDefaultValues(object instance)
         {
             // error check.

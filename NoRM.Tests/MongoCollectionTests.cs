@@ -24,6 +24,16 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void CollectionName_For_Deeply_Generic_Collection_Is_Legal_And_Reasonable()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var coll = db.GetCollection<GenericSuperClass<List<String>>>();
+                Assert.Equal("NormTests.GenericSuperClass_List_String", coll.FullyQualifiedName);
+            }
+        }
+
+        [Fact]
         public void Find_On_Unspecified_Type_Returns_Expando_When_No_Discriminator_Available()
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString("strict=false")))

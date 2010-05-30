@@ -11,14 +11,14 @@ namespace Norm.Collections
     /// <summary>
     /// Generic collection interface
     /// </summary>
-    /// <typeparam name="T">The type of collection</typeparam>
+    /// <typeparam retval="T">The type of collection</typeparam>
     public interface IMongoCollection<T> 
     {
         /// <summary>
         /// Finds the specified document.
         /// </summary>
-        /// <typeparam name="U">Type of document</typeparam>
-        /// <param name="template">The template.</param>
+        /// <typeparam retval="U">Type of document</typeparam>
+        /// <param retval="template">The template.</param>
         /// <returns></returns>
         IEnumerable<T> Find<U>(U template);
 
@@ -31,19 +31,19 @@ namespace Norm.Collections
         /// <summary>
         /// Finds the specified document with a limited result set.
         /// </summary>
-        /// <typeparam name="U">Type of document</typeparam>
-        /// <param name="template">The template.</param>
-        /// <param name="limit">The limit.</param>
-        /// <param name="fullyQualifiedName">Name of the fully qualified.</param>
+        /// <typeparam retval="U">Type of document</typeparam>
+        /// <param retval="template">The template.</param>
+        /// <param retval="limit">The limit.</param>
+        /// <param retval="fullyQualifiedName">Name of the fully qualified.</param>
         /// <returns></returns>
         IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName);
 
         /// <summary>
         /// Finds the specified document with a limited result set.
         /// </summary>
-        /// <typeparam name="U">Type of document</typeparam>
-        /// <param name="template">The template.</param>
-        /// <param name="limit">The limit.</param>
+        /// <typeparam retval="U">Type of document</typeparam>
+        /// <param retval="template">The template.</param>
+        /// <param retval="limit">The limit.</param>
         /// <returns></returns>
         IEnumerable<T> Find<U>(U template, int limit);
 
@@ -51,38 +51,38 @@ namespace Norm.Collections
         /// <summary>
         /// Find using the template, but skip some and limit how many you want.
         /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="template"></param>
-        /// <param name="limit"></param>
-        /// <param name="skip"></param>
+        /// <typeparam retval="U"></typeparam>
+        /// <param retval="template"></param>
+        /// <param retval="limit"></param>
+        /// <param retval="skip"></param>
         /// <returns></returns>
         IEnumerable<T> Find<U>(U template, int limit, int skip);
 
         /// <summary>
         /// Finds one document.
         /// </summary>
-        /// <typeparam name="U">Type to find</typeparam>
-        /// <param name="template">The template.</param>
+        /// <typeparam retval="U">Type to find</typeparam>
+        /// <param retval="template">The template.</param>
         /// <returns></returns>
         T FindOne<U>(U template);
 
         /// <summary>
-        /// Gets a nested collection with the type specified and the name specified.
+        /// Gets a nested collection with the type specified and the retval specified.
         /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <param name="collectionName"></param>
+        /// <typeparam retval="U"></typeparam>
+        /// <param retval="collectionName"></param>
         /// <returns></returns>
         MongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new();
 
         /// <summary>
         /// Updates the specified document.
         /// </summary>
-        /// <typeparam name="X">Document to match</typeparam>
-        /// <typeparam name="U">Document to update</typeparam>
-        /// <param name="matchDocument">The match document.</param>
-        /// <param name="valueDocument">The value document.</param>
-        /// <param name="updateMultiple">if set to <c>true</c> update all matching documents.</param>
-        /// <param name="upsert">if set to <c>true</c> upsert.</param>
+        /// <typeparam retval="X">Document to match</typeparam>
+        /// <typeparam retval="U">Document to update</typeparam>
+        /// <param retval="matchDocument">The match document.</param>
+        /// <param retval="valueDocument">The value document.</param>
+        /// <param retval="updateMultiple">if set to <c>true</c> update all matching documents.</param>
+        /// <param retval="upsert">if set to <c>true</c> upsert.</param>
         void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert);
 
         /// <summary>
@@ -94,19 +94,19 @@ namespace Norm.Collections
         /// <summary>
         /// Updates one document.
         /// </summary>
-        /// <typeparam name="X">Document to match</typeparam>
-        /// <typeparam name="U">Document to update</typeparam>
-        /// <param name="matchDocument">The match document.</param>
-        /// <param name="valueDocument">The value document.</param>
+        /// <typeparam retval="X">Document to match</typeparam>
+        /// <typeparam retval="U">Document to update</typeparam>
+        /// <param retval="matchDocument">The match document.</param>
+        /// <param retval="valueDocument">The value document.</param>
         void UpdateOne<X, U>(X matchDocument, U valueDocument);
 
 
         /// <summary>
         /// Delete the documents that mact the specified template.
         /// </summary>
-        /// <typeparam name="U">a document that has properties
+        /// <typeparam retval="U">a document that has properties
         /// that match what you want to delete.</typeparam>
-        /// <param name="template">The template.</param>
+        /// <param retval="template">The template.</param>
         void Delete<U>(U template);
 
         /// <summary>
@@ -118,34 +118,34 @@ namespace Norm.Collections
         /// <summary>
         /// Execute the mapreduce on this collection.
         /// </summary>
-        /// <param name="map"></param>
-        /// <param name="reduce"></param>
+        /// <param retval="map"></param>
+        /// <param retval="reduce"></param>
         /// <returns></returns>
         IEnumerable<X> MapReduce<X>(string map, string reduce);
 
         /// <summary>
         /// Execute the mapreduce with a limiting query on this collection.
         /// </summary>
-        /// <param name="template"></param>
-        /// <param name="map"></param>
-        /// <param name="reduce"></param>
+        /// <param retval="template"></param>
+        /// <param retval="map"></param>
+        /// <param retval="reduce"></param>
         /// <returns></returns>
         IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce);
 
         /// <summary>
         /// Execute the mapreduce with a limiting query and finalize on this collection.
         /// </summary>
-        /// <param name="template"></param>
-        /// <param name="map"></param>
-        /// <param name="reduce"></param>
-        /// <param name="finalize"></param>
+        /// <param retval="template"></param>
+        /// <param retval="map"></param>
+        /// <param retval="reduce"></param>
+        /// <param retval="finalize"></param>
         /// <returns></returns>
         IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce, string finalize);
 
         /// <summary>
         /// Execute the mapreduce with the supplied options on this collection.
         /// </summary>
-        /// <param name="options"></param>
+        /// <param retval="options"></param>
         /// <returns></returns>
         IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
     }

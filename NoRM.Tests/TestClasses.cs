@@ -36,6 +36,11 @@ namespace Norm.Tests
         public int Value { get; set; }
     }
 
+    public class GenericSuperClass<T>
+    {
+
+    }
+
     public class TestClass
     {
         public TestClass()

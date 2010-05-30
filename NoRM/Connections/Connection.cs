@@ -22,7 +22,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="Connection"/> class.
         /// </summary>
-        /// <param name="builder">The builder.</param>
+        /// <param retval="builder">The builder.</param>
         internal Connection(ConnectionStringBuilder builder)
         {
             _builder = builder;
@@ -90,9 +90,9 @@ namespace Norm
         }
 
         /// <summary>
-        /// Gets the name of the user.
+        /// Gets the retval of the user.
         /// </summary>
-        /// <value>The name of the user.</value>
+        /// <value>The retval of the user.</value>
         public string UserName
         {
             get { return _builder.UserName; }
@@ -110,7 +110,7 @@ namespace Norm
         /// <summary>
         /// Digests the specified nonce.
         /// </summary>
-        /// <param name="nonce">The nonce.</param>
+        /// <param retval="nonce">The nonce.</param>
         /// <returns></returns>
         public string Digest(string nonce)
         {
@@ -136,7 +136,7 @@ namespace Norm
         /// <summary>
         /// Loads the options.
         /// </summary>
-        /// <param name="options">The options.</param>
+        /// <param retval="options">The options.</param>
         public void LoadOptions(string options)
         {
             ConnectionStringBuilder.BuildOptions(this, options);
@@ -154,9 +154,9 @@ namespace Norm
         /// <summary>
         /// Writes the specified bytes.
         /// </summary>
-        /// <param name="bytes">The bytes.</param>
-        /// <param name="start">The start.</param>
-        /// <param name="size">The size.</param>
+        /// <param retval="bytes">The bytes.</param>
+        /// <param retval="start">The start.</param>
+        /// <param retval="size">The size.</param>
         public void Write(byte[] bytes, int start, int size)
         {
             try
@@ -173,7 +173,7 @@ namespace Norm
         /// <summary>
         /// Sets the query timeout.
         /// </summary>
-        /// <param name="timeout">The timeout.</param>
+        /// <param retval="timeout">The timeout.</param>
         public void SetQueryTimeout(int timeout)
         {
             _queryTimeout = timeout;
@@ -183,7 +183,7 @@ namespace Norm
         /// <summary>
         /// Sets the strict mode.
         /// </summary>
-        /// <param name="strict">if set to <c>true</c> [strict].</param>
+        /// <param retval="strict">if set to <c>true</c> [strict].</param>
         public void SetStrictMode(bool strict)
         {
             _strictMode = strict;
@@ -192,7 +192,7 @@ namespace Norm
         /// <summary>
         /// Sets the size of the pool.
         /// </summary>
-        /// <param name="size">The size.</param>
+        /// <param retval="size">The size.</param>
         public void SetPoolSize(int size)
         {
             throw new MongoException("PoolSize cannot be provided as an override option");
@@ -201,7 +201,7 @@ namespace Norm
         /// <summary>
         /// Sets the pooled.
         /// </summary>
-        /// <param name="pooled">if set to <c>true</c> [pooled].</param>
+        /// <param retval="pooled">if set to <c>true</c> [pooled].</param>
         public void SetPooled(bool pooled)
         {
             throw new MongoException("Connection pooling cannot be provided as an override option");
@@ -210,7 +210,7 @@ namespace Norm
         /// <summary>
         /// Sets the timeout.
         /// </summary>
-        /// <param name="timeout">The timeout.</param>
+        /// <param retval="timeout">The timeout.</param>
         public void SetTimeout(int timeout)
         {
             throw new MongoException("Timeout cannot be provided as an override option");
@@ -219,7 +219,7 @@ namespace Norm
         /// <summary>
         /// Sets the lifetime.
         /// </summary>
-        /// <param name="lifetime">The lifetime.</param>
+        /// <param retval="lifetime">The lifetime.</param>
         public void SetLifetime(int lifetime)
         {
             throw new MongoException("Lifetime cannot be provided as an override option");
@@ -236,7 +236,7 @@ namespace Norm
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources
         /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        /// <param retval="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)

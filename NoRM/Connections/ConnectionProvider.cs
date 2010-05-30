@@ -48,7 +48,7 @@ namespace Norm
         /// <summary>
         /// Authenticates the specified connection.
         /// </summary>
-        /// <param name="connection">The connection.</param>
+        /// <param retval="connection">The connection.</param>
         /// <returns></returns>
         protected bool Authenticate(IConnection connection)
         {

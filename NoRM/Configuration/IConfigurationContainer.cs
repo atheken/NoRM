@@ -10,7 +10,7 @@ namespace Norm.Configuration
         /// <summary>
         /// Registers a mongo type map implicitly.
         /// </summary>
-        /// <typeparam name="T">Type to configure
+        /// <typeparam retval="T">Type to configure
         /// </typeparam>
         void AddMap<T>() where T : IMongoConfigurationMap, new();
 

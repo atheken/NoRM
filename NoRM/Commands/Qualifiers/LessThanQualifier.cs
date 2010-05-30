@@ -11,7 +11,7 @@ namespace Norm.Commands.Qualifiers
         /// Initializes a new instance of the <see cref="LessThanQualifier"/> class.
         /// Builds a less than qualifier, really ought to be a number (MAYBE a string)
         /// </summary>
-        /// <param name="value">The value.</param>
+        /// <param retval="value">The value.</param>
         internal LessThanQualifier(object value) : base("$lt", value)
         {
         }

@@ -13,7 +13,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits an expression.
         /// </summary>
-        /// <param name="exp">The expression.</param>
+        /// <param retval="exp">The expression.</param>
         /// <returns></returns>
         /// <exception cref="Exception">
         /// </exception>
@@ -89,7 +89,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a binding.
         /// </summary>
-        /// <param name="binding">
+        /// <param retval="binding">
         /// The binding.
         /// </param>
         /// <returns>
@@ -114,7 +114,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits an element initializer.
         /// </summary>
-        /// <param name="initializer">The initializer.</param>
+        /// <param retval="initializer">The initializer.</param>
         /// <returns></returns>
         protected virtual ElementInit VisitElementInitializer(ElementInit initializer)
         {
@@ -127,7 +127,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a unary expression.
         /// </summary>
-        /// <param name="u">The expression.</param>
+        /// <param retval="u">The expression.</param>
         /// <returns></returns>
         protected virtual Expression VisitUnary(UnaryExpression u)
         {
@@ -140,7 +140,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a binary expression.
         /// </summary>
-        /// <param name="b">
+        /// <param retval="b">
         /// The expression.
         /// </param>
         /// <returns>
@@ -164,7 +164,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a "type is" expression
         /// </summary>
-        /// <param name="b">
+        /// <param retval="b">
         /// The expression.
         /// </param>
         /// <returns>
@@ -180,7 +180,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a constant.
         /// </summary>
-        /// <param name="c">The expression.</param>
+        /// <param retval="c">The expression.</param>
         /// <returns></returns>
         protected virtual Expression VisitConstant(ConstantExpression c)
         {
@@ -190,7 +190,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a conditional.
         /// </summary>
-        /// <param name="c">The expression.</param>
+        /// <param retval="c">The expression.</param>
         /// <returns></returns>
         protected virtual Expression VisitConditional(ConditionalExpression c)
         {
@@ -208,7 +208,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a parameter.
         /// </summary>
-        /// <param name="p">The expression.</param>
+        /// <param retval="p">The expression.</param>
         /// <returns></returns>
         protected virtual Expression VisitParameter(ParameterExpression p)
         {
@@ -218,7 +218,7 @@ namespace Norm.Linq
         /// <summary>
         /// The visit member access.
         /// </summary>
-        /// <param name="m">The m.</param>
+        /// <param retval="m">The m.</param>
         /// <returns></returns>
         protected virtual Expression VisitMemberAccess(MemberExpression m)
         {
@@ -231,7 +231,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits amethod call.
         /// </summary>
-        /// <param name="m">The expression.</param>
+        /// <param retval="m">The expression.</param>
         /// <returns></returns>
         protected virtual Expression VisitMethodCall(MethodCallExpression m)
         {
@@ -248,7 +248,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits an expression list.
         /// </summary>
-        /// <param name="original">
+        /// <param retval="original">
         /// The original expression.
         /// </param>
         /// <returns>
@@ -283,7 +283,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a member assignment.
         /// </summary>
-        /// <param name="assignment">
+        /// <param retval="assignment">
         /// The assignment.
         /// </param>
         /// <returns>
@@ -299,7 +299,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a member member binding.
         /// </summary>
-        /// <param name="binding">
+        /// <param retval="binding">
         /// The binding.
         /// </param>
         /// <returns>
@@ -315,7 +315,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a member list binding.
         /// </summary>
-        /// <param name="binding">
+        /// <param retval="binding">
         /// The binding.
         /// </param>
         /// <returns>
@@ -331,7 +331,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a binding list.
         /// </summary>
-        /// <param name="original">
+        /// <param retval="original">
         /// The original.
         /// </param>
         /// <returns>
@@ -369,7 +369,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits an element initializer list.
         /// </summary>
-        /// <param name="original">The original.</param>
+        /// <param retval="original">The original.</param>
         /// <returns></returns>
         protected virtual IEnumerable<ElementInit> VisitElementInitializerList(ReadOnlyCollection<ElementInit> original)
         {
@@ -403,7 +403,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a lambda.
         /// </summary>
-        /// <param name="lambda">
+        /// <param retval="lambda">
         /// The lambda.
         /// </param>
         /// <returns>
@@ -419,7 +419,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a new expression.
         /// </summary>
-        /// <param name="nex">
+        /// <param retval="nex">
         /// The expression.
         /// </param>
         /// <returns>
@@ -440,7 +440,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a member init.
         /// </summary>
-        /// <param name="init">The init.</param>
+        /// <param retval="init">The init.</param>
         /// <returns></returns>
         protected virtual Expression VisitMemberInit(MemberInitExpression init)
         {
@@ -457,7 +457,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a list init.
         /// </summary>
-        /// <param name="init">The init.</param>
+        /// <param retval="init">The init.</param>
         /// <returns></returns>
         protected virtual Expression VisitListInit(ListInitExpression init)
         {
@@ -474,7 +474,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits a new array.
         /// </summary>
-        /// <param name="na">
+        /// <param retval="na">
         /// The na.
         /// </param>
         /// <returns>
@@ -495,7 +495,7 @@ namespace Norm.Linq
         /// <summary>
         /// Visits an invocation.
         /// </summary>
-        /// <param name="iv">The invocation.</param>
+        /// <param retval="iv">The invocation.</param>
         /// <returns></returns>
         protected virtual Expression VisitInvocation(InvocationExpression iv)
         {

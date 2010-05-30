@@ -4,8 +4,8 @@ namespace Norm
     /// <summary>
     /// The i mongo grouping.
     /// </summary>
-    /// <typeparam name="K">Key</typeparam>
-    /// <typeparam name="V">Value</typeparam>
+    /// <typeparam retval="K">Key</typeparam>
+    /// <typeparam retval="V">Value</typeparam>
     public interface IMongoGrouping<K, V>
     {
         /// <summary>

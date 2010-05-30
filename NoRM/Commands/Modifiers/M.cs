@@ -19,7 +19,7 @@ namespace Norm
         /// <summary>
         /// Creates a $inc operation to be applied to a field using the update command.
         /// </summary>
-        /// <param name="amountToIncrementBy"></param>
+        /// <param retval="amountToIncrementBy"></param>
         /// <returns></returns>
         public static IncrementOperation Increment(int amountToIncrementBy)
         {
@@ -29,7 +29,7 @@ namespace Norm
         ///<summary>
         /// Creates a $set operation to be applied to a field using the update command. 
         ///</summary>
-        ///<param name="setValue"></param>
+        ///<param retval="setValue"></param>
         ///<returns></returns>
         public static SetOperation<T> Set<T>(T setValue)
         {
@@ -39,8 +39,8 @@ namespace Norm
         /// <summary>
         /// Defines a $push operation against the the property that this is being assigned to.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="pushValue"></param>
+        /// <typeparam retval="T"></typeparam>
+        /// <param retval="pushValue"></param>
         /// <returns></returns>
         public static PushOperation<T> Push<T>(T pushValue)
         {
@@ -50,8 +50,8 @@ namespace Norm
         /// <summary>
         /// $push es all values into the array.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="pushValues"></param>
+        /// <typeparam retval="T"></typeparam>
+        /// <param retval="pushValues"></param>
         /// <returns></returns>
         public static PushAllOperation<T> PushAll<T>(params T[] pushValues)
         {
@@ -61,8 +61,8 @@ namespace Norm
         /// <summary>
         /// defines an $addToSet operation on the property with which this is being assigned.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="addToSetValue"></param>
+        /// <typeparam retval="T"></typeparam>
+        /// <param retval="addToSetValue"></param>
         /// <returns></returns>
         public static AddToSetOperation<T> AddToSet<T>(T addToSetValue)
         {
@@ -72,8 +72,8 @@ namespace Norm
         /// <summary>
         /// defines a $pull operation against the lefthand property.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="pullValue"></param>
+        /// <typeparam retval="T"></typeparam>
+        /// <param retval="pullValue"></param>
         /// <returns></returns>
         public static PullOperation<T> Pull<T>(T pullValue)
         {
@@ -83,7 +83,7 @@ namespace Norm
         /// <summary>
         /// defines a $pop operation against the lefthand property.
         /// </summary>
-        /// <param name="popType"></param>
+        /// <param retval="popType"></param>
         /// <returns></returns>
         public static PopOperation Pop(PopType popType)
         {
@@ -93,8 +93,8 @@ namespace Norm
         /// <summary>
         /// defines a $pullAll on the lefthand property.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="pullValues"></param>
+        /// <typeparam retval="T"></typeparam>
+        /// <param retval="pullValues"></param>
         /// <returns></returns>
         public static PullAllOperation<T> PullAll<T>(params T[] pullValues)
         {
