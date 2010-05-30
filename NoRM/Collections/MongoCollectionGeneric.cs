@@ -49,7 +49,15 @@ namespace Norm.Collections
             _db = db;
             _connection = connection;
             _collectionName = collectionName;
-            //_queryContext = new MongoQuery<T>(MongoQueryProvider.Create(_connection.ConnectionString), _collectionName);
+        }
+
+        /// <summary>
+        /// This is the LINQ Hook, call me and you'll be querying MongoDB via LINQ. w00t!
+        /// </summary>
+        /// <returns></returns>
+        public IQueryable<T> AsQueryable()
+        {
+            return new MongoQuery<T>(MongoQueryProvider.Create(this._db));
         }
 
         /// <summary>
@@ -534,7 +542,7 @@ namespace Norm.Collections
                 projection = fieldSelection.Compile();
                 _compiledTransforms[fieldSelection.GetHashCode()] = projection;
             }
-            return new MongoQueryExecutor<T, U, Z>(qm, (Func<T,Z>) projection);
+            return new MongoQueryExecutor<T, U, Z>(qm, (Func<T, Z>)projection);
         }
 
 

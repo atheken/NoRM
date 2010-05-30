@@ -14,7 +14,7 @@ namespace Norm.Linq
     /// A default implementation of IQueryable for use with QueryProvider
     /// </summary>
     /// <typeparam retval="T">Type to query; also the underlying collection type.</typeparam>
-    public class MongoQuery<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable, IMongoQuery
+    internal class MongoQuery<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, IOrderedQueryable<T>, IOrderedQueryable, IMongoQuery
     {
         private readonly Expression _expression;
         private readonly MongoQueryProvider _provider;

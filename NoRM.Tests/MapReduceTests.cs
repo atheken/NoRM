@@ -29,7 +29,7 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
-                var mr = mongo.CreateMapReduce();
+                var mr = mongo.Database.CreateMapReduce();
                 var result = mr.Execute(new MapReduceOptions<ReduceProduct> {Map = _map, Reduce = _reduce});
                 var found = false;
                 foreach(var c in mongo.Database.GetAllCollections())
@@ -51,7 +51,7 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f }); 
-                var mr = mongo.CreateMapReduce();
+                var mr = mongo.Database.CreateMapReduce();
                 name = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce }).Result;
             }
 
@@ -71,7 +71,7 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
-                var mr = mongo.CreateMapReduce();
+                var mr = mongo.Database.CreateMapReduce();
                 
                     var result = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, OutputCollectionName = "TempMr" });
                     Assert.Equal("TempMr", result.Result);
@@ -88,7 +88,7 @@ namespace Norm.Tests
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
                                                             new ReduceProduct {Price = 2.5f});
-                var mr = mongo.CreateMapReduce();
+                var mr = mongo.Database.CreateMapReduce();
 
                 var response =
                     mr.Execute(new MapReduceOptions<ReduceProduct> {Map = _map, Reduce = _reduce, Permanant = true});
@@ -108,7 +108,7 @@ namespace Norm.Tests
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
                                                             new ReduceProduct {Price = 2.5f},
                                                             new ReduceProduct {Price = 2.5f});
-                var mr = mongo.CreateMapReduce();
+                var mr = mongo.Database.CreateMapReduce();
 
                 var _query = new {Price = Q.GreaterThan(2)};
                 var response =
@@ -129,7 +129,7 @@ namespace Norm.Tests
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct { Price = 1.5f },
                                                             new ReduceProduct { Price = 2.5f },
                                                             new ReduceProduct { Price = 2.5f });
-                var mr = mongo.CreateMapReduce();
+                var mr = mongo.Database.CreateMapReduce();
 
                 var _query = new { Price = Q.GreaterThan(2) };
                 var response =
@@ -150,7 +150,7 @@ namespace Norm.Tests
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
                                                             new ReduceProduct {Price = 2.5f});
-                var mr = mongo.CreateMapReduce();
+                var mr = mongo.Database.CreateMapReduce();
 
                 var response =
                     mr.Execute(new MapReduceOptions<ReduceProduct>
@@ -168,7 +168,7 @@ namespace Norm.Tests
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
                                                             new ReduceProduct {Price = 2.5f});
-                var mr = mongo.CreateMapReduce();
+                var mr = mongo.Database.CreateMapReduce();
 
                 var response =
                     mr.Execute(new MapReduceOptions<ReduceProduct>
@@ -186,7 +186,7 @@ namespace Norm.Tests
             {
                 mongo.GetCollection<ReduceProduct>().Insert(new ReduceProduct {Price = 1.5f},
                                                             new ReduceProduct {Price = 2.5f});
-                var mr = mongo.CreateMapReduce();
+                var mr = mongo.Database.CreateMapReduce();
 
                 const string finalize = "function(key, value){return 1;}";
                 var response =

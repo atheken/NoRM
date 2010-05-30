@@ -28,6 +28,16 @@ namespace Norm
         }
 
         /// <summary>
+        /// The create map reduce.
+        /// </summary>
+        /// <returns>
+        /// </returns>
+        public MapReduce CreateMapReduce()
+        {
+            return new MapReduce(this);
+        }
+
+        /// <summary>
         /// Gets the current connection.
         /// </summary>
         public IConnection CurrentConnection

@@ -198,11 +198,11 @@ namespace Norm.Tests
                     Price = 10,
                     Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                 });
-                session.Provider.DB.GetCollection<TestProduct>()
+                session.DB.GetCollection<TestProduct>()
                     .CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
 
                 int i;
-                session.Provider.DB.GetCollection<TestProduct>().DeleteIndices(out i);
+                session.DB.GetCollection<TestProduct>().DeleteIndices(out i);
 
                 //it's TWO because there's always an index on _id by default.
                 Assert.Equal(2, i);
@@ -235,13 +235,13 @@ namespace Norm.Tests
                     Price = 10,
                     Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                 });
-                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
-                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Available, "TestIndex1", false, IndexOption.Ascending);
-                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Name, "TestIndex2", false, IndexOption.Ascending);
+                session.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+                session.DB.GetCollection<TestProduct>().CreateIndex(p => p.Available, "TestIndex1", false, IndexOption.Ascending);
+                session.DB.GetCollection<TestProduct>().CreateIndex(p => p.Name, "TestIndex2", false, IndexOption.Ascending);
 
                 int i, j;
-                session.Provider.DB.GetCollection<TestProduct>().DeleteIndex("TestIndex1", out i);
-                session.Provider.DB.GetCollection<TestProduct>().DeleteIndex("TestIndex2", out j);
+                session.DB.GetCollection<TestProduct>().DeleteIndex("TestIndex1", out i);
+                session.DB.GetCollection<TestProduct>().DeleteIndex("TestIndex2", out j);
 
                 Assert.Equal(4, i);
                 Assert.Equal(3, j);

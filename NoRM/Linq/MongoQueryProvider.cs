@@ -13,25 +13,13 @@ namespace Norm.Linq
     /// <summary>
     /// The mongo query provider.
     /// </summary>
-    public class MongoQueryProvider : IQueryProvider, IDisposable, IMongoQueryResults
+    internal class MongoQueryProvider : IQueryProvider, IMongoQueryResults
     {
-        private readonly Mongo _server;
         private QueryTranslationResults _results;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoQueryProvider"/> class.
-        /// </summary>
-        /// <param retval="server">
-        /// The server.
-        /// </param>
-        public MongoQueryProvider(Mongo server)
+        internal static MongoQueryProvider Create(MongoDatabase db)
         {
-            _server = server;
-        }
-
-        public static MongoQueryProvider Create(String connectionString)
-        {
-            return new MongoQueryProvider(Mongo.Create(connectionString));
+            return new MongoQueryProvider() { DB = db };
         }
 
         /// <summary>
@@ -39,15 +27,8 @@ namespace Norm.Linq
         /// </summary>
         public MongoDatabase DB
         {
-            get { return _server.Database; }
-        }
-
-        /// <summary>
-        /// Gets the server.
-        /// </summary>
-        public Mongo Server
-        {
-            get { return _server; }
+            get;
+            private set;
         }
 
         /// <summary>
@@ -120,7 +101,7 @@ namespace Norm.Linq
 
             _results = results;
 
-            var executor = new MongoQueryExecutor(_server, results);
+            var executor = new MongoQueryExecutor(this.DB, results);
             return executor.Execute<T>();
         }
 
@@ -167,11 +148,6 @@ namespace Norm.Linq
                 return true;
             return expression.NodeType != ExpressionType.Parameter &&
                    expression.NodeType != ExpressionType.Lambda;
-        }
-
-        public void Dispose()
-        {
-            _server.Dispose();
         }
 
         QueryTranslationResults IMongoQueryResults.TranslationResults

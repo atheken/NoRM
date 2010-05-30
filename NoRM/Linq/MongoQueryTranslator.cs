@@ -14,7 +14,7 @@ namespace Norm.Linq
     /// <summary>
     /// The mongo query translator.
     /// </summary>
-    public class MongoQueryTranslator : ExpressionVisitor
+    internal class MongoQueryTranslator : ExpressionVisitor
     {
 
         private int _takeCount = Int32.MaxValue;

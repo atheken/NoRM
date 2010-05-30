@@ -9,19 +9,19 @@ namespace Norm.Linq
     /// <summary>
     /// Executes the query against the database
     /// </summary>
-    public class MongoQueryExecutor
+    internal class MongoQueryExecutor
     {
-        private readonly Mongo _mongo;
+        private readonly MongoDatabase _db;
         private readonly QueryTranslationResults _translationResults;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQueryExecutor"/> class.
         /// </summary>
-        /// <param retval="mongo">The mongo instance</param>
+        /// <param retval="mongo">The database on which the query will be executed.</param>
         /// <param retval="translationResults">The results of the query translation</param>
-        public MongoQueryExecutor(Mongo mongo, QueryTranslationResults translationResults)
+        public MongoQueryExecutor(MongoDatabase db, QueryTranslationResults translationResults)
         {
-            _mongo = mongo;
+            _db = db;
             _translationResults = translationResults;
         }
 
@@ -33,7 +33,7 @@ namespace Norm.Linq
         public object Execute<T>()
         {
             // This is the actual Query mechanism...            
-            var collection = new MongoCollection<T>(_translationResults.CollectionName, _mongo.Database, _mongo.Database.CurrentConnection);
+            var collection = new MongoCollection<T>(_translationResults.CollectionName, _db, _db.CurrentConnection);
 
             object result;
             switch (_translationResults.MethodCall)
@@ -131,7 +131,7 @@ namespace Norm.Linq
 
         private T ExecuteMapReduce<T>(string typeName, MapReduceParameters parameters)
         {
-            var mr = _mongo.CreateMapReduce();
+            var mr = _db.CreateMapReduce();
             var response = mr.Execute(new MapReduceOptions(typeName) { Map = parameters.Map, Reduce = parameters.Reduce, Finalize = parameters.Finalize });
             var coll = response.GetCollection<MapReduceResult<T>>();
             var r = coll.Find().FirstOrDefault();

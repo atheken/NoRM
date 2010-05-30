@@ -23,7 +23,7 @@ namespace Norm.Tests
                     Supplier = new Supplier { Name = "Supplier", CreatedOn = DateTime.Now }
                 });
 
-                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "Test", true, IndexOption.Ascending);
+                session.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "Test", true, IndexOption.Ascending);
             }
         }
 
@@ -34,7 +34,7 @@ namespace Norm.Tests
             {
                 session.Drop<TestProduct>();
 
-                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+                session.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
 
                 session.Add(new TestProduct
                                 {
@@ -53,7 +53,7 @@ namespace Norm.Tests
                 var query = new Expando();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
-                var result = session.Provider.DB.GetCollection<TestProduct>().Explain(query);
+                var result = session.DB.GetCollection<TestProduct>().Explain(query);
 
                 Assert.Equal("BtreeCursor TestIndex", result.Cursor);
             }
@@ -66,7 +66,7 @@ namespace Norm.Tests
             {
                 session.Drop<TestProduct>();
 
-                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Name, "TestIndex", true, IndexOption.Ascending);
+                session.DB.GetCollection<TestProduct>().CreateIndex(p => p.Name, "TestIndex", true, IndexOption.Ascending);
 
                 session.Add(new TestProduct
                 {
@@ -76,7 +76,7 @@ namespace Norm.Tests
                 });
 
 
-                var result = session.Provider.DB.GetCollection<TestProduct>().Explain(new { Name = "ExplainProduct" });
+                var result = session.DB.GetCollection<TestProduct>().Explain(new { Name = "ExplainProduct" });
 
                 Assert.Equal("BtreeCursor TestIndex", result.Cursor);
             }
@@ -89,7 +89,7 @@ namespace Norm.Tests
             {
                 session.Drop<TestProduct>();
                
-                session.Provider.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
+                session.DB.GetCollection<TestProduct>().CreateIndex(p => p.Supplier.Name, "TestIndex", true, IndexOption.Ascending);
 
                 session.Add(new TestProduct
                 {
@@ -123,7 +123,7 @@ namespace Norm.Tests
                 var query = new Expando();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
-                var result = session.Provider.DB
+                var result = session.DB
                     .GetCollection<TestProduct>()
                     .Find(query)
                     .Hint(p => p.Name, IndexOption.Ascending);
@@ -149,7 +149,7 @@ namespace Norm.Tests
                 var query = new Expando();
                 query["Supplier.Name"] = Q.Equals("Supplier");
 
-                var result = session.Provider.DB.GetCollection<TestProduct>()
+                var result = session.DB.GetCollection<TestProduct>()
                     .Find(query)
                     .Hint(p => p.Name, IndexOption.Ascending)
                     .Hint(p => p.Supplier.Name, IndexOption.Descending);

@@ -118,16 +118,6 @@ namespace Norm
         }
 
         /// <summary>
-        /// The create map reduce.
-        /// </summary>
-        /// <returns>
-        /// </returns>
-        public MapReduce CreateMapReduce()
-        {
-            return new MapReduce(this.Database);
-        }
-
-        /// <summary>
         /// The last error.
         /// </summary>
         /// <returns>

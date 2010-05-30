@@ -7,7 +7,7 @@ namespace Norm.Linq
     /// <summary>
     /// Rewrites an expression tree so that locally isolatable sub-expressions are evaluated and converted into ConstantExpression nodes.
     /// </summary>
-    public static class PartialEvaluator
+    internal static class PartialEvaluator
     {
         /// <summary>
         /// Performs evaluation & replacement of independent sub-trees

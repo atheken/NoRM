@@ -1,4 +1,5 @@
 using Norm.BSON;
+using System.Linq;
 
 namespace Norm.Linq
 {
