@@ -3,9 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using Norm.BSON;
 using Norm.Protocol.Messages;
+using System;
 
 namespace Norm
 {
+    public class MongoQueryExecutor<T, U> : MongoQueryExecutor<T, U, T>
+    {
+        public MongoQueryExecutor(QueryMessage<T,U> message)
+            : base(message, y => y)
+        {
+
+        }
+    }
+
     /// <summary>
     /// Acts as a proxy for query execution so additional paramaters like
     /// hints can be added with a more fluent syntax around IEnumerable
@@ -13,17 +23,15 @@ namespace Norm
     /// </summary>
     /// <typeparam name="T">The type to query</typeparam>
     /// <typeparam name="U">Document template type</typeparam>
-    public class MongoQueryExecutor<T, U> : IEnumerable<T>
+    /// <typeparam name="O">The output type.</typeparam>
+    public class MongoQueryExecutor<T, U, O> : IEnumerable<O>
     {
         private readonly Expando _hints = new Expando();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoQueryExecutor&lt;T, U&gt;"/> class.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        public MongoQueryExecutor(QueryMessage<T, U> message)
+        public MongoQueryExecutor(QueryMessage<T, U> message, Func<T, O> projection)
         {
-            Message = message;
+            this.Message = message;
+            this.Translator = projection;
         }
 
         /// <summary>
@@ -42,13 +50,20 @@ namespace Norm
             _hints.Set(hint, direction);
         }
 
+        private Func<T, O> Translator
+        {
+            get;
+            set;
+        }
+
+
         /// <summary>
         /// Returns an enumerator that iterates through the collection.
         /// </summary>
         /// <returns>
         /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
         /// </returns>
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<O> GetEnumerator()
         {
             ReplyMessage<T> replyMessage;
 
@@ -68,7 +83,7 @@ namespace Norm
 
             foreach (var r in replyMessage.Results)
             {
-                yield return r;
+                yield return this.Translator(r);
             }
 
             yield break;

@@ -26,9 +26,9 @@ namespace Norm.Tests
         [Fact]
         public void Find_On_Unspecified_Type_Returns_Expando_When_No_Discriminator_Available()
         {
-            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            using (var db = Mongo.Create(TestHelper.ConnectionString("strict=false")))
             {
-                db.Database.GetCollection("helloWorld").Insert(new { _id = 1 });
+                //db.Database.GetCollection("helloWorld").Insert(new { _id = 1 });
                 db.Database.DropCollection("helloWorld");
                 var coll = db.Database.GetCollection("helloWorld");
                 coll.Insert(new IntId { Id = 5, Name = "hi there" },
@@ -41,10 +41,10 @@ namespace Norm.Tests
             }
         }
 
-        [Fact(Skip = "This times out, but I don't know why..")]
+        [Fact(Skip = "This test is timing out")]
         public void Get_Collection_Statistics_Works()
         {
-            using (var mongo = Mongo.Create(TestHelper.ConnectionString("timeout=3")))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var coll = mongo.GetCollection<IntId>("Fake");
                 coll.Insert(new IntId { Id = 4, Name = "Test 1" });
@@ -99,6 +99,37 @@ namespace Norm.Tests
                 Assert.Equal(16000, mongo.GetCollection<TestProduct>("Fake").Find().Count());
             }
         }
+
+        [Fact]
+        public void Find_Subset_Returns_Appropriate_Subset()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var coll = db.GetCollection<TestProduct>();
+                coll.Delete(new { });
+                var oid = ObjectId.NewObjectId();
+
+                coll.Insert(new TestProduct
+                {
+                    _id = oid,
+                    Price = 42.42f,
+                    Supplier = new Supplier
+                    {
+                        Name = "Bob's house of pancakes",
+                        RefNum = 12,
+                        CreatedOn = DateTime.MinValue
+                    }
+                });
+
+                var subset = db.GetCollection<TestProduct>().Find(new { }, new { }, Int32.MaxValue, 0,
+                    j => new { j.Supplier.Name, j.Price, j._id }).ToArray();
+
+                Assert.Equal("Bob's house of pancakes", subset[0].Name);
+                Assert.Equal(42.42f, subset[0].Price);
+                Assert.Equal(oid, subset[0]._id);
+            }
+        }
+
 
         [Fact]
         public void SaveOrInsertThrowsExceptionIfTypeDoesntHaveAnId()

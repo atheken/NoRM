@@ -21,10 +21,5 @@ namespace Norm.Configuration
         /// The connection string.
         /// </param>
         void UseConnectionString(string connectionString);
-
-        /// <summary>
-        /// Marks a type as a summary of another type (partial get)
-        /// </summary>        
-        void SummaryOf<T>();
     }
 }

@@ -17,7 +17,6 @@ namespace Norm.Tests
             MongoConfiguration.RemoveMapFor<Shopper>();
             MongoConfiguration.RemoveMapFor<Cart>();
             MongoConfiguration.RemoveMapFor<TestProduct>();
-            MongoConfiguration.RemoveMapFor<ProductSummary>();
 
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
@@ -256,7 +255,7 @@ namespace Norm.Tests
                 var found = mongo.GetCollection<SuperClassObjectFluentMapped>("Fake").Find();
 
                 Assert.Equal(2, found.Count());
-                Assert.Equal(obj1.Id, found.ElementAt(0).Id);
+                Assert.Equal(obj1.Id, found.ElementAt(0).Id) ;
                 Assert.Equal("Prod1", found.ElementAt(0).Title);
                 Assert.Equal(obj2.Id, found.ElementAt(1).Id);
                 Assert.Equal("Prod2", found.ElementAt(1).Title);
@@ -275,23 +274,6 @@ namespace Norm.Tests
 
                 Assert.Equal(1, found.Count());
                 Assert.Equal(typeof(SubClassedObjectFluentMapped), found.ElementAt(0).GetType());
-            }
-        }
-
-        [Fact]
-        public void MarksAClassAsASummary()
-        {
-            MongoConfiguration.Initialize(m => m.For<ProductSummary>(p => p.SummaryOf<TestProduct>()));
-            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
-            {
-                mongo.GetCollection<TestProduct>().Insert(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Soap", Price = 2, Supplier = new Supplier { Name = "A Supplier" } });
-                mongo.GetCollection<TestProduct>().Insert(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Rope", Price = 1, Supplier = new Supplier { Name = "A Supplier" } });
-                mongo.GetCollection<TestProduct>().Insert(new TestProduct { UniqueID = Guid.NewGuid(), Available = DateTime.Now, Name = "Fun", Price = 0, Supplier = new Supplier { Name = "A Supplier" } });
-
-                var found = mongo.GetCollection<ProductSummary>().Find();
-                Assert.Equal(3, found.Count());
-                Assert.Equal("Soap", found.ElementAt(0).Name);
-                Assert.Equal(2, found.ElementAt(0).Price);
             }
         }
     }

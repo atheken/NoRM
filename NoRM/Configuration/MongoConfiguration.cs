@@ -100,8 +100,7 @@ namespace Norm.Configuration
             if (discriminatingType != null)
                 return discriminatingType.Name;
 
-            var realType = SummaryTypeFor(type) ?? type;
-            return _configuration != null ? _configuration.GetConfigurationMap().GetCollectionName(realType) : realType.Name;
+            return _configuration != null ? _configuration.GetConfigurationMap().GetCollectionName(type) : type.Name;
         }
 
         /// <summary>
@@ -117,15 +116,6 @@ namespace Norm.Configuration
         internal static string GetConnectionString(Type type)
         {
             return _configuration != null ? _configuration.GetConfigurationMap().GetConnectionString(type) : null;
-        }
-
-        /// <summary>
-        /// If the given type is a summary objet, the underlying type is returned (else null)
-        /// </summary>
-        /// <remarks>
-        internal static Type SummaryTypeFor(Type type)
-        {
-            return _configuration != null ? _configuration.GetConfigurationMap().SummaryTypeFor(type) : null;
         }
     }
 }

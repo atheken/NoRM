@@ -25,7 +25,7 @@ namespace Norm.Protocol.SystemMessages.Requests
         }
 
         /// <summary>
-        /// The key.
+        /// The fieldSelectionExpando.
         /// </summary>
         /// <value>The Key property gets/sets the Key data member.</value>
         public Expando Key { get; set; }

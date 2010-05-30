@@ -333,7 +333,11 @@ namespace Norm.Collections
             return _db.GetCollectionStatistics(_collectionName);
         }
 
-        
+        /// <summary>
+        /// Returns the fully qualified and mapped name from the member expression.
+        /// </summary>
+        /// <param name="mex"></param>
+        /// <returns></returns>
         private String RecurseMemberExpression(MemberExpression mex)
         {
             var retval = "";
@@ -351,11 +355,11 @@ namespace Norm.Collections
         /// Asynchronously creates an index on this collection.
         /// It is highly recommended that you use the overload of this method that accepts an expression unless you need the granularity that this method provides.
         /// </summary>
-        /// <param name="key">The document properties that participate in this index. Each property of "key" should be 
+        /// <param name="fieldSelectionExpando">The document properties that participate in this index. Each property of "fieldSelectionExpando" should be 
         /// set to either "IndexOption.Ascending" or "IndexOption.Descending", the properties can be deep aliases, like "Suppiler.Name",
         /// but remember that this will make no effort to check that what you put in for values match the MongoConfiguration.</param>
         /// <param name="indexName">The name of the index as it should appear in the special "system.indexes" child collection.</param>
-        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this key. 
+        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
         /// MongoDB will potentially optimize the index based on this being true.</param>
         public void CreateIndex(Expando key, String indexName, bool isUnique)
         {
@@ -377,14 +381,14 @@ namespace Norm.Collections
         /// <code>
         /// y=>y.MyIndexedProperty
         /// </code>
-        /// or, if you have a multi-key index, you can do this:
+        /// or, if you have a multi-fieldSelectionExpando index, you can do this:
         /// <code>
         /// y=> new { y.PropertyA, y.PropertyB.Property1, y.PropertyC }
         /// </code>
         /// This will automatically map the MongoConfiguration aliases.
         /// </param>
         /// <param name="indexName">The name of the index as it should appear in the special "system.indexes" child collection.</param>
-        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this key. 
+        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
         /// MongoDB will potentially optimize the index based on this being true.</param>
         /// <param name="direction">Should all of the elements in the index be sorted Ascending, or Decending, if you need to sort each property differently, 
         /// you should use the Expando overload of this method for greater granularity.</param>
@@ -408,11 +412,11 @@ namespace Norm.Collections
         }
 
         /// <summary>
-        /// Gets the distinct values for the specified key.
+        /// Gets the distinct values for the specified fieldSelectionExpando.
         /// </summary>
         /// <typeparam name="U">You better know that every value that could come back
         /// is of this type, or BAD THINGS will happen.</typeparam>
-        /// <param name="keyName">Name of the key.</param>
+        /// <param name="keyName">Name of the fieldSelectionExpando.</param>
         /// <returns></returns>
         public IEnumerable<U> Distinct<U>(string keyName)
         {
@@ -486,23 +490,45 @@ namespace Norm.Collections
                 OrderBy = orderBy
             };
             var type = typeof(T);
-            if (MongoConfiguration.SummaryTypeFor(type) != null)
-            {
-                qm.FieldSelection = GetSelectionFields(type);
-            }
             return new MongoQueryExecutor<T, U>(qm);
         }
 
-        private static FieldSelectionList GetSelectionFields(Type type)
+        public IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, Expression<Func<T, Z>> fieldSelection)
         {
-            var properties = TypeHelper.GetHelperForType(type).GetProperties();
-            var fields = new FieldSelectionList(properties.Count);
-            foreach (var property in properties)
-            {
-                fields.Add(property.Name);
-            }
-            return fields;
+            return this.Find(template, orderBy, limit, skip, this.FullyQualifiedName, fieldSelection);
         }
+
+        public IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, String fullName, Expression<Func<T, Z>> fieldSelection)
+        {
+            #region Extract field names to request
+            var exp = fieldSelection.Body as NewExpression;
+            var fieldSelectionExpando = new Expando();
+            if (exp != null)
+            {
+                foreach (var x in exp.Arguments.OfType<MemberExpression>())
+                {
+                    fieldSelectionExpando[this.RecurseMemberExpression(x)] = 1;
+                }
+            }
+            else if (fieldSelection.Body is MemberExpression)
+            {
+                var me = fieldSelection.Body as MemberExpression;
+                fieldSelectionExpando[this.RecurseMemberExpression(me)] = 1;
+            }
+            #endregion
+
+            var qm = new QueryMessage<T, U>(_connection, fullName)
+            {
+                NumberToTake = limit,
+                NumberToSkip = skip,
+                Query = template,
+                OrderBy = orderBy,
+                FieldSelection = fieldSelectionExpando.AllProperties().Select(y => y.PropertyName)
+            };
+
+            return new MongoQueryExecutor<T, U, Z>(qm, fieldSelection.Compile());
+        }
+
 
         /// <summary>
         /// Finds documents that match the template, and ordered according to the orderby document.

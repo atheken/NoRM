@@ -44,7 +44,7 @@ namespace Norm.Protocol.SystemMessages.Requests
         public string User { get; set; }
 
         /// <summary>
-        /// The key.
+        /// The fieldSelectionExpando.
         /// </summary>
         /// <value>The Key property gets/sets the Key data member.</value>
         public string Key { get; set; }

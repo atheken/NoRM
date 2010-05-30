@@ -31,15 +31,15 @@ namespace Norm.Responses
         public string Cursor { get; set; }
         
         /// <summary>
-        /// Gets or sets the start key.
+        /// Gets or sets the start fieldSelectionExpando.
         /// </summary>
-        /// <value>The start key.</value>
+        /// <value>The start fieldSelectionExpando.</value>
         internal Expando StartKey { get; set; }
         
         /// <summary>
-        /// Gets or sets the end key.
+        /// Gets or sets the end fieldSelectionExpando.
         /// </summary>
-        /// <value>The end key.</value>
+        /// <value>The end fieldSelectionExpando.</value>
         internal Expando EndKey { get; set; }
         
         /// <summary>
@@ -49,9 +49,9 @@ namespace Norm.Responses
         internal List<Expando[]> IndexBounds { get; set; }
 
         /// <summary>
-        /// Gets the explain start key list.
+        /// Gets the explain start fieldSelectionExpando list.
         /// </summary>
-        /// <value>The explain start key.</value>
+        /// <value>The explain start fieldSelectionExpando.</value>
         public Dictionary<string, string> ExplainStartKey
         {
             get
@@ -69,9 +69,9 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// Gets the explain end key list.
+        /// Gets the explain end fieldSelectionExpando list.
         /// </summary>
-        /// <value>The explain end key.</value>
+        /// <value>The explain end fieldSelectionExpando.</value>
         public Dictionary<string, string> ExplainEndKey
         {
             get

@@ -70,14 +70,5 @@ namespace Norm.Configuration
         {
             get { return _collectionNames; }
         }
-
-        /// <summary>
-        /// Gets the summary types.
-        /// </summary>
-        /// <value>The summary type.</value>
-        internal static IDictionary<Type, Type> SummaryTypes
-        {
-            get { return _summaryTypes; }
-        }
     }
 }

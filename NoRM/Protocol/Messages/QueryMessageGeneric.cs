@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using Norm.BSON;
 using Norm.Protocol.SystemMessages;
+using System.Collections.Generic;
 
 namespace Norm.Protocol.Messages
 {
@@ -42,20 +43,20 @@ namespace Norm.Protocol.Messages
         /// A BSON query.
         /// </summary>
         /// <value>The Query property gets/sets the Query data member.</value>
-        public U Query
+        internal U Query
         {
             get;
             set;
         }
 
         /// <summary>
-        /// The fields to select
+        /// The fields to select from each document in the current collection.
         /// </summary>
-        internal FieldSelectionList FieldSelection { get; set; }
+        internal IEnumerable<String> FieldSelection { get; set; }
 
-        /// <summary>TODO::Description.</summary>
+        /// <summary>This defines </summary>
         /// <value>The OrderBy property gets/sets the OrderBy data member.</value>
-        public object OrderBy
+        internal object OrderBy
         {
             get;
             set;
@@ -64,7 +65,7 @@ namespace Norm.Protocol.Messages
         /// Gets or sets the number of documents to take.
         /// </summary>
         /// <value>The number of documents to take.</value>
-        public int NumberToTake
+        internal int NumberToTake
         {
             get;
             set;
@@ -125,6 +126,16 @@ namespace Norm.Protocol.Messages
             if (OrderBy != null)
             {
                 fly["orderby"] = this.OrderBy;
+            }
+            if (this.FieldSelection != null)
+            {
+                var fields = new Expando();
+                foreach (var f in this.FieldSelection)
+                {
+                    fields[f] = 1;
+                }
+
+                fly["fieldsToReturn"] = fields;
             }
             return BsonSerializer.Serialize(fly);            
         }

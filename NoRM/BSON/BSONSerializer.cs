@@ -111,10 +111,6 @@ namespace Norm.BSON
             {
                 WriteFlyweight((Expando)document);
             }
-            else if (document is FieldSelectionList)
-            {
-                WriteFieldListSelection((FieldSelectionList)document);
-            }
             else
             {
                 WriteObject(document);
@@ -123,13 +119,7 @@ namespace Norm.BSON
             EndDocument(true);
         }
 
-        private void WriteFieldListSelection(FieldSelectionList fields)
-        {
-            foreach (var field in fields)
-            {
-                Write(field, 1);
-            }
-        }
+      
 
         /// <summary>
         /// Writes a Flyweight.

@@ -88,7 +88,6 @@
     <Compile Include="BSON\BsonSerializer.cs" />
     <Compile Include="BSON\BSONTypes.cs" />
     <Compile Include="BSON\ExpandoProperty.cs" />
-    <Compile Include="BSON\FieldSelectionList.cs" />
     <Compile Include="BSON\IdPropertyFinder.cs" />
     <Compile Include="BSON\IExpando.cs" />
     <Compile Include="BSON\Lists\ArrayWrapper.cs" />
