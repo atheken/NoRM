@@ -19,7 +19,7 @@ namespace Norm.GridFS
         /// <returns></returns>
         public static GridFileCollection Files<T>(this IMongoCollection<T> rootCollection)
         {
-            return new GridFileCollection(rootCollection.GetChildCollection<FileSummary>("files"),
+            return new GridFileCollection(rootCollection.GetChildCollection<GridFile>("files"),
                 rootCollection.GetChildCollection<FileChunk>("chunks"));
         }
 
@@ -30,7 +30,7 @@ namespace Norm.GridFS
         /// <returns></returns>
         public static GridFileCollection Files(this MongoDatabase database)
         {
-            return new GridFileCollection(database.GetCollection<FileSummary>("files"),
+            return new GridFileCollection(database.GetCollection<GridFile>("files"),
                 database.GetCollection<FileChunk>("chunks"));
         }
     }

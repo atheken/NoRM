@@ -10,9 +10,9 @@ namespace Norm.GridFS
     public class GridFileCollection
     {
         private IMongoCollection<FileChunk> FileChunks { get; set; }
-        private IMongoCollection<FileSummary> FileSummaries { get; set; }
+        private IMongoCollection<GridFile> FileSummaries { get; set; }
 
-        internal GridFileCollection(IMongoCollection<FileSummary> fileSummaries, IMongoCollection<FileChunk> fileChunks)
+        internal GridFileCollection(IMongoCollection<GridFile> fileSummaries, IMongoCollection<FileChunk> fileChunks)
         {
             this.FileChunks = fileChunks;
             this.FileSummaries = fileSummaries;
@@ -20,19 +20,27 @@ namespace Norm.GridFS
 
         public void Save(GridFile file)
         {
-            this.FileSummaries.Update(new { _id = file.Id }, file.Summary, false, true);
+            this.FileSummaries.Save(file);
             this.FileChunks.Delete(new { _id = file.Id });
-            this.FileChunks.Insert(file.CachedChunks);
+            if (file.CachedChunks.Any())
+            {
+                this.FileChunks.Insert(file.CachedChunks);
+            }
         }
 
         /// <summary>
         /// Finds and returns the first file that matches the criteria.
         /// </summary>
-        /// <param name="matchCriteria"></param>
+        /// <param name="template"></param>
         /// <returns></returns>
-        public GridFile FindOne(Expression<Func<GridFile, bool>> matchCriteria)
+        public GridFile FindOne<U>(U template)
         {
-            return null;
+            var retval = this.FileSummaries.FindOne(template);
+            if(retval != null)
+            {
+                retval.Chunks = this.FileChunks.AsQueryable().Where(y => y.FileID == retval.Id).OrderBy(j => j.ChunkNumber);
+            }
+            return retval;
         }
 
         /// <summary>
@@ -40,10 +48,14 @@ namespace Norm.GridFS
         /// </summary>
         /// <param name="matchCriteria"></param>
         /// <returns></returns>
-        public IEnumerable<GridFile> Find(Expression<Func<GridFile, bool>> matchCriteria)
+        public IEnumerable<GridFile> Find<U>(U template)
         {
-
-            return Enumerable.Empty<GridFile>();
+            foreach (var f in this.FileSummaries.Find(template))
+            {
+                f.Chunks = this.FileChunks.AsQueryable().Where(y=>y.FileID == f.Id).OrderBy(j => j.ChunkNumber);
+                yield return f;
+            }
+            yield break;
         }
 
 
@@ -54,8 +66,16 @@ namespace Norm.GridFS
         /// <param name="IDofFileToDelete"></param>
         public void Delete(ObjectId IDofFileToDelete)
         {
-            this.FileSummaries.Delete(new { _id = IDofFileToDelete });
-            this.FileChunks.Delete(new { _id = IDofFileToDelete });
+            if (IDofFileToDelete != null)
+            {
+                this.FileSummaries.Delete(new { _id = IDofFileToDelete });
+                this.FileChunks.Delete(new { _id = IDofFileToDelete });
+            }
+            else
+            {
+                this.FileSummaries.Delete(new { });
+                this.FileChunks.Delete(new { });
+            }
         }
     }
 }

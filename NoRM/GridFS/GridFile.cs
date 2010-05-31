@@ -5,6 +5,8 @@ using System.Text;
 using Norm.Collections;
 using System.IO;
 using System.Security.Cryptography;
+using Norm.Attributes;
+using Norm.Configuration;
 
 namespace Norm.GridFS
 {
@@ -13,25 +15,54 @@ namespace Norm.GridFS
     /// </summary>
     public class GridFile
     {
-        /// <summary>
-        /// The GridFS representation of this file.
-        /// </summary>
-        internal FileSummary Summary { get; set; }
+        static GridFile()
+        {
+            MongoConfiguration.Initialize(container => container.For<GridFile>(y =>
+            {
+                y.ForProperty(j => j.Length).UseAlias("length");
+                y.ForProperty(j => j.ChunkSize).UseAlias("chunkSize");
+                y.ForProperty(j => j.UploadDate).UseAlias("uploadDate");
+                y.ForProperty(j => j.MD5Checksum).UseAlias("md5");
+                y.ForProperty(j => j.FileName).UseAlias("filename");
+                y.ForProperty(j => j.ContentType).UseAlias("contentType");
+                y.ForProperty(j => j.Aliases).UseAlias("aliases");
+            }));
+        }
+
+
+        public GridFile()
+        {
+            this.UploadDate = DateTime.Now.ToUniversalTime();
+            this.ChunkSize = (256 * 1024);//the suggested 256kB chunk size.
+            this.Id = ObjectId.NewObjectId();
+        }
+
+        private int Length { get; set; }
+        private int ChunkSize { get; set; }
 
         /// <summary>
         /// The collection in which this file's chunks live.
         /// </summary>
+        [MongoIgnore]
         internal IQueryable<FileChunk> Chunks { get; set; }
         /// <summary>
         /// Lazily load the queryable chunks.
         /// </summary>
+        [MongoIgnore]
         internal List<FileChunk> CachedChunks
         {
             get
             {
                 if (this._cachedChunks == null)
                 {
-                    this._cachedChunks = this.Chunks.ToList();
+                    if (this.Chunks != null)
+                    {
+                        this._cachedChunks = this.Chunks.ToList();
+                    }
+                    else
+                    {
+                        this._cachedChunks = new List<FileChunk>(0);
+                    }
                 }
                 return this._cachedChunks;
             }
@@ -40,7 +71,7 @@ namespace Norm.GridFS
                 this._cachedChunks = value.ToList();
             }
         }
-        
+
         private List<FileChunk> _cachedChunks;
 
         /// <summary>
@@ -49,8 +80,8 @@ namespace Norm.GridFS
         /// <remarks>Required.</remarks>
         public ObjectId Id
         {
-            get { return this.Summary.Id; }
-            set { this.Summary.Id = value; }
+            get;
+            set;
         }
 
         /// <summary>
@@ -59,8 +90,8 @@ namespace Norm.GridFS
         /// <remarks>Required.</remarks>
         public DateTime UploadDate
         {
-            get { return this.Summary.UploadDate; }
-            set { this.Summary.UploadDate = value; }
+            get;
+            set;
         }
 
         /// <summary>
@@ -69,8 +100,8 @@ namespace Norm.GridFS
         /// <remarks>Required.</remarks>
         public String MD5Checksum
         {
-            get { return this.Summary.MD5; }
-            set { this.Summary.MD5 = value; }
+            get;
+            set;
         }
 
         /// <summary>
@@ -79,9 +110,8 @@ namespace Norm.GridFS
         /// <remarks>Optional.</remarks>
         public String FileName
         {
-
-            get { return this.Summary.FileName; }
-            set { this.Summary.FileName = value; }
+            get;
+            set;
         }
 
         /// <summary>
@@ -92,8 +122,8 @@ namespace Norm.GridFS
         /// </remarks>
         public String ContentType
         {
-            get { return this.Summary.ContentType; }
-            set { this.Summary.ContentType = value; }
+            get;
+            set;
         }
 
         /// <summary>
@@ -102,14 +132,15 @@ namespace Norm.GridFS
         /// <remarks>Optional.</remarks>
         public IEnumerable<String> Aliases
         {
-            get { return this.Summary.Aliases; }
-            set { this.Summary.Aliases = value; }
+            get;
+            set;
         }
 
         /// <summary>
         /// The content of this file.
         /// </summary>
         /// <returns></returns>
+        [MongoIgnore]
         public IEnumerable<byte> Content
         {
             get
@@ -126,7 +157,7 @@ namespace Norm.GridFS
                 do
                 {
                     var binary = value.Skip(cursor)
-                        .Take(this.Summary.ChunkSize).ToArray();
+                        .Take(this.ChunkSize).ToArray();
 
                     takeCount = binary.Length;
                     cursor += takeCount;
@@ -139,7 +170,7 @@ namespace Norm.GridFS
                         chunkNumber++;
                     }
                 } while (takeCount > 0);
-                this.Summary.Length = cursor;
+                this.Length = cursor;
                 var hash = hasher.ComputeHash(this.CachedChunks.SelectMany(y => y.BinaryData).ToArray());
                 this.MD5Checksum = BitConverter.ToString(hash).Replace("-", "");
             }
