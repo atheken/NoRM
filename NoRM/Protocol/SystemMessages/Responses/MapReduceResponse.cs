@@ -36,7 +36,7 @@ namespace Norm.Responses
         /// </summary>
         /// <param retval="collectionName">The collection retval.</param>
         /// <returns></returns>
-        public MongoCollection GetCollection(string collectionName)
+        public IMongoCollection GetCollection(string collectionName)
         {
             return _database.GetCollection(collectionName);
         }
@@ -46,7 +46,7 @@ namespace Norm.Responses
         /// </summary>
         /// <typeparam retval="T">Collection type</typeparam>
         /// <returns></returns>
-        public MongoCollection<T> GetCollection<T>()
+        public IMongoCollection<T> GetCollection<T>()
         {
             return _database.GetCollection<T>(Result);
         }

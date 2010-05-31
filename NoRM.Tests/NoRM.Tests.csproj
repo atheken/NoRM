@@ -92,6 +92,7 @@
     <Compile Include="DBTypeTests\ObjectIdTests.cs" />
     <Compile Include="ExpandoTests.cs" />
     <Compile Include="GeneralTests.cs" />
+    <Compile Include="GridFS\GridFileCollectionTests.cs" />
     <Compile Include="Helpers\QueryTestHelper.cs" />
     <Compile Include="IdPropertyFinderTests.cs" />
     <Compile Include="LinqTests\LinqAggregates.cs" />

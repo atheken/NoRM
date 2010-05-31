@@ -13,7 +13,7 @@ namespace Norm.Tests
     {
         private readonly Mongo _server;
         private BuildInfoResponse _buildInfo = null;
-        private readonly MongoCollection<Person> _collection;
+        private readonly IMongoCollection<Person> _collection;
         public QueryTests()
         {
             var admin = new MongoAdmin("mongodb://localhost/admin?pooling=false&strict=true");

@@ -118,7 +118,7 @@ namespace Norm.Collections
         /// <typeparam retval="U">Type of collection</typeparam>
         /// <param retval="collectionName">The collection Name.</param>
         /// <returns></returns>
-        public MongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new()
+        public IMongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new()
         {
             return new MongoCollection<U>(_collectionName + "." + collectionName, _db, _connection);
         }

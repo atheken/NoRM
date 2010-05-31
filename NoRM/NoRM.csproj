@@ -155,6 +155,11 @@
     <Compile Include="Connections\QueuedConnectionProviders.cs" />
     <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
+    <Compile Include="GridFS\FileChunk.cs" />
+    <Compile Include="GridFS\FileSummary.cs" />
+    <Compile Include="GridFS\GridFile.cs" />
+    <Compile Include="GridFS\GridFileCollection.cs" />
+    <Compile Include="GridFS\Helpers.cs" />
     <Compile Include="IHideSystemTypes.cs" />
     <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
