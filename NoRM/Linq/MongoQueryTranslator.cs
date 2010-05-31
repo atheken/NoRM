@@ -82,6 +82,9 @@ namespace Norm.Linq
             return Translate(exp, true);
         }
 
+        private Type OriginalSelectType { get; set; }
+        private LambdaExpression SelectLambda { get; set; }
+
         /// <summary>
         /// Translates LINQ to MongoDB.
         /// </summary>
@@ -111,7 +114,9 @@ namespace Norm.Linq
                            AggregatePropName = AggregatePropName,
                            IsComplex = IsComplex,
                            TypeName = TypeName,
-                           Query = WhereExpression
+                           Query = WhereExpression,
+                           Select = this.SelectLambda,
+                           OriginalSelectType = this.OriginalSelectType
                        };
         }
 
@@ -158,7 +163,7 @@ namespace Norm.Linq
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
             {
                 var alias = VisitAlias(m);
-                
+
                 VisitDateTimeProperty(m);
 
                 if (UseScopedQualifier)
@@ -264,7 +269,7 @@ namespace Norm.Linq
                 fixedName = GetDeepAlias(expressionRootType.Type, fixedName);
             }
 
-            string result = string.Join(".", fixedName.Select(x=>x.Replace("|Ind","")).ToArray());
+            string result = string.Join(".", fixedName.Select(x => x.Replace("|Ind", "")).ToArray());
 
             return result;
         }
@@ -363,7 +368,7 @@ namespace Norm.Linq
                 case ExpressionType.MemberAccess:
                 case ExpressionType.Convert:
                     return IsBoolean(expr.Type);
-                 default:
+                default:
                     return false;
             }
         }
@@ -451,18 +456,20 @@ namespace Norm.Linq
 
                 if (property.PropertyType.IsGenericType)
                     typeToQuery = property.PropertyType.GetGenericArguments()[0];
-                else 
+                else
                     typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
             }
 
             return graphParts;
         }
 
-        private void VisitBinaryOperator(BinaryExpression b) {
+        private void VisitBinaryOperator(BinaryExpression b)
+        {
 
             string currentOperator;
 
-            switch (b.NodeType) {
+            switch (b.NodeType)
+            {
                 case ExpressionType.And:
                     currentOperator = " & ";
                     IsComplex = true;
@@ -586,7 +593,7 @@ namespace Norm.Linq
             {
                 // set the collection retval
                 TypeName = q.ElementType.Name;
-                CollectionName = MongoConfiguration.GetCollectionName(q.ElementType);                
+                CollectionName = MongoConfiguration.GetCollectionName(q.ElementType);
 
                 // this is our Query wrapper - see if it has an expression
                 var qry = (IMongoQuery)c.Value;
@@ -699,7 +706,7 @@ namespace Norm.Linq
                             _sbWhere.Append("(");
                             Visit(m.Object);
                             _sbWhere.AppendFormat(".indexOf(\"{0}\")===0)", value.EscapeJavaScriptString());
-  
+
                             SetFlyValue(new Regex("^" + Regex.Escape(value)));
 
                             return m;
@@ -843,7 +850,7 @@ namespace Norm.Linq
         private static HashSet<String> _callableMethods = new HashSet<string>(){
             "First","Single","FirstOrDefault","SingleOrDefault","Count",
             "Sum","Average","Min","Max","Any","Take","Skip", 
-            "OrderBy","ThenBy","OrderByDescending","ThenByDescending","Where"};
+            "OrderBy","ThenBy","OrderByDescending","ThenByDescending","Where", "Select"};
 
         /// <summary>
         /// Determines if it's a callable method.
@@ -873,7 +880,7 @@ namespace Norm.Linq
         {
             if (op == " !== " || op == " === ")
                 return true;
-            
+
             if (value != null && (value.GetType().IsAssignableFrom(typeof(double))
                         || value.GetType().IsAssignableFrom(typeof(double?))
                         || value.GetType().IsAssignableFrom(typeof(int))
@@ -988,7 +995,7 @@ namespace Norm.Linq
             }
         }
 
-        private void TranslateToWhere(MethodCallExpression exp) 
+        private void TranslateToWhere(MethodCallExpression exp)
         {
             if (exp.Arguments.Count == 2)
             {
@@ -1084,7 +1091,7 @@ namespace Norm.Linq
 
         private static string VisitRegexOptions(MethodCallExpression m, RegexOptions options)
         {
-            var allowedOptions = new [] { RegexOptions.IgnoreCase, RegexOptions.Multiline, RegexOptions.None };
+            var allowedOptions = new[] { RegexOptions.IgnoreCase, RegexOptions.Multiline, RegexOptions.None };
             foreach (RegexOptions type in Enum.GetValues(typeof(RegexOptions)))
             {
                 if ((options & type) == type && !allowedOptions.Contains(type))
@@ -1131,12 +1138,15 @@ namespace Norm.Linq
                     break;
                 case "Take":
                     HandleTake(m.Arguments[1]);
-                    break;    
+                    break;
                 case "Min":
                 case "Max":
                 case "Sum":
                 case "Average":
                     HandleAggregate(m);
+                    break;
+                case "Select":
+                    HandleSelect(m);
                     break;
                 default:
                     Take = 1;
@@ -1156,6 +1166,12 @@ namespace Norm.Linq
             Visit(m.Arguments[0]);
 
             return m;
+        }
+
+        private void HandleSelect(MethodCallExpression m)
+        {
+            this.SelectLambda = ((UnaryExpression)(m.Arguments[1])).Operand as LambdaExpression;
+            this.OriginalSelectType = this.SelectLambda.Parameters[0].Type;
         }
 
         private static LambdaExpression GetLambda(Expression e)

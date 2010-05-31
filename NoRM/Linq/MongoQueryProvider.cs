@@ -98,11 +98,21 @@ namespace Norm.Linq
 
             var translator = new MongoQueryTranslator();
             var results = translator.Translate(expression);
-
             _results = results;
-
             var executor = new MongoQueryExecutor(this.DB, results);
-            return executor.Execute<T>();
+
+            object retval = null;
+            if (results.Select != null)
+            {
+                MethodInfo mi = executor.GetType().GetMethod("Execute");
+                var method = mi.MakeGenericMethod(results.OriginalSelectType);
+                retval = method.Invoke(executor, new object[]{});
+            }
+            else
+            {
+                retval = executor.Execute<T>();
+            }
+            return retval;
         }
 
         /// <summary>

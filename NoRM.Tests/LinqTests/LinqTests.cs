@@ -23,6 +23,22 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void Provider_Supports_Projection()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var coll = db.GetCollection<TestProduct>();
+
+                coll.Insert(new TestProduct { Available = DateTime.Now }, new TestProduct { Available = DateTime.Now });
+
+                var results = db.GetCollection<TestProduct>().AsQueryable()
+                    .Select(y => new { y.Available, y._id }).ToArray();
+            
+
+            }
+        }
+
+        [Fact]
         public void LinqQueriesShouldSupportExternalParameters()
         {
             var external = 10;

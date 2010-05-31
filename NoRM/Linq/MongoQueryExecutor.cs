@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Norm.Collections;
+using System.Reflection;
+using Norm.BSON;
+using System.Linq.Expressions;
 
 namespace Norm.Linq
 {
@@ -60,16 +63,32 @@ namespace Norm.Linq
                     _translationResults.Take = IsSingleResultMethod(_translationResults.MethodCall) ? 1 : _translationResults.Take;
                     _translationResults.Sort.ReverseKitchen();
 
-                    result = collection.Find(_translationResults.Where, _translationResults.Sort, _translationResults.Take, _translationResults.Skip, collection.FullyQualifiedName);
-
-                    switch (_translationResults.MethodCall)
+                    if (_translationResults.Select == null)
                     {
-                        case "SingleOrDefault": result = ((IEnumerable<T>)result).SingleOrDefault(); break;
-                        case "Single": result = ((IEnumerable<T>)result).Single(); break;
-                        case "FirstOrDefault": result = ((IEnumerable<T>)result).FirstOrDefault(); break;
-                        case "First": result = ((IEnumerable<T>)result).First(); break;
+                        result = collection.Find(_translationResults.Where, _translationResults.Sort, _translationResults.Take, _translationResults.Skip, collection.FullyQualifiedName);
+                        switch (_translationResults.MethodCall)
+                        {
+                            case "SingleOrDefault": result = ((IEnumerable<T>)result).SingleOrDefault(); break;
+                            case "Single": result = ((IEnumerable<T>)result).Single(); break;
+                            case "FirstOrDefault": result = ((IEnumerable<T>)result).FirstOrDefault(); break;
+                            case "First": result = ((IEnumerable<T>)result).First(); break;
+                        }
                     }
+                    else
+                    {
+                        Type t = collection.GetType();
+                        MethodInfo mi = t.GetMethods().ToArray()[28];
+                        var sortType = _translationResults.Sort ?? new Object();
+                        Type[] argTypes = { typeof(Expando), sortType.GetType(), _translationResults.Select.Body.Type };
+                        MethodInfo method = mi.MakeGenericMethod(argTypes);
+                        result = method.Invoke(collection, new object[]{_translationResults.Where,
+                            _translationResults.Sort, 
+                            _translationResults.Take,
+                            _translationResults.Skip,
+                            collection.FullyQualifiedName,
+                            _translationResults.Select});
 
+                    }
                     break;
             }
 
