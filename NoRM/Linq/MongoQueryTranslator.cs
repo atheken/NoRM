@@ -115,8 +115,8 @@ namespace Norm.Linq
                            IsComplex = IsComplex,
                            TypeName = TypeName,
                            Query = WhereExpression,
-                           Select = this.SelectLambda,
-                           OriginalSelectType = this.OriginalSelectType
+                           Select = SelectLambda,
+                           OriginalSelectType = OriginalSelectType
                        };
         }
 
@@ -876,6 +876,34 @@ namespace Norm.Linq
             SetFlyValue(_lastFlyProperty, value);
         }
 
+        private void SetFlyValue(string key, object value)
+        {
+            if (!CanGetQualifier(_lastOperator, value))
+            {
+                IsComplex = true;
+                return;
+            }
+
+            if (FlyWeight.Contains(key))
+            {
+                var existing = FlyWeight[key] as Expando;
+                if (existing != null)
+                {
+                    var newq = GetQualifier(_lastOperator, value) as Expando;
+                    if (newq != null)
+                    {
+                        existing.Merge(newq);
+                        return;
+                    }
+                }
+
+                IsComplex = true;
+                return;
+            }
+
+            FlyWeight[key] = GetQualifier(_lastOperator, value);
+        }
+        
         private bool CanGetQualifier(string op, object value)
         {
             if (op == " !== " || op == " === ")
@@ -924,34 +952,6 @@ namespace Norm.Linq
             }
 
             return null;
-        }
-
-        private void SetFlyValue(string key, object value)
-        {
-            if (!CanGetQualifier(_lastOperator, value))
-            {
-                IsComplex = true;
-                return;
-            }
-
-            if (FlyWeight.Contains(key))
-            {
-                var existing = FlyWeight[key] as Expando;
-                if (existing != null)
-                {
-                    var newq = GetQualifier(_lastOperator, value) as Expando;
-                    if (newq != null)
-                    {
-                        existing.Merge(newq);
-                        return;
-                    }
-                }
-
-                IsComplex = true;
-                return;
-            }
-
-            FlyWeight[key] = GetQualifier(_lastOperator, value);
         }
 
         /// <summary>
@@ -1108,6 +1108,12 @@ namespace Norm.Linq
             return jsoptions;
         }
 
+        private void HandleSelect(MethodCallExpression m)
+        {
+            SelectLambda = GetLambda(m.Arguments[1]);
+            OriginalSelectType = SelectLambda.Parameters[0].Type;
+        }
+
         /// <summary>
         /// The handle method call.
         /// </summary>
@@ -1166,12 +1172,6 @@ namespace Norm.Linq
             Visit(m.Arguments[0]);
 
             return m;
-        }
-
-        private void HandleSelect(MethodCallExpression m)
-        {
-            this.SelectLambda = ((UnaryExpression)(m.Arguments[1])).Operand as LambdaExpression;
-            this.OriginalSelectType = this.SelectLambda.Parameters[0].Type;
         }
 
         private static LambdaExpression GetLambda(Expression e)

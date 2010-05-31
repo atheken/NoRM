@@ -6,6 +6,7 @@ using Norm.Collections;
 using System.Reflection;
 using Norm.BSON;
 using System.Linq.Expressions;
+using System.Collections;
 
 namespace Norm.Linq
 {
@@ -77,7 +78,7 @@ namespace Norm.Linq
                     else
                     {
                         Type t = collection.GetType();
-                        MethodInfo mi = t.GetMethods().ToArray()[28];
+                        MethodInfo mi = t.GetMethod("FindFieldSelection", BindingFlags.Instance | BindingFlags.NonPublic);
                         var sortType = _translationResults.Sort ?? new Object();
                         Type[] argTypes = { typeof(Expando), sortType.GetType(), _translationResults.Select.Body.Type };
                         MethodInfo method = mi.MakeGenericMethod(argTypes);
@@ -87,6 +88,14 @@ namespace Norm.Linq
                             _translationResults.Skip,
                             collection.FullyQualifiedName,
                             _translationResults.Select});
+
+                        switch (_translationResults.MethodCall)
+                        {
+                            case "SingleOrDefault": result = ((IEnumerable)result).OfType<Object>().SingleOrDefault(); break;
+                            case "Single": result = ((IEnumerable)result).OfType<Object>().Single(); break;
+                            case "FirstOrDefault": result = ((IEnumerable)result).OfType<Object>().FirstOrDefault(); break;
+                            case "First": result = ((IEnumerable)result).OfType<Object>().First(); break;
+                        }
 
                     }
                     break;

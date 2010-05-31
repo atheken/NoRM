@@ -135,14 +135,13 @@ namespace Norm.Tests
                     }
                 });
 
-               
+
                 var subset = db.GetCollection<TestProduct>().Find(new { }, new { }, Int32.MaxValue, 0,
-                    j => new { j.Supplier.Name, j.Price, j._id }).ToArray();
+                    j => new { SupplierName = j.Supplier.Name, Cost = j.Price, Id = j._id }).ToArray();
 
-
-                Assert.Equal("Bob's house of pancakes", subset[0].Name);
-                Assert.Equal(42.42f, subset[0].Price);
-                Assert.Equal(oid, subset[0]._id);
+                Assert.Equal("Bob's house of pancakes", subset[0].SupplierName);
+                Assert.Equal(42.42f, subset[0].Cost);
+                Assert.Equal(oid, subset[0].Id);
             }
         }
 

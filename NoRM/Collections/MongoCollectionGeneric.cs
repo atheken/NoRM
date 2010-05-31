@@ -547,7 +547,17 @@ namespace Norm.Collections
             return new MongoQueryExecutor<T, U, Z>(qm, (Func<T, Z>)projection);
         }
 
-
+        /// <summary>
+        /// Infrastructure, Used by Linq Provider
+        /// </summary>
+        /// <remarks>
+        /// DO NOT change the name or signature of this method without also adjusting the LINQ Provider.
+        /// </remarks>
+        private IEnumerable<Z> FindFieldSelection<U, O, Z>(U template, O orderBy, int limit, int skip, String fullName, Expression<Func<T, Z>> fieldSelection)
+        {
+            return this.Find(template, orderBy, limit, skip, fullName, fieldSelection); 
+        }
+        
         /// <summary>
         /// Finds documents that match the template, and ordered according to the orderby document.
         /// </summary>
