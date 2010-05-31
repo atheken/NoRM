@@ -23,7 +23,7 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void Provider_Supports_Projection()
+        public void ProviderSupportsProjection()
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString()))
             {
@@ -33,7 +33,51 @@ namespace Norm.Tests
 
                 var results = db.GetCollection<TestProduct>().AsQueryable()
                     .Select(y => new { y.Available, y._id }).ToArray();
-            
+
+                Assert.Equal(2, results.Length);
+            }
+        }
+
+        [Fact]
+        public void ProviderSupportsProjectionInAnyOrderWithWhere()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Price = 22, Name = "AA" });
+                session.Add(new TestProduct { Price = 11, Name = "BB" });
+
+                var queryable = session.Products;
+
+                var results = queryable
+                    .Select(y => new { y.Price })
+                    .Where(x => x.Price == 22)
+                    .ToArray();
+
+                Assert.Equal(22, results[0].Price);
+                var stucture = queryable.QueryStructure();
+                Assert.Equal(false, stucture.IsComplex);
+
+            }
+        }
+
+        [Fact]
+        public void ProviderSupportsProjectionInAnyOrderWithWhereFir()
+        {
+            using (var session = new Session())
+            {
+                session.Add(new TestProduct { Price = 22, Name = "AA" });
+                session.Add(new TestProduct { Price = 11, Name = "BB" });
+
+                var queryable = session.Products;
+
+                var results = queryable
+                    .Where(x => x.Name == "AA")
+                    .Select(y => new { y.Price })
+                    .ToArray();
+
+                Assert.Equal(22, results[0].Price);
+                var stucture = queryable.QueryStructure();
+                Assert.Equal(false, stucture.IsComplex);
 
             }
         }

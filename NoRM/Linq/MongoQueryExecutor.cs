@@ -77,7 +77,7 @@ namespace Norm.Linq
                     else
                     {
                         Type t = collection.GetType();
-                        MethodInfo mi = t.GetMethods().ToArray()[28];
+                        MethodInfo mi = t.GetMethod("FindFieldSelection", BindingFlags.Instance | BindingFlags.NonPublic);
                         var sortType = _translationResults.Sort ?? new Object();
                         Type[] argTypes = { typeof(Expando), sortType.GetType(), _translationResults.Select.Body.Type };
                         MethodInfo method = mi.MakeGenericMethod(argTypes);
