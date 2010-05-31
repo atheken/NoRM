@@ -903,6 +903,37 @@ namespace Norm.Linq
 
             FlyWeight[key] = GetQualifier(_lastOperator, value);
         }
+<<<<<<< HEAD
+
+        private void SetFlyValue(string key, object value)
+        {
+            if (!CanGetQualifier(_lastOperator, value))
+            {
+                IsComplex = true;
+                return;
+            }
+
+            if (FlyWeight.Contains(key))
+            {
+                var existing = FlyWeight[key] as Expando;
+                if (existing != null)
+                {
+                    var newq = GetQualifier(_lastOperator, value) as Expando;
+                    if (newq != null)
+                    {
+                        existing.Merge(newq);
+                        return;
+                    }
+                }
+
+                IsComplex = true;
+                return;
+            }
+
+            FlyWeight[key] = GetQualifier(_lastOperator, value);
+        }
+=======
+>>>>>>> 987b11afdfaff72181ac2f4ba7eb4f28a821819b
         
         private bool CanGetQualifier(string op, object value)
         {
@@ -1106,6 +1137,12 @@ namespace Norm.Linq
                 jsoptions += "m";
 
             return jsoptions;
+        }
+
+        private void HandleSelect(MethodCallExpression m)
+        {
+            SelectLambda = GetLambda(m.Arguments[1]);
+            OriginalSelectType = SelectLambda.Parameters[0].Type;
         }
 
         private void HandleSelect(MethodCallExpression m)
