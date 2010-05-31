@@ -446,8 +446,10 @@ namespace Norm.Collections
             dm.Execute();
         }
 
-        /// <summary>TODO::Description.</summary>
-        public void Delete(T entity)
+        /// <summary>
+        /// Deletes the specified document based on it's Id property.
+        /// </summary>
+        public void Delete(T document)
         {
             var helper = TypeHelper.GetHelperForType(typeof(T));
             var idProperty = helper.FindIdProperty();
@@ -455,7 +457,7 @@ namespace Norm.Collections
             {
                 throw new MongoException(string.Format("Cannot delete {0} since it has no id property", typeof(T).FullName));
             }
-            Delete(new { Id = idProperty.Getter(entity) });
+            Delete(new { Id = idProperty.Getter(document) });
         }
 
         /// <summary>
