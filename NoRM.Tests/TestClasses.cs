@@ -353,6 +353,13 @@ namespace Norm.Tests
         public bool IsAvailable { get; set; }
         public bool IsStillAvailable { get; set; }
     }
+    
+    internal class TestProductSummary
+    {
+        public ObjectId _id { get; set; }
+        public string Name { get; set; }
+        public double Price { get; set; }
+    }
 
     public class FakeObject
     {

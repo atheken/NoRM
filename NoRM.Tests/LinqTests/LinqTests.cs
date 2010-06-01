@@ -53,8 +53,25 @@ namespace Norm.Tests
                     .Select(y => new { Avail = y.Available, Id = y._id }).ToArray();
 
                 Assert.Equal(2, results.Length);
-                Assert.Equal((new {Avail = DateTime.Now, Id = ObjectId.Empty }).GetType(),
+                Assert.Equal((new { Avail = DateTime.Now, Id = ObjectId.Empty }).GetType(),
                     results[0].GetType());
+            }
+        }
+
+        [Fact]
+        public void ProviderSupportsSophisticatedProjectionWithConcreteType()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var coll = db.GetCollection<TestProduct>();
+
+                coll.Insert(new TestProduct { Name = "AAA", Price = 10 }, new TestProduct { Name = "BBB", Price = 20 });
+
+                var results = db.GetCollection<TestProduct>().AsQueryable()
+                    .Select(y => new TestProductSummary { _id = y._id, Name = y.Name, Price = y.Price }).ToArray();
+
+                Assert.Equal(2, results.Length);
+                Assert.Equal((new TestProductSummary()).GetType(), results[0].GetType());
             }
         }
 
@@ -181,7 +198,7 @@ namespace Norm.Tests
                 Assert.Equal(false, queryable.QueryStructure().IsComplex);
             }
         }
-
+        
         [Fact]
         public void LinqQueriesShouldSupportNulls()
         {
