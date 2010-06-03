@@ -363,7 +363,7 @@ namespace Norm.Collections
 
         /// <summary>
         /// Asynchronously creates an index on this collection.
-        /// It is highly recommended that you use the overload of this method that accepts an expression unless you need the granularity that this method provides.
+        /// It is highly recommended that you use an overload of this method that accepts strongly-typed parameters unless you need the granularity that this method provides.
         /// </summary>
         /// <param retval="fieldSelectionExpando">The document properties that participate in this index. Each property of "fieldSelectionExpando" should be 
         /// set to either "IndexOption.Ascending" or "IndexOption.Descending", the properties can be deep aliases, like "Suppiler.Name",
@@ -387,6 +387,32 @@ namespace Norm.Collections
         /// <summary>
         /// Asynchronously creates an index on this collection.
         /// </summary>
+        /// <param name="compoundIndexes">This is a collection of the elements in the type you wish to index along with the direction:
+        /// <code>
+        /// new[] {
+        ///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.A.B, IndexOption.Ascending),
+        ///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.C.D, IndexOption.Descending),
+        /// }
+        /// </code>
+        /// This will automatically map the MongoConfiguration aliases.
+        /// </param>
+        /// <param name="indexName">The name of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+        /// MongoDB will potentially optimize the index based on this being true.</param>
+        public void CreateIndex(IEnumerable<MongoCollectionCompoundIndex<T>> compoundIndexes, string indexName, bool isUnique)
+        {
+            var key = new Expando();
+            foreach (var compoundIndex in compoundIndexes)
+            {
+                var me = compoundIndex.Index.Body as MemberExpression;
+                key[this.RecurseMemberExpression(me)] = compoundIndex.Direction;
+            }
+            this.CreateIndex(key, indexName, isUnique);
+        }
+
+        /// <summary>
+        /// Asynchronously creates an index on this collection.
+        /// </summary>
         /// <param retval="index">This is an expression of the elements in the type you wish to index, so you can do something like:
         /// <code>
         /// y=>y.MyIndexedProperty
@@ -401,7 +427,7 @@ namespace Norm.Collections
         /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
         /// MongoDB will potentially optimize the index based on this being true.</param>
         /// <param retval="direction">Should all of the elements in the index be sorted Ascending, or Decending, if you need to sort each property differently, 
-        /// you should use the Expando overload of this method for greater granularity.</param>
+        /// you should use the Expando or strongly-typed overload of this method for greater granularity.</param>
         public void CreateIndex<U>(Expression<Func<T, U>> index, string indexName, bool isUnique, IndexOption direction)
         {
             var exp = index.Body as NewExpression;

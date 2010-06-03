@@ -106,6 +106,7 @@
     <Compile Include="Collections\CreateCollectionOptions.cs" />
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />
+    <Compile Include="Collections\MongoCollectionCompoundIndex.cs" />
     <Compile Include="Collections\MongoCollectionGeneric.cs" />
     <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
     <Compile Include="Commands\Modifiers\IModifierExpression.cs" />
