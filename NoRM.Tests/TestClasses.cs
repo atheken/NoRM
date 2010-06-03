@@ -156,7 +156,7 @@ namespace Norm.Tests
 
         public void Update<T>(T item) where T : class, new()
         {
-            _provider.Database.GetCollection<T>().UpdateOne(item, item);
+            _provider.Database.GetCollection<T>().Save(item);
         }
 
         public void Drop<T>()
