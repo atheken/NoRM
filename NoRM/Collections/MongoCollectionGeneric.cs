@@ -346,6 +346,28 @@ namespace Norm.Collections
         /// <summary>
         /// Returns the fully qualified and mapped retval from the member expression.
         /// </summary>
+        /// <param name="body">The expression.</param>
+        /// <returns></returns>
+        private String RecurseExpression(Expression body)
+        {
+            var me = body as MemberExpression;
+            if (me != null)
+            {
+                return this.RecurseMemberExpression(me);
+            }
+
+            var ue = body as UnaryExpression;
+            if (ue != null)
+            {
+                return this.RecurseExpression(ue.Operand);
+            }
+
+            throw new MongoException("Unknown expression type, expected a MemberExpression or UnaryExpression.");
+        }
+
+        /// <summary>
+        /// Returns the fully qualified and mapped retval from the member expression.
+        /// </summary>
         /// <param retval="mex"></param>
         /// <returns></returns>
         private String RecurseMemberExpression(MemberExpression mex)
@@ -404,8 +426,7 @@ namespace Norm.Collections
             var key = new Expando();
             foreach (var compoundIndex in compoundIndexes)
             {
-                var me = compoundIndex.Index.Body as MemberExpression;
-                key[this.RecurseMemberExpression(me)] = compoundIndex.Direction;
+                key[this.RecurseExpression(compoundIndex.Index.Body)] = compoundIndex.Direction;
             }
             this.CreateIndex(key, indexName, isUnique);
         }
