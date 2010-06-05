@@ -57,7 +57,7 @@ namespace Norm.Collections
         /// <returns></returns>
         public IQueryable<T> AsQueryable()
         {
-            return new MongoQuery<T>(MongoQueryProvider.Create(this._db));
+            return new MongoQuery<T>(MongoQueryProvider.Create(this._db),this._collectionName);
         }
 
         /// <summary>
