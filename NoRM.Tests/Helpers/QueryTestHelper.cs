@@ -17,7 +17,7 @@ namespace Norm.Tests.Helpers
         /// <returns></returns>
         public static QueryTranslationResults QueryStructure<T>(this IQueryable<T> queryable)
         {
-             return ((IMongoQueryResults)queryable.Provider).TranslationResults;;
+             return ((IMongoQueryResults)queryable.Provider).TranslationResults;
         }
 
     }

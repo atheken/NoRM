@@ -165,7 +165,7 @@ namespace Norm.Linq
                 var alias = VisitAlias(m);
 
                 VisitDateTimeProperty(m);
-
+                
                 if (UseScopedQualifier)
                 {
                     _sbWhere.Append("this.");
@@ -1062,7 +1062,7 @@ namespace Norm.Linq
             else if (m.Arguments.Count == 2)
             {
                 _prefixAlias.Add(VisitDeepAlias((MemberExpression)m.Arguments[0]));
-                Visit(m.Arguments[1]);
+                VisitPredicate(GetLambda(m.Arguments[1]).Body);
                 _prefixAlias.RemoveAt(_prefixAlias.Count - 1);
 
                 if (IsComplex)

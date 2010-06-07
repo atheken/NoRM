@@ -207,6 +207,7 @@ namespace Norm.Tests
     {
         public string Text { get; set; }
         public string Name { get; set; }
+        public bool IsOld { get; set; }
         public IList<Tag> CommentTags { get; set; }
         public IList<string> CommentTagsSimple { get; set; }
     }

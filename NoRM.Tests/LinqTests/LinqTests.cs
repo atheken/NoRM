@@ -1757,6 +1757,48 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingAnyWithBool()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1", IsOld = false }, new Comment { Text = "comment2", IsOld = false } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1", IsOld = true }, new Comment { Text = "commentB", Name = "name2", IsOld = false } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var queryable = session.Posts;
+                var found = queryable.Where(p => p.Comments.Any(x => x.IsOld)).ToList();
+
+                Assert.Equal(1, found.Count);
+                Assert.Equal("Second", found[0].Title);
+
+                Assert.Equal(false, queryable.QueryStructure().IsComplex);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingAnyWithBoolNegated()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1", IsOld = false }, new Comment { Text = "comment2", IsOld = false } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1", IsOld = true }, new Comment { Text = "commentB", Name = "name2", IsOld = true } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var queryable = session.Posts;
+                var found = queryable.Where(p => p.Comments.Any(x => !x.IsOld)).ToList();
+
+                Assert.Equal(1, found.Count);
+                Assert.Equal("First", found[0].Title);
+
+                Assert.Equal(false, queryable.QueryStructure().IsComplex);
+            }
+        }
+
+        [Fact]
         public void CanQueryWithinEmbeddedArrayUsingTwoAnys()
         {
             using (var session = new Session())
