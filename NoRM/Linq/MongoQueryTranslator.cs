@@ -572,9 +572,32 @@ namespace Norm.Linq
         {
             ConditionalCount++;
             _sbWhere.Append("(");
-            VisitPredicate(b.Left);
-            VisitBinaryOperator(b);
-            VisitPredicate(b.Right);
+
+            var hasVisited = false;
+            switch (b.NodeType)
+            {
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                case ExpressionType.Or:
+                case ExpressionType.OrElse:
+                    if (IsBoolean(b.Left.Type))
+                    {
+                        VisitPredicate(b.Left);
+                        VisitBinaryOperator(b);
+                        VisitPredicate(b.Right);
+
+                        hasVisited = true;
+                    }
+                    break;
+            }
+
+            if (!hasVisited)
+            {
+                Visit(b.Left);
+                VisitBinaryOperator(b);
+                Visit(b.Right);
+            }
+
             _sbWhere.Append(")");
             return b;
         }
@@ -614,7 +637,7 @@ namespace Norm.Linq
                 {
                     case TypeCode.Boolean:
                         _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
-                        //SetFlyValue(c.Value);
+                        SetFlyValue(c.Value);
                         break;
                     case TypeCode.DateTime:
                         _sbWhere.Append(GetJavaScriptConstantValue(c.Value));

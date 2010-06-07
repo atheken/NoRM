@@ -1761,8 +1761,22 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
-                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1", IsOld = false }, new Comment { Text = "comment2", IsOld = false } } };
-                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1", IsOld = true }, new Comment { Text = "commentB", Name = "name2", IsOld = false } } };
+                var post1 = new Post
+                {
+                    Title = "First",
+                    Comments = new List<Comment> { 
+                        new Comment { Text = "comment1", IsOld = false }, 
+                        new Comment { Text = "comment2", IsOld = false }
+                    }
+                };
+                var post2 = new Post
+                {
+                    Title = "Second",
+                    Comments = new List<Comment> { 
+                        new Comment { Text = "commentA", Name = "name1", IsOld = true }, 
+                        new Comment { Text = "commentB", Name = "name2", IsOld = false } 
+                    }
+                };
 
                 session.Add(post1);
                 session.Add(post2);
@@ -1782,6 +1796,8 @@ namespace Norm.Tests
         {
             using (var session = new Session())
             {
+                var tf = false;
+
                 var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1", IsOld = false }, new Comment { Text = "comment2", IsOld = false } } };
                 var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1", IsOld = true }, new Comment { Text = "commentB", Name = "name2", IsOld = true } } };
 
@@ -1789,7 +1805,7 @@ namespace Norm.Tests
                 session.Add(post2);
 
                 var queryable = session.Posts;
-                var found = queryable.Where(p => p.Comments.Any(x => !x.IsOld)).ToList();
+                var found = queryable.Where(p => p.Comments.Any(x => x.IsOld == tf)).ToList();
 
                 Assert.Equal(1, found.Count);
                 Assert.Equal("First", found[0].Title);
