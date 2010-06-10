@@ -6,6 +6,7 @@ using Xunit;
 using Norm.Collections;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using Norm.Commands.Modifiers;
 
 namespace Norm.Tests
 {
@@ -381,6 +382,55 @@ namespace Norm.Tests
 
             var results = _collection.Distinct<Address>("Address");
             Assert.Equal(3, results.Count());
+        }
+
+        [Fact]
+        public void FindAndModify()
+        {
+            _collection.Insert(new Person { Name = "Joe Cool", Age = 10 });
+
+            var update = new Expando();
+            update["$inc"] = new { Age = 1 };
+
+            var result = _collection.FindAndModify(new { Name = "Joe Cool" }, update);
+            Assert.Equal(10, result.Age);
+
+            var result2 = _collection.Find(new { Name = "Joe Cool" }).FirstOrDefault();
+            Assert.Equal(11, result2.Age);
+        }
+
+        [Fact]
+        public void FindAndModifyWithSort()
+        {
+            _collection.Insert(new Person { Name = "Joe Cool", Age = 10 });
+            _collection.Insert(new Person { Name = "Joe Cool", Age = 15 });
+
+            var update = new Expando();
+            update["$inc"] = new { Age = 1 };
+
+            var result = _collection.FindAndModify(new { Name = "Joe Cool" }, update, new { Age = Norm.OrderBy.Descending });
+            Assert.Equal(15, result.Age);
+
+            var result2 = _collection.Find(new { Name = "Joe Cool" }).OrderByDescending(x=>x.Age).ToList();
+            Assert.Equal(16, result2[0].Age);
+            Assert.Equal(10, result2[1].Age);
+
+        }
+
+        [Fact]
+        public void FindAndModifyReturnsNullWhenQueryNotFound()
+        {
+            _collection.Insert(new Person { Name = "Joe Cool", Age = 10 });
+            _collection.Insert(new Person { Name = "Joe Cool", Age = 15 });
+
+            var update = new Expando();
+            update["$inc"] = new { Age = 1 };
+
+            var result = _collection.FindAndModify(new { Name = "Joe Cool1" }, update, new { Age = Norm.OrderBy.Descending });
+            Assert.Null(result);
+
+            var result2 = _collection.Find(new { Age = 15 }).ToList();
+            Assert.Equal(1, result2.Count);
         }
     }
 }

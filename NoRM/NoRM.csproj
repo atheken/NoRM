@@ -107,6 +107,7 @@
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />
     <Compile Include="Collections\MongoCollectionGeneric.cs" />
+    <Compile Include="Collections\HiLoIdGenerator.cs" />
     <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
     <Compile Include="Commands\Modifiers\IModifierExpression.cs" />
     <Compile Include="Commands\Modifiers\ModifierExpression.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Commands\Modifiers\PushAllOperation.cs" />
     <Compile Include="Commands\Modifiers\PushOperation.cs" />
     <Compile Include="Commands\Modifiers\SetOperation.cs" />
+    <Compile Include="Collections\CollectionHiLoIdGenerator.cs" />
     <Compile Include="Commands\OrderBy.cs" />
     <Compile Include="Commands\Qualifiers\AllQualifier.cs" />
     <Compile Include="Commands\Qualifiers\ElementMatch.cs" />
@@ -178,6 +180,7 @@
     <Compile Include="Mongo.cs" />
     <Compile Include="MongoQueryExecutor.cs" />
     <Compile Include="Protocol\IUpdateWithoutId.cs" />
+    <Compile Include="Protocol\Messages\FindAndModifyResult.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\ExplainRequest.cs" />
     <Compile Include="Protocol\Messages\IndexOption.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
