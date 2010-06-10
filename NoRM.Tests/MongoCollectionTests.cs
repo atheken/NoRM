@@ -335,6 +335,24 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void InsertingANewEntityGeneratingTheIntKeyFirst()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var collection = mongo.GetCollection<TestIntGeneration>("Fake");
+
+                var identity = (int)collection.GenerateId();
+                var testint = new TestIntGeneration { _id = identity, Name = "TestMe" };
+                collection.Insert(testint);
+
+                var result = collection.FindOne(new { _id = testint._id });
+
+                Assert.NotNull(testint._id);
+                Assert.Equal(result.Name, "TestMe");
+            }
+        }
+
+        [Fact]
         public void InsertingANewEntityWithNullableIntGeneratesAKey()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
