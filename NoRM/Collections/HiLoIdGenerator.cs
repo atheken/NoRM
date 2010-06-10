@@ -59,10 +59,10 @@ namespace Norm.Collections
                     var update = new Expando();
                     update["$inc"] = new { ServerHi = 1 };
 
-                    var hiLoKey = _db.GetCollection<NoRMHiLoKey>("NormHiLoKey").FindAndModify(new { _id = collectionName }, update);
+                    var hiLoKey = _db.GetCollection<NormHiLoKey>().FindAndModify(new { _id = collectionName }, update);
                     if (hiLoKey == null)
                     {
-                        _db.GetCollection<NoRMHiLoKey>("NormHiLoKey").Insert(new NoRMHiLoKey { CollectionName = collectionName, ServerHi = 2 });
+                        _db.GetCollection<NormHiLoKey>().Insert(new NormHiLoKey { CollectionName = collectionName, ServerHi = 2 });
                         return 1;
                     }
 
@@ -79,7 +79,7 @@ namespace Norm.Collections
 
         #region Nested type: HiLoKey
 
-        private class NoRMHiLoKey
+        private class NormHiLoKey
         {
             [MongoIdentifier]
             public string CollectionName { get; set; }
