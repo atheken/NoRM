@@ -261,6 +261,7 @@ namespace Norm.Tests
         public DateTime LastContact { get; set; }
         public List<String> Relatives { get; set; }
         public DateTime Birthday { get; set; }
+        public int Age { get; set; }
         public Person()
         {
             Id = ObjectId.NewObjectId();
@@ -360,6 +361,12 @@ namespace Norm.Tests
         public ObjectId _id { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
+    }
+
+    internal class TestIntGeneration
+    {
+        public int? _id { get; set; }
+        public string Name { get; set; }
     }
 
     public class FakeObject
