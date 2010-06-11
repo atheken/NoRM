@@ -1,10 +1,12 @@
-using Xunit;
-using System.Linq;
-using Norm.Configuration;
-using System.Collections.Generic;
 using System;
-using Norm.Protocol.Messages;
+using System.Collections.Generic;
+using System.Linq;
+using Norm;
 using Norm.BSON;
+using Norm.Collections;
+using Norm.Configuration;
+using Norm.Protocol.Messages;
+using Xunit;
 
 namespace Norm.Tests
 {
@@ -476,12 +478,33 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false&strict=false")))
             {
                 mongo.Database.DropCollection("ReduceProduct");
-                var collection = mongo.GetCollection<ReduceProduct>();
+                IMongoCollection<ReduceProduct> collection = mongo.GetCollection<ReduceProduct>();
                 collection.Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 var r = collection.MapReduce<ProductSum>(_map, _reduce).FirstOrDefault();
-                Assert.Equal(0, r.Id);
+
                 Assert.Equal(4, r.Value);
             }
+        }
+
+
+        [Fact]
+        public void StringAsIdentifierDoesTranslation()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var collection = mongo.GetCollection<StringIdentifier>();
+                collection.Insert(new StringIdentifier { CollectionName = "test", ServerHi = 2 });
+                
+                var result = collection.FindOne(new { CollectionName = "test" });
+                Assert.Equal(2, result.ServerHi);
+            }
+        }
+
+        private class StringIdentifier
+        {
+            [MongoIdentifier]
+            public string CollectionName { get; set; }
+            public long ServerHi { get; set; }
         }
 
         private class IntId

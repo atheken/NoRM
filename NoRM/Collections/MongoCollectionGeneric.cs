@@ -12,6 +12,7 @@ using Norm.Protocol.SystemMessages.Requests;
 using Norm.Responses;
 using TypeHelper = Norm.BSON.ReflectionHelper;
 using Norm.Commands.Modifiers;
+using Norm;
 
 namespace Norm.Collections
 {
@@ -108,7 +109,7 @@ namespace Norm.Collections
                 (typeof(long?).IsAssignableFrom(idProperty.Type)) ||
                 (typeof(int?).IsAssignableFrom(idProperty.Type)) )
             {
-                Insert(entity);
+                this.Insert(entity);
             }
             else
             {
@@ -122,21 +123,9 @@ namespace Norm.Collections
         /// <typeparam retval="U">Type of collection</typeparam>
         /// <param retval="collectionName">The collection Name.</param>
         /// <returns></returns>
-        public MongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new()
+        public IMongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new()
         {
             return new MongoCollection<U>(_collectionName + "." + collectionName, _db, _connection);
-        }
-
-        /// <summary>
-        /// Overload of Update that updates one document and doesn't upsert if no matches are found.
-        /// </summary>
-        /// <typeparam retval="X">Document to match</typeparam>
-        /// <typeparam retval="U">Value document</typeparam>
-        /// <param retval="matchDocument">The match Document.</param>
-        /// <param retval="valueDocument">The value Document.</param>
-        public void UpdateOne<X, U>(X matchDocument, U valueDocument)
-        {
-            Update(matchDocument, valueDocument, false, false);
         }
 
         /// <summary>
@@ -175,21 +164,6 @@ namespace Norm.Collections
         public string FullyQualifiedName
         {
             get { return string.Format("{0}.{1}", _db.DatabaseName, _collectionName); }
-        }
-
-
-
-        /// <summary>
-        /// Deletes all indices on this collection.
-        /// </summary>
-        /// <param retval="numberDeleted">
-        /// </param>
-        /// <returns>
-        /// The delete indices.
-        /// </returns>
-        public bool DeleteIndices(out int numberDeleted)
-        {
-            return DeleteIndex("*", out numberDeleted);
         }
 
         /// <summary>
@@ -231,31 +205,7 @@ namespace Norm.Collections
         /// </returns>
         public T FindOne<U>(U template)
         {
-            return Find(template, 1).FirstOrDefault();
-        }
-
-        /// <summary>Allows a document to be updated using the specified action.</summary>
-        public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action)
-        {
-            Update(matchDocument, action, false, false);
-
-        }
-
-
-        /// <summary>TODO::Description.</summary>
-        public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
-        {
-            var modifierExpression = new ModifierExpression<T>();
-            action(modifierExpression);
-            if (matchDocument is ObjectId)
-            {
-                Update(new { _id = matchDocument }, modifierExpression.Expression, updateMultiple, upsert);
-            }
-            else
-            {
-                Update(matchDocument, modifierExpression.Expression, updateMultiple, upsert);
-
-            }
+            return this.Find(template, 1).FirstOrDefault();
         }
 
         /// <summary>
@@ -265,77 +215,7 @@ namespace Norm.Collections
         new public IEnumerable<T> Find()
         {
             // this is a hack to get a value that will test for null into the serializer.
-            return Find(new object(), Int32.MaxValue, FullyQualifiedName);
-        }
-
-        /// <summary>
-        /// Return all documents matching the template
-        /// </summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Ok, not all documents, just all documents up to Int32.MaxValue - if you bring that many back, you've crashed. Sorry.
-        /// </remarks>
-        public IEnumerable<T> Find<U>(U template)
-        {
-            return Find(template, Int32.MaxValue);
-        }
-
-        /// <summary>
-        /// Get the documents that match the specified template.
-        /// </summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The number to return from this command.</param>
-        /// <returns></returns>
-        public IEnumerable<T> Find<U>(U template, int limit)
-        {
-            return Find(template, limit, 0, FullyQualifiedName);
-        }
-
-        /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The number to return from this command.</param>
-        /// <param retval="skip">The skip step.</param>
-        public IEnumerable<T> Find<U>(U template, int limit, int skip)
-        {
-            return Find(template, limit, skip, this.FullyQualifiedName);
-        }
-
-        /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <typeparam retval="O">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="orderby">How to order the results</param>
-        /// <param retval="limit">The number to return from this command.</param>
-        /// <param retval="skip">The skip step.</param>
-        public IEnumerable<T> Find<U, O>(U template, O orderby, int limit, int skip)
-        {
-            return this.Find(template, orderby, limit, skip, this.FullyQualifiedName);
-        }
-
-        /// <summary>
-        /// The find.
-        /// </summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The limit.</param>
-        /// <param retval="fullyQualifiedName">The fully qualified retval.</param>
-        /// <returns></returns>
-        public IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName)
-        {
-            return Find(template, limit, 0, fullyQualifiedName);
-        }
-
-        /// <summary>
-        /// A count on this collection without any filter.
-        /// </summary>
-        /// <returns>The count.</returns>
-        new public long Count()
-        {
-            return Count(new { });
+            return this.Find(new object(), Int32.MaxValue, FullyQualifiedName);
         }
 
         /// <summary>
@@ -345,24 +225,6 @@ namespace Norm.Collections
         public new CollectionStatistics GetCollectionStatistics()
         {
             return _db.GetCollectionStatistics(_collectionName);
-        }
-
-        /// <summary>
-        /// Returns the fully qualified and mapped retval from the member expression.
-        /// </summary>
-        /// <param retval="mex"></param>
-        /// <returns></returns>
-        private String RecurseMemberExpression(MemberExpression mex)
-        {
-            var retval = "";
-            var parentEx = mex.Expression as MemberExpression;
-            if (parentEx != null)
-            {
-                //we need to recurse because we're not at the root yet.
-                retval += this.RecurseMemberExpression(parentEx) + ".";
-            }
-            retval += MongoConfiguration.GetPropertyAlias(mex.Expression.Type, mex.Member.Name);
-            return retval;
         }
 
         /// <summary>
@@ -386,43 +248,6 @@ namespace Norm.Collections
                     Name = indexName,
                     Unique = isUnique
                 });
-        }
-
-        /// <summary>
-        /// Asynchronously creates an index on this collection.
-        /// </summary>
-        /// <param retval="index">This is an expression of the elements in the type you wish to index, so you can do something like:
-        /// <code>
-        /// y=>y.MyIndexedProperty
-        /// </code>
-        /// or, if you have a multi-fieldSelectionExpando index, you can do this:
-        /// <code>
-        /// y=> new { y.PropertyA, y.PropertyB.Property1, y.PropertyC }
-        /// </code>
-        /// This will automatically map the MongoConfiguration aliases.
-        /// </param>
-        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
-        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
-        /// MongoDB will potentially optimize the index based on this being true.</param>
-        /// <param retval="direction">Should all of the elements in the index be sorted Ascending, or Decending, if you need to sort each property differently, 
-        /// you should use the Expando overload of this method for greater granularity.</param>
-        public void CreateIndex<U>(Expression<Func<T, U>> index, string indexName, bool isUnique, IndexOption direction)
-        {
-            var exp = index.Body as NewExpression;
-            var key = new Expando();
-            if (exp != null)
-            {
-                foreach (var x in exp.Arguments.OfType<MemberExpression>())
-                {
-                    key[this.RecurseMemberExpression(x)] = direction;
-                }
-            }
-            else if (index.Body is MemberExpression)
-            {
-                var me = index.Body as MemberExpression;
-                key[this.RecurseMemberExpression(me)] = direction;
-            }
-            this.CreateIndex(key, indexName, isUnique);
         }
 
         /// <summary>
@@ -465,21 +290,6 @@ namespace Norm.Collections
         }
 
         /// <summary>
-        /// Finds documents
-        /// </summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The limit.</param>
-        /// <param retval="skip">The skip.</param>
-        /// <param retval="fullyQualifiedName">The fully qualified retval.</param>
-        /// <returns></returns>
-        public IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName)
-        {
-            return this.Find<U, Object>(template, null, limit, skip, fullyQualifiedName);
-        }
-
-
-        /// <summary>
         /// Locates documents that match the template, in the order specified.
         /// </summary>
         /// <remarks>
@@ -507,11 +317,6 @@ namespace Norm.Collections
             };
             var type = typeof(T);
             return new MongoQueryExecutor<T, U>(qm);
-        }
-
-        public T FindAndModify<U, X>(U query, X update)
-        {
-            return FindAndModify<U, X, object>(query, update, new { });
         }
 
         /// <summary>
@@ -549,11 +354,6 @@ namespace Norm.Collections
             }
         }
 
-        public IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, Expression<Func<T, Z>> fieldSelection)
-        {
-            return this.Find(template, orderBy, limit, skip, this.FullyQualifiedName, fieldSelection);
-        }
-
         public IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, String fullName, Expression<Func<T, Z>> fieldSelection)
         {
             #region Extract field names to request
@@ -563,13 +363,13 @@ namespace Norm.Collections
             {
                 foreach (var x in exp.Arguments.OfType<MemberExpression>())
                 {
-                    fieldSelectionExpando[this.RecurseMemberExpression(x)] = 1;
+                    fieldSelectionExpando[x.GetPropertyAlias()] = 1;
                 }
             }
             else if (fieldSelection.Body is MemberExpression)
             {
                 var me = fieldSelection.Body as MemberExpression;
-                fieldSelectionExpando[this.RecurseMemberExpression(me)] = 1;
+                fieldSelectionExpando[me.GetPropertyAlias()] = 1;
             }
             #endregion
 
@@ -603,18 +403,6 @@ namespace Norm.Collections
         }
         
         /// <summary>
-        /// Finds documents that match the template, and ordered according to the orderby document.
-        /// </summary>
-        /// <typeparam retval="U"></typeparam>
-        /// <typeparam retval="S"></typeparam>
-        /// <param retval="template">The spec document</param>
-        /// <param retval="orderBy">The order specification</param>
-        /// <returns>A set of documents ordered correctly and matching the spec.</returns>
-        public IEnumerable<T> Find<U, S>(U template, S orderBy)
-        {
-            return this.Find(template, orderBy, Int32.MaxValue, 0, this.FullyQualifiedName);
-        }
-        /// <summary>
         /// Generates a query explain plan.
         /// </summary>
         /// <typeparam retval="U">The type of the template document (probably an anonymous type..</typeparam>
@@ -642,17 +430,6 @@ namespace Norm.Collections
                 });
             var retval = (long)f.Get<double>("n");
             return retval;
-        }
-
-        /// <summary>
-        /// Inserts documents
-        /// </summary>
-        /// <param retval="documentsToInsert">
-        /// The documents to insert.
-        /// </param>
-        public void Insert(params T[] documentsToInsert)
-        {
-            Insert(documentsToInsert.AsEnumerable());
         }
 
         /// <summary>

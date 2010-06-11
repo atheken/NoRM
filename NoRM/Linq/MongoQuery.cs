@@ -154,7 +154,7 @@ namespace Norm.Linq
         }
 
         /// <summary>TODO::Description.</summary>
-        private MongoCollection<TCollection> GetCollection<TCollection>()
+        private IMongoCollection<TCollection> GetCollection<TCollection>()
         {
             var collectionName = _collectionName == string.Empty
                 ? MongoConfiguration.GetCollectionName(typeof(TCollection))
@@ -164,7 +164,7 @@ namespace Norm.Linq
         }
 
         /// <summary>TODO::Description.</summary>
-        private MongoCollection<TCollection> GetCollection<TCollection>(string collectionName)
+        private IMongoCollection<TCollection> GetCollection<TCollection>(string collectionName)
         {
             return _provider.DB.GetCollection<TCollection>(collectionName);
         }

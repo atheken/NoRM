@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Linq;
+using Norm.Responses;
+using Norm.BSON;
+using System.Linq.Expressions;
 
 namespace Norm.Collections
 {
@@ -15,48 +19,10 @@ namespace Norm.Collections
     public interface IMongoCollection<T> 
     {
         /// <summary>
-        /// Finds the specified document.
-        /// </summary>
-        /// <typeparam retval="U">Type of document</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <returns></returns>
-        IEnumerable<T> Find<U>(U template);
-
-        /// <summary>
         /// Finds all documents.
         /// </summary>
         /// <returns></returns>
         new IEnumerable<T> Find();
-
-        /// <summary>
-        /// Finds the specified document with a limited result set.
-        /// </summary>
-        /// <typeparam retval="U">Type of document</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The limit.</param>
-        /// <param retval="fullyQualifiedName">Name of the fully qualified.</param>
-        /// <returns></returns>
-        IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName);
-
-        /// <summary>
-        /// Finds the specified document with a limited result set.
-        /// </summary>
-        /// <typeparam retval="U">Type of document</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The limit.</param>
-        /// <returns></returns>
-        IEnumerable<T> Find<U>(U template, int limit);
-
-
-        /// <summary>
-        /// Find using the template, but skip some and limit how many you want.
-        /// </summary>
-        /// <typeparam retval="U"></typeparam>
-        /// <param retval="template"></param>
-        /// <param retval="limit"></param>
-        /// <param retval="skip"></param>
-        /// <returns></returns>
-        IEnumerable<T> Find<U>(U template, int limit, int skip);
 
         /// <summary>
         /// Finds one document.
@@ -72,7 +38,7 @@ namespace Norm.Collections
         /// <typeparam retval="U"></typeparam>
         /// <param retval="collectionName"></param>
         /// <returns></returns>
-        MongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new();
+        IMongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new();
 
         /// <summary>
         /// Updates the specified document.
@@ -90,16 +56,6 @@ namespace Norm.Collections
         /// </summary>
         /// <value><c>true</c> if updateable; otherwise, <c>false</c>.</value>
         bool Updateable { get; }
-
-        /// <summary>
-        /// Updates one document.
-        /// </summary>
-        /// <typeparam retval="X">Document to match</typeparam>
-        /// <typeparam retval="U">Document to update</typeparam>
-        /// <param retval="matchDocument">The match document.</param>
-        /// <param retval="valueDocument">The value document.</param>
-        void UpdateOne<X, U>(X matchDocument, U valueDocument);
-
 
         /// <summary>
         /// Delete the documents that mact the specified template.
@@ -148,5 +104,29 @@ namespace Norm.Collections
         /// <param retval="options"></param>
         /// <returns></returns>
         IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
+
+        T FindAndModify<U, X, Y>(U query, X update, Y sort);
+        IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName);
+        IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, String fullName, Expression<Func<T, Z>> fieldSelection);
+
+        string FullyQualifiedName { get; }
+        IQueryable<T> AsQueryable();
+
+        void Insert(IEnumerable<T> documentsToInsert);
+
+        ExplainResponse Explain<U>(U template);
+
+        void CreateIndex(Expando key, String indexName, bool isUnique);
+        void Save(T entity);
+
+        new CollectionStatistics GetCollectionStatistics();
+
+        long Count<U>(U query);
+
+        bool DeleteIndex(string indexName, out int numberDeleted);
+
+        IEnumerable<U> Distinct<U>(string keyName);
+
+        long GenerateId();
     }
 }

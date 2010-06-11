@@ -142,7 +142,7 @@ namespace Norm.Tests
                                    Map = map,
                                    Reduce = reduce
                                });
-            MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
+            IMongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
             MapReduceResult<T> r = coll.Find().FirstOrDefault();
             result = r.Value;
 

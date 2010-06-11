@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Norm;
 using Norm.BSON;
 using Norm.Linq;
 using Norm.Protocol.Messages;
