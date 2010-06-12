@@ -669,7 +669,13 @@ namespace Norm.Tests
 
         public void Drop<T>()
         {
-            _provider.Database.DropCollection(MongoConfiguration.GetCollectionName(typeof(T)));
+            try
+            {
+                _provider.Database.DropCollection(MongoConfiguration.GetCollectionName(typeof (T)));
+            }
+            catch (MongoException)
+            {
+            }
         }
 
         public void Dispose()
