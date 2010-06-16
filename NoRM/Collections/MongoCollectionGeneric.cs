@@ -20,7 +20,7 @@ namespace Norm.Collections
     /// Mongo typed collection.
     /// </summary>
     /// <typeparam retval="T">Collection type</typeparam>
-    public partial class MongoCollection<T> : IMongoCollection<T>
+    public class MongoCollection<T> : IMongoCollection<T>
     {
         private static Dictionary<int, object> _compiledTransforms = new Dictionary<int, object>();
         private static CollectionHiLoIdGenerator _collectionHiLoIdGenerator = new CollectionHiLoIdGenerator(20);
@@ -209,20 +209,10 @@ namespace Norm.Collections
         }
 
         /// <summary>
-        /// Find objects in the collection without any qualifiers.
-        /// </summary>
-        /// <returns></returns>
-        new public IEnumerable<T> Find()
-        {
-            // this is a hack to get a value that will test for null into the serializer.
-            return this.Find(new object(), Int32.MaxValue, FullyQualifiedName);
-        }
-
-        /// <summary>
         /// The get collection statistics.
         /// </summary>
         /// <returns></returns>
-        public new CollectionStatistics GetCollectionStatistics()
+        public CollectionStatistics GetCollectionStatistics()
         {
             return _db.GetCollectionStatistics(_collectionName);
         }
@@ -308,6 +298,8 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName)
         {
+            var type = typeof (T);
+
             var qm = new QueryMessage<T, U>(_connection, fullyQualifiedName)
             {
                 NumberToTake = limit,
@@ -315,7 +307,7 @@ namespace Norm.Collections
                 Query = template,
                 OrderBy = orderBy
             };
-            var type = typeof(T);
+
             return new MongoQueryExecutor<T, U>(qm);
         }
 
@@ -456,7 +448,6 @@ namespace Norm.Collections
             }
         }
 
-
         /// <summary>
         /// Executes the MapReduce on this collection
         /// </summary>
@@ -481,7 +472,6 @@ namespace Norm.Collections
         public IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce)
         {
             return MapReduce<X>(new MapReduceOptions<T> { Query = template, Map = map, Reduce = reduce });
-
         }
 
         /// <summary>
@@ -497,7 +487,6 @@ namespace Norm.Collections
         public IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce, string finalize)
         {
             return MapReduce<X>(new MapReduceOptions<T> { Query = template, Map = map, Reduce = reduce, Finalize = finalize });
-
         }
 
         /// <summary>
@@ -512,10 +501,7 @@ namespace Norm.Collections
             var response = mr.Execute(options);
             var collection = response.GetCollection<X>();
             return collection.Find().ToList();
-
         }
-
-
 
         private void AssertUpdatable()
         {

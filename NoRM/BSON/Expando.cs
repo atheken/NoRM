@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Norm.BSON
@@ -14,6 +15,27 @@ namespace Norm.BSON
     public class Expando : IExpando
     {
         private Dictionary<string, object> _kitchenSinkProps = new Dictionary<string, object>(0, StringComparer.InvariantCultureIgnoreCase);
+
+        public Expando()
+        {
+        }
+
+        public Expando(object values)
+        {
+            AddValues(values);
+        }
+
+        private void AddValues(object values)
+        {
+            if (values != null)
+            {
+                foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(values))
+                {
+                    object obj2 = descriptor.GetValue(values);
+                    _kitchenSinkProps.Add(descriptor.Name, obj2);
+                }
+            }
+        }
 
         /// <summary>
         /// Get or set a property of this flyweight.

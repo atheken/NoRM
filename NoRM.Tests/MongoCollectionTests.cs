@@ -6,6 +6,7 @@ using Norm.BSON;
 using Norm.Collections;
 using Norm.Configuration;
 using Norm.Protocol.Messages;
+using Norm.Linq;
 using Xunit;
 
 namespace Norm.Tests
@@ -492,10 +493,14 @@ namespace Norm.Tests
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
+                
                 var collection = mongo.GetCollection<StringIdentifier>();
+                mongo.Database.DropCollection("StringIdentifier");
                 collection.Insert(new StringIdentifier { CollectionName = "test", ServerHi = 2 });
                 
                 var result = collection.FindOne(new { CollectionName = "test" });
+                //var result = collection.AsQueryable().Where(x => x.CollectionName == "test").SingleOrDefault();
+                
                 Assert.Equal(2, result.ServerHi);
             }
         }

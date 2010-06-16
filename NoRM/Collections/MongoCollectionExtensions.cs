@@ -14,6 +14,64 @@ namespace Norm
 {
     public static class MongoCollectionExtensions
     {
+        /// <summary>TODO::Description.</summary>
+        public static void Update<T, X>(this IMongoCollection<T> collection, X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
+        {
+            var modifierExpression = new ModifierExpression<T>();
+            action(modifierExpression);
+            if (matchDocument is ObjectId)
+            {
+                collection.Update(new { _id = matchDocument }, modifierExpression.Expression, updateMultiple, upsert);
+            }
+            else
+            {
+                collection.Update(matchDocument, modifierExpression.Expression, updateMultiple, upsert);
+
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates an index on this collection.
+        /// </summary>
+        /// <param retval="index">This is an expression of the elements in the type you wish to index, so you can do something like:
+        /// <code>
+        /// y=>y.MyIndexedProperty
+        /// </code>
+        /// or, if you have a multi-fieldSelectionExpando index, you can do this:
+        /// <code>
+        /// y=> new { y.PropertyA, y.PropertyB.Property1, y.PropertyC }
+        /// </code>
+        /// This will automatically map the MongoConfiguration aliases.
+        /// </param>
+        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+        /// MongoDB will potentially optimize the index based on this being true.</param>
+        /// <param retval="direction">Should all of the elements in the index be sorted Ascending, or Decending, if you need to sort each property differently, 
+        /// you should use the Expando overload of this method for greater granularity.</param>
+        public static void CreateIndex<T, U>(this IMongoCollection<T> collection, Expression<Func<T, U>> index, string indexName, bool isUnique, IndexOption direction)
+        {
+            var exp = index.Body as NewExpression;
+            var key = new Expando();
+            if (exp != null)
+            {
+                foreach (var x in exp.Arguments.OfType<MemberExpression>())
+                {
+                    key[x.GetPropertyAlias()] = direction;
+                }
+            }
+            else if (index.Body is MemberExpression)
+            {
+                var me = index.Body as MemberExpression;
+                key[me.GetPropertyAlias()] = direction;
+            }
+            collection.CreateIndex(key, indexName, isUnique);
+        }
+
+        public static IEnumerable<Z> Find<T, U, O, Z>(this IMongoCollection<T> collection, U template, O orderBy, int limit, int skip, Expression<Func<T, Z>> fieldSelection)
+        {
+            return collection.Find(template, orderBy, limit, skip, collection.FullyQualifiedName, fieldSelection);
+        }
+
         /// <summary>
         /// Finds documents
         /// </summary>
@@ -102,14 +160,14 @@ namespace Norm
             return collection.Find(template, orderBy, Int32.MaxValue, 0, collection.FullyQualifiedName);
         }
 
-        public static IEnumerable<Z> Find<T, U, O, Z>(this IMongoCollection<T> collection, U template, O orderBy, int limit, int skip, Expression<Func<T, Z>> fieldSelection)
+        /// <summary>
+        /// Find objects in the collection without any qualifiers.
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<T> Find<T>(this IMongoCollection<T> collection)
         {
-            return collection.Find(template, orderBy, limit, skip, collection.FullyQualifiedName, fieldSelection);
-        }
-
-        public static T FindAndModify<T, U, X>(this IMongoCollection<T> collection, U query, X update)
-        {
-            return collection.FindAndModify<U, X, object>(query, update, new { });
+            // this is a hack to get a value that will test for null into the serializer.
+            return collection.Find(new object(), Int32.MaxValue, collection.FullyQualifiedName);
         }
 
         /// <summary>
@@ -123,43 +181,11 @@ namespace Norm
             collection.Insert(documentsToInsert.AsEnumerable());
         }
 
-
-        /// <summary>
-        /// Asynchronously creates an index on this collection.
-        /// </summary>
-        /// <param retval="index">This is an expression of the elements in the type you wish to index, so you can do something like:
-        /// <code>
-        /// y=>y.MyIndexedProperty
-        /// </code>
-        /// or, if you have a multi-fieldSelectionExpando index, you can do this:
-        /// <code>
-        /// y=> new { y.PropertyA, y.PropertyB.Property1, y.PropertyC }
-        /// </code>
-        /// This will automatically map the MongoConfiguration aliases.
-        /// </param>
-        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
-        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
-        /// MongoDB will potentially optimize the index based on this being true.</param>
-        /// <param retval="direction">Should all of the elements in the index be sorted Ascending, or Decending, if you need to sort each property differently, 
-        /// you should use the Expando overload of this method for greater granularity.</param>
-        public static void CreateIndex<T, U>(this IMongoCollection<T> collection, Expression<Func<T, U>> index, string indexName, bool isUnique, IndexOption direction)
+        public static T FindAndModify<T, U, X>(this IMongoCollection<T> collection, U query, X update)
         {
-            var exp = index.Body as NewExpression;
-            var key = new Expando();
-            if (exp != null)
-            {
-                foreach (var x in exp.Arguments.OfType<MemberExpression>())
-                {
-                    key[x.GetPropertyAlias()] = direction;
-                }
-            }
-            else if (index.Body is MemberExpression)
-            {
-                var me = index.Body as MemberExpression;
-                key[me.GetPropertyAlias()] = direction;
-            }
-            collection.CreateIndex(key, indexName, isUnique);
+            return collection.FindAndModify<U, X, object>(query, update, new { });
         }
+
 
         /// <summary>
         /// Overload of Update that updates one document and doesn't upsert if no matches are found.
@@ -177,22 +203,6 @@ namespace Norm
         public static void Update<T, X>(this IMongoCollection<T> collection, X matchDocument, Action<IModifierExpression<T>> action)
         {
             collection.Update(matchDocument, action, false, false);
-        }
-
-        /// <summary>TODO::Description.</summary>
-        public static void Update<T, X>(this IMongoCollection<T> collection, X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
-        {
-            var modifierExpression = new ModifierExpression<T>();
-            action(modifierExpression);
-            if (matchDocument is ObjectId)
-            {
-                collection.Update(new { _id = matchDocument }, modifierExpression.Expression, updateMultiple, upsert);
-            }
-            else
-            {
-                collection.Update(matchDocument, modifierExpression.Expression, updateMultiple, upsert);
-
-            }
         }
 
         /// <summary>
