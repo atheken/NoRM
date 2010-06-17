@@ -380,7 +380,7 @@ namespace Norm.BSON
                 var words = decimal.GetBits(dec);
                 _writer.Write(words.Length * 4);
                 _writer.Write((byte)4);
-                //FIXME!
+                // TODO: Assert length == 4 integers == 16 bytes
                 _writer.Write(words[0]);
                 _writer.Write(words[1]);
                 _writer.Write(words[2]);

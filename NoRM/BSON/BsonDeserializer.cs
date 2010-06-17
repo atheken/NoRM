@@ -437,8 +437,8 @@ namespace Norm.BSON
             }
             if (subType == 4)
             {
+                // TODO: Assert length == 16
                 return _reader.ReadDecimal();
-                //return new Decimal();
             }
             throw new MongoException("No support for binary type: " + subType);
         }

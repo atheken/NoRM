@@ -213,7 +213,20 @@ namespace Norm.BSON
         private static Action<object, object> SetterMethod<TTarget, TParam>(PropertyInfo method) where TTarget : class
         {
             var m = method.GetSetMethod(true);
-            if (m == null) { return null; } //no setter
+            if (m == null)//cm
+            {
+                // Hacky: Isolate the code that determines the name of the backing field (implementation detail)
+                // Todo: 
+                FieldInfo fi = typeof(TTarget).GetField("<" + method.Name + ">k__BackingField", BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (fi != null)
+                {
+                    return (target, param) => fi.SetValue(target, param);
+                }
+                else
+                {
+                    return null;
+                }
+            }
             var func = (Action<TTarget, TParam>)Delegate.CreateDelegate(typeof(Action<TTarget, TParam>), m);
             return (target, param) => func((TTarget)target, (TParam)param);
         }
