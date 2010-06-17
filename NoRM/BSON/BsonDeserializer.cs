@@ -324,7 +324,7 @@ namespace Norm.BSON
                 {
                     ((IExpando)instance)[name] = value;
                 }
-                else if (container == null && value != null)
+                else if (container == null && value != null && property.Setter != null)
                 {
                     property.Setter(instance, value);
                 }
@@ -434,6 +434,11 @@ namespace Norm.BSON
             if (subType == 3)
             {
                 return new Guid(_reader.ReadBytes(length));
+            }
+            if (subType == 4)
+            {
+                return _reader.ReadDecimal();
+                //return new Decimal();
             }
             throw new MongoException("No support for binary type: " + subType);
         }

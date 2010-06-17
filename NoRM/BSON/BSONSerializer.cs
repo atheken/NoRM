@@ -19,6 +19,7 @@ namespace Norm.BSON
                 {typeof (int), BSONTypes.Int32},
                 {typeof (long), BSONTypes.Int64},
                 {typeof (bool), BSONTypes.Boolean},
+                {typeof (decimal), BSONTypes.Binary},
                 {typeof (string), BSONTypes.String},{typeof (double), BSONTypes.Double},
                 {typeof (Guid), BSONTypes.Binary},{typeof (Regex), BSONTypes.Regex},
                 {typeof (DateTime), BSONTypes.DateTime},
@@ -372,6 +373,19 @@ namespace Norm.BSON
                 _writer.Write((byte)3);
                 _writer.Write(bytes);
                 Written(5 + bytes.Length);
+            }
+            else if (value is decimal)
+            {
+                var dec = (decimal)value;
+                var words = decimal.GetBits(dec);
+                _writer.Write(words.Length * 4);
+                _writer.Write((byte)4);
+                //FIXME!
+                _writer.Write(words[0]);
+                _writer.Write(words[1]);
+                _writer.Write(words[2]);
+                _writer.Write(words[3]);
+                Written(5 + words.Length * 4);
             }
         }
 
