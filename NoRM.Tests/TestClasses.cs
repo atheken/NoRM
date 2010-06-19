@@ -207,6 +207,7 @@ namespace Norm.Tests
     {
         public string Text { get; set; }
         public string Name { get; set; }
+        public bool IsOld { get; set; }
         public IList<Tag> CommentTags { get; set; }
         public IList<string> CommentTagsSimple { get; set; }
     }
@@ -260,6 +261,7 @@ namespace Norm.Tests
         public DateTime LastContact { get; set; }
         public List<String> Relatives { get; set; }
         public DateTime Birthday { get; set; }
+        public int Age { get; set; }
         public Person()
         {
             Id = ObjectId.NewObjectId();
@@ -352,6 +354,19 @@ namespace Norm.Tests
         public int Quantity { get; set; }
         public bool IsAvailable { get; set; }
         public bool IsStillAvailable { get; set; }
+    }
+    
+    internal class TestProductSummary
+    {
+        public ObjectId _id { get; set; }
+        public string Name { get; set; }
+        public double Price { get; set; }
+    }
+
+    internal class TestIntGeneration
+    {
+        public int? _id { get; set; }
+        public string Name { get; set; }
     }
 
     public class FakeObject

@@ -165,7 +165,7 @@ namespace Norm.Linq
                 var alias = VisitAlias(m);
 
                 VisitDateTimeProperty(m);
-
+                
                 if (UseScopedQualifier)
                 {
                     _sbWhere.Append("this.");
@@ -572,9 +572,32 @@ namespace Norm.Linq
         {
             ConditionalCount++;
             _sbWhere.Append("(");
-            VisitPredicate(b.Left);
-            VisitBinaryOperator(b);
-            VisitPredicate(b.Right);
+
+            var hasVisited = false;
+            switch (b.NodeType)
+            {
+                case ExpressionType.And:
+                case ExpressionType.AndAlso:
+                case ExpressionType.Or:
+                case ExpressionType.OrElse:
+                    if (IsBoolean(b.Left.Type))
+                    {
+                        VisitPredicate(b.Left);
+                        VisitBinaryOperator(b);
+                        VisitPredicate(b.Right);
+
+                        hasVisited = true;
+                    }
+                    break;
+            }
+
+            if (!hasVisited)
+            {
+                Visit(b.Left);
+                VisitBinaryOperator(b);
+                Visit(b.Right);
+            }
+
             _sbWhere.Append(")");
             return b;
         }
@@ -614,7 +637,7 @@ namespace Norm.Linq
                 {
                     case TypeCode.Boolean:
                         _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
-                        //SetFlyValue(c.Value);
+                        SetFlyValue(c.Value);
                         break;
                     case TypeCode.DateTime:
                         _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
@@ -1062,7 +1085,7 @@ namespace Norm.Linq
             else if (m.Arguments.Count == 2)
             {
                 _prefixAlias.Add(VisitDeepAlias((MemberExpression)m.Arguments[0]));
-                Visit(m.Arguments[1]);
+                VisitPredicate(GetLambda(m.Arguments[1]).Body);
                 _prefixAlias.RemoveAt(_prefixAlias.Count - 1);
 
                 if (IsComplex)

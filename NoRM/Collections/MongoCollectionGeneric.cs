@@ -22,6 +22,7 @@ namespace Norm.Collections
     public partial class MongoCollection<T> : IMongoCollection<T>
     {
         private static Dictionary<int, object> _compiledTransforms = new Dictionary<int, object>();
+        private static CollectionHiLoIdGenerator _collectionHiLoIdGenerator = new CollectionHiLoIdGenerator(20);
 
         /// <summary>
         /// This will have a different instance for each concrete version of <see cref="MongoCollection{T}"/>
@@ -57,7 +58,7 @@ namespace Norm.Collections
         /// <returns></returns>
         public IQueryable<T> AsQueryable()
         {
-            return new MongoQuery<T>(MongoQueryProvider.Create(this._db),this._collectionName);
+            return new MongoQuery<T>(MongoQueryProvider.Create(this._db), this._collectionName);
         }
 
         /// <summary>
@@ -102,7 +103,10 @@ namespace Norm.Collections
             var helper = TypeHelper.GetHelperForType(typeof(T));
             var idProperty = helper.FindIdProperty();
             var id = idProperty.Getter(entity);
-            if (id == null && typeof(ObjectId).IsAssignableFrom(idProperty.Type))
+            if (id == null && 
+                (typeof(ObjectId).IsAssignableFrom(idProperty.Type)) ||
+                (typeof(long?).IsAssignableFrom(idProperty.Type)) ||
+                (typeof(int?).IsAssignableFrom(idProperty.Type)) )
             {
                 Insert(entity);
             }
@@ -118,7 +122,7 @@ namespace Norm.Collections
         /// <typeparam retval="U">Type of collection</typeparam>
         /// <param retval="collectionName">The collection Name.</param>
         /// <returns></returns>
-        public IMongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new()
+        public MongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new()
         {
             return new MongoCollection<U>(_collectionName + "." + collectionName, _db, _connection);
         }
@@ -505,6 +509,46 @@ namespace Norm.Collections
             return new MongoQueryExecutor<T, U>(qm);
         }
 
+        public T FindAndModify<U, X>(U query, X update)
+        {
+            return FindAndModify<U, X, object>(query, update, new { });
+        }
+
+        /// <summary>
+        /// This command can be used to atomically modify a document (at most one) and return it.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <typeparam name="X"></typeparam>
+        /// <typeparam name="Y"></typeparam>
+        /// <param name="query">The document template used to find the document to find and modify</param>
+        /// <param name="update">A modifier object</param>
+        /// <param name="sort">If multiple docs match, choose the first one in the specified sort order as the object to manipulate</param>
+        /// <returns></returns>
+        public T FindAndModify<U, X, Y>(U query, X update, Y sort)
+        {
+            var cmdColl = this._db.GetCollection<FindAndModifyResult<T>>("$cmd");
+
+            try
+            {
+                var returnValue = cmdColl.FindOne(new
+                {
+                    findandmodify = this._collectionName,
+                    query = query,
+                    update = update,
+                    sort = sort
+                }).Value;
+
+                return returnValue;
+            }
+            catch (MongoException ex)
+            {
+                if (ex.Message == "No matching object found")
+                    return default(T);
+
+                throw;
+            }
+        }
+
         public IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, Expression<Func<T, Z>> fieldSelection)
         {
             return this.Find(template, orderBy, limit, skip, this.FullyQualifiedName, fieldSelection);
@@ -708,23 +752,38 @@ namespace Norm.Collections
         /// Tries the setting id property.
         /// </summary>
         /// <param retval="entities">The entities.</param>
-        private static void TrySettingId(IEnumerable<T> entities)
+        private void TrySettingId(IEnumerable<T> entities)
         {
+            Dictionary<Type, Func<object>> knownTypes = new Dictionary<Type, Func<object>> { 
+                { typeof(long?), () => GenerateId() }, 
+                { typeof(int?), () => Convert.ToInt32(GenerateId()) }, 
+                { typeof(ObjectId), () => ObjectId.NewObjectId() } 
+            };
+
             if (typeof(T) != typeof(Object) && typeof(T).GetInterface("IUpdateWithoutId") == null)
             {
                 var idProperty = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty();
-                if (idProperty != null && typeof(ObjectId).IsAssignableFrom(idProperty.Type) && idProperty.Setter != null)
+                if (idProperty != null && knownTypes.ContainsKey(idProperty.Type) && idProperty.Setter != null)
                 {
                     foreach (var entity in entities)
                     {
                         var value = idProperty.Getter(entity);
                         if (value == null)
                         {
-                            idProperty.Setter(entity, ObjectId.NewObjectId());
+                            idProperty.Setter(entity, knownTypes[idProperty.Type]());
                         }
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Generates a new identity value using the HiLo algorithm
+        /// </summary>
+        /// <returns>New identity value</returns>
+        public long GenerateId()
+        {
+            return _collectionHiLoIdGenerator.GenerateId(_db, _collectionName);
         }
 
     }

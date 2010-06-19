@@ -20,6 +20,7 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("strict=false")))
             {
                 mongo.Database.DropCollection("Fake");
+                mongo.Database.DropCollection("Faker");
             }
         }
 
@@ -330,6 +331,100 @@ namespace Norm.Tests
                 Assert.NotEqual(ObjectId.Empty, product1._id);
                 Assert.NotNull(product2._id);
                 Assert.NotEqual(ObjectId.Empty, product2._id);
+            }
+        }
+
+        [Fact]
+        public void InsertingANewEntityGeneratingTheIntKeyFirst()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var collection = mongo.GetCollection<TestIntGeneration>("Fake");
+
+                var identity = (int)collection.GenerateId();
+                var testint = new TestIntGeneration { _id = identity, Name = "TestMe" };
+                collection.Insert(testint);
+
+                var result = collection.FindOne(new { _id = testint._id });
+
+                Assert.NotNull(testint._id);
+                Assert.Equal(result.Name, "TestMe");
+            }
+        }
+
+        [Fact]
+        public void InsertingANewEntityWithNullableIntGeneratesAKey()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var testint = new TestIntGeneration { _id = null };
+                mongo.GetCollection<TestIntGeneration>("Fake").Insert(testint);
+
+                Assert.NotNull(testint._id);
+                Assert.NotEqual(0, testint._id.Value);
+            }
+        }
+
+        [Fact]
+        public void InsertingANewEntityWithNullableIntGeneratesAKeyComplex()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var idents = new List<int>();
+                for (int i = 0; i < 15; i++)
+                {
+                    var testint = new TestIntGeneration { _id = null };
+                    mongo.GetCollection<TestIntGeneration>("Fake").Insert(testint);
+                    idents.Add(testint._id.Value);
+                }
+
+                var list = mongo.GetCollection<TestIntGeneration>("Fake").Find(new { _id = Q.In(idents.ToArray()) });
+
+                foreach (var item in list)
+                {
+                    Assert.True(idents.Contains(item._id.Value));
+                }
+
+                Assert.Equal(idents.Distinct().Count(), list.Select(x => x._id.Value).Distinct().Count());
+            }
+        }
+
+        [Fact]
+        public void InsertingANewEntityWithNullableIntGeneratesAKeyComplexWith2Collections()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var idents = new List<int>();
+                for (int i = 0; i < 15; i++)
+                {
+                    var testint = new TestIntGeneration { _id = null };
+                    mongo.GetCollection<TestIntGeneration>("Fake").Insert(testint);
+                    idents.Add(testint._id.Value);
+                }
+
+                var idents2 = new List<int>();
+                for (int i = 0; i < 15; i++)
+                {
+                    var testint = new TestIntGeneration { _id = null };
+                    mongo.GetCollection<TestIntGeneration>("Faker").Insert(testint);
+                    idents2.Add(testint._id.Value);
+                }
+
+                var list = mongo.GetCollection<TestIntGeneration>("Fake").Find(new { _id = Q.In(idents.ToArray()) });
+                var list2 = mongo.GetCollection<TestIntGeneration>("Faker").Find(new { _id = Q.In(idents2.ToArray()) });
+
+                foreach (var item in list)
+                {
+                    Assert.True(idents.Contains(item._id.Value));
+                }
+
+                foreach (var item in list2)
+                {
+                    Assert.True(idents2.Contains(item._id.Value));
+                }
+
+                Assert.Equal(idents.Distinct().Count(), list.Select(x => x._id.Value).Distinct().Count());
+                Assert.Equal(idents2.Distinct().Count(), list2.Select(x => x._id.Value).Distinct().Count());
             }
         }
 

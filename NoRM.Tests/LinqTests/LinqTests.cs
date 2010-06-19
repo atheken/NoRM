@@ -53,8 +53,25 @@ namespace Norm.Tests
                     .Select(y => new { Avail = y.Available, Id = y._id }).ToArray();
 
                 Assert.Equal(2, results.Length);
-                Assert.Equal((new {Avail = DateTime.Now, Id = ObjectId.Empty }).GetType(),
+                Assert.Equal((new { Avail = DateTime.Now, Id = ObjectId.Empty }).GetType(),
                     results[0].GetType());
+            }
+        }
+
+        [Fact]
+        public void ProviderSupportsSophisticatedProjectionWithConcreteType()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var coll = db.GetCollection<TestProduct>();
+
+                coll.Insert(new TestProduct { Name = "AAA", Price = 10 }, new TestProduct { Name = "BBB", Price = 20 });
+
+                var results = db.GetCollection<TestProduct>().AsQueryable()
+                    .Select(y => new TestProductSummary { _id = y._id, Name = y.Name, Price = y.Price }).ToArray();
+
+                Assert.Equal(2, results.Length);
+                Assert.Equal((new TestProductSummary()).GetType(), results[0].GetType());
             }
         }
 
@@ -181,7 +198,7 @@ namespace Norm.Tests
                 Assert.Equal(false, queryable.QueryStructure().IsComplex);
             }
         }
-
+        
         [Fact]
         public void LinqQueriesShouldSupportNulls()
         {
@@ -1735,6 +1752,64 @@ namespace Norm.Tests
                 var found = queryable.Where(p => p.Comments.Any(x => x.Text == "commentA")).SingleOrDefault();
 
                 Assert.Equal("Second", found.Title);
+                Assert.Equal(false, queryable.QueryStructure().IsComplex);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingAnyWithBool()
+        {
+            using (var session = new Session())
+            {
+                var post1 = new Post
+                {
+                    Title = "First",
+                    Comments = new List<Comment> { 
+                        new Comment { Text = "comment1", IsOld = false }, 
+                        new Comment { Text = "comment2", IsOld = false }
+                    }
+                };
+                var post2 = new Post
+                {
+                    Title = "Second",
+                    Comments = new List<Comment> { 
+                        new Comment { Text = "commentA", Name = "name1", IsOld = true }, 
+                        new Comment { Text = "commentB", Name = "name2", IsOld = false } 
+                    }
+                };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var queryable = session.Posts;
+                var found = queryable.Where(p => p.Comments.Any(x => x.IsOld)).ToList();
+
+                Assert.Equal(1, found.Count);
+                Assert.Equal("Second", found[0].Title);
+
+                Assert.Equal(false, queryable.QueryStructure().IsComplex);
+            }
+        }
+
+        [Fact]
+        public void CanQueryWithinEmbeddedArrayUsingAnyWithBoolNegated()
+        {
+            using (var session = new Session())
+            {
+                var tf = false;
+
+                var post1 = new Post { Title = "First", Comments = new List<Comment> { new Comment { Text = "comment1", IsOld = false }, new Comment { Text = "comment2", IsOld = false } } };
+                var post2 = new Post { Title = "Second", Comments = new List<Comment> { new Comment { Text = "commentA", Name = "name1", IsOld = true }, new Comment { Text = "commentB", Name = "name2", IsOld = true } } };
+
+                session.Add(post1);
+                session.Add(post2);
+
+                var queryable = session.Posts;
+                var found = queryable.Where(p => p.Comments.Any(x => x.IsOld == tf)).ToList();
+
+                Assert.Equal(1, found.Count);
+                Assert.Equal("First", found[0].Title);
+
                 Assert.Equal(false, queryable.QueryStructure().IsComplex);
             }
         }
