@@ -18,6 +18,9 @@ namespace Norm.Collections
     /// <summary>
     /// Mongo typed collection.
     /// </summary>
+    /// <remarks>
+    /// This class is not (and will probably not become) thread-safe.
+    /// </remarks>
     /// <typeparam retval="T">Collection type</typeparam>
     public partial class MongoCollection<T> : IMongoCollection<T>
     {
@@ -122,7 +125,7 @@ namespace Norm.Collections
         /// <typeparam retval="U">Type of collection</typeparam>
         /// <param retval="collectionName">The collection Name.</param>
         /// <returns></returns>
-        public MongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new()
+        public IMongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new()
         {
             return new MongoCollection<U>(_collectionName + "." + collectionName, _db, _connection);
         }

@@ -110,6 +110,28 @@ namespace Norm.Collections
         /// <summary>Allows a document to be updated using the specified action.</summary>
         void Update<X>(X matchDocument, Action<IModifierExpression<T>> action);
 
+        /// <summary>
+        /// Convenience overload for FindAndModify with Sort
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <typeparam name="X"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="update"></param>
+        /// <returns></returns>
+        T FindAndModify<U, X>(U query, X update);
+        
+
+        /// <summary>
+        /// Locate and update one element, returning it.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <typeparam name="X"></typeparam>
+        /// <typeparam name="Y"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="update"></param>
+        /// <param name="sort"></param>
+        /// <returns></returns>
+        T FindAndModify<U, X, Y>(U query, X update, Y sort);
 
         /// <summary>TODO::Description.</summary>
         void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert);
@@ -352,5 +374,11 @@ namespace Norm.Collections
         /// <param retval="options">The options</param>
         /// <returns></returns>
         IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
+
+        /// <summary>
+        /// Produces a new sequential ID for this collection.
+        /// </summary>
+        /// <returns></returns>
+        long GenerateId();
     }
 }
