@@ -21,7 +21,7 @@ namespace Norm.Responses
         {
             get
             {
-                return this["ok"].Equals(true) || this["ok"].Equals(1d);
+                return this._properties.ContainsKey("ok") && (this["ok"].Equals(true) || this["ok"].Equals(1d));
             }
         }
 
