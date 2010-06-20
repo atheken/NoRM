@@ -1,0 +1,19 @@
+﻿<Window x:Class="NorMan.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NoRMan" Height="350" Width="525">
+    <Grid Height="Auto" Name="mainGrid" Width="Auto">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50*" />
+            <ColumnDefinition Width="250*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Height="Auto" Width="Auto" Grid.Column="0" >
+            
+            
+        </StackPanel>
+        <StackPanel Height="Auto" Width="Auto" Grid.Column="1">
+            
+            
+        </StackPanel>
+    </Grid>
+</Window>

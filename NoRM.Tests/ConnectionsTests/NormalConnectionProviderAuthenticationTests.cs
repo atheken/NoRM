@@ -17,7 +17,7 @@ namespace Norm.Tests
         [Fact]
         public void AuthenticatesWithProperCredentials()
         {
-            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create(AuthenticatedConnectionString("usr", "8e156e298e19afdc3a104ddd172a2bee")));
+            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create(AuthenticatedConnectionString("usr", "pss")));
             var connection = provider.Open(null);
             Assert.Equal(true, connection.Client.Connected);
             provider.Close(connection);

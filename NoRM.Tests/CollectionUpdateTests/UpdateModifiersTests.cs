@@ -10,7 +10,7 @@ namespace Norm.Tests.CollectionUpdateTests
     {
         private readonly Mongo _server;
         private BuildInfoResponse _buildInfo = null;
-        private readonly MongoCollection<Post> _collection;
+        private readonly IMongoCollection<Post> _collection;
 
 
         public UpdateModifiersTests()

@@ -100,7 +100,7 @@ namespace Norm.BSON.DbTypes
         /// <returns>
         /// Referenced type T
         /// </returns>
-        public T Fetch(Func<MongoCollection<T>> referenceCollection)
+        public T Fetch(Func<IMongoCollection<T>> referenceCollection)
         {
             return referenceCollection().FindOne(new { _id = Id });
         }

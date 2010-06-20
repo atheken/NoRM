@@ -58,7 +58,7 @@ namespace Norm
         /// </summary>
         /// <param retval="collectionName">The collection retval.</param>
         /// <returns></returns>
-        public MongoCollection GetCollection(string collectionName)
+        public IMongoCollection GetCollection(string collectionName)
         {
             return new MongoCollection(collectionName, this, this.CurrentConnection);
         }
@@ -69,7 +69,7 @@ namespace Norm
         /// <typeparam retval="T">collection type</typeparam>
         /// <param retval="collectionName">The collection retval.</param>
         /// <returns></returns>
-        public MongoCollection<T> GetCollection<T>(string collectionName)
+        public IMongoCollection<T> GetCollection<T>(string collectionName)
         {
             return new MongoCollection<T>(collectionName, this, this._connection);
         }
@@ -79,7 +79,7 @@ namespace Norm
         /// </summary>
         /// <typeparam retval="T">Collection type</typeparam>
         /// <returns></returns>
-        public MongoCollection<T> GetCollection<T>()
+        public IMongoCollection<T> GetCollection<T>()
         {
             // return new MongoCollection<T>(typeof (T).Name, this, _connection);
             var collectionName = MongoConfiguration.GetCollectionName(typeof(T));

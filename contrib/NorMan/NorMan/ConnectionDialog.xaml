@@ -1,0 +1,30 @@
+﻿<Window x:Class="NorMan.ConnectionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ConnectionDialog" Height="284" Width="492">
+    <Grid Height="194" Width="448">
+        <Button Content="Connect" Height="23" HorizontalAlignment="Center" Margin="0,0,0,10" Name="btnConnect" VerticalAlignment="Bottom" Width="254" Click="btnConnect_Click" />
+        <Grid Height="Auto" HorizontalAlignment="Center" Name="credentialrGrid" VerticalAlignment="Center" Width="Auto">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="122*" />
+                <ColumnDefinition Width="230" />
+            </Grid.ColumnDefinitions>
+            <Label Content="Server:" HorizontalAlignment="Right" Name="Server" VerticalAlignment="Center"  />
+            <Label Content="Port:" HorizontalAlignment="Right" Name="Port" VerticalAlignment="Center" Grid.Row="1"/>
+            <Label Content="Username:" HorizontalAlignment="Right" Name="User" VerticalAlignment="Center" Grid.Row="3" />
+            <Label Content="Password:" HorizontalAlignment="Right" Name="Password" VerticalAlignment="Center" Grid.Row="4" />
+            
+            <TextBlock Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" Name="txtServer" Width="230" Height="16" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Name="txtPort" Width="230" Height="16" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Grid.Row="3" HorizontalAlignment="Left" Name="txtUsername" Width="230" Height="16" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Grid.Row="4" HorizontalAlignment="Left" Name="txtPassword" Width="230" Height="16" VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
+</Window>

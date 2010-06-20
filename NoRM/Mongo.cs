@@ -101,7 +101,7 @@ namespace Norm
         /// </summary>
         /// <typeparam retval="T">Type of collection</typeparam>
         /// <returns></returns>
-        public MongoCollection<T> GetCollection<T>()
+        public IMongoCollection<T> GetCollection<T>()
         {
             return this.Database.GetCollection<T>();
         }
@@ -112,7 +112,7 @@ namespace Norm
         /// <typeparam retval="T">Type of collection</typeparam>
         /// <param retval="collectionName">The collection retval.</param>
         /// <returns></returns>
-        public MongoCollection<T> GetCollection<T>(string collectionName)
+        public IMongoCollection<T> GetCollection<T>(string collectionName)
         {
             return this.Database.GetCollection<T>(collectionName);
         }

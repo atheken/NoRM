@@ -9,7 +9,7 @@ namespace Norm.Collections
     /// <summary>
     /// The mongo collection.
     /// </summary>
-    public class MongoCollection : MongoCollection<Object>
+    public class MongoCollection : MongoCollection<Object>, IMongoCollection
     {
        
         /// <summary>

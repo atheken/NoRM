@@ -116,7 +116,23 @@ namespace Norm
         {
             using (var md5 = MD5.Create())
             {
-                var rawDigest = Encoding.UTF8.GetBytes(string.Concat(nonce, UserName, _builder.Password));
+                var rawDigest = Encoding.UTF8.GetBytes(string.Concat(nonce, UserName, CreatePasswordDigest()));
+                var hashed = md5.ComputeHash(rawDigest);
+                var sb = new StringBuilder(hashed.Length * 2);
+                Array.ForEach(hashed, b => sb.Append(b.ToString("X2")));
+                return sb.ToString().ToLower();
+            }
+        }
+
+        /// <summary>
+        /// Create the password digest from the username and password.
+        /// </summary>
+        /// <returns>The password digest.</returns>
+        private string CreatePasswordDigest()
+        {
+            using (var md5 = MD5.Create())
+            {
+                var rawDigest = Encoding.UTF8.GetBytes(string.Concat(_builder.UserName, ":mongo:", _builder.Password));
                 var hashed = md5.ComputeHash(rawDigest);
                 var sb = new StringBuilder(hashed.Length * 2);
                 Array.ForEach(hashed, b => sb.Append(b.ToString("X2")));
