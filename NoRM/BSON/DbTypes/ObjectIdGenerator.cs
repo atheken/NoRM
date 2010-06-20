@@ -113,9 +113,11 @@ namespace Norm.BSON.DbTypes
         /// </returns>
         private static byte[] GenerateHostHash()
         {
-            var md5 = MD5.Create();
-            var host = Dns.GetHostName();
-            return md5.ComputeHash(Encoding.Default.GetBytes(host));
+            using (var md5 = MD5.Create())
+            {
+                var host = Dns.GetHostName();
+                return md5.ComputeHash(Encoding.Default.GetBytes(host));
+            }
         }
 
         /// <summary>
