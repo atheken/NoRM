@@ -276,5 +276,21 @@ namespace Norm.Tests
                 Assert.Equal(typeof(SubClassedObjectFluentMapped), found.ElementAt(0).GetType());
             }
         }
+
+        [Fact]
+        public void Can_fluently_configure_discriminator_for_all_implementations_of_an_interface()
+        {
+            MongoConfiguration.Initialize(r => r.AddMap<DiscriminationMap>());
+            
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var obj1 = new InterfacePropertyContainingClass();
+                mongo.GetCollection<InterfacePropertyContainingClass>().Insert(obj1);
+                var found = mongo.GetCollection<InterfacePropertyContainingClass>().Find();
+
+                Assert.Equal(1, found.Count());
+                Assert.Equal(typeof(NotDiscriminatedClass), found.ElementAt(0).InterfaceProperty.GetType());
+            }
+        }
     }
 }

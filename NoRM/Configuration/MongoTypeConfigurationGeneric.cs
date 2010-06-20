@@ -69,5 +69,15 @@ namespace Norm.Configuration
             ConnectionStrings[typeof(T)] = connectionString;
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
+
+        /// <summary>
+        /// Marks the type as discriminator for all its subtypes. 
+        /// Alternative to the MongoDiscriminatorAttribute if it is not possible or wanted to put an attribute on the types.
+        /// </summary>
+        public void UseAsDiscriminator()
+        {
+            DiscriminatedTypes[typeof (T)] = true;
+            MongoConfiguration.FireTypeChangedEvent((typeof(T)));
+        }
     }
 }

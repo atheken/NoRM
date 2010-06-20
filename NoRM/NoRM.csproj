@@ -96,6 +96,7 @@
     <Compile Include="BSON\Lists\ListHelper.cs" />
     <Compile Include="BSON\Lists\ListWrapper.cs" />
     <Compile Include="BSON\MagicProperty.cs" />
+    <Compile Include="BSON\ObjectParser.cs" />
     <Compile Include="BSON\QualifierCommand.cs" />
     <Compile Include="BSON\DbTypes\ObjectIdGenerator.cs" />
     <Compile Include="BSON\DbTypes\ScopedCodeGeneric.cs" />

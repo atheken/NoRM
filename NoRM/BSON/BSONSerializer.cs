@@ -156,12 +156,10 @@ namespace Norm.BSON
             var typeHelper = ReflectionHelper.GetHelperForType(document.GetType());
             var idProperty = typeHelper.FindIdProperty();
             var documentType = document.GetType();
-            var discriminator = typeHelper.GetTypeDiscriminator();
+            var discriminator = GetTypeDiscriminator(typeHelper, documentType);
 
             if (String.IsNullOrEmpty(discriminator) == false)
-            {
                 SerializeMember("__type", discriminator);
-            }
 
             foreach (var property in typeHelper.GetProperties())
             {
@@ -186,6 +184,14 @@ namespace Norm.BSON
                     SerializeMember(f.PropertyName, f.Value);
                 }
             }
+        }
+
+        private string GetTypeDiscriminator(ReflectionHelper typeHelper, Type documentType) 
+        {
+            var discriminator = typeHelper.GetTypeDiscriminator();
+            if (String.IsNullOrEmpty(discriminator))
+                discriminator = MongoConfiguration.GetTypeDiscriminator(documentType);
+            return discriminator;
         }
 
         /// <summary>

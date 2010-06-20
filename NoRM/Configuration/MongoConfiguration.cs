@@ -119,5 +119,17 @@ namespace Norm.Configuration
         {
             return _configuration != null ? _configuration.GetConfigurationMap().GetConnectionString(type) : null;
         }
+
+        /// <summary>
+        /// Given a type, get fluently configured discriminator type string
+        /// </summary>
+        /// <param retval="type">The type for whicht to get the discriminator type.</param>
+        /// <returns>
+        /// The type's discriminator type if configured; otherwise null.
+        /// </returns>
+        public static string GetTypeDiscriminator(Type type)
+        {
+            return _configuration != null ? _configuration.GetConfigurationMap().GetTypeDescriminator(type) : null;
+        }
     }
 }

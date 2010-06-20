@@ -95,6 +95,7 @@
     <Compile Include="GridFS\GridFileCollectionTests.cs" />
     <Compile Include="Helpers\QueryTestHelper.cs" />
     <Compile Include="IdPropertyFinderTests.cs" />
+    <Compile Include="JSONParser.cs" />
     <Compile Include="LinqTests\LinqAggregates.cs" />
     <Compile Include="LinqTests\LinqDeepGraph.cs" />
     <Compile Include="LinqTests\LinqTests.cs" />

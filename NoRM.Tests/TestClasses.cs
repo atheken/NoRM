@@ -597,6 +597,37 @@ namespace Norm.Tests
         public Guid Id { get; protected set; }
     }
 
+    internal class InterfacePropertyContainingClass
+    {
+        public InterfacePropertyContainingClass()
+        {
+            Id = Guid.NewGuid();
+            InterfaceProperty = new NotDiscriminatedClass();
+        }
+
+        [MongoIdentifier]
+        public Guid Id { get; set; }
+        public INotDiscriminated InterfaceProperty { get; set; }
+    }
+
+    internal interface INotDiscriminated
+    {
+        string Something { get; set; }
+    }
+
+    internal class NotDiscriminatedClass : INotDiscriminated
+    {
+        public string Something { get; set; }
+    }
+
+    public class DiscriminationMap : MongoConfigurationMap
+    {
+        public DiscriminationMap()
+        {
+            For<INotDiscriminated>(config => config.UseAsDiscriminator());
+        }
+    }
+
     internal interface IDTOWithNonDefaultId
     {
         [MongoIdentifier]

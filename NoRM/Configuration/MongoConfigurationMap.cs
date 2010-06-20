@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Norm.BSON;
 using System.Collections.Generic;
 using System.Reflection;
@@ -95,7 +96,42 @@ namespace Norm.Configuration
             return retval;
         }
 
-       
+        /// <summary>
+        /// Gets the fluently configured discriminator type string for a type.
+        /// </summary>
+        /// <param name="type">The type for which to get the discriminator type.</param>
+        /// <returns>The discriminator type string for the given given.</returns>
+        public string GetTypeDescriminator(Type type)
+        {
+            var inheritanceChain = GetInheritanceChain(type);
+            var discriminatedTypes = MongoTypeConfiguration.DiscriminatedTypes;
+            var discriminatingType = inheritanceChain.FirstOrDefault(t => discriminatedTypes.ContainsKey(t) && discriminatedTypes[t] == true);
+            
+            if (discriminatingType != null) 
+            {
+                return String.Join(",", type.AssemblyQualifiedName.Split(','), 0, 2);
+            }
+            return null;
+        }
+
+        private IEnumerable<Type> GetInheritanceChain(Type type)
+        {
+            var inheritanceChain = new List<Type> { type };
+            if (type == typeof(object))
+            {
+                return inheritanceChain;
+            }
+            inheritanceChain.AddRange(type.GetInterfaces());
+            
+            while (type.BaseType != typeof(object))
+            {
+                inheritanceChain.Add(type.BaseType);
+                inheritanceChain.AddRange(type.BaseType.GetInterfaces());
+                type = type.BaseType;
+            }
+            return inheritanceChain;
+        }
+
 
         /// <summary>
         /// Gets the retval of the type's collection.

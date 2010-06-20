@@ -11,7 +11,8 @@ namespace Norm.Configuration
         private static readonly Dictionary<Type, string> _collectionNames = new Dictionary<Type, string>();
         private static readonly Dictionary<Type, string> _connectionStrings = new Dictionary<Type, string>();
         private static readonly Dictionary<Type, Dictionary<string, PropertyMappingExpression>> _typeConfigurations = new Dictionary<Type, Dictionary<string, PropertyMappingExpression>>();
-        private static readonly IDictionary<Type, Type> _summaryTypes = new Dictionary<Type, Type>();
+        private static readonly Dictionary<Type, Type> _summaryTypes = new Dictionary<Type, Type>();
+        private static readonly Dictionary<Type, bool> _discriminatedTypes = new Dictionary<Type, bool>();
 
         /// <summary>
         /// Gets the property maps.
@@ -51,6 +52,10 @@ namespace Norm.Configuration
             {
                 _connectionStrings.Remove(t);
             }
+            if (_discriminatedTypes.ContainsKey(t))
+            {
+                _discriminatedTypes.Remove(t);
+            }
         }
 
         /// <summary>
@@ -69,6 +74,15 @@ namespace Norm.Configuration
         internal static Dictionary<Type, string> CollectionNames
         {
             get { return _collectionNames; }
+        }
+
+        /// <summary>
+        /// Gets the discriminated types
+        /// </summary>
+        /// <value>True if a type is marked as a discriminated type, otherwise false.</value>
+        internal static Dictionary<Type, bool> DiscriminatedTypes
+        {
+            get { return _discriminatedTypes; }
         }
     }
 }

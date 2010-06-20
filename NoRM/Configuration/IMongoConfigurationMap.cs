@@ -45,5 +45,7 @@ namespace Norm.Configuration
         /// Type's property alias if configured; otherwise null
         /// </returns>
         string GetPropertyAlias(Type type, string propertyName);
+
+        string GetTypeDescriminator(Type type);
     }
 }
