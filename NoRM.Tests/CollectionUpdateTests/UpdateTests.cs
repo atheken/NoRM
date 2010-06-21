@@ -17,7 +17,18 @@ namespace Norm.Tests
         }
         public void Dispose()
         {
-            _server.Database.DropCollection("CheeseClubContacts");
+            try
+            {
+                _server.Database.DropCollection("CheeseClubContacts");
+            }
+            catch(MongoException e)
+            {
+                if (e.Message != "ns not found")
+                {
+                    throw;
+                }
+            }
+
             using (var admin = new MongoAdmin("mongodb://localhost/NormTests?pooling=false"))
             {
                 admin.DropDatabase();
@@ -40,6 +51,27 @@ namespace Norm.Tests
             var b = _collection.FindOne(new { c.Id });
             //prove that it was updated.
             Assert.Equal(c.Name, b.Name);
+        }
+
+        [Fact]
+        public void save_should_insert_and_then_update_when_id_is_nullable_int()
+        {
+            var collection = _server.GetCollection<CheeseClubContactWithNullableIntId>(); 
+            var subject = new CheeseClubContactWithNullableIntId();
+            collection.Save(subject);
+
+            var a = collection.FindOne(new { subject.Id });
+            //prove it was inserted.
+            Assert.Equal(subject.Id, a.Id);
+
+            subject.Name = "hello";
+            collection.Save(subject);
+
+            var b = collection.FindOne(new { subject.Id });
+            //prove that it was updated.
+            Assert.Equal(subject.Name, b.Name);
+
+            _server.Database.DropCollection(typeof(CheeseClubContactWithNullableIntId).Name);
         }
 
         [Fact]
