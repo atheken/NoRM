@@ -229,6 +229,13 @@ namespace Norm.Tests
         }
     }
 
+    internal class CheeseClubContactWithNullableIntId
+    {
+        public int? Id { get; set; }
+        public string Name { get; set; }
+        public string FavoriteCheese { get; set; }
+    }
+
     internal class ProductReference
     {
         public ProductReference()
