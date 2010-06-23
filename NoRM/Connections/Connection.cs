@@ -267,7 +267,11 @@ namespace Norm
             }
 
             _client.Close();
-            _netStream.Close();
+            if (_netStream != null)
+            {
+                _netStream.Flush();
+                _netStream.Close();
+            }
             _disposed = true;
         }
 
