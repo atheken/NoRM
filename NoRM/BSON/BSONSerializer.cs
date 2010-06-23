@@ -364,11 +364,10 @@ namespace Norm.BSON
             {
                 var bytes = (byte[])value;
                 var length = bytes.Length;
-                _writer.Write(length + 4);
-                _writer.Write((byte)2);
                 _writer.Write(length);
+                _writer.Write((byte)0);
                 _writer.Write(bytes);
-                Written(9 + length);
+                Written(5 + length);
             }
             else if (value is Guid)
             {

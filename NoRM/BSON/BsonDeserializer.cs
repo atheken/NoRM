@@ -427,6 +427,10 @@ namespace Norm.BSON
             var length = _reader.ReadInt32();
             var subType = _reader.ReadByte();
             Read(5 + length);
+            if (subType == 0)
+            {
+                return _reader.ReadBytes(length);
+            }
             if (subType == 2)
             {
                 return _reader.ReadBytes(_reader.ReadInt32());

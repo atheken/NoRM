@@ -190,7 +190,13 @@ namespace Norm.Tests
         [Fact]
         public void SerializationOfBytesIsNotLossy()
         {
-            var obj1 = new GeneralDTO { Bytes = BitConverter.GetBytes(Int32.MaxValue) };
+            var bin = new List<byte>();
+            for(int i = 1; i < 1000; i++)
+            {
+                bin.AddRange(BitConverter.GetBytes(i));
+            }
+
+            var obj1 = new GeneralDTO { Bytes = bin.ToArray() };
             var obj2 = new GeneralDTO { Bytes = null };
 
             var obj1Bytes = BsonSerializer.Serialize(obj1);
@@ -199,7 +205,7 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
-            Assert.Equal(obj1.Bytes, hydratedObj1.Bytes);
+            Assert.True(obj1.Bytes.SequenceEqual(hydratedObj1.Bytes));
             Assert.Equal(null, hydratedObj2.Bytes);
         }
 
