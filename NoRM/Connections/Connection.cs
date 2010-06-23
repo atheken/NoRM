@@ -15,6 +15,7 @@ namespace Norm
     {
         private readonly ConnectionStringBuilder _builder;
         private readonly TcpClient _client;
+        private NetworkStream _netStream;
         private bool _disposed;
         private int? _queryTimeout;
         private bool? _strictMode;
@@ -146,7 +147,12 @@ namespace Norm
         /// <returns></returns>
         public NetworkStream GetStream()
         {
-            return Client.GetStream();
+            if (_netStream == null)
+            {
+                _netStream = Client.GetStream();
+            }
+
+            return _netStream;
         }
 
         /// <summary>
@@ -261,6 +267,11 @@ namespace Norm
             }
 
             _client.Close();
+            if (_netStream != null)
+            {
+                _netStream.Flush();
+                _netStream.Close();
+            }
             _disposed = true;
         }
 
