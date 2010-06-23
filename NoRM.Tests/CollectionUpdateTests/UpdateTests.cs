@@ -54,9 +54,9 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void save_should_insert_and_then_update_when_id_is_nullable_int()
+        public void Save_should_insert_and_then_update_when_id_is_nullable_int()
         {
-            var collection = _server.GetCollection<CheeseClubContactWithNullableIntId>(); 
+            var collection = _server.GetCollection<CheeseClubContactWithNullableIntId>();
             var subject = new CheeseClubContactWithNullableIntId();
             collection.Save(subject);
 

@@ -269,8 +269,8 @@ namespace Norm.Tests
             {
                 var id1 = ObjectId.NewObjectId();
                 var id2 = ObjectId.NewObjectId();
-                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id1, Name = "Prod1" });
-                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id2, Name = "Prod2" });
+                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id1, Name = "Prod1", Price=3 });
+                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id2, Name = "Prod2" , Price=4});
                 var found = mongo.GetCollection<TestProduct>("Fake").Find();
                 Assert.Equal(2, found.Count());
                 Assert.Equal(id1, found.ElementAt(0)._id);
