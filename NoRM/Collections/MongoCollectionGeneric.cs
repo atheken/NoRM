@@ -106,10 +106,9 @@ namespace Norm.Collections
             var helper = TypeHelper.GetHelperForType(typeof(T));
             var idProperty = helper.FindIdProperty();
             var id = idProperty.Getter(entity);
-            if (id == null && 
-                (typeof(ObjectId).IsAssignableFrom(idProperty.Type)) ||
-                (typeof(long?).IsAssignableFrom(idProperty.Type)) ||
-                (typeof(int?).IsAssignableFrom(idProperty.Type)) )
+            if (id == null &&
+                (typeof(ObjectId).IsAssignableFrom(idProperty.Type) || typeof(long?).IsAssignableFrom(idProperty.Type) ||
+                 typeof(int?).IsAssignableFrom(idProperty.Type)))
             {
                 Insert(entity);
             }
