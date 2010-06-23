@@ -216,6 +216,23 @@ namespace Norm.Collections
         /// <summary>
         /// Asynchronously creates an index on this collection.
         /// </summary>
+        /// <param name="compoundIndexes">This is a collection of the elements in the type you wish to index along with the direction:
+        /// <code>
+        /// new[] {
+        ///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.A.B, IndexOption.Ascending),
+        ///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.C.D, IndexOption.Descending),
+        /// }
+        /// </code>
+        /// This will automatically map the MongoConfiguration aliases.
+        /// </param>
+        /// <param name="indexName">The name of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+        /// MongoDB will potentially optimize the index based on this being true.</param>
+        void CreateIndex(IEnumerable<MongoCollectionCompoundIndex<T>> compoundIndexes, string indexName, bool isUnique);
+
+        /// <summary>
+        /// Asynchronously creates an index on this collection.
+        /// </summary>
         /// <param retval="index">This is an expression of the elements in the type you wish to index, so you can do something like:
         /// <code>
         /// y=>y.MyIndexedProperty
