@@ -37,7 +37,7 @@ namespace Norm.Linq
         public object Execute<T>()
         {
             // This is the actual Query mechanism...            
-            var collection = new MongoCollection<T>(_translationResults.CollectionName, _db, _db.CurrentConnection);
+            IMongoCollection<T> collection = new MongoCollection<T>(_translationResults.CollectionName, _db, _db.CurrentConnection);
 
             object result;
             switch (_translationResults.MethodCall)

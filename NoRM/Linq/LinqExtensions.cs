@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using Norm.BSON;
 using Norm.Protocol.Messages;
 using Norm.Responses;
+using Norm.Configuration;
 
 namespace Norm.Linq
 {
@@ -88,6 +89,24 @@ namespace Norm.Linq
             var expando = new Expando();
             expando[qualifier.CommandName] = qualifier.ValueForCommand;
             return expando;
+        }
+
+        /// <summary>
+        /// Returns the fully qualified and mapped retval from the member expression.
+        /// </summary>
+        /// <param retval="mex"></param>
+        /// <returns></returns>
+        public static string GetPropertyAlias(this MemberExpression mex)
+        {
+            var retval = "";
+            var parentEx = mex.Expression as MemberExpression;
+            if (parentEx != null)
+            {
+                //we need to recurse because we're not at the root yet.
+                retval += GetPropertyAlias(parentEx) + ".";
+            }
+            retval += MongoConfiguration.GetPropertyAlias(mex.Expression.Type, mex.Member.Name);
+            return retval;
         }
     }
 }

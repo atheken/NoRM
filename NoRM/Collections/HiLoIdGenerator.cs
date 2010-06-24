@@ -14,7 +14,7 @@ namespace Norm.Collections
     public class HiLoIdGenerator
     {
         private readonly long _capacity;
-        private ReaderWriterLockSlim _lockSlim = new ReaderWriterLockSlim();
+        private readonly object generatorLock = new object();
         private long _currentHi;
         private long _currentLo;
         private MongoDatabase _db;
@@ -34,20 +34,19 @@ namespace Norm.Collections
         /// <returns></returns>
         public long GenerateId(string collectionName)
         {
-            _lockSlim.EnterUpgradeableReadLock();
             long incrementedCurrentLow = Interlocked.Increment(ref _currentLo);
             if (incrementedCurrentLow > _capacity)
             {
-                _lockSlim.EnterWriteLock();
-                if (Thread.VolatileRead(ref _currentLo) > _capacity)
+                lock (generatorLock)
                 {
-                    _currentHi = GetNextHi(collectionName);
-                    _currentLo = 1;
-                    incrementedCurrentLow = 1;
+                    if (Thread.VolatileRead(ref _currentLo) > _capacity)
+                    {
+                        _currentHi = GetNextHi(collectionName);
+                        _currentLo = 1;
+                        incrementedCurrentLow = 1;
+                    }
                 }
-                _lockSlim.ExitWriteLock();
             }
-            _lockSlim.ExitUpgradeableReadLock();
             return (_currentHi - 1) * _capacity + (incrementedCurrentLow);
         }
 

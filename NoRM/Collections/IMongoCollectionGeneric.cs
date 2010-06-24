@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Linq;
+using Norm.Commands.Modifiers;
 using Norm.Responses;
 using Norm.BSON;
 using System.Linq.Expressions;
-using Norm.Protocol.Messages;
-using System.Linq;
-using Norm.Commands.Modifiers;
 
 namespace Norm.Collections
 {
@@ -18,246 +17,42 @@ namespace Norm.Collections
     /// Generic collection interface
     /// </summary>
     /// <typeparam retval="T">The type of collection</typeparam>
-    public interface IMongoCollection<T>
+    public interface IMongoCollection<T> 
     {
         /// <summary>
-        /// This is the LINQ Hook, call me and you'll be querying MongoDB via LINQ. w00t!
+        /// Finds one document.
         /// </summary>
+        /// <typeparam retval="U">Type to find</typeparam>
+        /// <param retval="template">The template.</param>
         /// <returns></returns>
-        IQueryable<T> AsQueryable();
+        T FindOne<U>(U template);
 
         /// <summary>
-        /// Attempts to save or update an instance
+        /// Gets a nested collection with the type specified and the retval specified.
         /// </summary>
-        /// <param retval="entity">The entity.</param>
-        /// <remarks>
-        /// Only works when the Id property is of type ObjectId
-        /// </remarks>
-        void Save(T entity);
-
-        /// <summary>
-        /// Get a child collection of the specified type.
-        /// </summary>
-        /// <typeparam retval="U">Type of collection</typeparam>
-        /// <param retval="collectionName">The collection Name.</param>
+        /// <typeparam retval="U"></typeparam>
+        /// <param retval="collectionName"></param>
         /// <returns></returns>
         IMongoCollection<U> GetChildCollection<U>(string collectionName) where U : class, new();
 
         /// <summary>
-        /// Overload of Update that updates one document and doesn't upsert if no matches are found.
+        /// Updates the specified document.
         /// </summary>
         /// <typeparam retval="X">Document to match</typeparam>
-        /// <typeparam retval="U">Value document</typeparam>
-        /// <param retval="matchDocument">The match Document.</param>
-        /// <param retval="valueDocument">The value Document.</param>
-        void UpdateOne<X, U>(X matchDocument, U valueDocument);
-
-        /// <summary>
-        /// The update.
-        /// </summary>
-        /// <typeparam retval="X">Document to match</typeparam>
-        /// <typeparam retval="U">Value document</typeparam>
+        /// <typeparam retval="U">Document to update</typeparam>
         /// <param retval="matchDocument">The match document.</param>
         /// <param retval="valueDocument">The value document.</param>
-        /// <param retval="updateMultiple">The update multiple.</param>
-        /// <param retval="upsert">The upsert.</param>
-        /// <exception cref="NotSupportedException">
-        /// </exception>
+        /// <param retval="updateMultiple">if set to <c>true</c> update all matching documents.</param>
+        /// <param retval="upsert">if set to <c>true</c> upsert.</param>
         void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert);
 
-        /// <summary>
-        /// The retval of this collection, including the database prefix.
-        /// </summary>
-        string FullyQualifiedName {get;}
-
-        bool Updateable { get; }
-
-        /// <summary>
-        /// Deletes all indices on this collection.
-        /// </summary>
-        /// <param retval="numberDeleted">
-        /// </param>
-        /// <returns>
-        /// The delete indices.
-        /// </returns>
-        bool DeleteIndices(out int numberDeleted);
-
-        /// <summary>
-        /// Deletes the specified index for the collection.
-        /// </summary>
-        /// <param retval="indexName">
-        /// </param>
-        /// <param retval="numberDeleted">
-        /// </param>
-        /// <returns>
-        /// The delete index.
-        /// </returns>
-        bool DeleteIndex(string indexName, out int numberDeleted);
-
-        /// <summary>
-        /// This will do a search on the collection using the specified template.
-        /// If no documents are found, default(T) will be returned.
-        /// </summary>
-        /// <typeparam retval="U">A type that has each member set to the value to search.
-        /// Keep in mind that all the properties must either be concrete values, or the
-        /// special "Qualifier"-type values.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <returns>
-        /// The first document that matched the template, or default(T)
-        /// </returns>
-        T FindOne<U>(U template);
-
-        /// <summary>Allows a document to be updated using the specified action.</summary>
-        void Update<X>(X matchDocument, Action<IModifierExpression<T>> action);
-
-        /// <summary>
-        /// Convenience overload for FindAndModify with Sort
-        /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <typeparam name="X"></typeparam>
-        /// <param name="query"></param>
-        /// <param name="update"></param>
-        /// <returns></returns>
-        T FindAndModify<U, X>(U query, X update);
-        
-
-        /// <summary>
-        /// Locate and update one element, returning it.
-        /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <typeparam name="X"></typeparam>
-        /// <typeparam name="Y"></typeparam>
-        /// <param name="query"></param>
-        /// <param name="update"></param>
-        /// <param name="sort"></param>
-        /// <returns></returns>
-        T FindAndModify<U, X, Y>(U query, X update, Y sort);
-
-        /// <summary>TODO::Description.</summary>
         void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert);
 
         /// <summary>
-        /// Find objects in the collection without any qualifiers.
+        /// Gets a value indicating whether this <see cref="IMongoCollection&lt;T&gt;"/> is updateable.
         /// </summary>
-        /// <returns></returns>
-        new IEnumerable<T> Find();
-
-        /// <summary>
-        /// Return all documents matching the template
-        /// </summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Ok, not all documents, just all documents up to Int32.MaxValue - if you bring that many back, you've crashed. Sorry.
-        /// </remarks>
-        IEnumerable<T> Find<U>(U template);
-
-        /// <summary>
-        /// Get the documents that match the specified template.
-        /// </summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The number to return from this command.</param>
-        /// <returns></returns>
-        IEnumerable<T> Find<U>(U template, int limit);
-
-        /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The number to return from this command.</param>
-        /// <param retval="skip">The skip step.</param>
-        IEnumerable<T> Find<U>(U template, int limit, int skip);
-
-        /// <summary>Finds the documents matching the template, an limits/skips the specified numbers.</summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <typeparam retval="O">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="orderby">How to order the results</param>
-        /// <param retval="limit">The number to return from this command.</param>
-        /// <param retval="skip">The skip step.</param>
-        IEnumerable<T> Find<U, O>(U template, O orderby, int limit, int skip);
-
-        /// <summary>
-        /// The find.
-        /// </summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The limit.</param>
-        /// <param retval="fullyQualifiedName">The fully qualified retval.</param>
-        /// <returns></returns>
-        IEnumerable<T> Find<U>(U template, int limit, string fullyQualifiedName);
-
-        /// <summary>
-        /// A count on this collection without any filter.
-        /// </summary>
-        /// <returns>The count.</returns>
-        new long Count();
-
-        /// <summary>
-        /// The get collection statistics.
-        /// </summary>
-        /// <returns></returns>
-        new CollectionStatistics GetCollectionStatistics();
-
-
-        /// <summary>
-        /// Asynchronously creates an index on this collection.
-        /// It is highly recommended that you use the overload of this method that accepts an expression unless you need the granularity that this method provides.
-        /// </summary>
-        /// <param retval="fieldSelectionExpando">The document properties that participate in this index. Each property of "fieldSelectionExpando" should be 
-        /// set to either "IndexOption.Ascending" or "IndexOption.Descending", the properties can be deep aliases, like "Suppiler.Name",
-        /// but remember that this will make no effort to check that what you put in for values match the MongoConfiguration.</param>
-        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
-        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
-        /// MongoDB will potentially optimize the index based on this being true.</param>
-        void CreateIndex(Expando key, String indexName, bool isUnique);
-
-        /// <summary>
-        /// Asynchronously creates an index on this collection.
-        /// </summary>
-        /// <param name="compoundIndexes">This is a collection of the elements in the type you wish to index along with the direction:
-        /// <code>
-        /// new[] {
-        ///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.A.B, IndexOption.Ascending),
-        ///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.C.D, IndexOption.Descending),
-        /// }
-        /// </code>
-        /// This will automatically map the MongoConfiguration aliases.
-        /// </param>
-        /// <param name="indexName">The name of the index as it should appear in the special "system.indexes" child collection.</param>
-        /// <param name="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
-        /// MongoDB will potentially optimize the index based on this being true.</param>
-        void CreateIndex(IEnumerable<MongoCollectionCompoundIndex<T>> compoundIndexes, string indexName, bool isUnique);
-
-        /// <summary>
-        /// Asynchronously creates an index on this collection.
-        /// </summary>
-        /// <param retval="index">This is an expression of the elements in the type you wish to index, so you can do something like:
-        /// <code>
-        /// y=>y.MyIndexedProperty
-        /// </code>
-        /// or, if you have a multi-fieldSelectionExpando index, you can do this:
-        /// <code>
-        /// y=> new { y.PropertyA, y.PropertyB.Property1, y.PropertyC }
-        /// </code>
-        /// This will automatically map the MongoConfiguration aliases.
-        /// </param>
-        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
-        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
-        /// MongoDB will potentially optimize the index based on this being true.</param>
-        /// <param retval="direction">Should all of the elements in the index be sorted Ascending, or Decending, if you need to sort each property differently, 
-        /// you should use the Expando overload of this method for greater granularity.</param>
-        void CreateIndex<U>(Expression<Func<T, U>> index, string indexName, bool isUnique, IndexOption direction);
-
-        /// <summary>
-        /// Gets the distinct values for the specified fieldSelectionExpando.
-        /// </summary>
-        /// <typeparam retval="U">You better know that every value that could come back
-        /// is of this type, or BAD THINGS will happen.</typeparam>
-        /// <param retval="keyName">Name of the fieldSelectionExpando.</param>
-        /// <returns></returns>
-        IEnumerable<U> Distinct<U>(string keyName);
+        /// <value><c>true</c> if updateable; otherwise, <c>false</c>.</value>
+        bool Updateable { get; }
 
         /// <summary>
         /// Delete the documents that mact the specified template.
@@ -268,21 +63,55 @@ namespace Norm.Collections
         void Delete<U>(U template);
 
         /// <summary>
-        /// Deletes the specified document based on it's Id property.
+        /// Delete the entity
         /// </summary>
-        void Delete(T document);
+        void Delete(T entity);
 
         /// <summary>
-        /// Finds documents
+        /// Execute the mapreduce on this collection.
         /// </summary>
-        /// <typeparam retval="U">Type of document to find.</typeparam>
-        /// <param retval="template">The template.</param>
-        /// <param retval="limit">The limit.</param>
-        /// <param retval="skip">The skip.</param>
-        /// <param retval="fullyQualifiedName">The fully qualified retval.</param>
+        /// <param retval="map"></param>
+        /// <param retval="reduce"></param>
         /// <returns></returns>
-        IEnumerable<T> Find<U>(U template, int limit, int skip, string fullyQualifiedName);
+        IEnumerable<X> MapReduce<X>(string map, string reduce);
 
+        /// <summary>
+        /// Execute the mapreduce with a limiting query on this collection.
+        /// </summary>
+        /// <param retval="template"></param>
+        /// <param retval="map"></param>
+        /// <param retval="reduce"></param>
+        /// <returns></returns>
+        IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce);
+
+        /// <summary>
+        /// Execute the mapreduce with a limiting query and finalize on this collection.
+        /// </summary>
+        /// <param retval="template"></param>
+        /// <param retval="map"></param>
+        /// <param retval="reduce"></param>
+        /// <param retval="finalize"></param>
+        /// <returns></returns>
+        IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce, string finalize);
+
+        /// <summary>
+        /// Execute the mapreduce with the supplied options on this collection.
+        /// </summary>
+        /// <param retval="options"></param>
+        /// <returns></returns>
+        IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
+
+        /// <summary>
+        /// This command can be used to atomically modify a document (at most one) and return it.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <typeparam name="X"></typeparam>
+        /// <typeparam name="Y"></typeparam>
+        /// <param name="query">The document template used to find the document to find and modify</param>
+        /// <param name="update">A modifier object</param>
+        /// <param name="sort">If multiple docs match, choose the first one in the specified sort order as the object to manipulate</param>
+        /// <returns></returns>
+        T FindAndModify<U, X, Y>(U query, X update, Y sort);
 
         /// <summary>
         /// Locates documents that match the template, in the order specified.
@@ -303,43 +132,19 @@ namespace Norm.Collections
         /// <returns></returns>
         IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName);
 
-        IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, Expression<Func<T, Z>> fieldSelection);
 
         IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, String fullName, Expression<Func<T, Z>> fieldSelection);
 
+        /// <summary>
+        /// The retval of this collection, including the database prefix.
+        /// </summary>
+        string FullyQualifiedName { get; }
 
         /// <summary>
-        /// Finds documents that match the template, and ordered according to the orderby document.
+        /// This is the LINQ Hook, call me and you'll be querying MongoDB via LINQ. w00t!
         /// </summary>
-        /// <typeparam retval="U"></typeparam>
-        /// <typeparam retval="S"></typeparam>
-        /// <param retval="template">The spec document</param>
-        /// <param retval="orderBy">The order specification</param>
-        /// <returns>A set of documents ordered correctly and matching the spec.</returns>
-        IEnumerable<T> Find<U, S>(U template, S orderBy);
-        /// <summary>
-        /// Generates a query explain plan.
-        /// </summary>
-        /// <typeparam retval="U">The type of the template document (probably an anonymous type..</typeparam>
-        /// <param retval="template">The template of the query to explain.</param>
         /// <returns></returns>
-        ExplainResponse Explain<U>(U template);
-
-        /// <summary>
-        /// A count using the specified filter.
-        /// </summary>
-        /// <typeparam retval="U">Document type</typeparam>
-        /// <param retval="query">The query.</param>
-        /// <returns>The count.</returns>
-        long Count<U>(U query);
-
-        /// <summary>
-        /// Inserts documents
-        /// </summary>
-        /// <param retval="documentsToInsert">
-        /// The documents to insert.
-        /// </param>
-        void Insert(params T[] documentsToInsert);
+        IQueryable<T> AsQueryable();
 
         /// <summary>
         /// Inserts documents
@@ -351,51 +156,70 @@ namespace Norm.Collections
         /// </exception>
         void Insert(IEnumerable<T> documentsToInsert);
 
+        /// <summary>
+        /// Generates a query explain plan.
+        /// </summary>
+        /// <typeparam retval="U">The type of the template document (probably an anonymous type..</typeparam>
+        /// <param retval="template">The template of the query to explain.</param>
+        /// <returns></returns>
+        ExplainResponse Explain<U>(U template);
 
         /// <summary>
-        /// Executes the MapReduce on this collection
+        /// Asynchronously creates an index on this collection.
+        /// It is highly recommended that you use the overload of this method that accepts an expression unless you need the granularity that this method provides.
         /// </summary>
-        /// <typeparam retval="X">The return type</typeparam>
-        /// <param retval="map"></param>
-        /// <param retval="reduce"></param>
-        /// <returns></returns>
-        IEnumerable<X> MapReduce<X>(string map, string reduce);
+        /// <param retval="fieldSelectionExpando">The document properties that participate in this index. Each property of "fieldSelectionExpando" should be 
+        /// set to either "IndexOption.Ascending" or "IndexOption.Descending", the properties can be deep aliases, like "Suppiler.Name",
+        /// but remember that this will make no effort to check that what you put in for values match the MongoConfiguration.</param>
+        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+        /// MongoDB will potentially optimize the index based on this being true.</param>
+        void CreateIndex(Expando key, String indexName, bool isUnique);
+        
+        /// <summary>
+        /// Deletes the specified index for the collection.
+        /// </summary>
+        /// <param retval="indexName"></param>
+        /// <param retval="numberDeleted"></param>
+        /// <returns>The delete index.</returns>
+        bool DeleteIndex(string indexName, out int numberDeleted);
 
         /// <summary>
-        /// Executes the map reduce with an applied template
+        /// Attempts to save or update an instance
         /// </summary>
-        /// <typeparam retval="U">The type of the template</typeparam>
-        /// <typeparam retval="X">The return type</typeparam>
-        /// <param retval="template"></param>
-        /// <param retval="map"></param>
-        /// <param retval="reduce"></param>
-        /// <returns></returns>
-        IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce);
+        /// <param retval="entity">The entity.</param>
+        /// <remarks>
+        /// Only works when the Id property is of type ObjectId
+        /// </remarks>
+        void Save(T entity);
 
         /// <summary>
-        /// Executes the map reduce with an applied template and finalize
+        /// The get collection statistics.
         /// </summary>
-        /// <typeparam retval="U">The type of the template</typeparam>
-        /// <typeparam retval="X">The return type</typeparam>
-        /// <param retval="template">The template</param>
-        /// <param retval="map"></param>
-        /// <param retval="reduce"></param>
-        /// <param retval="finalize"></param>
         /// <returns></returns>
-        IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce, string finalize);
+        CollectionStatistics GetCollectionStatistics();
 
         /// <summary>
-        /// Executes the map reduce with any options
+        /// A count using the specified filter.
         /// </summary>
-        /// <typeparam retval="X">The return type</typeparam>
-        /// <param retval="options">The options</param>
-        /// <returns></returns>
-        IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
+        /// <typeparam retval="U">Document type</typeparam>
+        /// <param retval="query">The query.</param>
+        /// <returns>The count.</returns>
+        long Count<U>(U query);
 
         /// <summary>
-        /// Produces a new sequential ID for this collection.
+        /// Gets the distinct values for the specified fieldSelectionExpando.
         /// </summary>
+        /// <typeparam retval="U">You better know that every value that could come back
+        /// is of this type, or BAD THINGS will happen.</typeparam>
+        /// <param retval="keyName">Name of the fieldSelectionExpando.</param>
         /// <returns></returns>
+        IEnumerable<U> Distinct<U>(string keyName);
+
+        /// <summary>
+        /// Generates a new identity value using the HiLo algorithm
+        /// </summary>
+        /// <returns>New identity value</returns>
         long GenerateId();
     }
 }

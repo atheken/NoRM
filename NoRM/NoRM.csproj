@@ -108,6 +108,7 @@
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />
     <Compile Include="Collections\MongoCollectionCompoundIndex.cs" />
+    <Compile Include="Collections\MongoCollectionExtensions.cs" />
     <Compile Include="Collections\MongoCollectionGeneric.cs" />
     <Compile Include="Collections\HiLoIdGenerator.cs" />
     <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
