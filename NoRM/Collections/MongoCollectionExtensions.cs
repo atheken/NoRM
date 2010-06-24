@@ -14,22 +14,6 @@ namespace Norm
 {
     public static class MongoCollectionExtensions
     {
-        /// <summary>TODO::Description.</summary>
-        public static void Update<T, X>(this IMongoCollection<T> collection, X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
-        {
-            var modifierExpression = new ModifierExpression<T>();
-            action(modifierExpression);
-            if (matchDocument is ObjectId)
-            {
-                collection.Update(new { _id = matchDocument }, modifierExpression.Expression, updateMultiple, upsert);
-            }
-            else
-            {
-                collection.Update(matchDocument, modifierExpression.Expression, updateMultiple, upsert);
-
-            }
-        }
-
         /// <summary>
         /// Asynchronously creates an index on this collection.
         /// </summary>

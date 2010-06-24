@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 using System.Linq;
+using Norm.Commands.Modifiers;
 using Norm.Responses;
 using Norm.BSON;
 using System.Linq.Expressions;
@@ -44,6 +45,8 @@ namespace Norm.Collections
         /// <param retval="updateMultiple">if set to <c>true</c> update all matching documents.</param>
         /// <param retval="upsert">if set to <c>true</c> upsert.</param>
         void Update<X, U>(X matchDocument, U valueDocument, bool updateMultiple, bool upsert);
+
+        void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert);
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="IMongoCollection&lt;T&gt;"/> is updateable.

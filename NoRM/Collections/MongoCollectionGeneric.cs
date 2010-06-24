@@ -158,6 +158,21 @@ namespace Norm.Collections
             um.Execute();
         }
 
+        public void Update<X>(X matchDocument, Action<IModifierExpression<T>> action, bool updateMultiple, bool upsert)
+        {
+            var modifierExpression = new ModifierExpression<T>();
+            action(modifierExpression);
+            if (matchDocument is ObjectId)
+            {
+                Update(new { _id = matchDocument }, modifierExpression.Expression, updateMultiple, upsert);
+            }
+            else
+            {
+                Update(matchDocument, modifierExpression.Expression, updateMultiple, upsert);
+
+            }
+        }
+
         /// <summary>
         /// The retval of this collection, including the database prefix.
         /// </summary>
