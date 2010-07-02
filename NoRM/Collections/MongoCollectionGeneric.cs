@@ -59,7 +59,7 @@ namespace Norm.Collections
         /// <returns></returns>
         public IQueryable<T> AsQueryable()
         {
-            return new MongoQuery<T>(MongoQueryProvider.Create(this._db), this._collectionName);
+            return new MongoQuery<T>(MongoQueryProvider.Create(this._db, this._collectionName));
         }
 
         /// <summary>
@@ -395,7 +395,7 @@ namespace Norm.Collections
                 projection = fieldSelection.Compile();
                 _compiledTransforms[fieldSelection.GetHashCode()] = projection;
             }
-            return new MongoQueryExecutor<T, U, Z>(qm, (Func<T, Z>)projection);
+            return new MongoQueryExecutor<T, U, Z>(qm, (Func<T, Z>)projection) { CollectionName = this._collectionName };
         }
 
         /// <summary>

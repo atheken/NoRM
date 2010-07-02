@@ -32,7 +32,7 @@ namespace Norm.Linq
 
         private string AggregatePropName { get; set; }
         private string TypeName { get; set; }
-        private string CollectionName { get; set; }
+        public string CollectionName { get; set; }
         private string MethodCall { get; set; }
 
         /// <summary>
@@ -616,8 +616,7 @@ namespace Norm.Linq
             {
                 // set the collection retval
                 TypeName = q.ElementType.Name;
-                CollectionName = MongoConfiguration.GetCollectionName(q.ElementType);
-
+                
                 // this is our Query wrapper - see if it has an expression
                 var qry = (IMongoQuery)c.Value;
                 var innerExpression = qry.GetExpression();
