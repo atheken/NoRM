@@ -26,7 +26,7 @@ namespace Norm.Collections
         /// <param name="db">MongoDatabase instance</param>
         /// <param name="collectionName">Collection Name</param>
         /// <returns>Generated identity</returns>
-        public long GenerateId(MongoDatabase db, string collectionName)
+        public long GenerateId(IMongoDatabase db, string collectionName)
         {
             HiLoIdGenerator value;
 

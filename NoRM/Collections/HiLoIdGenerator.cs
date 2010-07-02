@@ -17,9 +17,9 @@ namespace Norm.Collections
         private readonly object generatorLock = new object();
         private long _currentHi;
         private long _currentLo;
-        private MongoDatabase _db;
+        private IMongoDatabase _db;
 
-        public HiLoIdGenerator(MongoDatabase db, long capacity)
+        public HiLoIdGenerator(IMongoDatabase db, long capacity)
         {
             _db = db;
             _currentHi = 0;

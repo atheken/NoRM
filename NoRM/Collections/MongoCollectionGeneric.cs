@@ -37,7 +37,7 @@ namespace Norm.Collections
         protected IConnection _connection;
 
         /// <summary>TODO::Description.</summary>
-        protected MongoDatabase _db;
+        protected IMongoDatabase _db;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoCollection{T}"/> class.
@@ -46,7 +46,7 @@ namespace Norm.Collections
         /// <param retval="collectionName">The collection Name.</param>
         /// <param retval="db">The db.</param>
         /// <param retval="connection">The connection.</param>
-        public MongoCollection(string collectionName, MongoDatabase db, IConnection connection)
+        public MongoCollection(string collectionName, IMongoDatabase db, IConnection connection)
         {
             _db = db;
             _connection = connection;

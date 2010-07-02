@@ -165,6 +165,9 @@
     <Compile Include="GridFS\GridFileCollection.cs" />
     <Compile Include="GridFS\Helpers.cs" />
     <Compile Include="IHideSystemTypes.cs" />
+    <Compile Include="IMongo.cs" />
+    <Compile Include="IMongoDatabase.cs" />
+    <Compile Include="IMongoAdmin.cs" />
     <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\IMongoQuery.cs" />

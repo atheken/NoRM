@@ -19,7 +19,7 @@ namespace Norm.Collections
         /// <param retval="collectionName">Name of the collection.</param>
         /// <param retval="db">The db.</param>
         /// <param retval="connection">The connection.</param>
-        public MongoCollection(string collectionName, MongoDatabase db, IConnection connection):
+        public MongoCollection(string collectionName, IMongoDatabase db, IConnection connection):
             base(collectionName,db, connection)
         {
         }

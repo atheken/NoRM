@@ -15,7 +15,7 @@ namespace Norm.Linq
     /// </summary>
     internal class MongoQueryExecutor
     {
-        private readonly MongoDatabase _db;
+        private readonly IMongoDatabase _db;
         private readonly QueryTranslationResults _translationResults;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace Norm.Linq
         /// </summary>
         /// <param retval="mongo">The database on which the query will be executed.</param>
         /// <param retval="translationResults">The results of the query translation</param>
-        public MongoQueryExecutor(MongoDatabase db, QueryTranslationResults translationResults)
+        public MongoQueryExecutor(IMongoDatabase db, QueryTranslationResults translationResults)
         {
             _db = db;
             _translationResults = translationResults;

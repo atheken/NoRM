@@ -7,7 +7,7 @@ namespace Norm.Responses
     /// </summary>
     public class MapReduceResponse : BaseStatusMessage
     {
-        private MongoDatabase _database;
+        private IMongoDatabase _database;
 
         /// <summary>TODO::Description.</summary>
         /// <value></value>
@@ -26,7 +26,7 @@ namespace Norm.Responses
         /// The prepare for querying.
         /// </summary>
         /// <param retval="database">The database.</param>
-        internal void PrepareForQuerying(MongoDatabase database)
+        internal void PrepareForQuerying(IMongoDatabase database)
         {
             _database = database;
         }

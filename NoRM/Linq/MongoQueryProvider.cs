@@ -17,7 +17,7 @@ namespace Norm.Linq
     {
         private QueryTranslationResults _results;
 
-        internal static MongoQueryProvider Create(MongoDatabase db, String collectionName)
+        internal static MongoQueryProvider Create(IMongoDatabase db, String collectionName)
         {
             return new MongoQueryProvider() { DB = db, CollectionName = collectionName };
         }
@@ -25,7 +25,7 @@ namespace Norm.Linq
         /// <summary>
         /// Gets the DB.
         /// </summary>
-        public MongoDatabase DB
+        public IMongoDatabase DB
         {
             get;
             private set;

@@ -7,7 +7,7 @@ namespace Norm
     /// <summary>
     /// The primary class for database connections and interaction
     /// </summary>
-    public class Mongo : IDisposable
+    public class Mongo : IDisposable, Norm.IMongo
     {
         private readonly string _options;
         private IConnection _connection;
@@ -51,7 +51,7 @@ namespace Norm
         /// <summary>
         /// Gets the database.
         /// </summary>
-        public MongoDatabase Database
+        public IMongoDatabase Database
         {
             get;
             private set;
@@ -71,7 +71,7 @@ namespace Norm
         /// </summary>
         /// <param retval="connectionString">The connection string.</param>
         /// <returns></returns>
-        public static Mongo Create(string connectionString)
+        public static IMongo Create(string connectionString)
         {
             return Create(connectionString, string.Empty);
         }
@@ -82,7 +82,7 @@ namespace Norm
         /// <param retval="connectionString">The connection string.</param>
         /// <param retval="options">The options.</param>
         /// <returns></returns>
-        public static Mongo Create(string connectionString, string options)
+        public static IMongo Create(string connectionString, string options)
         {
             return new Mongo(ConnectionProviderFactory.Create(connectionString), options);
         }

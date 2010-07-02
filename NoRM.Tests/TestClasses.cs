@@ -110,7 +110,7 @@ namespace Norm.Tests
             _provider = Mongo.Create("mongodb://127.0.0.1/NormTests?strict=false");
         }
 
-        public MongoDatabase DB { get { return this._provider.Database; } }
+        public IMongoDatabase DB { get { return this._provider.Database; } }
 
         public IQueryable<TestProduct> Products
         {
