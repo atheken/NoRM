@@ -491,15 +491,14 @@ namespace Norm.Tests
         [Fact]
         public void StringAsIdentifierDoesTranslation()
         {
-            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("strict=false")))
             {
                 
                 var collection = mongo.GetCollection<StringIdentifier>();
                 mongo.Database.DropCollection("StringIdentifier");
                 collection.Insert(new StringIdentifier { CollectionName = "test", ServerHi = 2 });
                 
-                var result = collection.FindOne(new { CollectionName = "test" });
-                //var result = collection.AsQueryable().Where(x => x.CollectionName == "test").SingleOrDefault();
+                var result = collection.AsQueryable().Where(x => x.CollectionName == "test").SingleOrDefault();
                 
                 Assert.Equal(2, result.ServerHi);
             }

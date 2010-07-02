@@ -156,22 +156,29 @@ namespace Norm.BSON
             var typeHelper = ReflectionHelper.GetHelperForType(document.GetType());
             var idProperty = typeHelper.FindIdProperty();
             var documentType = document.GetType();
-            var discriminator = GetTypeDiscriminator(typeHelper, documentType);
+            var discriminator = typeHelper.GetTypeDiscriminator();
 
             if (String.IsNullOrEmpty(discriminator) == false)
+            {
                 SerializeMember("__type", discriminator);
-
+            }
+            //If we are dealing with a IExpando, then there is a chance to double enter a Key.. 
+            // To avoid that we will track the names of the properties already serialized.
+            List<string> processedFields = new List<string>();
             foreach (var property in typeHelper.GetProperties())
             {
                 var name = property == idProperty && !IsDbReference(property.DeclaringType)
                                ? "_id"
                                : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
+
                 object value;
                 if (property.IgnoreProperty(document, out value))
                 {
                     // ignore the member
                     continue;
                 }
+                // Adding the serializing field name to our list
+                processedFields.Add(name);
                 // serialize the member
                 SerializeMember(name, value);
             }
@@ -181,17 +188,13 @@ namespace Norm.BSON
             {
                 foreach (var f in fly.AllProperties())
                 {
-                    SerializeMember(f.PropertyName, f.Value);
+                    //Only serialize if the name hasn't already been serialized to the object.
+                    if (!processedFields.Contains(f.PropertyName))
+                    {
+                        SerializeMember(f.PropertyName, f.Value);
+                    }
                 }
             }
-        }
-
-        private string GetTypeDiscriminator(ReflectionHelper typeHelper, Type documentType) 
-        {
-            var discriminator = typeHelper.GetTypeDiscriminator();
-            if (String.IsNullOrEmpty(discriminator))
-                discriminator = MongoConfiguration.GetTypeDiscriminator(documentType);
-            return discriminator;
         }
 
         /// <summary>
