@@ -20,6 +20,26 @@ namespace Norm.Tests
                 session.Drop<TestProduct>();
                 session.Drop<Post>();
             }
+            using (var db = Mongo.Create(TestHelper.ConnectionString("strict=false")))
+            {
+                db.Database.DropCollection("acmePost");
+            }
+        }
+
+        [Fact]
+        void ProviderDoesntChokeOnCustomCollectionNames()
+        {
+            using (var db = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var collname = "acmePost";
+                var coll = db.GetCollection<Post>(collname);
+                coll.Insert(new Post { Title = "a" }, new Post { Title = "b" }, new Post { Title = "c" });
+                var results = coll.AsQueryable().Where(y => y.Title == "c").ToArray();
+
+                Assert.Equal("c", results.ElementAt(0).Title);
+
+            }
+
         }
 
         [Fact]
@@ -198,7 +218,7 @@ namespace Norm.Tests
                 Assert.Equal(false, queryable.QueryStructure().IsComplex);
             }
         }
-        
+
         [Fact]
         public void LinqQueriesShouldSupportNulls()
         {

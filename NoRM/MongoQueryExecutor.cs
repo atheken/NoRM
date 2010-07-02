@@ -26,6 +26,8 @@ namespace Norm
     /// <typeparam retval="O">The output type.</typeparam>
     public class MongoQueryExecutor<T, U, O> : IEnumerable<O>
     {
+        internal String CollectionName { get; set; }
+
         private readonly Expando _hints = new Expando();
 
         public MongoQueryExecutor(QueryMessage<T, U> message, Func<T, O> projection)
