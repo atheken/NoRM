@@ -475,6 +475,41 @@ namespace Norm.Collections
             this.CreateIndex(key, indexName, isUnique);
         }
 
+		/// <summary>
+		/// Asynchronously creates an index on this collection.
+		/// </summary>
+		/// <param retval="index">This is an expression of the elements in the type you wish to index, so you can do something like:
+		/// <code>
+		/// y=>y.MyIndexedProperty
+		/// </code>
+		/// or, if you have a multi-fieldSelectionExpando index, you can do this:
+		/// <code>
+		/// y=> new { y.PropertyA, y.PropertyB.Property1, y.PropertyC }
+		/// </code>
+		/// This will automatically map the MongoConfiguration aliases.
+		/// </param>
+		/// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
+		/// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+		/// MongoDB will potentially optimize the index based on this being true.</param>
+		public void CreateGeoIndex<U>(Expression<Func<T, U>> index, string indexName, bool isUnique)
+		{
+			var exp = index.Body as NewExpression;
+			var key = new Expando();
+			if (exp != null)
+			{
+				foreach (var x in exp.Arguments.OfType<MemberExpression>())
+				{
+					key[this.RecurseMemberExpression(x)] = "2d";
+				}
+			}
+			else if (index.Body is MemberExpression)
+			{
+				var me = index.Body as MemberExpression;
+				key[this.RecurseMemberExpression(me)] = "2d";
+			}
+			this.CreateIndex(key, indexName, isUnique);
+		}
+
         /// <summary>
         /// Gets the distinct values for the specified fieldSelectionExpando.
         /// </summary>
