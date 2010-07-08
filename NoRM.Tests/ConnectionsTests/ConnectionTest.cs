@@ -89,7 +89,7 @@ namespace Norm.Tests
         {
             using (var connection = new DisposableConnection(ConnectionStringBuilder.Create(TestHelper.ConnectionString("querytimeout=30&strict=false", "ussrr", "ppaassss"))))
             {
-                Assert.Equal("08f11f775e2a8cf4248f0ae6126164f0", connection.Digest("1234abc"));
+                Assert.Equal("21069b52452d123b3f4885400c1c9581", connection.Digest("1234abc"));
             }
         }
 

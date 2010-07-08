@@ -15,6 +15,7 @@ namespace Norm
     {
         private readonly ConnectionStringBuilder _builder;
         private readonly TcpClient _client;
+        private NetworkStream _netStream;
         private bool _disposed;
         private int? _queryTimeout;
         private bool? _strictMode;
@@ -116,7 +117,23 @@ namespace Norm
         {
             using (var md5 = MD5.Create())
             {
-                var rawDigest = Encoding.UTF8.GetBytes(string.Concat(nonce, UserName, _builder.Password));
+                var rawDigest = Encoding.UTF8.GetBytes(string.Concat(nonce, UserName, CreatePasswordDigest()));
+                var hashed = md5.ComputeHash(rawDigest);
+                var sb = new StringBuilder(hashed.Length * 2);
+                Array.ForEach(hashed, b => sb.Append(b.ToString("X2")));
+                return sb.ToString().ToLower();
+            }
+        }
+
+        /// <summary>
+        /// Create the password digest from the username and password.
+        /// </summary>
+        /// <returns>The password digest.</returns>
+        private string CreatePasswordDigest()
+        {
+            using (var md5 = MD5.Create())
+            {
+                var rawDigest = Encoding.UTF8.GetBytes(string.Concat(_builder.UserName, ":mongo:", _builder.Password));
                 var hashed = md5.ComputeHash(rawDigest);
                 var sb = new StringBuilder(hashed.Length * 2);
                 Array.ForEach(hashed, b => sb.Append(b.ToString("X2")));
@@ -130,7 +147,12 @@ namespace Norm
         /// <returns></returns>
         public NetworkStream GetStream()
         {
-            return Client.GetStream();
+            if (_netStream == null)
+            {
+                _netStream = Client.GetStream();
+            }
+
+            return _netStream;
         }
 
         /// <summary>
@@ -245,6 +267,11 @@ namespace Norm
             }
 
             _client.Close();
+            if (_netStream != null)
+            {
+                _netStream.Flush();
+                _netStream.Close();
+            }
             _disposed = true;
         }
 

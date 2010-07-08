@@ -106,6 +106,7 @@
     <Compile Include="Collections\CreateCollectionOptions.cs" />
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />
+    <Compile Include="Collections\MongoCollectionCompoundIndex.cs" />
     <Compile Include="Collections\MongoCollectionGeneric.cs" />
     <Compile Include="Collections\HiLoIdGenerator.cs" />
     <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
@@ -157,6 +158,10 @@
     <Compile Include="Connections\QueuedConnectionProviders.cs" />
     <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
+    <Compile Include="GridFS\FileChunk.cs" />
+    <Compile Include="GridFS\GridFile.cs" />
+    <Compile Include="GridFS\GridFileCollection.cs" />
+    <Compile Include="GridFS\Helpers.cs" />
     <Compile Include="IHideSystemTypes.cs" />
     <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />

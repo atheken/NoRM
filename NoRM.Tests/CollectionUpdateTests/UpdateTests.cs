@@ -9,7 +9,7 @@ namespace Norm.Tests
     public class UpdateTests : IDisposable
     {
         private readonly Mongo _server;
-        private readonly MongoCollection<CheeseClubContact> _collection;
+        private readonly IMongoCollection<CheeseClubContact> _collection;
         public UpdateTests()
         {
             _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");

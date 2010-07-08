@@ -28,5 +28,20 @@ namespace NoRM.Tests
             Assert.False(e.TryGet<bool>("hello", out out2));
 
         }
+
+        [Fact]
+        public void SerializationOfFlyweightListsInsideFlyweightWorks()
+        {
+            var testObj = new Expando();
+            testObj["astring"] = "stringval";
+            var innerObj = new List<Expando>();
+            var innerInnerObject = new Expando();
+            innerInnerObject["innerInnerValue"] = "aStringOfDoom";
+            innerObj.Add(innerInnerObject);
+            testObj["InnerObject"] = innerObj;
+            var testBytes = BsonSerializer.Serialize(testObj);
+            var hydrated = BsonDeserializer.Deserialize<Expando>(testBytes);
+            Assert.Equal(testObj["InnerObject"].GetType(),hydrated["InnerObject"].GetType());
+        }
     }
 }

@@ -9,7 +9,7 @@ namespace Norm.Tests
     
     public class MongoSearchQualifierTests : IDisposable
     {
-        private readonly MongoCollection<TestClass> _coll;
+        private readonly IMongoCollection<TestClass> _coll;
         private readonly Mongo _server;
 
         public MongoSearchQualifierTests()

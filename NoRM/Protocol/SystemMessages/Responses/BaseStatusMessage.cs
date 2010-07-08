@@ -16,17 +16,12 @@ namespace Norm.Responses
         /// This is the raw value returned from the response. 
         /// It is required for serializer support, use "WasSuccessful" if you need a boolean value.
         /// </summary>
-        protected double? ok { get; set; }
-
-        /// <summary>
-        /// Did this message return correctly?
-        /// </summary>
-        /// <remarks>This maps to the "OK" value of the response.</remarks>
+        /// <remarks>This maps to the "OK" value of the response which can be a decimal (pre-1.5.2) or boolean (1.5.2+).</remarks>
         public bool WasSuccessful
         {
             get
             {
-                return this.ok == 1d ? true : false;
+                return this._properties.ContainsKey("ok") && (this["ok"].Equals(true) || this["ok"].Equals(1d));
             }
         }
 

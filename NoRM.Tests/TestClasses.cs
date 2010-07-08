@@ -142,7 +142,7 @@ namespace Norm.Tests
                                    Map = map,
                                    Reduce = reduce
                                });
-            MongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
+            IMongoCollection<MapReduceResult<T>> coll = response.GetCollection<MapReduceResult<T>>();
             MapReduceResult<T> r = coll.Find().FirstOrDefault();
             result = r.Value;
 
@@ -156,7 +156,7 @@ namespace Norm.Tests
 
         public void Update<T>(T item) where T : class, new()
         {
-            _provider.Database.GetCollection<T>().UpdateOne(item, item);
+            _provider.Database.GetCollection<T>().Save(item);
         }
 
         public void Drop<T>()
@@ -669,7 +669,13 @@ namespace Norm.Tests
 
         public void Drop<T>()
         {
-            _provider.Database.DropCollection(MongoConfiguration.GetCollectionName(typeof(T)));
+            try
+            {
+                _provider.Database.DropCollection(MongoConfiguration.GetCollectionName(typeof (T)));
+            }
+            catch (MongoException)
+            {
+            }
         }
 
         public void Dispose()
