@@ -8,7 +8,7 @@ namespace Norm.Tests
 {
     public class UpdateTests : IDisposable
     {
-        private readonly Mongo _server;
+        private readonly IMongo _server;
         private readonly IMongoCollection<CheeseClubContact> _collection;
         public UpdateTests()
         {

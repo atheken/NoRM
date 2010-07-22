@@ -134,6 +134,7 @@
     <Compile Include="Commands\Qualifiers\NotInQualifier.cs" />
     <Compile Include="Commands\Qualifiers\SizeQualifier.cs" />
     <Compile Include="BSON\Expando.cs" />
+    <Compile Include="Commands\Qualifiers\SliceQualifier.cs" />
     <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
     <Compile Include="Configuration\ConfigurationContainer.cs" />
     <Compile Include="Configuration\IConfigurationContainer.cs" />
