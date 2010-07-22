@@ -53,7 +53,7 @@ namespace Norm.Protocol.Messages
         /// <summary>
         /// The fields to select from each document in the current collection.
         /// </summary>
-        internal IEnumerable<String> FieldSelection { get; set; }
+        internal object FieldSelection { get; set; }
 
         /// <summary>This defines </summary>
         /// <value>The OrderBy property gets/sets the OrderBy data member.</value>
@@ -88,12 +88,7 @@ namespace Norm.Protocol.Messages
             var payload2 = new byte[0];
             if (this.FieldSelection != null)
             {
-                var fields = new Expando();
-                foreach (var f in FieldSelection)
-                {
-                    fields[f] = 1;
-                }
-                payload2 = BsonSerializer.Serialize(fields);
+                payload2 = BsonSerializer.Serialize(this.FieldSelection);
             }
             var collection = Encoding.UTF8.GetBytes(_collection);
             var collectionLength = collection.Length + 1; //+1 is for collection's null terminator which we'll be adding in a bit

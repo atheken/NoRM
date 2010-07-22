@@ -17,7 +17,7 @@ namespace Norm.Collections
     /// Generic collection interface
     /// </summary>
     /// <typeparam retval="T">The type of collection</typeparam>
-    public interface IMongoCollection<T> 
+    public interface IMongoCollection<T>
     {
         /// <summary>
         /// Finds one document.
@@ -132,6 +132,7 @@ namespace Norm.Collections
         /// <returns></returns>
         IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName);
 
+        IEnumerable<T> Find<U, O, Z>(U template, O orderBy, Z fieldSelector, int limit, int skip);
 
         IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, String fullName, Expression<Func<T, Z>> fieldSelection);
 
@@ -175,7 +176,7 @@ namespace Norm.Collections
         /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
         /// MongoDB will potentially optimize the index based on this being true.</param>
         void CreateIndex(Expando key, String indexName, bool isUnique);
-        
+
         /// <summary>
         /// Deletes the specified index for the collection.
         /// </summary>

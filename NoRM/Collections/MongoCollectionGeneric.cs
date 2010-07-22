@@ -107,7 +107,7 @@ namespace Norm.Collections
             if (id == null && (
                 (typeof(ObjectId).IsAssignableFrom(idProperty.Type)) ||
                 (typeof(long?).IsAssignableFrom(idProperty.Type)) ||
-                (typeof(int?).IsAssignableFrom(idProperty.Type))) )
+                (typeof(int?).IsAssignableFrom(idProperty.Type))))
             {
                 this.Insert(entity);
             }
@@ -313,7 +313,7 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName)
         {
-            var type = typeof (T);
+            var type = typeof(T);
 
             var qm = new QueryMessage<T, U>(_connection, fullyQualifiedName)
             {
@@ -361,6 +361,21 @@ namespace Norm.Collections
             }
         }
 
+        public IEnumerable<T> Find<U, O, Z>(U template, O orderBy, Z fieldSelector, int limit, int skip)
+        {
+
+            var qm = new QueryMessage<T, U>(_connection, this.FullyQualifiedName)
+            {
+                NumberToTake = limit,
+                NumberToSkip = skip,
+                Query = template,
+                OrderBy = orderBy,
+                FieldSelection = fieldSelector
+            };
+
+            return new MongoQueryExecutor<T, U>(qm) { CollectionName = this._collectionName };
+        }
+
         public IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, String fullName, Expression<Func<T, Z>> fieldSelection)
         {
             #region Extract field names to request
@@ -380,13 +395,14 @@ namespace Norm.Collections
             }
             #endregion
 
+
             var qm = new QueryMessage<T, U>(_connection, fullName)
             {
                 NumberToTake = limit,
                 NumberToSkip = skip,
                 Query = template,
                 OrderBy = orderBy,
-                FieldSelection = fieldSelectionExpando.AllProperties().Select(y => y.PropertyName)
+                FieldSelection = fieldSelectionExpando
             };
 
             object projection = null;
@@ -406,9 +422,9 @@ namespace Norm.Collections
         /// </remarks>
         private IEnumerable<Z> FindFieldSelection<U, O, Z>(U template, O orderBy, int limit, int skip, String fullName, Expression<Func<T, Z>> fieldSelection)
         {
-            return this.Find(template, orderBy, limit, skip, fullName, fieldSelection); 
+            return this.Find(template, orderBy, limit, skip, fullName, fieldSelection);
         }
-        
+
         /// <summary>
         /// Generates a query explain plan.
         /// </summary>
