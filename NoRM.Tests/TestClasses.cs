@@ -103,7 +103,7 @@ namespace Norm.Tests
     internal class Session : IDisposable
     {
         
-        private readonly Mongo _provider;
+        private readonly IMongo _provider;
 
         public Session()
         {
@@ -674,9 +674,9 @@ namespace Norm.Tests
 
     internal class Shoppers : IQueryable<Shopper>, IDisposable
     {
-        private readonly Mongo _provider;
+        private readonly IMongo _provider;
 
-        public Shoppers(Mongo conn)
+        public Shoppers(IMongo conn)
         {
             _provider = conn;
             this._queryable = conn.GetCollection<Shopper>().AsQueryable();

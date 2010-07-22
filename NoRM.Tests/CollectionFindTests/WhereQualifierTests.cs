@@ -9,7 +9,7 @@ namespace Norm.Tests
 
     public class WhereQualifierTests : IDisposable
     {
-        private readonly Mongo _server;
+        private readonly IMongo _server;
         private readonly IMongoCollection<TestClass> _collection;
         public WhereQualifierTests()
         {

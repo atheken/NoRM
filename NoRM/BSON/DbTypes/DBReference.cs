@@ -114,7 +114,7 @@ namespace Norm.BSON.DbTypes
         /// <returns>
         /// Referenced type T
         /// </returns>
-        public T Fetch(Func<Mongo> server)
+        public T Fetch(Func<IMongo> server)
         {
             return Fetch(() => server().GetCollection<T>());
         }

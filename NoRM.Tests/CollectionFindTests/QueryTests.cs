@@ -13,7 +13,7 @@ namespace Norm.Tests
 {
     public class QueryTests : IDisposable
     {
-        private readonly Mongo _server;
+        private readonly IMongo _server;
         private BuildInfoResponse _buildInfo = null;
         private readonly IMongoCollection<Person> _collection;
         public QueryTests()
