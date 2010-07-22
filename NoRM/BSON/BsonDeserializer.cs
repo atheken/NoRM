@@ -83,23 +83,28 @@ namespace Norm.BSON
         /// <returns></returns>
         private static T Deserialize<T>(BinaryReader stream)
         {
-            return new BsonDeserializer(stream).Read<T>();
+            return Deserialize<T>(stream, stream.ReadInt32());
         }
         private static T Deserialize<T>(BinaryReader stream, int length)
         {
-            return new BsonDeserializer(stream).Read<T>(length);
+
+            var deserializer = new BsonDeserializer(stream);
+            T retval = default(T);
+            try
+            {
+                retval = deserializer.Read<T>(length);
+            }
+            catch (Exception ex)
+            {
+                int toRead = deserializer._current.Length - deserializer._current.Digested;
+                deserializer._reader.ReadBytes(toRead);
+                throw ex;
+            }
+
+            return retval;
         }
 
 
-        /// <summary>
-        /// Reads a document instance.
-        /// </summary>
-        /// <typeparam retval="T"></typeparam>
-        /// <returns></returns>
-        private T Read<T>()
-        {
-            return Read<T>(_reader.ReadInt32());
-        }
         private T Read<T>(int length)
         {
             NewDocument(length);
@@ -170,15 +175,15 @@ namespace Norm.BSON
             {
                 return null;
             }
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>))
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 type = Nullable.GetUnderlyingType(type);
             }
-            if (type == typeof (string))
+            if (type == typeof(string))
             {
                 return ReadString();
             }
-            if (type == typeof (int))
+            if (type == typeof(int))
             {
                 return ReadInt(storedType);
             }
@@ -186,16 +191,16 @@ namespace Norm.BSON
             {
                 return ReadEnum(type, storedType);
             }
-            if (type == typeof (float))
+            if (type == typeof(float))
             {
                 Read(8);
-                return (float) _reader.ReadDouble();
+                return (float)_reader.ReadDouble();
             }
             if (storedType == BSONTypes.Binary)
             {
                 return ReadBinary();
             }
-            if (_IEnumerableType.IsAssignableFrom(type)|| storedType == BSONTypes.Array)
+            if (_IEnumerableType.IsAssignableFrom(type) || storedType == BSONTypes.Array)
             {
                 return ReadList(type, container);
             }
@@ -350,7 +355,7 @@ namespace Norm.BSON
             }
             //If we just got an untyped object here, we don't know what we have, but we know its an array.
             //So deserialize it to a list of Expandos.
-            if(listType == typeof(Object))
+            if (listType == typeof(Object))
             {
                 listType = typeof(List<Expando>);
             }
