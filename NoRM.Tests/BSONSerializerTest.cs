@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 using Xunit;
 using Norm.BSON;
 using System.Linq;
+using System.Globalization;
+using Norm.Configuration;
 
 namespace Norm.Tests
 {
@@ -467,6 +469,35 @@ namespace Norm.Tests
             Assert.Equal(expando["State"], address.State);
             Assert.Equal(expando["Zip"], address.Zip);
         }
-        
+
+        [Fact]
+        public void SerializesCultureInfo()
+        {
+            var s1 = new CultureInfoDTO() { Culture = CultureInfo.GetCultureInfo("en-US") };
+            var bytes = BsonSerializer.Serialize(s1);
+            var s2 = BsonDeserializer.Deserialize<CultureInfoDTO>(bytes);
+            Assert.Equal(s1.Culture, s2.Culture);
+        }
+
+        [Fact]
+        public void SerializesClassWithCustomValueObjectUsingCustomTypeConverter()
+        {
+            IMongoConfigurationMap cfg = new MongoConfigurationMap();
+            cfg.TypeConverterFor<NonSerializableValueObject, NonSerializableValueObjectTypeConverter>();
+            BsonSerializer.UseConfiguration(cfg);
+
+            // Verify that a contained, normally unserializable, value can be serialized with a proper type converter
+            var s1 = new NonSerializableClass() 
+                { 
+                    Value = new NonSerializableValueObject("12345"),
+                    Text = "Abc"
+                };
+            var bytes = BsonSerializer.Serialize(s1);
+            var s2 = BsonDeserializer.Deserialize<NonSerializableClass>(bytes);
+            Assert.Equal(s1.Value.Number, s2.Value.Number);
+            Assert.Equal(s1.Text, s2.Text);
+
+            BsonSerializer.UseConfiguration(null);
+        }
     }
 }

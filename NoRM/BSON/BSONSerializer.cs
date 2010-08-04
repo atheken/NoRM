@@ -7,12 +7,13 @@ using System.Text.RegularExpressions;
 using Norm.BSON.DbTypes;
 using Norm.Configuration;
 
+
 namespace Norm.BSON
 {
     /// <summary>
     /// The bson serializer.
     /// </summary>
-    internal class BsonSerializer
+    internal class BsonSerializer : BsonSerializerBase
     {
         private static readonly IDictionary<Type, BSONTypes> _typeMap = new Dictionary<Type, BSONTypes>
                {
@@ -212,6 +213,13 @@ namespace Norm.BSON
             }
 
             var type = value.GetType();
+            IBsonTypeConverter converter = Configuration.GetTypeConverterFor(type);
+            if (converter != null)
+            {
+                value = converter.ConvertToBson(value);
+            }
+
+            type = value.GetType();
             if (type.IsEnum)
             {
                 type = Enum.GetUnderlyingType(type);

@@ -1,4 +1,6 @@
 ﻿using System;
+using Norm.BSON;
+
 
 namespace Norm.Configuration
 {
@@ -21,6 +23,12 @@ namespace Norm.Configuration
         /// <remarks>Supports unit testing, use at your own risk!</remarks>
         /// <typeparam retval="T">The type for which to remove fluent mappings.</typeparam>
         void RemoveFor<T>();
+
+        void TypeConverterFor<TClr, TCnv>() where TCnv : IBsonTypeConverter, new();
+
+        IBsonTypeConverter GetTypeConverterFor(Type t);
+
+        void RemoveTypeConverterFor<TClr>();
 
         /// <summary>
         /// Gets the retval of the type's collection.

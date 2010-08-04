@@ -15,6 +15,9 @@ namespace Norm.Configuration
     {
         private Dictionary<Type, String> _idProperties = new Dictionary<Type, string>();
 
+        private IDictionary<Type, IBsonTypeConverter> TypeConverters = new Dictionary<Type, IBsonTypeConverter>();
+        //private IBsonTypeConverterRegistry BsonTypeConverterRegistry = new BsonTypeConverterRegistry();
+
         /// <summary>
         /// Configures properties for type T
         /// </summary>
@@ -24,6 +27,38 @@ namespace Norm.Configuration
         {
             var typeConfiguration = new MongoTypeConfiguration<T>();
             typeConfigurationAction((ITypeConfiguration<T>)typeConfiguration);
+        }
+
+        /// <summary>
+        /// Configures a type converter for type TClr
+        /// </summary>
+        /// <remarks>A type converter is used to convert any .NET CLR type into a CLR type that Mongo BSON
+        /// understands. For instance turning a CultureInfo into a string and back again. This method registers
+        /// known converters.</remarks>
+        /// <typeparam name="TClr"></typeparam>
+        /// <typeparam name="TCnv"></typeparam>
+        public void TypeConverterFor<TClr, TCnv>() where TCnv : IBsonTypeConverter, new()
+        {
+            Type ClrType = typeof(TClr);
+            Type CnvType = typeof(TCnv);
+
+            if (TypeConverters.ContainsKey(ClrType))
+                throw new ArgumentException(string.Format("The type '{0}' has already a type converter registered ({1}). You are trying to register '{2}'",
+                                                          ClrType, TypeConverters[ClrType], CnvType));
+
+            TypeConverters.Add(ClrType, new TCnv());
+        }
+
+        public IBsonTypeConverter GetTypeConverterFor(Type t)
+        {
+            IBsonTypeConverter converter = null;
+            TypeConverters.TryGetValue(t, out converter);
+            return converter;
+        }
+
+        public void RemoveTypeConverterFor<TClr>()
+        {
+            TypeConverters.Remove(typeof(TClr));
         }
 
         private bool IsIdPropertyForType(Type type, String propertyName)

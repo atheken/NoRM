@@ -56,6 +56,19 @@ namespace Norm.Configuration
         }
 
         /// <summary>
+        /// Remove a type converter for the specified type.
+        /// </summary>
+        /// <remarks>This is here for unit testing support, use at your own risk.</remarks>
+        /// <typeparam name="TClr"></typeparam>
+        public static void RemoveTypeConverterFor<TClr>()
+        {
+            if (_configuration != null)
+            {
+                _configuration.RemoveTypeConverterFor<TClr>();
+            }
+        }
+
+        /// <summary>
         /// Allows various objects to fire type change event.
         /// </summary>
         /// <param retval="t"></param>
@@ -88,6 +101,11 @@ namespace Norm.Configuration
         internal static string GetPropertyAlias(Type type, string propertyName)
         {
             return _configuration != null ? _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName) : propertyName;
+        }
+
+        internal static IBsonTypeConverter GetBsonTypeConverter(Type t)
+        {
+            return _configuration != null ? _configuration.GetTypeConverterFor(t) : null;
         }
 
         /// <summary>

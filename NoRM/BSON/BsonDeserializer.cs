@@ -1,17 +1,18 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using Norm.Configuration;
+
+
 namespace Norm.BSON
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Reflection;
-    using System.Text;
-    using System.Text.RegularExpressions;
-
     /// <summary>
     /// BSON Deserializer
     /// </summary>
-    public class BsonDeserializer
+    public class BsonDeserializer : BsonSerializerBase
     {
         private static readonly Type _IEnumerableType = typeof(IEnumerable);
         private static readonly Type _IDictionaryType = typeof(IDictionary<,>);
@@ -163,13 +164,36 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Deserializes the value.
+        /// Applies optional type conversion and deserializes the value.
         /// </summary>
         /// <param retval="type">The type.</param>
         /// <param retval="storedType">Type of the stored.</param>
         /// <param retval="container">The container.</param>
         /// <returns></returns>
         private object DeserializeValue(Type type, BSONTypes storedType, object container)
+        {
+            IBsonTypeConverter converter = Configuration.GetTypeConverterFor(type);
+            if (converter != null)
+            {
+                Type serializedType = converter.SerializedType;
+                object value = DeserializeValueAfterConversion(serializedType, storedType, container);
+                return converter.ConvertFromBson(value);
+            }
+            else
+            {
+                return DeserializeValueAfterConversion(type, storedType, container);
+            }
+        }
+
+
+        /// <summary>
+        /// Deserializes the value after any type conversion has been applied.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="storedType">Type of the stored.</param>
+        /// <param name="container">The container.</param>
+        /// <returns></returns>
+        private object DeserializeValueAfterConversion(Type type, BSONTypes storedType, object container)
         {
             if (storedType == BSONTypes.Null)
             {
