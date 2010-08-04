@@ -36,9 +36,9 @@ namespace Norm.Collections
             lock (generatorLock)
             {
                 if (keyGeneratorsByTag.TryGetValue(collectionName, out value))
-                    return value.GenerateId(collectionName);
+                    return value.GenerateId(collectionName, db);
 
-                value = new HiLoIdGenerator(db, _capacity);
+                value = new HiLoIdGenerator(_capacity);
                 // doing it this way for thread safety
                 keyGeneratorsByTag = new Dictionary<string, HiLoIdGenerator>(keyGeneratorsByTag)
                 {
@@ -46,7 +46,7 @@ namespace Norm.Collections
                 };
             }
 
-            return value.GenerateId(collectionName);
+            return value.GenerateId(collectionName, db);
         }
     }
 }

@@ -19,8 +19,11 @@ namespace Norm.Collections
     /// <summary>
     /// Mongo typed collection.
     /// </summary>
+    /// <remarks>
+    /// This class is not (and will probably not become) thread-safe.
+    /// </remarks>
     /// <typeparam retval="T">Collection type</typeparam>
-    public class MongoCollection<T> : IMongoCollection<T>
+    public partial class MongoCollection<T> : IMongoCollection<T>
     {
         private static Dictionary<int, object> _compiledTransforms = new Dictionary<int, object>();
         private static CollectionHiLoIdGenerator _collectionHiLoIdGenerator = new CollectionHiLoIdGenerator(20);
