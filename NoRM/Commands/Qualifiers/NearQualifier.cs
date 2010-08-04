@@ -12,7 +12,7 @@ namespace Norm.Commands.Qualifiers
 		/// </summary>
 		/// <param name="center">The center point</param>
 		public NearQualifier(LatLng center)
-			: base("$near", new object[] { center.ToArray() })
+			: base("$near", center.ToArray())
 		{
 		}
 	}

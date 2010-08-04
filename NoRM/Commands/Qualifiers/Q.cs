@@ -239,7 +239,7 @@ namespace Norm
 		/// </summary>
 		/// <param name="center">Center location</param>
 		/// <returns></returns>
-		public static NearQualifier Exists(LatLng center)
+		public static NearQualifier Near(LatLng center)
 		{
 			return new NearQualifier(center);
 		}
