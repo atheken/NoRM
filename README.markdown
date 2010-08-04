@@ -1,6 +1,8 @@
 NoRM is a .Net library for connecting to the document-oriented database, MongoDB.
 =================================================================================
 
+Please check the project website for more samples and a screencast: [normproject.org](http://normproject.org)
+
 If you have any questions or ideas, please use the [Google Group](http://groups.google.com/group/norm-mongodb) to convey them (Hint: this will also be a good way to be notified when we get close to a release)
 
 *The API may change a bit over time, and there remain a few more features before we will cut a "Release" but the library is pretty stable, and has good unit test coverage for the core components. If you have ideas or requests, let us know - or fork them and share with us.*
