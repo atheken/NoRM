@@ -23,6 +23,7 @@ namespace Norm
         IEnumerable<ProfilingInformationResponse> GetProfilingInformation();
         LastErrorResponse LastError();
         LastErrorResponse LastError(int verifyCount);
+        LastErrorResponse LastError(int waitCount, int waitTimeout);
         SetProfileResponse SetProfileLevel(ProfileLevel level);
         ValidateCollectionResponse ValidateCollection(string collectionName, bool scanData);
     }

@@ -207,13 +207,44 @@ namespace Norm
         }
 
         /// <summary>
-        /// Number of servers that must have the last write complete before lasterror will return.
+        /// An overload of LastError requireing a number of servers 
+        /// last write complete before lasterror will return.
         /// </summary>
         /// <param name="waitCount"></param>
         /// <returns></returns>
         public LastErrorResponse LastError(int waitCount)
         {
             return GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1, w = waitCount });
+        }
+
+        /// <summary>
+        /// An overload of LastError requireing a number of servers 
+        /// last write complete before lasterror will return, or the amount 
+        /// of time to wait for writes to complete before returning.
+        /// </summary>
+        /// <param name="waitCount"></param>
+        /// <param name="waitTimeout"></param>
+        /// <exception cref="MongoException">If the timeout is exceeded, a MongoException is thrown.</exception>
+        /// <returns></returns>
+        public LastErrorResponse LastError(int waitCount, int waitTimeout)
+        {
+            try
+            {
+                return GetCollection<LastErrorResponse>("$cmd").FindOne(new
+                {
+                    getlasterror = 1,
+                    w = waitCount,
+                    wtimeout = waitTimeout
+                });
+            }
+            catch (MongoException exception)
+            {
+                if(exception.Message == null)
+                {
+                    exception = new MongoException("Get Last Error timed out.");
+                }
+                throw exception;
+            }
         }
     }
 }
