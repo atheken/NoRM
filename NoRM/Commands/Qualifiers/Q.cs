@@ -60,7 +60,7 @@ namespace Norm
             return new OrQualifier(orGroups);
         }
 
-
+      
         /// <summary>
         /// Produces an "$or" qualifier where each of the groups is a set of criteria.
         /// </summary>
@@ -85,9 +85,9 @@ namespace Norm
         /// </summary>
         /// <param name="left">The first index for the slice.</param>
         /// <param name="right">The second index for the slice.</param>
-        public static SliceQualifier Slice(int left,int right)
+        public static SliceQualifier Slice(int left, int right)
         {
-            return new SliceQualifier(left,right);
+            return new SliceQualifier(left, right);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Norm
         {
             return new LessThanQualifier(value);
         }
- 
+
         /// <summary>
         /// Builds a $lte qualifier for the search.
         /// </summary>

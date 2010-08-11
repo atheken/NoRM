@@ -27,7 +27,7 @@ namespace Norm.Tests
         }
 
         [Fact]
-        public void MultiQualifier()
+        public void MultiQualifierAnd()
         {
             _collection.Insert(new TestClass { AInteger = 78 },
                 new TestClass { AInteger = 79 },
@@ -35,9 +35,29 @@ namespace Norm.Tests
                 new TestClass { AInteger = 81 });
 
             var result = _collection.Find(new { AInteger = Q.LessThan(81).And(Q.GreaterThan(78)) }).ToArray();
-            Assert.Equal(2,result.Length);
+            Assert.Equal(2, result.Length);
             Assert.Equal(79, result[0].AInteger);
             Assert.Equal(80, result[1].AInteger);
+        }
+
+        [Fact]
+        public void MultiQualifieOr()
+        {
+            _collection.Insert(
+                new TestClass { AInteger = 78 },
+                new TestClass { AInteger = 79 },
+                new TestClass { AInteger = 80 },
+                new TestClass { AInteger = 81 });
+
+
+
+            var result = _collection.Find(
+                Q.Or(new { AInteger = Q.LessOrEqual(78) },
+                new { AInteger = Q.GreaterOrEqual(81) })
+                ).ToArray();
+            Assert.Equal(2, result.Length);
+            Assert.Equal(78, result[0].AInteger);
+            Assert.Equal(81, result[1].AInteger);
         }
 
         [Fact]
