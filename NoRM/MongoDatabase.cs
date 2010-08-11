@@ -205,5 +205,15 @@ namespace Norm
         {
             return GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });
         }
+
+        /// <summary>
+        /// Number of servers that must have the last write complete before lasterror will return.
+        /// </summary>
+        /// <param name="waitCount"></param>
+        /// <returns></returns>
+        public LastErrorResponse LastError(int waitCount)
+        {
+            return GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1, w = waitCount });
+        }
     }
 }

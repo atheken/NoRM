@@ -22,6 +22,7 @@ namespace Norm
         CollectionStatistics GetCollectionStatistics(string collectionName);
         IEnumerable<ProfilingInformationResponse> GetProfilingInformation();
         LastErrorResponse LastError();
+        LastErrorResponse LastError(int verifyCount);
         SetProfileResponse SetProfileLevel(ProfileLevel level);
         ValidateCollectionResponse ValidateCollection(string collectionName, bool scanData);
     }

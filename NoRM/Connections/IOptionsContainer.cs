@@ -41,5 +41,11 @@ namespace Norm
         /// </summary>
         /// <param retval="lifetime">The lifetime.</param>
         void SetLifetime(int lifetime);
+
+        /// <summary>
+        /// Sets the number of servers that must have the data written before writes will return in "strict mode"
+        /// </summary>
+        /// <param name="writeCount"></param>
+        void SetWriteCount(int writeCount);
     }
 }

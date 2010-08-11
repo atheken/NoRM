@@ -9,6 +9,11 @@ namespace Norm
     public interface IConnection : IDisposable
     {
         /// <summary>
+        /// Get the write count required to be returned from the server when strict mode is enabled.
+        /// </summary>
+        int VerifyWriteCount { get; }
+
+        /// <summary>
         /// The connection string used to create this connection.
         /// </summary>
         string ConnectionString { get; }
