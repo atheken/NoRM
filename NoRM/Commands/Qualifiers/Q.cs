@@ -2,6 +2,9 @@ using System;
 ﻿using Norm.Commands.Qualifiers;
 using System.Text.RegularExpressions;
 using Norm.BSON;
+using Norm.Commands;
+using System.Collections;
+using System.Linq;
 
 namespace Norm
 {
@@ -45,6 +48,27 @@ namespace Norm
                 retval[q.CommandName] = q.ValueForCommand;
             }
             return retval;
+        }
+
+        /// <summary>
+        /// Produces an "$or" qualifier where each of the groups is a set of criteria.
+        /// </summary>
+        /// <param name="orGroups"></param>
+        /// <returns></returns>
+        public static OrQualifier Or(params object[] orGroups)
+        {
+            return new OrQualifier(orGroups);
+        }
+
+
+        /// <summary>
+        /// Produces an "$or" qualifier where each of the groups is a set of criteria.
+        /// </summary>
+        /// <param name="orGroups"></param>
+        /// <returns></returns>
+        public static OrQualifier Or(IEnumerable orGroups)
+        {
+            return Or(orGroups.OfType<Object>().ToArray());
         }
 
         /// <summary>
