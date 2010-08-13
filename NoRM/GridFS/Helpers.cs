@@ -28,7 +28,7 @@ namespace Norm.GridFS
         /// </summary>
         /// <param name="database"></param>
         /// <returns></returns>
-        public static GridFileCollection Files(this MongoDatabase database)
+        public static GridFileCollection Files(this IMongoDatabase database)
         {
             return new GridFileCollection(database.GetCollection<GridFile>("files"),
                 database.GetCollection<FileChunk>("chunks"));

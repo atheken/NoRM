@@ -1,10 +1,13 @@
-using Xunit;
-using System.Linq;
-using Norm.Configuration;
-using System.Collections.Generic;
 using System;
-using Norm.Protocol.Messages;
+using System.Collections.Generic;
+using System.Linq;
+using Norm;
 using Norm.BSON;
+using Norm.Collections;
+using Norm.Configuration;
+using Norm.Protocol.Messages;
+using Norm.Linq;
+using Xunit;
 
 namespace Norm.Tests
 {
@@ -269,8 +272,8 @@ namespace Norm.Tests
             {
                 var id1 = ObjectId.NewObjectId();
                 var id2 = ObjectId.NewObjectId();
-                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id1, Name = "Prod1" });
-                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id2, Name = "Prod2" });
+                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id1, Name = "Prod1", Price=3 });
+                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id2, Name = "Prod2" , Price=4});
                 var found = mongo.GetCollection<TestProduct>("Fake").Find();
                 Assert.Equal(2, found.Count());
                 Assert.Equal(id1, found.ElementAt(0)._id);
@@ -476,12 +479,36 @@ namespace Norm.Tests
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false&strict=false")))
             {
                 mongo.Database.DropCollection("ReduceProduct");
-                var collection = mongo.GetCollection<ReduceProduct>();
+                IMongoCollection<ReduceProduct> collection = mongo.GetCollection<ReduceProduct>();
                 collection.Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 var r = collection.MapReduce<ProductSum>(_map, _reduce).FirstOrDefault();
-                Assert.Equal(0, r.Id);
+
                 Assert.Equal(4, r.Value);
             }
+        }
+
+
+        [Fact]
+        public void StringAsIdentifierDoesTranslation()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString("strict=false")))
+            {
+                
+                var collection = mongo.GetCollection<StringIdentifier>();
+                mongo.Database.DropCollection("StringIdentifier");
+                collection.Insert(new StringIdentifier { CollectionName = "test", ServerHi = 2 });
+                
+                var result = collection.AsQueryable().Where(x => x.CollectionName == "test").SingleOrDefault();
+                
+                Assert.Equal(2, result.ServerHi);
+            }
+        }
+
+        private class StringIdentifier
+        {
+            [MongoIdentifier]
+            public string CollectionName { get; set; }
+            public long ServerHi { get; set; }
         }
 
         private class IntId

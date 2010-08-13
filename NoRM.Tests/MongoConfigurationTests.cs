@@ -17,6 +17,7 @@ namespace Norm.Tests
             MongoConfiguration.RemoveMapFor<Shopper>();
             MongoConfiguration.RemoveMapFor<Cart>();
             MongoConfiguration.RemoveMapFor<TestProduct>();
+            MongoConfiguration.RemoveTypeConverterFor<NonSerializableValueObject>();
 
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
@@ -102,7 +103,7 @@ namespace Norm.Tests
         public void Mongo_Configuration_Remove_Mapping_Of_Norm_Types_Fails()
         {
             //removal of maps for Norm types is verboden.
-            Assert.Throws<NotSupportedException>(() => MongoConfiguration.RemoveMapFor<MongoDatabase>());
+            Assert.Throws<NotSupportedException>(() => MongoConfiguration.RemoveMapFor<IMongoDatabase>());
         }
 
         [Fact]
@@ -202,7 +203,7 @@ namespace Norm.Tests
                     }
                 });
 
-                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers.Any(y=>y.Name == "Supplier1")).ToList();
+                var deepQuery = shoppers.Where(x => x.Cart.CartSuppliers.Any(y => y.Name == "Supplier1")).ToList();
                 Assert.Equal("John", deepQuery[0].Name);
                 Assert.Equal("Cart1", deepQuery[0].Cart.Name);
                 Assert.Equal(1, deepQuery.Count);
@@ -255,7 +256,7 @@ namespace Norm.Tests
                 var found = mongo.GetCollection<SuperClassObjectFluentMapped>("Fake").Find();
 
                 Assert.Equal(2, found.Count());
-                Assert.Equal(obj1.Id, found.ElementAt(0).Id) ;
+                Assert.Equal(obj1.Id, found.ElementAt(0).Id);
                 Assert.Equal("Prod1", found.ElementAt(0).Title);
                 Assert.Equal(obj2.Id, found.ElementAt(1).Id);
                 Assert.Equal("Prod2", found.ElementAt(1).Title);
@@ -275,6 +276,14 @@ namespace Norm.Tests
                 Assert.Equal(1, found.Count());
                 Assert.Equal(typeof(SubClassedObjectFluentMapped), found.ElementAt(0).GetType());
             }
+        }
+       
+        [Fact]
+        public void Can_Register_TypeConverter()
+        {
+            MongoConfiguration.Initialize(c => c.TypeConverterFor<NonSerializableValueObject, NonSerializableValueObjectTypeConverter>());
+            IBsonTypeConverter converter = MongoConfiguration.ConfigurationContainer.GetTypeConverterFor(typeof(NonSerializableValueObject));
+            Assert.Equal(typeof(NonSerializableValueObjectTypeConverter), converter.GetType());
         }
     }
 }

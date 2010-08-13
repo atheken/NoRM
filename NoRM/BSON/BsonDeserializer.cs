@@ -1,17 +1,18 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+using Norm.Configuration;
+
+
 namespace Norm.BSON
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Reflection;
-    using System.Text;
-    using System.Text.RegularExpressions;
-
     /// <summary>
     /// BSON Deserializer
     /// </summary>
-    public class BsonDeserializer
+    public class BsonDeserializer : BsonSerializerBase
     {
         private static readonly Type _IEnumerableType = typeof(IEnumerable);
         private static readonly Type _IDictionaryType = typeof(IDictionary<,>);
@@ -83,23 +84,28 @@ namespace Norm.BSON
         /// <returns></returns>
         private static T Deserialize<T>(BinaryReader stream)
         {
-            return new BsonDeserializer(stream).Read<T>();
+            return Deserialize<T>(stream, stream.ReadInt32());
         }
         private static T Deserialize<T>(BinaryReader stream, int length)
         {
-            return new BsonDeserializer(stream).Read<T>(length);
+
+            var deserializer = new BsonDeserializer(stream);
+            T retval = default(T);
+            try
+            {
+                retval = deserializer.Read<T>(length);
+            }
+            catch (Exception ex)
+            {
+                int toRead = deserializer._current.Length - deserializer._current.Digested;
+                deserializer._reader.ReadBytes(toRead);
+                throw ex;
+            }
+
+            return retval;
         }
 
 
-        /// <summary>
-        /// Reads a document instance.
-        /// </summary>
-        /// <typeparam retval="T"></typeparam>
-        /// <returns></returns>
-        private T Read<T>()
-        {
-            return Read<T>(_reader.ReadInt32());
-        }
         private T Read<T>(int length)
         {
             NewDocument(length);
@@ -158,13 +164,36 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Deserializes the value.
+        /// Applies optional type conversion and deserializes the value.
         /// </summary>
         /// <param retval="type">The type.</param>
         /// <param retval="storedType">Type of the stored.</param>
         /// <param retval="container">The container.</param>
         /// <returns></returns>
         private object DeserializeValue(Type type, BSONTypes storedType, object container)
+        {
+            IBsonTypeConverter converter = Configuration.GetTypeConverterFor(type);
+            if (converter != null)
+            {
+                Type serializedType = converter.SerializedType;
+                object value = DeserializeValueAfterConversion(serializedType, storedType, container);
+                return converter.ConvertFromBson(value);
+            }
+            else
+            {
+                return DeserializeValueAfterConversion(type, storedType, container);
+            }
+        }
+
+
+        /// <summary>
+        /// Deserializes the value after any type conversion has been applied.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="storedType">Type of the stored.</param>
+        /// <param name="container">The container.</param>
+        /// <returns></returns>
+        private object DeserializeValueAfterConversion(Type type, BSONTypes storedType, object container)
         {
             if (storedType == BSONTypes.Null)
             {
@@ -195,7 +224,7 @@ namespace Norm.BSON
             {
                 return ReadBinary();
             }
-            if (_IEnumerableType.IsAssignableFrom(type))
+            if (_IEnumerableType.IsAssignableFrom(type) || storedType == BSONTypes.Array)
             {
                 return ReadList(type, container);
             }
@@ -348,6 +377,12 @@ namespace Norm.BSON
             {
                 return ReadDictionary(listType, existingContainer);
             }
+            //If we just got an untyped object here, we don't know what we have, but we know its an array.
+            //So deserialize it to a list of Expandos.
+            if (listType == typeof(Object))
+            {
+                listType = typeof(List<Expando>);
+            }
 
             NewDocument(_reader.ReadInt32());
             var itemType = ListHelper.GetListItemType(listType);
@@ -427,6 +462,10 @@ namespace Norm.BSON
             var length = _reader.ReadInt32();
             var subType = _reader.ReadByte();
             Read(5 + length);
+            if (subType == 0)
+            {
+                return _reader.ReadBytes(length);
+            }
             if (subType == 2)
             {
                 return _reader.ReadBytes(_reader.ReadInt32());

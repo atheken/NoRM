@@ -10,7 +10,7 @@ namespace Norm
     /// </summary>
     public class MapReduce
     {
-        private readonly MongoDatabase _database;
+        private readonly IMongoDatabase _database;
         private readonly IList<string> _temporaryCollections;
         
         /// <summary>
@@ -24,7 +24,7 @@ namespace Norm
         /// (and it was causing errors). These are deleted by Mongo when the connection is terminated. 
         /// http://groups.google.com/group/mongodb-user/browse_thread/thread/5b068bd40847950d/8de9428e132e8b68?lnk=raot
         /// </remarks>
-        internal MapReduce(MongoDatabase database)
+        internal MapReduce(IMongoDatabase database)
         {
             this._database = database;
             this._temporaryCollections = new List<string>(5);

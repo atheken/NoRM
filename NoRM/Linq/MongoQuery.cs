@@ -18,7 +18,8 @@ namespace Norm.Linq
     {
         private readonly Expression _expression;
         private readonly MongoQueryProvider _provider;
-        private readonly string _collectionName;
+
+        public String CollectionName { get { return this._provider.CollectionName; } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQuery{T}"/> class.
@@ -31,7 +32,7 @@ namespace Norm.Linq
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        public MongoQuery(MongoQueryProvider provider, string collectionName)
+        public MongoQuery(MongoQueryProvider provider)
         {
             if (provider == null)
             {
@@ -40,19 +41,8 @@ namespace Norm.Linq
 
             _provider = provider;
             _expression = Expression.Constant(this);
-            _collectionName = collectionName;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoQuery{T}"/> class.
-        /// </summary>
-        /// <param retval="provider">
-        /// The provider.
-        /// </param>
-        public MongoQuery(MongoQueryProvider provider)
-            : this(provider, MongoConfiguration.GetCollectionName(typeof(T)))
-        {
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoQuery{T}"/> class.
@@ -69,6 +59,7 @@ namespace Norm.Linq
         /// </exception>
         public MongoQuery(MongoQueryProvider provider, Expression expression)
         {
+           
             if (provider == null)
             {
                 throw new ArgumentNullException("provider");
@@ -83,7 +74,7 @@ namespace Norm.Linq
             {
                 throw new ArgumentOutOfRangeException("expression");
             }
-
+            
             _provider = provider;
             _expression = expression;
         }
@@ -149,18 +140,14 @@ namespace Norm.Linq
         /// <returns></returns>
         internal ExplainResponse Explain(Expando query)
         {
-            var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
-            return this.GetCollection<ExplainResponse>(collectionName).Explain(query);
+           
+            return this.GetCollection<ExplainResponse>(this._provider.CollectionName).Explain(query);
         }
 
         /// <summary>TODO::Description.</summary>
         private IMongoCollection<TCollection> GetCollection<TCollection>()
         {
-            var collectionName = _collectionName == string.Empty
-                ? MongoConfiguration.GetCollectionName(typeof(TCollection))
-                : _collectionName;
-
-            return GetCollection<TCollection>(collectionName);
+            return GetCollection<TCollection>(this._provider.CollectionName);
         }
 
         /// <summary>TODO::Description.</summary>

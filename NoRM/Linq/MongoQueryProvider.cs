@@ -17,15 +17,15 @@ namespace Norm.Linq
     {
         private QueryTranslationResults _results;
 
-        internal static MongoQueryProvider Create(MongoDatabase db)
+        internal static MongoQueryProvider Create(IMongoDatabase db, String collectionName)
         {
-            return new MongoQueryProvider() { DB = db };
+            return new MongoQueryProvider() { DB = db, CollectionName = collectionName };
         }
 
         /// <summary>
         /// Gets the DB.
         /// </summary>
-        public MongoDatabase DB
+        public IMongoDatabase DB
         {
             get;
             private set;
@@ -42,6 +42,8 @@ namespace Norm.Linq
             var query = new MongoQuery<S>(this, expression);
             return query;
         }
+
+        public String CollectionName { get; set; }
 
         /// <summary>
         /// The i query provider. create query.
@@ -97,6 +99,7 @@ namespace Norm.Linq
             expression = PartialEvaluator.Eval(expression, this.CanBeEvaluatedLocally);
 
             var translator = new MongoQueryTranslator();
+            translator.CollectionName = this.CollectionName;
             var results = translator.Translate(expression);
             _results = results;
             var executor = new MongoQueryExecutor(this.DB, results);

@@ -8,13 +8,14 @@ using Norm.Protocol.SystemMessages;
 namespace Norm.Protocol
 {
     /// <summary>TODO::Description.</summary>
-    public class ExplainRequest<T>  : ISystemQuery
+    public class ExplainRequest<T> : ISystemQuery
     {
         static ExplainRequest()
         {
-            MongoConfiguration.Initialize(cfg=>cfg.For<ExplainRequest<T>>(y=>{
+            MongoConfiguration.Initialize(cfg => cfg.For<ExplainRequest<T>>(y =>
+            {
                 y.ForProperty(c => c.Explain).UseAlias("$explain");
-                y.ForProperty(c => c.Query).UseAlias("query"); 
+                y.ForProperty(c => c.Query).UseAlias("query");
             }));
         }
 

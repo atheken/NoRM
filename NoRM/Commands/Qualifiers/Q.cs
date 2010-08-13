@@ -48,6 +48,25 @@ namespace Norm
         }
 
         /// <summary>
+        /// Produces a single element $slice at the specific index.
+        /// </summary>
+        /// <param name="index">The single index that the slice will be used with.</param>
+        public static SliceQualifier Slice(int index)
+        {
+            return new SliceQualifier(index);
+        }
+
+        /// <summary>
+        /// Produces a $slice qualifier at starting at the left index and going to the right index.
+        /// </summary>
+        /// <param name="left">The first index for the slice.</param>
+        /// <param name="right">The second index for the slice.</param>
+        public static SliceQualifier Slice(int left,int right)
+        {
+            return new SliceQualifier(left,right);
+        }
+
+        /// <summary>
         /// construct a $where qualifier
         /// </summary>
         /// <param retval="expression">The expression.</param>

@@ -11,7 +11,7 @@ namespace Norm
     /// <summary>
     /// Mongo database
     /// </summary>
-    public class MongoDatabase
+    public class MongoDatabase : IMongoDatabase
     {
         private readonly IConnection _connection;
         private readonly string _databaseName;

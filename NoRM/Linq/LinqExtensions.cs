@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using Norm.BSON;
 using Norm.Protocol.Messages;
 using Norm.Responses;
+using Norm.Configuration;
 
 namespace Norm.Linq
 {
@@ -36,15 +37,18 @@ namespace Norm.Linq
         /// </summary>
         /// <typeparam retval="T">Type to explain</typeparam>
         /// <param retval="expression">The expression.</param>
+        /// <remarks>ATT: I *do not* like this, I would like to see this refactored to not do an explicit cast.</remarks>
         /// <returns>Query explain plan</returns>
         public static ExplainResponse Explain<T>(this IQueryable<T> expression)
         {
-            var translator = new MongoQueryTranslator();
-            var translationResults = translator.Translate(expression.Expression, false);
+            var mq = expression as MongoQuery<T>;
 
-            if (expression is MongoQuery<T>)
+            if (mq != null)
             {
-                return (expression as MongoQuery<T>).Explain(translationResults.Where);
+                var translator = new MongoQueryTranslator();
+                var translationResults = translator.Translate(expression.Expression, false);
+                translator.CollectionName = mq.CollectionName;
+                return mq.Explain(translationResults.Where);
             }
 
             return null;
@@ -57,13 +61,14 @@ namespace Norm.Linq
         /// <param retval="find">The type of document being enumerated.</param>
         /// <param retval="hint">The query hint expression.</param>
         /// <param retval="direction">Ascending or descending.</param>
+        /// <remarks>ATT: I *do not* like this, I would like to see this refactored to not do an explicit cast.</remarks>
         /// <returns></returns>
         public static IEnumerable<T> Hint<T>(this IEnumerable<T> find, Expression<Func<T, object>> hint, IndexOption direction)
         {
+            var proxy = (MongoQueryExecutor<T, Expando>)find;
             var translator = new MongoQueryTranslator();
             var index = translator.Translate(hint);
-
-            var proxy = (MongoQueryExecutor<T, Expando>)find;
+            translator.CollectionName = proxy.CollectionName;
             proxy.AddHint(index.Query, direction);
             return find;
         }
@@ -88,6 +93,24 @@ namespace Norm.Linq
             var expando = new Expando();
             expando[qualifier.CommandName] = qualifier.ValueForCommand;
             return expando;
+        }
+
+        /// <summary>
+        /// Returns the fully qualified and mapped retval from the member expression.
+        /// </summary>
+        /// <param retval="mex"></param>
+        /// <returns></returns>
+        public static string GetPropertyAlias(this MemberExpression mex)
+        {
+            var retval = "";
+            var parentEx = mex.Expression as MemberExpression;
+            if (parentEx != null)
+            {
+                //we need to recurse because we're not at the root yet.
+                retval += GetPropertyAlias(parentEx) + ".";
+            }
+            retval += MongoConfiguration.GetPropertyAlias(mex.Expression.Type, mex.Member.Name);
+            return retval;
         }
     }
 }

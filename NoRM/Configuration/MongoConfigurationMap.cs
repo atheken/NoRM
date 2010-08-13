@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Norm.BSON;
 using System.Collections.Generic;
 using System.Reflection;
@@ -14,6 +15,9 @@ namespace Norm.Configuration
     {
         private Dictionary<Type, String> _idProperties = new Dictionary<Type, string>();
 
+        private IDictionary<Type, IBsonTypeConverter> TypeConverters = new Dictionary<Type, IBsonTypeConverter>();
+        //private IBsonTypeConverterRegistry BsonTypeConverterRegistry = new BsonTypeConverterRegistry();
+
         /// <summary>
         /// Configures properties for type T
         /// </summary>
@@ -23,6 +27,38 @@ namespace Norm.Configuration
         {
             var typeConfiguration = new MongoTypeConfiguration<T>();
             typeConfigurationAction((ITypeConfiguration<T>)typeConfiguration);
+        }
+
+        /// <summary>
+        /// Configures a type converter for type TClr
+        /// </summary>
+        /// <remarks>A type converter is used to convert any .NET CLR type into a CLR type that Mongo BSON
+        /// understands. For instance turning a CultureInfo into a string and back again. This method registers
+        /// known converters.</remarks>
+        /// <typeparam name="TClr"></typeparam>
+        /// <typeparam name="TCnv"></typeparam>
+        public void TypeConverterFor<TClr, TCnv>() where TCnv : IBsonTypeConverter, new()
+        {
+            Type ClrType = typeof(TClr);
+            Type CnvType = typeof(TCnv);
+
+            if (TypeConverters.ContainsKey(ClrType))
+                throw new ArgumentException(string.Format("The type '{0}' has already a type converter registered ({1}). You are trying to register '{2}'",
+                                                          ClrType, TypeConverters[ClrType], CnvType));
+
+            TypeConverters.Add(ClrType, new TCnv());
+        }
+
+        public IBsonTypeConverter GetTypeConverterFor(Type t)
+        {
+            IBsonTypeConverter converter = null;
+            TypeConverters.TryGetValue(t, out converter);
+            return converter;
+        }
+
+        public void RemoveTypeConverterFor<TClr>()
+        {
+            TypeConverters.Remove(typeof(TClr));
         }
 
         private bool IsIdPropertyForType(Type type, String propertyName)
@@ -95,7 +131,42 @@ namespace Norm.Configuration
             return retval;
         }
 
-       
+        /// <summary>
+        /// Gets the fluently configured discriminator type string for a type.
+        /// </summary>
+        /// <param name="type">The type for which to get the discriminator type.</param>
+        /// <returns>The discriminator type string for the given given.</returns>
+        public string GetTypeDescriminator(Type type)
+        {
+            var inheritanceChain = GetInheritanceChain(type);
+            var discriminatedTypes = MongoTypeConfiguration.DiscriminatedTypes;
+            var discriminatingType = inheritanceChain.FirstOrDefault(t => discriminatedTypes.ContainsKey(t) && discriminatedTypes[t] == true);
+            
+            if (discriminatingType != null) 
+            {
+                return String.Join(",", type.AssemblyQualifiedName.Split(','), 0, 2);
+            }
+            return null;
+        }
+
+        private IEnumerable<Type> GetInheritanceChain(Type type)
+        {
+            var inheritanceChain = new List<Type> { type };
+            if (type == typeof(object))
+            {
+                return inheritanceChain;
+            }
+            inheritanceChain.AddRange(type.GetInterfaces());
+            
+            while (type.BaseType != typeof(object))
+            {
+                inheritanceChain.Add(type.BaseType);
+                inheritanceChain.AddRange(type.BaseType.GetInterfaces());
+                type = type.BaseType;
+            }
+            return inheritanceChain;
+        }
+
 
         /// <summary>
         /// Gets the retval of the type's collection.

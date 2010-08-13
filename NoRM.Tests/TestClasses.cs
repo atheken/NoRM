@@ -12,6 +12,7 @@ using Norm.Collections;
 using System.ComponentModel;
 using Norm.BSON;
 using System.Collections;
+using System.Globalization;
 
 namespace Norm.Tests
 {
@@ -103,14 +104,14 @@ namespace Norm.Tests
     internal class Session : IDisposable
     {
         
-        private readonly Mongo _provider;
+        private readonly IMongo _provider;
 
         public Session()
         {
             _provider = Mongo.Create("mongodb://127.0.0.1/NormTests?strict=false");
         }
 
-        public MongoDatabase DB { get { return this._provider.Database; } }
+        public IMongoDatabase DB { get { return this._provider.Database; } }
 
         public IQueryable<TestProduct> Products
         {
@@ -125,11 +126,14 @@ namespace Norm.Tests
             get { return _provider.GetCollection<Post>().AsQueryable(); }
         }
 
+        #region IDisposable Members
 
         public void Dispose()
         {
             _provider.Dispose();
         }
+
+        #endregion
 
         public T MapReduce<T>(string map, string reduce)
         {
@@ -227,6 +231,13 @@ namespace Norm.Tests
         {
             Id = ObjectId.NewObjectId();
         }
+    }
+
+    internal class CheeseClubContactWithNullableIntId
+    {
+        public int? Id { get; set; }
+        public string Name { get; set; }
+        public string FavoriteCheese { get; set; }
     }
 
     internal class ProductReference
@@ -525,6 +536,55 @@ namespace Norm.Tests
         public bool IsOver9000 { get; set; }
     }
 
+    public class CultureInfoDTO
+    {
+        public CultureInfo Culture { get; set; }
+    }
+
+    public class NonSerializableClass
+    {
+        public NonSerializableValueObject Value { get; set; }
+        public string Text { get; set; }
+    }
+
+    public class NonSerializableValueObject
+    {
+        // Stuff a few properties in here that Norm normally cannot handle
+        private ArgumentException ex { get; set; }
+        private NonSerializableValueObject MakeNormCrashReference { get; set; }
+
+        public string Number { get; private set; }
+
+        public NonSerializableValueObject(string number)
+        {
+            Number = number;
+            MakeNormCrashReference = this;
+        }
+    }
+
+    public class NonSerializableValueObjectTypeConverter : IBsonTypeConverter
+    {
+        #region IBsonTypeConverter Members
+
+        public Type SerializedType
+        {
+            get { return typeof(string); }
+        }
+
+        public object ConvertToBson(object data)
+        {
+            return ((NonSerializableValueObject)data).Number;
+        }
+
+        public object ConvertFromBson(object data)
+        {
+            return new NonSerializableValueObject((string)data);
+        }
+
+        #endregion
+    }
+
+
     [MongoDiscriminated]
     public class SuperClassObject
     {
@@ -597,6 +657,37 @@ namespace Norm.Tests
         public Guid Id { get; protected set; }
     }
 
+    internal class InterfacePropertyContainingClass
+    {
+        public InterfacePropertyContainingClass()
+        {
+            Id = Guid.NewGuid();
+            InterfaceProperty = new NotDiscriminatedClass();
+        }
+
+        [MongoIdentifier]
+        public Guid Id { get; set; }
+        public INotDiscriminated InterfaceProperty { get; set; }
+    }
+
+    internal interface INotDiscriminated
+    {
+        string Something { get; set; }
+    }
+
+    internal class NotDiscriminatedClass : INotDiscriminated
+    {
+        public string Something { get; set; }
+    }
+
+    public class DiscriminationMap : MongoConfigurationMap
+    {
+        public DiscriminationMap()
+        {
+            For<INotDiscriminated>(config => config.UseAsDiscriminator());
+        }
+    }
+
     internal interface IDTOWithNonDefaultId
     {
         [MongoIdentifier]
@@ -636,9 +727,9 @@ namespace Norm.Tests
 
     internal class Shoppers : IQueryable<Shopper>, IDisposable
     {
-        private readonly Mongo _provider;
+        private readonly IMongo _provider;
 
-        public Shoppers(Mongo conn)
+        public Shoppers(IMongo conn)
         {
             _provider = conn;
             this._queryable = conn.GetCollection<Shopper>().AsQueryable();
@@ -669,7 +760,13 @@ namespace Norm.Tests
 
         public void Drop<T>()
         {
-            _provider.Database.DropCollection(MongoConfiguration.GetCollectionName(typeof(T)));
+            try
+            {
+                _provider.Database.DropCollection(MongoConfiguration.GetCollectionName(typeof (T)));
+            }
+            catch (MongoException)
+            {
+            }
         }
 
         public void Dispose()

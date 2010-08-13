@@ -14,14 +14,12 @@ namespace Norm.Collections
     public class HiLoIdGenerator
     {
         private readonly long _capacity;
-        private readonly object generatorLock = new object();
+        private ReaderWriterLockSlim _lockSlim = new ReaderWriterLockSlim();
         private long _currentHi;
         private long _currentLo;
-        private MongoDatabase _db;
 
-        public HiLoIdGenerator(MongoDatabase db, long capacity)
+        public HiLoIdGenerator(long capacity)
         {
-            _db = db;
             _currentHi = 0;
             _capacity = capacity;
             _currentLo = capacity + 1;
@@ -32,25 +30,26 @@ namespace Norm.Collections
         /// </summary>
         /// <param name="collectionName">Collection Name</param>
         /// <returns></returns>
-        public long GenerateId(string collectionName)
+        public long GenerateId(string collectionName, IMongoDatabase database)
         {
+            _lockSlim.EnterUpgradeableReadLock();
             long incrementedCurrentLow = Interlocked.Increment(ref _currentLo);
             if (incrementedCurrentLow > _capacity)
             {
-                lock (generatorLock)
+                _lockSlim.EnterWriteLock();
+                if (Thread.VolatileRead(ref _currentLo) > _capacity)
                 {
-                    if (Thread.VolatileRead(ref _currentLo) > _capacity)
-                    {
-                        _currentHi = GetNextHi(collectionName);
-                        _currentLo = 1;
-                        incrementedCurrentLow = 1;
-                    }
+                    _currentHi = GetNextHi(collectionName, database);
+                    _currentLo = 1;
+                    incrementedCurrentLow = 1;
                 }
+                _lockSlim.ExitWriteLock();
             }
+            _lockSlim.ExitUpgradeableReadLock();
             return (_currentHi - 1) * _capacity + (incrementedCurrentLow);
         }
 
-        private long GetNextHi(string collectionName)
+        private long GetNextHi(string collectionName, IMongoDatabase database)
         {
             while (true)
             {
@@ -59,10 +58,10 @@ namespace Norm.Collections
                     var update = new Expando();
                     update["$inc"] = new { ServerHi = 1 };
 
-                    var hiLoKey = _db.GetCollection<NormHiLoKey>().FindAndModify(new { _id = collectionName }, update);
+                    var hiLoKey = database.GetCollection<NormHiLoKey>().FindAndModify(new { _id = collectionName }, update);
                     if (hiLoKey == null)
                     {
-                        _db.GetCollection<NormHiLoKey>().Insert(new NormHiLoKey { CollectionName = collectionName, ServerHi = 2 });
+                        database.GetCollection<NormHiLoKey>().Insert(new NormHiLoKey { CollectionName = collectionName, ServerHi = 2 });
                         return 1;
                     }
 

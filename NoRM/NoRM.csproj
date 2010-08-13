@@ -79,6 +79,7 @@
     <Compile Include="Attributes\MongoIgnoreIfNullAttribute.cs" />
     <Compile Include="BSON\BsonDeserializer.cs" />
     <Compile Include="BSON\BsonHelper.cs" />
+    <Compile Include="BSON\BsonSerializerBase.cs" />
     <Compile Include="BSON\Command.cs" />
     <Compile Include="BSON\DbTypes\GridFile.cs" />
     <Compile Include="BSON\DbTypes\ObjectId.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="BSON\BsonSerializer.cs" />
     <Compile Include="BSON\BSONTypes.cs" />
     <Compile Include="BSON\ExpandoProperty.cs" />
+    <Compile Include="BSON\IBsonTypeConverter.cs" />
     <Compile Include="BSON\IdPropertyFinder.cs" />
     <Compile Include="BSON\IExpando.cs" />
     <Compile Include="BSON\Lists\ArrayWrapper.cs" />
@@ -96,6 +98,7 @@
     <Compile Include="BSON\Lists\ListHelper.cs" />
     <Compile Include="BSON\Lists\ListWrapper.cs" />
     <Compile Include="BSON\MagicProperty.cs" />
+    <Compile Include="BSON\ObjectParser.cs" />
     <Compile Include="BSON\QualifierCommand.cs" />
     <Compile Include="BSON\DbTypes\ObjectIdGenerator.cs" />
     <Compile Include="BSON\DbTypes\ScopedCodeGeneric.cs" />
@@ -103,9 +106,12 @@
     <Compile Include="BSON\DocumentExceedsSizeLimitsException.cs" />
     <Compile Include="BSON\ModifierCommand.cs" />
     <Compile Include="BSON\ReflectionHelper.cs" />
+    <Compile Include="BSON\TypeConverters\CultureInfoTypeConverter.cs" />
     <Compile Include="Collections\CreateCollectionOptions.cs" />
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />
+    <Compile Include="Collections\MongoCollectionCompoundIndex.cs" />
+    <Compile Include="Collections\MongoCollectionExtensions.cs" />
     <Compile Include="Collections\MongoCollectionGeneric.cs" />
     <Compile Include="Collections\HiLoIdGenerator.cs" />
     <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
@@ -131,6 +137,7 @@
     <Compile Include="Commands\Qualifiers\NotInQualifier.cs" />
     <Compile Include="Commands\Qualifiers\SizeQualifier.cs" />
     <Compile Include="BSON\Expando.cs" />
+    <Compile Include="Commands\Qualifiers\SliceQualifier.cs" />
     <Compile Include="Commands\Qualifiers\WhereQualifier.cs" />
     <Compile Include="Configuration\ConfigurationContainer.cs" />
     <Compile Include="Configuration\IConfigurationContainer.cs" />
@@ -162,6 +169,9 @@
     <Compile Include="GridFS\GridFileCollection.cs" />
     <Compile Include="GridFS\Helpers.cs" />
     <Compile Include="IHideSystemTypes.cs" />
+    <Compile Include="IMongo.cs" />
+    <Compile Include="IMongoDatabase.cs" />
+    <Compile Include="IMongoAdmin.cs" />
     <Compile Include="IMongoGrouping.cs" />
     <Compile Include="Linq\ExpressionVisitor.cs" />
     <Compile Include="Linq\IMongoQuery.cs" />

@@ -14,9 +14,9 @@
     <RootNamespace>Documentation</RootNamespace>
     <Name>Documentation</Name>
     <!-- SHFB properties -->
-    <OutputPath>.\</OutputPath>
+    <OutputPath>.\docs\</OutputPath>
     <HtmlHelpName>NoRM</HtmlHelpName>
-    <HelpFileFormat>HtmlHelp1</HelpFileFormat>
+    <HelpFileFormat>HtmlHelp1, Website</HelpFileFormat>
     <HelpTitle>NoRM Documentation</HelpTitle>
     <NamingMethod>MemberName</NamingMethod>
     <SyntaxFilters>Standard</SyntaxFilters>
@@ -24,7 +24,8 @@
     <MissingTags>Summary, Parameter, Returns, Value, AutoDocumentCtors, Namespace, TypeParameter, AutoDocumentDispose</MissingTags>
     <DocumentationSources>
       <DocumentationSource sourceFile="..\NoRM\bin\Debug\NoRM.dll" xmlns="" />
-<DocumentationSource sourceFile="..\NoRM\bin\Debug\NoRM.xml" xmlns="" /></DocumentationSources>
+      <DocumentationSource sourceFile="..\NoRM\bin\Debug\NoRM.xml" xmlns="" />
+    </DocumentationSources>
     <VisibleItems>InheritedMembers, InheritedFrameworkMembers</VisibleItems>
     <RootNamespaceContainer>True</RootNamespaceContainer>
     <RootNamespaceTitle>NoRM</RootNamespaceTitle>

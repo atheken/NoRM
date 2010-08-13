@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 using Xunit;
 using Norm.BSON;
 using System.Linq;
+using System.Globalization;
+using Norm.Configuration;
 
 namespace Norm.Tests
 {
@@ -190,7 +192,13 @@ namespace Norm.Tests
         [Fact]
         public void SerializationOfBytesIsNotLossy()
         {
-            var obj1 = new GeneralDTO { Bytes = BitConverter.GetBytes(Int32.MaxValue) };
+            var bin = new List<byte>();
+            for(int i = 1; i < 1000; i++)
+            {
+                bin.AddRange(BitConverter.GetBytes(i));
+            }
+
+            var obj1 = new GeneralDTO { Bytes = bin.ToArray() };
             var obj2 = new GeneralDTO { Bytes = null };
 
             var obj1Bytes = BsonSerializer.Serialize(obj1);
@@ -199,7 +207,7 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
-            Assert.Equal(obj1.Bytes, hydratedObj1.Bytes);
+            Assert.True(obj1.Bytes.SequenceEqual(hydratedObj1.Bytes));
             Assert.Equal(null, hydratedObj2.Bytes);
         }
 
@@ -461,6 +469,35 @@ namespace Norm.Tests
             Assert.Equal(expando["State"], address.State);
             Assert.Equal(expando["Zip"], address.Zip);
         }
-        
+
+        [Fact]
+        public void SerializesCultureInfo()
+        {
+            var s1 = new CultureInfoDTO() { Culture = CultureInfo.GetCultureInfo("en-US") };
+            var bytes = BsonSerializer.Serialize(s1);
+            var s2 = BsonDeserializer.Deserialize<CultureInfoDTO>(bytes);
+            Assert.Equal(s1.Culture, s2.Culture);
+        }
+
+        [Fact]
+        public void SerializesClassWithCustomValueObjectUsingCustomTypeConverter()
+        {
+            IMongoConfigurationMap cfg = new MongoConfigurationMap();
+            cfg.TypeConverterFor<NonSerializableValueObject, NonSerializableValueObjectTypeConverter>();
+            BsonSerializer.UseConfiguration(cfg);
+
+            // Verify that a contained, normally unserializable, value can be serialized with a proper type converter
+            var s1 = new NonSerializableClass() 
+                { 
+                    Value = new NonSerializableValueObject("12345"),
+                    Text = "Abc"
+                };
+            var bytes = BsonSerializer.Serialize(s1);
+            var s2 = BsonDeserializer.Deserialize<NonSerializableClass>(bytes);
+            Assert.Equal(s1.Value.Number, s2.Value.Number);
+            Assert.Equal(s1.Text, s2.Text);
+
+            BsonSerializer.UseConfiguration(null);
+        }
     }
 }

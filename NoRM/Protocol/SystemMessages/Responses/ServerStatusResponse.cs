@@ -86,6 +86,16 @@ namespace Norm.Responses
         /// <summary>TODO::Description.</summary>
         /// <value></value>
         public double? Ratio { get; set; }
+
+        public LockQueueInfo CurrentQueue { get; set; }
+    }
+
+    public class LockQueueInfo
+    {
+        public int Total { get; set; }
+        public int Readers { get; set; }
+        public int Writers { get; set; }
+
     }
 
     /// <summary>
@@ -108,6 +118,11 @@ namespace Norm.Responses
         /// <summary>TODO::Description.</summary>
         /// <value></value>
         public bool? Supported { get; set; }
+
+        /// <summary>
+        /// The bit-ness of the server.
+        /// </summary>
+        public int? Bits { get; set; }
     }
 
     /// <summary>

@@ -56,6 +56,19 @@ namespace Norm.Configuration
         }
 
         /// <summary>
+        /// Remove a type converter for the specified type.
+        /// </summary>
+        /// <remarks>This is here for unit testing support, use at your own risk.</remarks>
+        /// <typeparam name="TClr"></typeparam>
+        public static void RemoveTypeConverterFor<TClr>()
+        {
+            if (_configuration != null)
+            {
+                _configuration.RemoveTypeConverterFor<TClr>();
+            }
+        }
+
+        /// <summary>
         /// Allows various objects to fire type change event.
         /// </summary>
         /// <param retval="t"></param>
@@ -90,6 +103,11 @@ namespace Norm.Configuration
             return _configuration != null ? _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName) : propertyName;
         }
 
+        internal static IBsonTypeConverter GetBsonTypeConverter(Type t)
+        {
+            return _configuration != null ? _configuration.GetTypeConverterFor(t) : null;
+        }
+
         /// <summary>
         /// Given the type, get the fluently configured collection type.
         /// </summary>
@@ -118,6 +136,18 @@ namespace Norm.Configuration
         internal static string GetConnectionString(Type type)
         {
             return _configuration != null ? _configuration.GetConfigurationMap().GetConnectionString(type) : null;
+        }
+
+        /// <summary>
+        /// Given a type, get fluently configured discriminator type string
+        /// </summary>
+        /// <param retval="type">The type for whicht to get the discriminator type.</param>
+        /// <returns>
+        /// The type's discriminator type if configured; otherwise null.
+        /// </returns>
+        public static string GetTypeDiscriminator(Type type)
+        {
+            return _configuration != null ? _configuration.GetConfigurationMap().GetTypeDescriminator(type) : null;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Norm.Tests
         [Fact(Skip="Xunit misbehaves on this test, need to investigate")]
         public void AuthenticatesWithProperCredentials()
         {
-            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(AuthenticatedConnectionString("usr", "8e156e298e19afdc3a104ddd172a2bee")));
+            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(AuthenticatedConnectionString("usr", "pss")));
             var connection = provider.Open(null);
             Assert.Equal(true, connection.Client.Connected);
             provider.Close(connection);           

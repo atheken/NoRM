@@ -7,9 +7,9 @@ using System;
 
 namespace Norm.Tests
 {
-    public class MongoAdminTests
+    public class IMongoAdminTests
     {
-        public MongoAdminTests()
+        public IMongoAdminTests()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString("strict=false")))
             {

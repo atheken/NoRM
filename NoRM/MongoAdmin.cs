@@ -9,7 +9,7 @@ namespace Norm
     /// <summary>
     /// This class is used to connect to the MongoDB server and send special Administrative commands to it.
     /// </summary>
-    public class MongoAdmin : IDisposable
+    public class MongoAdmin : IMongoAdmin
     {
         private readonly IConnection _connection;
         private readonly IConnectionProvider _connectionProvider;
@@ -31,7 +31,7 @@ namespace Norm
         /// <summary>
         /// Gets Database.
         /// </summary>
-        public MongoDatabase Database
+        public IMongoDatabase Database
         {
             get;
             private set;
