@@ -10,7 +10,7 @@ namespace Norm.Tests
     public class WhereQualifierTests : IDisposable
     {
         private readonly Mongo _server;
-        private readonly MongoCollection<TestClass> _collection;
+        private readonly IMongoCollection<TestClass> _collection;
         public WhereQualifierTests()
         {
             _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
