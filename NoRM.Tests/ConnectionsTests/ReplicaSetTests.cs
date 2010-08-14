@@ -73,11 +73,11 @@ namespace NoRM.Tests.ConnectionsTests
             serverProcess.Start();
         }
 
-        [Fact(DisplayName="REPLICA SET TESTS: We run all the tests together because it takes up to a minute to spin up the replica set")]
+        [Fact(DisplayName = "REPLICA SET TESTS: We run all the tests together because it takes up to a minute to spin up the replica set")]
         public void RunAllReplicaSetTests()
         {
             this.GetReplicaSetStatusReturnsCorrectInformation();
-            
+
             //after status response come back, we have a good chance of these passing.
             this.ReplicaSet_ConnectionString_Dynamically_Finds_Nodes();
         }
@@ -99,17 +99,18 @@ namespace NoRM.Tests.ConnectionsTests
             {
                 try
                 {
-                    using (var ma = new MongoAdmin("mongodb://localhost:64300/admin"))
+                    using (var ma = new MongoAdmin("mongodb://localhost:64300/admin?pooling=false"))
                     {
                         result = ma.GetReplicaSetStatus();
+                        break;
                     }
-                    break;
                 }
                 catch (Exception ex)
                 {
                     //swallow this, since the replica set is not online yet.
+                    t.Thread.Sleep(5000);
                 }
-                t.Thread.Sleep(500);
+                
             }
 
             Assert.NotNull(result);
