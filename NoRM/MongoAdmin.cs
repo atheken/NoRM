@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Norm.Protocol.SystemMessages.Requests;
 using Norm.Responses;
+using Norm.Protocol.SystemMessages.Responses;
 
 namespace Norm
 {
@@ -225,6 +226,21 @@ namespace Norm
             this._disposed = true;
         }
 
+
+        private T ExecuteCommand<T>(Object command)
+        {
+            return this.Database.GetCollection<T>("$cmd").FindOne(command);
+        }
+
+        /// <summary>
+        /// Initialize a new config.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public ReplicaSetConfigReponse InitializeReplicaSet(ReplicaSet config)
+        {
+            return this.ExecuteCommand<ReplicaSetConfigReponse>(new { replSetInitialize = config });
+        }
 
         /// <summary>
         /// Releases unmanaged resources and performs other cleanup operations before the

@@ -156,13 +156,13 @@
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\ConnectionProvider.cs" />
     <Compile Include="Connections\ConnectionProviderFactory.cs" />
-    <Compile Include="Connections\ConnectionStringBuilder.cs" />
+    <Compile Include="Connections\ConnectionOptions.cs" />
     <Compile Include="Connections\IConnection.cs" />
     <Compile Include="Connections\IConnectionProvider.cs" />
     <Compile Include="Connections\IOptionsContainer.cs" />
     <Compile Include="Connections\NormalConnectionProvider.cs" />
     <Compile Include="Connections\PooledConnectionProvider.cs" />
-    <Compile Include="Connections\QueuedConnectionProviders.cs" />
+    <Compile Include="Connections\ReplicationSetRegistry.cs" />
     <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
     <Compile Include="GridFS\FileChunk.cs" />
@@ -246,10 +246,12 @@
     <Compile Include="Protocol\SystemMessages\Responses\ListDatabasesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\PreviousErrorResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfilingInformationResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ReplicaSetConfigReponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\SetProfileResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />
     <Compile Include="Protocol\SystemMessages\ISystemQuery.cs" />
+    <Compile Include="ReplicaSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

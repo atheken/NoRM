@@ -86,7 +86,6 @@
     <Compile Include="ConnectionsTests\NormalConnectionProviderAuthenticationTests.cs" />
     <Compile Include="ConnectionsTests\NormalConnectionProviderTests.cs" />
     <Compile Include="ConnectionsTests\PooledConnectionProviderTests.cs" />
-    <Compile Include="ConnectionsTests\QueuedConnectionProviderTests.cs" />
     <Compile Include="DBTypeTests\DBRefTests.cs" />
     <Compile Include="DBTypeTests\GridFSTests.cs" />
     <Compile Include="DBTypeTests\ObjectIdTests.cs" />

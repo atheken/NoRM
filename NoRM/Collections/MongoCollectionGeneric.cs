@@ -474,10 +474,21 @@ namespace Norm.Collections
             insertMessage.Execute();
             if (_connection.StrictMode)
             {
-                var error = _db.LastError(_connection.VerifyWriteCount);
-                if (error.Code > 0)
+                if (_connection.VerifyWriteCount.HasValue)
                 {
-                    throw new MongoException(error.Error);
+                    var error = _db.LastError(_connection.VerifyWriteCount.Value);
+                    if (error.Code > 0)
+                    {
+                        throw new MongoException(error.Error);
+                    }
+                }
+                else
+                {
+                    var error = _db.LastError();
+                    if (error.Code > 0)
+                    {
+                        throw new MongoException(error.Error);
+                    }
                 }
             }
         }

@@ -7,7 +7,7 @@ namespace Norm.Tests
         [Fact]
         public void ThrowsExceptionIfConnectingWithInvalidCredentials()
         {
-            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(AuthenticatedConnectionString("bad", "boy")));
+            var provider = new PooledConnectionProvider(ConnectionOptions.Create(AuthenticatedConnectionString("bad", "boy")));
             var ex = Assert.Throws<MongoException>(() => provider.Open(null));
             Assert.Equal("auth fails", ex.Message);
         }
@@ -16,7 +16,7 @@ namespace Norm.Tests
         [Fact(Skip="Xunit misbehaves on this test, need to investigate")]
         public void AuthenticatesWithProperCredentials()
         {
-            var provider = new PooledConnectionProvider(ConnectionStringBuilder.Create(AuthenticatedConnectionString("usr", "pss")));
+            var provider = new PooledConnectionProvider(ConnectionOptions.Create(AuthenticatedConnectionString("usr", "pss")));
             var connection = provider.Open(null);
             Assert.Equal(true, connection.Client.Connected);
             provider.Close(connection);           

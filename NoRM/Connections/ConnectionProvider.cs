@@ -7,20 +7,18 @@ using Norm.Collections;
 
 namespace Norm
 {
-    //this base class will eventually serve a purpose
-
     /// <summary>
-    /// Connectin provider
+    /// The base connection provider for all concrete implementations in NoRM.
     /// </summary>
     public abstract class ConnectionProvider : IConnectionProvider
     {
-        /// <summary>TODO::Description.</summary>
-        public abstract ConnectionStringBuilder ConnectionString { get; }
+        /// <summary>The connection to create and use for this class.</summary>
+        public abstract ConnectionOptions ConnectionString { get; }
 
-        /// <summary>TODO::Description.</summary>
+        /// <summary>Provide a connection.</summary>
         public abstract IConnection Open(string options);
 
-        /// <summary>TODO::Description.</summary>
+        /// <summary>Close a previously opened connection.</summary>
         public abstract void Close(IConnection connection);
 
         /// <summary>
@@ -57,7 +55,8 @@ namespace Norm
                 return true;
             }
 
-            var nonce = new MongoCollection<GetNonceResponse>("$cmd", new MongoDatabase("admin", connection), connection).FindOne(new { getnonce = 1 });
+            var nonce = new MongoCollection<GetNonceResponse>("$cmd",
+                new MongoDatabase("admin", connection), connection).FindOne(new { getnonce = 1 });
 
             if (nonce.WasSuccessful)
             {

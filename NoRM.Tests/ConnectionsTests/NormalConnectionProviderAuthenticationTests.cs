@@ -7,7 +7,7 @@ namespace Norm.Tests
         [Fact(Skip="authenticated connection seems to be hanging when we run this in sequence")]
         public void ThrowsExceptionIfConnectingWithInvalidCredentials()
         {
-            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create(AuthenticatedConnectionString("bad", "boy")));
+            var provider = new NormalConnectionProvider(ConnectionOptions.Create(AuthenticatedConnectionString("bad", "boy")));
 
             var ex = Assert.Throws<MongoException>(() => provider.Open(null));
             Assert.Equal("auth fails", ex.Message);
@@ -17,7 +17,7 @@ namespace Norm.Tests
         [Fact]
         public void AuthenticatesWithProperCredentials()
         {
-            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create(AuthenticatedConnectionString("usr", "pss")));
+            var provider = new NormalConnectionProvider(ConnectionOptions.Create(AuthenticatedConnectionString("usr", "pss")));
             var connection = provider.Open(null);
             Assert.Equal(true, connection.Client.Connected);
             provider.Close(connection);
