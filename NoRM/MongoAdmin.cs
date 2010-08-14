@@ -252,7 +252,7 @@ namespace Norm
         {
             return reconfigure ?
                 this.ExecuteCommand<ReplicaSetConfigReponse>(new { replSetReconfig = config }) :
-                this.ExecuteCommand<ReplicaSetConfigReponse>(new { replSetInitialize = config });
+                this.ExecuteCommand<ReplicaSetConfigReponse>(new { replSetInitiate = config });
         }
 
         /// <summary>
