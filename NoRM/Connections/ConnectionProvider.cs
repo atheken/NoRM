@@ -27,20 +27,21 @@ namespace Norm
         /// <returns></returns>
         protected IConnection CreateNewConnection()
         {
-            var connection = new Connection(ConnectionString);
+            var retval = new Connection(ConnectionString);
             try
             {
-                if (!Authenticate(connection))
+                if (!Authenticate(retval))
                 {
-                    Close(connection);
+                    Close(retval);
                 }
             }
             catch (Exception)
             {
-                Close(connection);
+                Close(retval);
                 throw;
             }
-            return connection;
+
+            return retval;
         }
 
         /// <summary>
