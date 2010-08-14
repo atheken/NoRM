@@ -12,6 +12,7 @@ namespace Norm
     public class ConnectionOptions : IOptionsContainer, ICloneable
     {
         private String _connectionString;
+        private bool _isNew = true;
 
         /// <summary>
         /// Produces the original connection string (URI) that was used to get this instance of ConnectionOptions.
@@ -24,19 +25,20 @@ namespace Norm
 
         private const string DEFAULT_DATABASE = "admin";
         private const int DEFAULT_PORT = 27017;
-        private static readonly Regex _rxSchemaMatch = new Regex("^(mongodb(rs)?://)", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly Regex _rxSchemaMatch = new Regex("^((mongodb://)|(mongodbrs://))", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
         private static readonly Regex _rxUserInfoMatch = new Regex("(?<username>.+?):(?<password>.+)", RegexOptions.Compiled);
 
         #region options assignment delegates
         private static readonly IDictionary<string, Action<string, ConnectionOptions>>
             _optionsHandler = new Dictionary<string, Action<string, ConnectionOptions>>
               {
+
                   {"strict", (v, b) => b.StrictMode =bool.Parse(v)},
                   {"querytimeout", (v, b) => b.QueryTimeout = int.Parse(v)},
-                  {"pooling", (v, b) => b.Pooled =bool.Parse(v)},
-                  {"poolsize", (v, b) => b.PoolSize = int.Parse(v)},
-                  {"timeout", (v, b) => b.Timeout = int.Parse(v)},
-                  {"lifetime", (v, b) => b.Lifetime = int.Parse(v)},
+                  {"pooling", (v, b) =>{ if(!b._isNew){throw new MongoException("Connection pooling cannot be provided as an override option");} b.Pooled =bool.Parse(v);}},
+                  {"poolsize", (v, b) =>{ if(!b._isNew){throw new MongoException("PoolSize cannot be provided as an override option");} b.PoolSize = int.Parse(v);}},
+                  {"timeout", (v, b) =>{ if(!b._isNew){throw new MongoException("Timeout cannot be provided as an override option");} b.Timeout = int.Parse(v);}},
+                  {"lifetime", (v, b) =>{ if(!b._isNew){throw new MongoException("Lifetime cannot be provided as an override option");} b.Lifetime = int.Parse(v);}},
                   {"verifywritecount", (v,b)=> b.VerifyWriteCount = int.Parse(v)}
               };
         #endregion
@@ -136,7 +138,7 @@ namespace Norm
                 }
             }
 
-            if (Uri.IsWellFormedUriString(connection, UriKind.Absolute))
+            if (Uri.IsWellFormedUriString(connection, UriKind.Absolute) && !Regex.IsMatch("(^mongodb://$)|(^mongodbrs://$)", connection))
             {
                 var builder = new ConnectionOptions();
                 var conn = new Uri(connection);
@@ -168,11 +170,13 @@ namespace Norm
                 }
                 else
                 {
-                    throw new NotSupportedException("This is not quite there yet, try back in a few days.");
+                    //need to connect to the admin db to get the replicaset information..
+
                 }
 
 
                 builder.AssignOptions(conn.Query.TrimStart('?'));
+                builder._isNew = false;
                 return builder;
             }
             else
@@ -232,7 +236,7 @@ namespace Norm
             }
         }
 
-        
+
         public object Clone()
         {
             return ConnectionOptions.Create(this._connectionString);
