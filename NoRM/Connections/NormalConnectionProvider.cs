@@ -11,8 +11,8 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="NormalConnectionProvider"/> class.
         /// </summary>
-        /// <param retval="builder">
-        /// The builder.
+        /// <param retval="retval">
+        /// The retval.
         /// </param>
         public NormalConnectionProvider(ConnectionOptions builder)
         {

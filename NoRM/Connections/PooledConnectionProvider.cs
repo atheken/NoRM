@@ -22,7 +22,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="PooledConnectionProvider"/> class.
         /// </summary>
-        /// <param retval="builder">The builder.</param>
+        /// <param retval="retval">The retval.</param>
         public PooledConnectionProvider(ConnectionOptions builder)
         {
             _builder = builder;

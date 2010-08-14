@@ -4,6 +4,7 @@ using System.Linq;
 using Norm.Protocol.SystemMessages.Requests;
 using Norm.Responses;
 using Norm.Protocol.SystemMessages.Responses;
+using Norm.BSON;
 
 namespace Norm
 {
@@ -232,14 +233,26 @@ namespace Norm
             return this.Database.GetCollection<T>("$cmd").FindOne(command);
         }
 
+        public void ReplicaSetPrimaryStepDown()
+        {
+            this.ExecuteCommand<Expando>(new { replSetStepDown = true });
+        }
+
+        public ReplicaSetStatusResponse GetReplicaSetStatus()
+        {
+            return this.ExecuteCommand<ReplicaSetStatusResponse>(new { replSetGetStatus = 1 });
+        }
+
         /// <summary>
         /// Initialize a new config.
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public ReplicaSetConfigReponse InitializeReplicaSet(ReplicaSet config)
+        public ReplicaSetConfigReponse ConfigureReplicaSet(ReplicaSet config, bool reconfigure)
         {
-            return this.ExecuteCommand<ReplicaSetConfigReponse>(new { replSetInitialize = config });
+            return reconfigure ?
+                this.ExecuteCommand<ReplicaSetConfigReponse>(new { replSetReconfig = config }) :
+                this.ExecuteCommand<ReplicaSetConfigReponse>(new { replSetInitialize = config });
         }
 
         /// <summary>

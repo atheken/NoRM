@@ -196,6 +196,8 @@
     <Compile Include="MongoQueryExecutor.cs" />
     <Compile Include="Protocol\IUpdateWithoutId.cs" />
     <Compile Include="Protocol\Messages\FindAndModifyResult.cs" />
+    <Compile Include="Protocol\ReplicaSetMember.cs" />
+    <Compile Include="Protocol\ReplicaSetState.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\ExplainRequest.cs" />
     <Compile Include="Protocol\Messages\IndexOption.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
@@ -247,6 +249,7 @@
     <Compile Include="Protocol\SystemMessages\Responses\PreviousErrorResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfilingInformationResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ReplicaSetConfigReponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ReplicaSetStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\SetProfileResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />

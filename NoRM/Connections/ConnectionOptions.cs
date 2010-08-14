@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Norm
 {
@@ -113,11 +114,14 @@ namespace Norm
         public int? VerifyWriteCount { get; set; }
 
         /// <summary>
-        /// Creates a connection string builder.
+        /// Creates a connection string retval.
         /// </summary>
         /// <param retval="connectionString">The connection string.</param>
         /// <returns></returns>
         /// <exception cref="MongoException">
+        /// Thrown when either an incorrect connection string is passed. 
+        /// Or when using a replica set, a connection cannot be made to the Admin 
+        /// database using the settings provided (in order to find the other servers).
         /// </exception>
         public static ConnectionOptions Create(string connectionString)
         {
@@ -141,9 +145,9 @@ namespace Norm
             if (Uri.IsWellFormedUriString(connection, UriKind.Absolute)
                 && !Regex.IsMatch("(^mongodb://$)|(^mongodbrs://$)", connection))
             {
-                var builder = new ConnectionOptions();
+                var retval = new ConnectionOptions();
                 var conn = new Uri(connection, true);
-                builder._connectionString = connection;
+                retval._connectionString = connection;
 
                 int port;
                 try
@@ -152,33 +156,47 @@ namespace Norm
                     port = port == -1 ? DEFAULT_PORT : port;
                 }
                 catch { port = DEFAULT_PORT; };
-                builder.Servers = new List<Server>(1);
-                builder.Servers.Add(new Server() { Host = conn.Host, Port = port });
+                retval.Servers = new List<Server>(1);
+                retval.Servers.Add(new Server() { Host = conn.Host, Port = port });
                 var isReplicaSet = conn.Scheme.Equals("mongodbrs", StringComparison.InvariantCultureIgnoreCase);
 
                 if (!String.IsNullOrEmpty(conn.UserInfo))
                 {
-                    builder.SetAuthentication(conn.UserInfo);
+                    retval.SetAuthentication(conn.UserInfo);
+                }
+                retval.Database = (conn.AbsolutePath ?? "").Trim('/', '\\');
+                if (String.IsNullOrEmpty(retval.Database))
+                {
+                    retval.Database = DEFAULT_DATABASE;
                 }
 
-                if (!isReplicaSet)
+                if (isReplicaSet)
                 {
-                    builder.Database = (conn.AbsolutePath ?? "").Trim('/', '\\');
-                    if (String.IsNullOrEmpty(builder.Database))
+                    //do some special replica set stuff.
+                    var format = "mongodb://{0}:{1}/admin?pooling=false";
+                    if (!String.IsNullOrEmpty(conn.UserInfo))
                     {
-                        builder.Database = DEFAULT_DATABASE;
+                        format = "mongodb://{2}@{0}:{1}/admin?pooling=false";
                     }
+
+                    var admin = new MongoAdmin(String.Format(format,
+                        retval.Servers[0].Host, retval.Servers[0].Port, conn.UserInfo));
+                    var rs = admin.GetReplicaSetStatus();
+                    retval.Servers =
+                        rs.Members.Select(y =>
+                        {
+                            var s = new Server();
+                            var parts = y.ServerName.Split(':');
+                            s.Host = parts[0];
+                            s.Port = parts.Length == 2 ? Int32.Parse(parts[1]) : DEFAULT_PORT;
+                            return s;
+                        }).ToList();
                 }
-                else
-                {
-                    //need to connect to the admin db to get the replicaset information..
-
-                }
 
 
-                builder.AssignOptions(conn.Query.TrimStart('?'));
-                builder._isNew = false;
-                return builder;
+                retval.AssignOptions(conn.Query.TrimStart('?'));
+                retval._isNew = false;
+                return retval;
             }
             else
             {
@@ -219,7 +237,7 @@ namespace Norm
         /// <summary>
         /// The build authentication.
         /// </summary>
-        /// <param retval="sb">The string builder.</param>
+        /// <param retval="sb">The string retval.</param>
         /// <returns></returns>
         /// <exception cref="MongoException">
         /// </exception>

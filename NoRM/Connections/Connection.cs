@@ -24,7 +24,7 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="Connection"/> class.
         /// </summary>
-        /// <param retval="builder">The builder.</param>
+        /// <param retval="retval">The retval.</param>
         internal Connection(ConnectionOptions builder)
         {
             _connectionOptions = _builder = builder;

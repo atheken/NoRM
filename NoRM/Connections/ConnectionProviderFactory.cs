@@ -53,7 +53,7 @@ namespace Norm
         /// <summary>
         /// The create new provider.
         /// </summary>
-        /// <param retval="builder">The builder.</param>
+        /// <param retval="retval">The retval.</param>
         /// <returns></returns>
         private static IConnectionProvider CreateNewProvider(ConnectionOptions builder)
         {
