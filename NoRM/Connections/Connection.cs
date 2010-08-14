@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Norm
 {
@@ -15,6 +16,7 @@ namespace Norm
     /// </summary>
     public class Connection : IConnection, IOptionsContainer
     {
+        private static long _request = 0;
         private readonly ConnectionOptions _builder;
         private IOptionsContainer _connectionOptions;
         private readonly TcpClient _client;
@@ -35,7 +37,12 @@ namespace Norm
                 ReceiveTimeout = builder.QueryTimeout * 1000,
                 SendTimeout = builder.QueryTimeout * 1000
             };
-            _client.Connect(builder.Servers[0].Host, builder.Servers[0].Port);
+
+            var l = Interlocked.Read(ref _request);
+            Interlocked.Increment(ref _request);
+            var index = (int)(l % builder.Servers.Count);
+
+            _client.Connect(builder.Servers[index].Host, builder.Servers[index].Port);
         }
 
         /// <summary>
