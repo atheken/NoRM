@@ -138,10 +138,11 @@ namespace Norm
                 }
             }
 
-            if (Uri.IsWellFormedUriString(connection, UriKind.Absolute) && !Regex.IsMatch("(^mongodb://$)|(^mongodbrs://$)", connection))
+            if (Uri.IsWellFormedUriString(connection, UriKind.Absolute)
+                && !Regex.IsMatch("(^mongodb://$)|(^mongodbrs://$)", connection))
             {
                 var builder = new ConnectionOptions();
-                var conn = new Uri(connection);
+                var conn = new Uri(connection, true);
                 builder._connectionString = connection;
 
                 int port;
@@ -211,7 +212,7 @@ namespace Norm
                     throw new MongoException("Invalid connection option: " + part);
                 }
 
-                _optionsHandler[kvp[0].ToLower()](kvp[1], this);
+                _optionsHandler[Uri.UnescapeDataString(kvp[0].ToLower())](Uri.UnescapeDataString(kvp[1]), this);
             }
         }
 
@@ -231,8 +232,8 @@ namespace Norm
             }
             else
             {
-                this.UserName = m.Groups["username"].Value;
-                this.Password = m.Groups["password"].Value;
+                this.UserName = Uri.UnescapeDataString(m.Groups["username"].Value);
+                this.Password = Uri.UnescapeDataString(m.Groups["password"].Value);
             }
         }
 

@@ -13,6 +13,13 @@ namespace Norm.Tests
         }
 
         [Fact]
+        public void Properly_Decodes_Username_and_Password_URLEncoded_Values()
+        {
+            var opts = ConnectionOptions.Create("mongodb://username:P%40$$w0rd@localhost/ProjectEuler");
+            Assert.Equal("P@$$w0rd", opts.Password);
+        }
+
+        [Fact]
         public void ThrowsExceptionIfAuthenticationDoesntHaveTwoParts()
         {
             var ex = Assert.Throws<MongoException>(() => ConnectionOptions.Create("mongodb://notgood@host/db"));
