@@ -1,10 +1,11 @@
-using Xunit;
+using NUnit.Framework;
 
 namespace Norm.Tests
 {
+    [TestFixture]
     public class NormalConnectionProviderTests
     {
-        [Fact]
+        [Test]
         public void CreatesANewConnectionForEachOpen()
         {
             IConnection connection1 = null;
@@ -15,7 +16,7 @@ namespace Norm.Tests
             {            
                 connection1 = provider.Open(null);
                 connection2 = provider.Open(null);
-                Assert.NotSame(connection1, connection2);
+                Assert.AreNotSame(connection1, connection2);
             }
             finally
             {
@@ -24,7 +25,7 @@ namespace Norm.Tests
             }
         }
 
-        [Fact]
+        [Test]
         public void ClosesTheUnderlyingConnection()
         {
             var provider = new NormalConnectionProvider(ConnectionOptions.Create(TestHelper.ConnectionString()));

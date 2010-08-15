@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Xunit;
+using NUnit.Framework;
 using Norm.BSON;
 using System.Linq;
 using System.Globalization;
@@ -10,16 +10,17 @@ using Norm.Configuration;
 
 namespace Norm.Tests
 {
+    [TestFixture]
     public class BSONSerializerTest
     {
-        [Fact]
+        [Test]
         public void DoesntSerializeIgnoredProperties()
         {
             var o = new GeneralDTO {IgnoredProperty = 4};
-            Assert.Equal(0, BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(o)).IgnoredProperty);
+            Assert.AreEqual(0, BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(o)).IgnoredProperty);
         }
 
-        [Fact]
+        [Test]
         public void Should_Not_Serialize_When_Default_Values_Specified()
         {
             var o = new SerializerTest() { Id = 1, Message = "Test" };
@@ -28,10 +29,10 @@ namespace Norm.Tests
             // create a object with value Id = 1
             var s1 = BsonSerializer.Serialize(new { Id = 1 });
             // both should be equal
-            Assert.Equal(o1, s1);
+            Assert.AreEqual(o1, s1);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfEnumIsNotLossy()
         {
             var obj1 = new GeneralDTO{ Flags32 = Flags32.FlagOn, Flags64 = Flags64.FlagOff };
@@ -40,37 +41,37 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj2));
 
-            Assert.Equal(obj1.Flags32, hydratedObj1.Flags32);
-            Assert.Equal(null, hydratedObj2.Flags32);
+            Assert.AreEqual(obj1.Flags32, hydratedObj1.Flags32);
+            Assert.AreEqual(null, hydratedObj2.Flags32);
 
-            Assert.Equal(obj1.Flags64, hydratedObj1.Flags64);
-            Assert.Equal(null, hydratedObj2.Flags64);
+            Assert.AreEqual(obj1.Flags64, hydratedObj1.Flags64);
+            Assert.AreEqual(null, hydratedObj2.Flags64);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfFlyweightIsNotLossy()
         {
             var testObj = new Expando();
             testObj["astring"] = "stringval";
             var testBytes = BsonSerializer.Serialize(testObj);
             var hydrated = BsonDeserializer.Deserialize<Expando>(testBytes);
-            Assert.Equal(testObj["astring"], hydrated["astring"]);
+            Assert.AreEqual(testObj["astring"], hydrated["astring"]);
         }
         
-        [Fact]
+        [Test]
         public void SerializesAndDeserializesAFloat()
         {
             var o = new GeneralDTO {AFloat = 1.4f};
-            Assert.Equal(1.4f, BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(o)).AFloat);
+            Assert.AreEqual(1.4f, BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(o)).AFloat);
         }
-        [Fact]
+        [Test]
         public void SerializingPocoGeneratesBytes()
         {
             var dummy = new GeneralDTO { Title = "Testing" };
-            Assert.NotEmpty(BsonSerializer.Serialize(dummy));
+            Assert.IsTrue(BsonSerializer.Serialize(dummy).Length > 0);
         }
         
-        [Fact]
+        [Test]
         public void SerializationOfDatesHasMillisecondPrecision()
         {
             var obj1 = new GeneralDTO { ADateTime = null };
@@ -82,15 +83,15 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
-            Assert.Equal(null, hydratedObj1.ADateTime);
+            Assert.AreEqual(null, hydratedObj1.ADateTime);
 
             //Mongo stores dates as long, therefore, we have to use double->long rounding.
-            Assert.Equal((long)((obj2.ADateTime.Value.ToUniversalTime() - DateTime.MinValue)).TotalMilliseconds,
+            Assert.AreEqual((long)((obj2.ADateTime.Value.ToUniversalTime() - DateTime.MinValue)).TotalMilliseconds,
                 (long)(hydratedObj2.ADateTime.Value - DateTime.MinValue).TotalMilliseconds);
 
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfStringsAreNotLossy()
         {
             var obj1 = new GeneralDTO { Title = null };
@@ -102,11 +103,11 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
-            Assert.Equal(null, hydratedObj1.Title);
-            Assert.Equal(obj2.Title, hydratedObj2.Title);
+            Assert.AreEqual(null, hydratedObj1.Title);
+            Assert.AreEqual(obj2.Title, hydratedObj2.Title);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfNestedObjectsIsNotLossy()
         {
             var obj1 = new GeneralDTO { Title = "Hello World", Nester = new GeneralDTO { Title = "Bob", AnInt = 42 } };
@@ -115,13 +116,13 @@ namespace Norm.Tests
 
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
 
-            Assert.Equal(obj1.Title, hydratedObj1.Title);
-            Assert.Equal(obj1.Nester.Title, hydratedObj1.Nester.Title);
-            Assert.Equal(obj1.Nester.AnInt, hydratedObj1.Nester.AnInt);
+            Assert.AreEqual(obj1.Title, hydratedObj1.Title);
+            Assert.AreEqual(obj1.Nester.Title, hydratedObj1.Nester.Title);
+            Assert.AreEqual(obj1.Nester.AnInt, hydratedObj1.Nester.AnInt);
 
         }
 
-        [Fact]
+        [Test]
         public void RecursiveNestedTypesDontCauseInfiniteLoop()
         {
             var obj1 = new GeneralDTO { Title = "Hello World", Nester = new GeneralDTO { Title = "Bob", AnInt = 42 } };
@@ -130,7 +131,7 @@ namespace Norm.Tests
 
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfDoublesAreNotLossy()
         {
             var obj1 = new GeneralDTO { Pi = 3.1415927d };
@@ -142,21 +143,21 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
-            Assert.Equal(obj1.Pi, hydratedObj1.Pi);
-            Assert.Equal(null, hydratedObj2.Pi);
+            Assert.AreEqual(obj1.Pi, hydratedObj1.Pi);
+            Assert.AreEqual(null, hydratedObj2.Pi);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfIEnumerableTIsNotLossy()
         {
             var gto = new GeneralDTO{ AnIEnumerable = new List<Person>(){ new Person(), new Person()}};
             var bytes = BsonSerializer.Serialize(gto);
         
             var gto2 = BsonDeserializer.Deserialize<GeneralDTO>(bytes);
-            Assert.Equal(2, gto2.AnIEnumerable.Count());
+            Assert.AreEqual(2, gto2.AnIEnumerable.Count());
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfIntsAreNotLossy()
         {
             var obj1 = new GeneralDTO { AnInt = 100 };
@@ -169,11 +170,11 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
-            Assert.Equal(obj1.AnInt, hydratedObj1.AnInt);
-            Assert.Equal(null, hydratedObj2.AnInt);
+            Assert.AreEqual(obj1.AnInt, hydratedObj1.AnInt);
+            Assert.AreEqual(null, hydratedObj2.AnInt);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfBooleansAreNotLossy()
         {
             var obj1 = new GeneralDTO { ABoolean = true };
@@ -185,11 +186,11 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
-            Assert.Equal(obj1.ABoolean, hydratedObj1.ABoolean);
-            Assert.Equal(null, hydratedObj2.ABoolean);
+            Assert.AreEqual(obj1.ABoolean, hydratedObj1.ABoolean);
+            Assert.AreEqual(null, hydratedObj2.ABoolean);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfBytesIsNotLossy()
         {
             var bin = new List<byte>();
@@ -208,10 +209,10 @@ namespace Norm.Tests
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
             Assert.True(obj1.Bytes.SequenceEqual(hydratedObj1.Bytes));
-            Assert.Equal(null, hydratedObj2.Bytes);
+            Assert.AreEqual(null, hydratedObj2.Bytes);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfGuidIsNotLossy()
         {
             var obj1 = new GeneralDTO { AGuid = Guid.NewGuid() };
@@ -223,47 +224,47 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
-            Assert.Equal(obj1.AGuid, hydratedObj1.AGuid);
-            Assert.Equal(null, hydratedObj2.AGuid);
+            Assert.AreEqual(obj1.AGuid, hydratedObj1.AGuid);
+            Assert.AreEqual(null, hydratedObj2.AGuid);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfInheritenceIsNotLossy()
         {
             var obj1 = new SubClassedObject {Title = "Subclassed", ABool = true};
             var hydratedObj1 = BsonDeserializer.Deserialize<SubClassedObject>(BsonSerializer.Serialize(obj1));
-            Assert.Equal(obj1.Title, hydratedObj1.Title);
-            Assert.Equal(obj1.ABool, hydratedObj1.ABool);
+            Assert.AreEqual(obj1.Title, hydratedObj1.Title);
+            Assert.AreEqual(obj1.ABool, hydratedObj1.ABool);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfInheritenceIsNotLossy_EvenWhenWeAskForTheBaseType()
         {
             var obj1 = new SubClassedObject { Title = "The Title", ABool = true };
             var hydratedObj1 = (SubClassedObject)BsonDeserializer.Deserialize<SuperClassObject>(BsonSerializer.Serialize(obj1));
-            Assert.Equal(obj1.Title, hydratedObj1.Title);
-            Assert.Equal(obj1.ABool, hydratedObj1.ABool);
+            Assert.AreEqual(obj1.Title, hydratedObj1.Title);
+            Assert.AreEqual(obj1.ABool, hydratedObj1.ABool);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfInheritenceIsNotLossy_EvenWhenDiscriminatorIsOnAnInterface()
         {
             var obj1 = new InterfaceDiscriminatedClass();
             var hydratedObj1 = BsonDeserializer.Deserialize<InterfaceDiscriminatedClass>(BsonSerializer.Serialize(obj1));
 
-            Assert.Equal(obj1.Id, hydratedObj1.Id);
+            Assert.AreEqual(obj1.Id, hydratedObj1.Id);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfInheritenceIsNotLossy_EvenWhenDiscriminatorIsOnAnInterfaceAndWeTryToDeserializeUsingTheInterface()
         {
             var obj1 = new InterfaceDiscriminatedClass();
             var hydratedObj1 = (InterfaceDiscriminatedClass)BsonDeserializer.Deserialize<IDiscriminated>(BsonSerializer.Serialize(obj1));
 
-            Assert.Equal(obj1.Id, hydratedObj1.Id);
+            Assert.AreEqual(obj1.Id, hydratedObj1.Id);
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfRegexIsNotLossy()
         {
             var obj1 = new GeneralDTO { ARex = new Regex("[0-9]{5}", RegexOptions.Multiline) };
@@ -275,12 +276,12 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(obj1Bytes);
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(obj2Bytes);
 
-            Assert.Equal(obj1.ARex.ToString(), hydratedObj1.ARex.ToString());
-            Assert.Equal(obj1.ARex.Options, hydratedObj1.ARex.Options);
-            Assert.Equal(null, hydratedObj2.ARex);
+            Assert.AreEqual(obj1.ARex.ToString(), hydratedObj1.ARex.ToString());
+            Assert.AreEqual(obj1.ARex.Options, hydratedObj1.ARex.Options);
+            Assert.AreEqual(null, hydratedObj2.ARex);
             //more tests would be useful for all the options.
         }
-        [Fact]
+        [Test]
         public void SerializationOfScopedCodeIsNotLossy()
         {
             var obj1 = new GeneralDTO {Code = new ScopedCode {CodeString = "function(){return 'hello world!'}"}};
@@ -290,10 +291,10 @@ namespace Norm.Tests
 
             var obj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
 
-            Assert.Equal(obj1.Code.CodeString, obj2.Code.CodeString);
-            Assert.Equal(((Expando)obj1.Code.Scope)["$ns"],((Expando)obj2.Code.Scope)["$ns"]);
+            Assert.AreEqual(obj1.Code.CodeString, obj2.Code.CodeString);
+            Assert.AreEqual(((Expando)obj1.Code.Scope)["$ns"],((Expando)obj2.Code.Scope)["$ns"]);
         }
-        [Fact]
+        [Test]
         public void SerializesAndDeserializesAComplexObject()
         {
             var obj1 = new GeneralDTO
@@ -317,37 +318,37 @@ namespace Norm.Tests
             var hydratedObj1 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj1));
             var hydratedObj2 = BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(obj2));
 
-            Assert.Equal(obj1.Pi, hydratedObj1.Pi);
-            Assert.Equal(obj1.AnInt, hydratedObj1.AnInt);
-            Assert.Equal(obj1.Title, hydratedObj1.Title);
-            Assert.Equal(obj1.ABoolean, hydratedObj1.ABoolean);
-            Assert.Equal(obj1.Bytes, hydratedObj1.Bytes);
-            Assert.Equal(obj1.AGuid, hydratedObj1.AGuid);
-            Assert.Equal(obj1.ADateTime.Value.ToUniversalTime().Ticks, 
+            Assert.AreEqual(obj1.Pi, hydratedObj1.Pi);
+            Assert.AreEqual(obj1.AnInt, hydratedObj1.AnInt);
+            Assert.AreEqual(obj1.Title, hydratedObj1.Title);
+            Assert.AreEqual(obj1.ABoolean, hydratedObj1.ABoolean);
+            Assert.AreEqual(obj1.Bytes, hydratedObj1.Bytes);
+            Assert.AreEqual(obj1.AGuid, hydratedObj1.AGuid);
+            Assert.AreEqual(obj1.ADateTime.Value.ToUniversalTime().Ticks, 
                 hydratedObj1.ADateTime.Value.ToUniversalTime().Ticks);
-            Assert.Equal(obj1.Strings, hydratedObj1.Strings);
-            Assert.Equal(obj1.Flags32, hydratedObj1.Flags32);
-            Assert.Equal(obj1.Flags64, hydratedObj1.Flags64);
-            Assert.Equal(obj1.Nester.Title, hydratedObj1.Nester.Title);
-            Assert.Equal(obj1.Nester.Pi, hydratedObj1.Nester.Pi);
-            Assert.Equal(obj1.ARex.ToString(), hydratedObj1.ARex.ToString());
-            Assert.Equal(obj1.ARex.Options, hydratedObj1.ARex.Options);
+            Assert.AreEqual(obj1.Strings, hydratedObj1.Strings);
+            Assert.AreEqual(obj1.Flags32, hydratedObj1.Flags32);
+            Assert.AreEqual(obj1.Flags64, hydratedObj1.Flags64);
+            Assert.AreEqual(obj1.Nester.Title, hydratedObj1.Nester.Title);
+            Assert.AreEqual(obj1.Nester.Pi, hydratedObj1.Nester.Pi);
+            Assert.AreEqual(obj1.ARex.ToString(), hydratedObj1.ARex.ToString());
+            Assert.AreEqual(obj1.ARex.Options, hydratedObj1.ARex.Options);
 
-            Assert.Equal(obj2.Pi, hydratedObj2.Pi);
-            Assert.Equal(obj2.AnInt, hydratedObj2.AnInt);
-            Assert.Equal(obj2.Title, hydratedObj2.Title);
-            Assert.Equal(obj2.ABoolean, hydratedObj2.ABoolean);
-            Assert.Equal(obj2.Bytes, hydratedObj2.Bytes);
-            Assert.Equal(obj2.AGuid, hydratedObj2.AGuid);
-            Assert.Equal(obj2.ADateTime, hydratedObj2.ADateTime);
-            Assert.Equal(obj2.Strings, hydratedObj2.Strings);
-            Assert.Equal(obj2.Flags32, hydratedObj2.Flags32);
-            Assert.Equal(obj2.Flags64, hydratedObj2.Flags64);
-            Assert.Equal(obj2.Nester, hydratedObj2.Nester);
-            Assert.Equal(obj2.ARex, hydratedObj2.ARex);
+            Assert.AreEqual(obj2.Pi, hydratedObj2.Pi);
+            Assert.AreEqual(obj2.AnInt, hydratedObj2.AnInt);
+            Assert.AreEqual(obj2.Title, hydratedObj2.Title);
+            Assert.AreEqual(obj2.ABoolean, hydratedObj2.ABoolean);
+            Assert.AreEqual(obj2.Bytes, hydratedObj2.Bytes);
+            Assert.AreEqual(obj2.AGuid, hydratedObj2.AGuid);
+            Assert.AreEqual(obj2.ADateTime, hydratedObj2.ADateTime);
+            Assert.AreEqual(obj2.Strings, hydratedObj2.Strings);
+            Assert.AreEqual(obj2.Flags32, hydratedObj2.Flags32);
+            Assert.AreEqual(obj2.Flags64, hydratedObj2.Flags64);
+            Assert.AreEqual(obj2.Nester, hydratedObj2.Nester);
+            Assert.AreEqual(obj2.ARex, hydratedObj2.ARex);
         }
 
-        [Fact(Skip="Slow test")]
+        //[Fact(Skip="Slow test")]
         public void SerializationSpeedTest()
         {
             for (var i = 0; i < 5; i++)
@@ -374,7 +375,7 @@ namespace Norm.Tests
             }
         }   
 
-        [Fact]
+        [Test]
         public void SerializationOfEmptyListIsNotLossy()
         {
             var obj1Bytes = BsonSerializer.Serialize(new GeneralDTO { AList = new List<string>() });
@@ -382,26 +383,26 @@ namespace Norm.Tests
             Assert.True(obj2.AList != null);
         } 
         
-        [Fact]
+        [Test]
         public void SerializesWithPrivateSetter()
         {
             var start = new PrivateSetter(4);
             var bytes = BsonSerializer.Serialize(start);
             var end = BsonDeserializer.Deserialize<PrivateSetter>(bytes);  
-            Assert.Equal(start.Id, end.Id);
+            Assert.AreEqual(start.Id, end.Id);
         }
 
-        [Fact]
+        [Test]
         public void SerializesReadonlyList()
         {
             var start = new ReadOnlyList();
             start.Names.Add("Duncan Idaho");
             var bytes = BsonSerializer.Serialize(start);
             var end = BsonDeserializer.Deserialize<ReadOnlyList>(bytes);
-            Assert.Equal(1, end.Names.Count);
-            Assert.Equal("Duncan Idaho", end.Names[0]);
+            Assert.AreEqual(1, end.Names.Count);
+            Assert.AreEqual("Duncan Idaho", end.Names[0]);
         }
-        [Fact]
+        [Test]
         public void SerializesReadonlyICollection()
         {
             var start = new HashSetList();
@@ -409,77 +410,77 @@ namespace Norm.Tests
             start.Names.Add("Idaho");
             var bytes = BsonSerializer.Serialize(start);
             var end = BsonDeserializer.Deserialize<HashSetList>(bytes);
-            Assert.Equal(2, end.Names.Count);
-            Assert.Equal("Duncan", end.Names.ElementAt(0));
-            Assert.Equal("Idaho", end.Names.ElementAt(1));
+            Assert.AreEqual(2, end.Names.Count);
+            Assert.AreEqual("Duncan", end.Names.ElementAt(0));
+            Assert.AreEqual("Idaho", end.Names.ElementAt(1));
         }
 
-        [Fact]
+        [Test]
         public void SerializesDictionary()
         {
             var start = new DictionaryObject();
             start.Names.Add("Duncan Idaho", 2);
             var bytes = BsonSerializer.Serialize(start);
             var end = BsonDeserializer.Deserialize<DictionaryObject>(bytes);
-            Assert.Equal(1, end.Names.Count);
-            Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
-            Assert.Equal(2, end.Names.ElementAt(0).Value);
+            Assert.AreEqual(1, end.Names.Count);
+            Assert.AreEqual("Duncan Idaho", end.Names.ElementAt(0).Key);
+            Assert.AreEqual(2, end.Names.ElementAt(0).Value);
         }
-        [Fact]
+        [Test]
         public void SerializesIDictionary()
         {
             var start = new IDictionaryObject();
             start.Names.Add("Duncan Idaho", 2);
             var bytes = BsonSerializer.Serialize(start);
             var end = BsonDeserializer.Deserialize<IDictionaryObject>(bytes);
-            Assert.Equal(1, end.Names.Count);
-            Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
-            Assert.Equal(2, end.Names.ElementAt(0).Value);
+            Assert.AreEqual(1, end.Names.Count);
+            Assert.AreEqual("Duncan Idaho", end.Names.ElementAt(0).Key);
+            Assert.AreEqual(2, end.Names.ElementAt(0).Value);
         }
        
-        [Fact]
+        [Test]
         public void SerializesReadonlyDictionary()
         {
             var start = new ReadOnlyDictionary();
             start.Names.Add("Duncan Idaho", 2);
             var bytes = BsonSerializer.Serialize(start);
             var end = BsonDeserializer.Deserialize<ReadOnlyDictionary>(bytes);
-            Assert.Equal(1, end.Names.Count);
-            Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
-            Assert.Equal(2, end.Names.ElementAt(0).Value);
+            Assert.AreEqual(1, end.Names.Count);
+            Assert.AreEqual("Duncan Idaho", end.Names.ElementAt(0).Key);
+            Assert.AreEqual(2, end.Names.ElementAt(0).Value);
         }
         
-        [Fact]
+        [Test]
         public void WillDeserializeObjectWithPrivateConstructor()
         {
             var start = PrivateConstructor.Create("Darren Kopp");
             var bytes = BsonSerializer.Serialize(start);
             var end = BsonDeserializer.Deserialize<PrivateConstructor>(bytes);
-            Assert.Equal(start.Name, end.Name);            
+            Assert.AreEqual(start.Name, end.Name);            
         }
         
-        [Fact]
+        [Test]
         public void SerializesExtraPropertiesToExpandoCollection()
         {
             var address = new Address {City = "Arrakeen", State = "Arrakis", Street = "1 Grand Palace Way", Zip = "sp1c3"};
             var bytes = BsonSerializer.Serialize(address);
             var expando = BsonDeserializer.Deserialize<ExpandoAddress>(bytes);
-            Assert.Equal(expando.City, address.City);
-            Assert.Equal(expando.Street, address.Street);
-            Assert.Equal(expando["State"], address.State);
-            Assert.Equal(expando["Zip"], address.Zip);
+            Assert.AreEqual(expando.City, address.City);
+            Assert.AreEqual(expando.Street, address.Street);
+            Assert.AreEqual(expando["State"], address.State);
+            Assert.AreEqual(expando["Zip"], address.Zip);
         }
 
-        [Fact]
+        [Test]
         public void SerializesCultureInfo()
         {
             var s1 = new CultureInfoDTO() { Culture = CultureInfo.GetCultureInfo("en-US") };
             var bytes = BsonSerializer.Serialize(s1);
             var s2 = BsonDeserializer.Deserialize<CultureInfoDTO>(bytes);
-            Assert.Equal(s1.Culture, s2.Culture);
+            Assert.AreEqual(s1.Culture, s2.Culture);
         }
 
-        [Fact]
+        [Test]
         public void SerializesClassWithCustomValueObjectUsingCustomTypeConverter()
         {
             IMongoConfigurationMap cfg = new MongoConfigurationMap();
@@ -494,8 +495,8 @@ namespace Norm.Tests
                 };
             var bytes = BsonSerializer.Serialize(s1);
             var s2 = BsonDeserializer.Deserialize<NonSerializableClass>(bytes);
-            Assert.Equal(s1.Value.Number, s2.Value.Number);
-            Assert.Equal(s1.Text, s2.Text);
+            Assert.AreEqual(s1.Value.Number, s2.Value.Number);
+            Assert.AreEqual(s1.Text, s2.Text);
 
             BsonSerializer.UseConfiguration(null);
         }

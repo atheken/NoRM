@@ -163,7 +163,6 @@
     <Compile Include="Connections\NormalConnectionProvider.cs" />
     <Compile Include="Connections\PooledConnectionProvider.cs" />
     <Compile Include="Connections\ReplicationSetRegistry.cs" />
-    <Compile Include="Connections\Server.cs" />
     <Compile Include="Connections\TimedLock.cs" />
     <Compile Include="GridFS\FileChunk.cs" />
     <Compile Include="GridFS\GridFile.cs" />

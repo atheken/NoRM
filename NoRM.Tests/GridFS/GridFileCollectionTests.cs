@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Xunit;
+using NUnit.Framework;
 using Norm.Tests;
 using Norm;
 using Norm.GridFS;
@@ -10,9 +10,11 @@ using System.IO;
 
 namespace NoRM.Tests.GridFS
 {
+    [TestFixture]
     public class GridFileCollectionTests
     {
-        public GridFileCollectionTests()
+        [SetUp]
+        public void Setup()
         {
             using (var conn = Mongo.Create(TestHelper.ConnectionString("strict=false")))
             {
@@ -21,7 +23,7 @@ namespace NoRM.Tests.GridFS
             }
         }
 
-        [Fact]
+        [Test]
         public void Extension_Methods_Provide_Access_To_Collections()
         {
             using (var conn = Mongo.Create(TestHelper.ConnectionString("strict=false")))
@@ -33,7 +35,7 @@ namespace NoRM.Tests.GridFS
             }
         }
 
-        [Fact]
+        [Test]
         public void File_Save_Is_Not_Lossy()
         {
             using (var conn = Mongo.Create(TestHelper.ConnectionString()))
@@ -55,18 +57,18 @@ namespace NoRM.Tests.GridFS
                 var file2 = gridFS.FindOne(new { _id = file.Id });
 
 
-                Assert.Equal(file.Id, file2.Id);
-                Assert.Equal(file.MD5Checksum, file2.MD5Checksum);
-                Assert.Equal(file.ContentType, file2.ContentType);
+                Assert.AreEqual(file.Id, file2.Id);
+                Assert.AreEqual(file.MD5Checksum, file2.MD5Checksum);
+                Assert.AreEqual(file.ContentType, file2.ContentType);
                 //Mongo stores dates as long, therefore, we have to use double->long rounding.
-                Assert.Equal((long)((file.UploadDate - DateTime.MinValue)).TotalMilliseconds,
+                Assert.AreEqual((long)((file.UploadDate - DateTime.MinValue)).TotalMilliseconds,
                     (long)(file2.UploadDate - DateTime.MinValue).TotalMilliseconds);
                 Assert.True(file.Aliases.SequenceEqual(file2.Aliases));
                 Assert.True(file.Content.SequenceEqual(file2.Content));
             }
         }
 
-        [Fact]
+        [Test]
         public void File_Delete_Works()
         {
             using (var conn = Mongo.Create(TestHelper.ConnectionString()))

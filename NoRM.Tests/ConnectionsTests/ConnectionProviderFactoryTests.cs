@@ -1,45 +1,46 @@
-using Xunit;
+using NUnit.Framework;
 
 namespace Norm.Tests
 {
+    [TestFixture]
     public class ConnectionProviderFactoryTests
     {
-        [Fact]
+        [Test]
         public void ReturnsAPooledConnectionProvider()
         {
-            Assert.IsType(typeof(PooledConnectionProvider), ConnectionProviderFactory.Create("mongodb://localhost/test?pooling=true"));
+            Assert.True(ConnectionProviderFactory.Create("mongodb://localhost/test?pooling=true") is PooledConnectionProvider);
         }
-        [Fact]
+        [Test]
         public void ReturnsNormalConnectionProvider()
         {
-            Assert.IsType(typeof(NormalConnectionProvider), ConnectionProviderFactory.Create("mongodb://localhost/test?pooling=false"));
+            Assert.True(ConnectionProviderFactory.Create("mongodb://localhost/test?pooling=false") is NormalConnectionProvider);
         }
         
-        [Fact]
+        [Test]
         public void ReturnsTheSameProviderForTheSameConnectionString()
         {
             const string connectionString = "mongodb://localhost/test?pooling=false";
             var original = ConnectionProviderFactory.Create(connectionString);
-            Assert.Same(original, ConnectionProviderFactory.Create(connectionString));
+            Assert.AreSame(original, ConnectionProviderFactory.Create(connectionString));
         }
-        [Fact]
+        [Test]
         public void ReturnsDifferentProvidersForDifferentConnectionStrings()
         {            
             var original = ConnectionProviderFactory.Create("mongodb://localhost/test?pooling=false");
-            Assert.NotSame(original, ConnectionProviderFactory.Create("mongodb://localhost/test?pooling=false&strict=false"));
+            Assert.AreNotSame(original, ConnectionProviderFactory.Create("mongodb://localhost/test?pooling=false&strict=false"));
         }
-        [Fact]
+        [Test]
         public void ConnectionProviderSupportsConfigFileValues()
         {
             var provider = ConnectionProviderFactory.Create("NormTests");
             Assert.NotNull(provider);
         }
-        [Fact]
+        [Test]
         public void ConnectionProviderConfigFileValuesMatchConnectionStringGrammar()
         {
             Assert.Throws<MongoException>(() => ConnectionProviderFactory.Create("NormTestsFail"));
         }
-        [Fact]
+        [Test]
         public void ConnectionProviderConfigFailsForMissingConnectionString()
         {
             Assert.Throws<MongoException>(() =>  ConnectionProviderFactory.Create("NormTestsFail") );

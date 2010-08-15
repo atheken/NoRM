@@ -1,27 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Norm.Tests;
-using System.Diagnostics;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
-using Xunit;
 using Norm;
-using t = System.Threading;
 using Norm.Protocol.SystemMessages.Responses;
-using System.Threading;
+using NUnit.Framework;
+using t = System.Threading;
 
 namespace NoRM.Tests.ConnectionsTests
 {
-    public class ReplicaSetTests : IDisposable
+    [TestFixture]
+    public class ReplicaSetTests
     {
-
-
         private Process _server1 = null;
         private Process _server2 = null;
 
-        private void Configure()
+        [SetUp]
+        public void Configure()
         {
             StartProcess(ref _server1, 64300);
             StartProcess(ref _server2, 64301);
@@ -51,11 +47,6 @@ namespace NoRM.Tests.ConnectionsTests
             }
         }
 
-        public ReplicaSetTests()
-        {
-            Configure();
-        }
-
         private static void StartProcess(ref Process serverProcess, int i)
         {
             var pathname = ConfigurationManager.AppSettings["replicaSetTestPath"] + "/rs" + i.ToString() + "/";
@@ -73,7 +64,7 @@ namespace NoRM.Tests.ConnectionsTests
             serverProcess.Start();
         }
 
-        [Fact(DisplayName = "REPLICA SET TESTS: We run all the tests together because it takes up to a minute to spin up the replica set")]
+//        [Fact(DisplayName = "REPLICA SET TESTS: We run all the tests together because it takes up to a minute to spin up the replica set")]
         public void RunAllReplicaSetTests()
         {
             this.GetReplicaSetStatusReturnsCorrectInformation();
@@ -85,7 +76,7 @@ namespace NoRM.Tests.ConnectionsTests
         public void ReplicaSet_ConnectionString_Dynamically_Finds_Nodes()
         {
             var options = ConnectionOptions.Create("mongodbrs://localhost:64300/admin");
-            Assert.Equal(2, options.Servers.Count);
+            Assert.AreEqual(2, options.Servers.Count);
         }
 
         /// <summary>
@@ -116,7 +107,8 @@ namespace NoRM.Tests.ConnectionsTests
             Assert.NotNull(result);
         }
 
-        public void Dispose()
+        [TearDown]
+        public void Teardown()
         {
             _server1.Kill();
             _server2.Kill();

@@ -1,95 +1,96 @@
 using System;
 using System.Net.Sockets;
-using Xunit;
+using NUnit.Framework;
 
 namespace Norm.Tests
 {
+    [TestFixture]
     public class ConnectionTest
     {
-        [Fact]
+        [Test]
         public void ThrowsExceptionIfCantConnect()
         {
             Assert.Throws<SocketException>(() => new Connection(ConnectionOptions.Create("mongodb://localhost2/test")));
         }
-        [Fact]
+        [Test]
         public void ThrowsExceptionWhenTryingToOverridePooling()
         {
             using (var connection = new DisposableConnection(ConnectionOptions.Create(TestHelper.ConnectionString())))
             {
                 var ex = Assert.Throws<MongoException>(() => connection.LoadOptions("pooling=true"));
-                Assert.Equal("Connection pooling cannot be provided as an override option", ex.Message);
+                Assert.AreEqual("Connection pooling cannot be provided as an override option", ex.Message);
             }
         }
-        [Fact]
+        [Test]
         public void ThrowsExceptionWhenTryingToOverridePoolSize()
         {
             using (var connection = new DisposableConnection(ConnectionOptions.Create(TestHelper.ConnectionString())))
             {
                 var ex = Assert.Throws<MongoException>(() => connection.LoadOptions("poolsize=23"));
-                Assert.Equal("PoolSize cannot be provided as an override option", ex.Message);
+                Assert.AreEqual("PoolSize cannot be provided as an override option", ex.Message);
             }
         }
-        [Fact]
+        [Test]
         public void ThrowsExceptionWhenTryingToOverrideTimeout()
         {
             using (var connection = new DisposableConnection(ConnectionOptions.Create(TestHelper.ConnectionString())))
             {
                 var ex = Assert.Throws<MongoException>(() => connection.LoadOptions("timeout=23"));
-                Assert.Equal("Timeout cannot be provided as an override option", ex.Message);
+                Assert.AreEqual("Timeout cannot be provided as an override option", ex.Message);
             }
         }
-        [Fact]
+        [Test]
         public void ThrowsExceptionWhenTryingToOverrideLifetime()
         {
             using (var connection = new DisposableConnection(ConnectionOptions.Create(TestHelper.ConnectionString())))
             {
                 var ex = Assert.Throws<MongoException>(() => connection.LoadOptions("lifetime=23"));
-                Assert.Equal("Lifetime cannot be provided as an override option", ex.Message);
+                Assert.AreEqual("Lifetime cannot be provided as an override option", ex.Message);
             }
         }
-        [Fact]
+        [Test]
         public void OverridesStrictMode()
         {
             using (var connection = new DisposableConnection(ConnectionOptions.Create(TestHelper.ConnectionString("?strict=true"))))
             {
-                Assert.Equal(true, connection.StrictMode);
+                Assert.AreEqual(true, connection.StrictMode);
                 connection.LoadOptions("strict=false");
-                Assert.Equal(false, connection.StrictMode);
+                Assert.AreEqual(false, connection.StrictMode);
             }
         }
-        [Fact]
+        [Test]
         public void OverridesQueryTimeout()
         {
             using (var connection = new DisposableConnection(ConnectionOptions.Create(TestHelper.ConnectionString("querytimeout=30"))))
             {
-                Assert.Equal(30, connection.QueryTimeout);
+                Assert.AreEqual(30, connection.QueryTimeout);
                 connection.LoadOptions("querytimeout=32");
-                Assert.Equal(32, connection.QueryTimeout);
+                Assert.AreEqual(32, connection.QueryTimeout);
             }
         }
        
 
-        [Fact]
+        [Test]
         public void ResetsDefaults()
         {
             using (var connection = new DisposableConnection(ConnectionOptions.Create(TestHelper.ConnectionString("querytimeout=30&strict=false"))))
             {
                 connection.LoadOptions("querytimeout=23&strict=true");
-                Assert.Equal(true, connection.StrictMode);
-                Assert.Equal(23, connection.QueryTimeout);
+                Assert.AreEqual(true, connection.StrictMode);
+                Assert.AreEqual(23, connection.QueryTimeout);
 
                 connection.ResetOptions();
-                Assert.Equal(false, connection.StrictMode);
-                Assert.Equal(30, connection.QueryTimeout);
+                Assert.AreEqual(false, connection.StrictMode);
+                Assert.AreEqual(30, connection.QueryTimeout);
             }
         }
 
-        [Fact]
+        [Test]
         public void CreatesDigestFromNonce()
         {
             using (var connection = new DisposableConnection(ConnectionOptions.Create(TestHelper.ConnectionString("querytimeout=30&strict=false", "ussrr", "ppaassss"))))
             {
-                Assert.Equal("21069b52452d123b3f4885400c1c9581", connection.Digest("1234abc"));
+                Assert.AreEqual("21069b52452d123b3f4885400c1c9581", connection.Digest("1234abc"));
             }
         }
 

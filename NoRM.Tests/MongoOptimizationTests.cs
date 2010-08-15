@@ -4,13 +4,15 @@ using Norm;
 using Norm.BSON;
 using Norm.Linq;
 using Norm.Protocol.Messages;
-using Xunit;
+using NUnit.Framework;
+using Norm.Configuration;
 
 namespace Norm.Tests
 {
+    [TestFixture]
     public class MongoOptimizationTests
     {
-        [Fact]
+        [Test]
         public void MongoCollectionEnsuresIndicies()
         {
             using (var session = new Session())
@@ -28,7 +30,7 @@ namespace Norm.Tests
             }
         }
 
-        [Fact]
+        [Test]
         public void MongoQueryExplainsExecutionPlansForFlyweightQueries()
         {
             using (var session = new Session())
@@ -56,11 +58,11 @@ namespace Norm.Tests
 
                 var result = session.DB.GetCollection<TestProduct>().Explain(query);
 
-                Assert.Equal("BtreeCursor TestIndex", result.Cursor);
+                Assert.AreEqual("BtreeCursor TestIndex", result.Cursor);
             }
         }
 
-        [Fact]
+        [Test]
         public void MongoQueryExplainsExecutionPlans()
         {
             using (var session = new Session())
@@ -79,11 +81,11 @@ namespace Norm.Tests
 
                 var result = session.DB.GetCollection<TestProduct>().Explain(new { Name = "ExplainProduct" });
 
-                Assert.Equal("BtreeCursor TestIndex", result.Cursor);
+                Assert.AreEqual("BtreeCursor TestIndex", result.Cursor);
             }
         }
 
-        [Fact]
+        [Test]
         public void MongoQueryExplainsLinqExecutionPlans()
         {
             using (var session = new Session())
@@ -103,15 +105,16 @@ namespace Norm.Tests
                     .Where(x => x.Supplier.Name == "Supplier")
                     .Explain();
 
-                Assert.Equal("BtreeCursor TestIndex", result.Cursor);
+                Assert.AreEqual("BtreeCursor TestIndex", result.Cursor);
             }
         }
 
-        [Fact]
+        [Test]
         public void MongoQuerySupportsHintsForLinqQueries()
         {
             using (var session = new Session())
             {
+                MongoConfiguration.RemoveMapFor<TestProduct>();
                 session.Drop<TestProduct>();
 
                 session.Add(new TestProduct
@@ -129,15 +132,17 @@ namespace Norm.Tests
                     .Find(query)
                     .Hint(p => p.Name, IndexOption.Ascending);
 
-                Assert.Equal(1, result.Count());
+                Assert.AreEqual(1, result.Count());
             }
         }
 
-        [Fact]
+        [Test]
         public void MongoQuerySupportschainingHintsForLinqQueries()
         {
             using (var session = new Session())
             {
+                MongoConfiguration.RemoveMapFor<TestProduct>();
+                
                 session.Drop<TestProduct>();
 
                 session.Add(new TestProduct
@@ -155,7 +160,7 @@ namespace Norm.Tests
                     .Hint(p => p.Name, IndexOption.Ascending)
                     .Hint(p => p.Supplier.Name, IndexOption.Descending);
 
-                Assert.Equal(1, result.Count());
+                Assert.AreEqual(1, result.Count());
             }
         }
     }

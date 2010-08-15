@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Xunit;
+using NUnit.Framework;
 using Norm.BSON;
 
 namespace NoRM.Tests
 {
+    [TestFixture]
     public class ExpandoTests
     {
-        [Fact]
+        [Test]
         public void Expando_Get_Should_Throw_Exception_When_Property_Doesnt_Exist()
         {
             Assert.Throws<InvalidOperationException>(() => { var a = new Expando(); a.Get<bool>("doesn't exist"); });
         }
 
-        [Fact]
+        [Test]
         public void Expando_TryGet_Should_Not_Throw_Exception_When_Property_Doesnt_Exist()
         {
             var e = new Expando();
@@ -29,7 +30,7 @@ namespace NoRM.Tests
 
         }
 
-        [Fact]
+        [Test]
         public void SerializationOfFlyweightListsInsideFlyweightWorks()
         {
             var testObj = new Expando();
@@ -41,7 +42,7 @@ namespace NoRM.Tests
             testObj["InnerObject"] = innerObj;
             var testBytes = BsonSerializer.Serialize(testObj);
             var hydrated = BsonDeserializer.Deserialize<Expando>(testBytes);
-            Assert.Equal(testObj["InnerObject"].GetType(),hydrated["InnerObject"].GetType());
+            Assert.AreEqual(testObj["InnerObject"].GetType(),hydrated["InnerObject"].GetType());
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Xunit;
+using NUnit.Framework;
 using Norm.Responses;
 using Norm;
 using Norm.Tests;
@@ -10,27 +10,28 @@ using Norm.Tests;
 
 namespace NoRM.Tests
 {
+    [TestFixture]
     public class GeneralTests
     {
-        [Fact]
+        [Test]
         public void Get_Last_Error_Returns()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var le = mongo.LastError();
-                Assert.Equal(true, le.WasSuccessful);
+                Assert.AreEqual(true, le.WasSuccessful);
             }
         }
 
-        [Fact]
+        [Test]
         public void Base_Status_Message_Supports_Expando()
         {
             BaseStatusMessage bsm = new BaseStatusMessage();
             bsm["hello"] = "world";
-            Assert.Equal("world",bsm["hello"]);
-            Assert.Equal(bsm.AllProperties().First().PropertyName, "hello");
+            Assert.AreEqual("world", bsm["hello"]);
+            Assert.AreEqual(bsm.AllProperties().First().PropertyName, "hello");
 
-            Assert.Equal(bsm.AllProperties().First().Value, "world");
+            Assert.AreEqual(bsm.AllProperties().First().Value, "world");
             bsm.Delete("hello");
             Assert.False(bsm.AllProperties().Any());
 

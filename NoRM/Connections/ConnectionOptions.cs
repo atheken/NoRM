@@ -353,9 +353,13 @@ namespace Norm
         private bool _disposed;
         private Timer _updateTimer;
 
-        ~ConnectionOptions(){
-            _updateTimer.Stop();
-            _updateTimer.Dispose();
+        ~ConnectionOptions()
+        {
+            if (_updateTimer != null)
+            {
+                _updateTimer.Stop();
+                _updateTimer.Dispose();
+            }
         }
 
     }

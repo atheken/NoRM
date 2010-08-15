@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Xunit;
+using NUnit.Framework;
 using Norm.Collections;
 
 namespace Norm.Tests
 {
-    
+    [TestFixture]
     public class MongoDatabaseTest
-    {    
-        public MongoDatabaseTest()
+    {
+        [SetUp]
+        public void Setup()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
@@ -16,52 +17,52 @@ namespace Norm.Tests
             }      
         }
 
-        [Fact]
+        [Test]
         public void Get_Last_Error_Returns()
         {
             using(var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var le = mongo.Database.LastError();
-                Assert.Equal(true,le.WasSuccessful);
+                Assert.AreEqual(true,le.WasSuccessful);
             }
         }
 
-        [Fact]
+        [Test]
         public void CreateCollectionCreatesACappedCollection()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {                
-                Assert.Equal(true, mongo.Database.CreateCollection(new CreateCollectionOptions("capped") { Capped = true, Size = 10000, Max = 3 }));
+                Assert.AreEqual(true, mongo.Database.CreateCollection(new CreateCollectionOptions("capped") { Capped = true, Size = 10000, Max = 3 }));
                 var collection = mongo.GetCollection<FakeObject>("capped");
                 collection.Insert(new FakeObject());
                 collection.Insert(new FakeObject());
                 collection.Insert(new FakeObject());
                 collection.Insert(new FakeObject());
-                Assert.Equal(3, collection.Find().Count());
+                Assert.AreEqual(3, collection.Find().Count());
             }
         }
-        [Fact]
+        [Test]
         public void CreateCollectionThrowsExceptionIfAlreadyExist()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {                
                 mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));
-                Assert.Equal("collection already exists", ex.Message);
+                Assert.AreEqual("collection already exists", ex.Message);
             }
         }
-        [Fact]
+        [Test]
         public void CreateCollectionFailsSilentlyWithStrictModeOff()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("strict=false")))
             {
                 mongo.Database.CreateCollection(new CreateCollectionOptions("capped"));
-                Assert.Equal(false, mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));
+                Assert.AreEqual(false, mongo.Database.CreateCollection(new CreateCollectionOptions("capped")));
             }
         }
 
     
-        [Fact]
+        [Test]
         public void GetsAllCollections()
         {
             var expected = new List<string> { "NormTests.temp", "NormTests.temp2" };
@@ -76,56 +77,56 @@ namespace Norm.Tests
                     expected.Remove(collection.Name);
                 }
             }
-            Assert.Equal(0, expected.Count);
+            Assert.AreEqual(0, expected.Count);
         }
-        [Fact]
+        [Test]
         public void GetCollectionsReturnsNothingIfEmpty()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                Assert.Equal(0, mongo.Database.GetAllCollections().Count());
+                Assert.AreEqual(0, mongo.Database.GetAllCollections().Count());
             }
         }
 
-        [Fact]
+        [Test]
         public void DropsACollection()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var database = mongo.Database;
                 database.CreateCollection(new CreateCollectionOptions("temp"));
-                Assert.Equal(true, database.DropCollection("temp"));
-                Assert.Equal(0, mongo.Database.GetAllCollections().Count());                           
+                Assert.AreEqual(true, database.DropCollection("temp"));
+                Assert.AreEqual(0, mongo.Database.GetAllCollections().Count());                           
             }
         }
-        [Fact]
+        [Test]
         public void ThrowsExceptionIfDropCollectionFailsWithStrictModeOn()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.DropCollection("temp"));
-                Assert.Equal("ns not found", ex.Message);
+                Assert.AreEqual("ns not found", ex.Message);
             }
         }
-        [Fact]
+        [Test]
         public void DropCollectionFailsSilentlyWithStrictModeOff()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("&strict=false")))
             {
-                Assert.Equal(false, mongo.Database.DropCollection("temp"));
+                Assert.AreEqual(false, mongo.Database.DropCollection("temp"));
             }
         }
         
-        [Fact]
+        [Test]
         public void ReturnsTheDatabasesName()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
-                Assert.Equal("NormTests", mongo.Database.DatabaseName);
+                Assert.AreEqual("NormTests", mongo.Database.DatabaseName);
             }
         }
 
-        [Fact]
+        [Test]
         public void GetsACollectionsStatistics()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -135,25 +136,25 @@ namespace Norm.Tests
             }
         }
 
-        [Fact]
+        [Test]
         public void ThrowsExceptionIfGettingStatisticsFailsWithStrictModeOn()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.Database.GetCollectionStatistics("temp"));
-                Assert.Equal("ns not found", ex.Message);
+                Assert.AreEqual("ns not found", ex.Message);
             }
         }
-        [Fact]
+        [Test]
         public void GettingStatisticsFailsSilentlyWithStrictModeOff()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("&strict=false")))
             {
-                Assert.Equal(null, mongo.Database.GetCollectionStatistics("temp"));
+                Assert.AreEqual(null, mongo.Database.GetCollectionStatistics("temp"));
             }
         }
 
-        [Fact]
+        [Test]
         public void SetProfilingLevel()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -165,7 +166,7 @@ namespace Norm.Tests
                 Assert.True((response.PreviousLevel == 2.0));
             }
         }
-        [Fact]
+        [Test]
         public void GetProfilingInformation()
         {
             //this seems to vary a lot from version to version and who knows what else
@@ -183,7 +184,7 @@ namespace Norm.Tests
             }
         }
 
-        [Fact]
+        [Test]
         public void ValidateCollection()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -191,7 +192,7 @@ namespace Norm.Tests
                 var collection = mongo.Database.GetCollection<FakeObject>("validCollection");
                 collection.Insert(new FakeObject());
                 var response = mongo.Database.ValidateCollection("validCollection", false);
-                Assert.Equal(collection.FullyQualifiedName, response.Ns);
+                Assert.AreEqual(collection.FullyQualifiedName, response.Ns);
             }
         }
     }

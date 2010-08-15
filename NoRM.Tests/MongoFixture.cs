@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
+using NUnit.Framework;
 
 namespace Norm.Tests
 {
+
     public abstract class MongoFixture : IDisposable
     {
         private readonly Process _process;
@@ -42,7 +44,7 @@ namespace Norm.Tests
             return string.Concat(connectionString, '?', options);
         }
 
-        protected MongoFixture()
+        public MongoFixture()
         {
             _process = new Process
               {

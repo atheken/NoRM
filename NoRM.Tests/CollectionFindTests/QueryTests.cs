@@ -7,17 +7,21 @@ using Norm.BSON;
 using Norm.Collections;
 using Norm.Commands.Modifiers;
 using Norm.Responses;
-using Xunit;
+using NUnit.Framework;
 using Norm.Collections;
 
 namespace Norm.Tests
 {
-    public class QueryTests : IDisposable
+
+    [TestFixture]
+    public class QueryTests
     {
-        private readonly IMongo _server;
+        private  IMongo _server;
         private BuildInfoResponse _buildInfo = null;
-        private readonly IMongoCollection<Person> _collection;
-        public QueryTests()
+        private  IMongoCollection<Person> _collection;
+       
+        [SetUp]
+        public void  Setup()
         {
             var admin = new MongoAdmin("mongodb://localhost/admin?pooling=false&strict=true");
             _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
@@ -27,7 +31,9 @@ namespace Norm.Tests
             _collection.Insert(new Person());
             _collection.Delete(new { });
         }
-        public void Dispose()
+
+        [TearDown]
+        public void TearDown()
         {
             _server.Database.DropCollection("People");
             using (var admin = new MongoAdmin("mongodb://localhost/NormTests?pooling=false"))
@@ -38,7 +44,7 @@ namespace Norm.Tests
         }
 
 
-        [Fact]
+        [Test]
         public void FindUsesLimit()
         {
             _collection.Insert(new Person { Name = "BBB" });
@@ -47,7 +53,7 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.Find(new { }, 3).ToArray();
-            Assert.Equal(3, result.Length);
+            Assert.AreEqual(3, result.Length);
         }
 
         public void MongoCollection_Supports_LINQ()
@@ -58,10 +64,10 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.AsQueryable().Where(y => y.Name == "AAA").ToArray();
-            Assert.Equal(1, result.Length);
+            Assert.AreEqual(1, result.Length);
         }
 
-        [Fact]
+        [Test]
         public void Count_Works()
         {
             _collection.Insert(new Person { Name = "BBB" });
@@ -70,11 +76,11 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.Count();
-            Assert.Equal(4, result);
+            Assert.AreEqual(4, result);
         }
 
 
-        [Fact]
+        [Test]
         public void Count_With_Filter_Works()
         {
             _collection.Insert(new Person { Name = "BBB" });
@@ -83,10 +89,10 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.Count(new { Name = "AAA" });
-            Assert.Equal(1, result);
+            Assert.AreEqual(1, result);
         }
 
-        [Fact]
+        [Test]
         public void DateTime_GreaterThan_Qualifier_Works()
         {
             _collection.Insert(new Person { Birthday = new DateTime(1910, 1, 1) });
@@ -94,10 +100,10 @@ namespace Norm.Tests
             _collection.Insert(new Person { Birthday = new DateTime(1930, 1, 1) });
 
             var find = _collection.Find(new { Birthday = Q.GreaterThan(new DateTime(1920, 1, 1)) });
-            Assert.Equal(1, find.Count());
+            Assert.AreEqual(1, find.Count());
         }
 
-        [Fact]
+        [Test]
         public void Element_Match_Matches()
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString()))
@@ -120,12 +126,12 @@ namespace Norm.Tests
                         }
                     });
 
-                Assert.Equal(1, coll.Find(new { Comments = Q.ElementMatch(new { Text = "xyz" }) }).Count());
-                Assert.Equal(2, coll.Find(new { Comments = Q.ElementMatch(new { Text = Q.Matches("^x") }) }).Count());
+                Assert.AreEqual(1, coll.Find(new { Comments = Q.ElementMatch(new { Text = "xyz" }) }).Count());
+                Assert.AreEqual(2, coll.Find(new { Comments = Q.ElementMatch(new { Text = Q.Matches("^x") }) }).Count());
             }
         }
 
-        [Fact]
+        [Test]
         public void Where_Qualifier_Works()
         {
             _collection.Insert(new Person { Name = "Gnomey" });
@@ -133,10 +139,10 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "Elfy" });
 
             var find = _collection.Find(Q.Where("this.Name === 'Elfy';"));
-            Assert.Equal(1, find.Count());
+            Assert.AreEqual(1, find.Count());
         }
 
-        [Fact]
+        [Test]
         public void Find_Uses_Limit_Orderby_And_Skip()
         {
             _collection.Insert(new Person { Name = "AAA" });
@@ -146,13 +152,13 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.Find(new { Name = Q.NotEqual(new int?()) }, new { Name = OrderBy.Descending }, 3, 1).ToArray();
-            Assert.Equal(3, result.Length);
-            Assert.Equal("CCC", result[0].Name);
-            Assert.Equal("BBB", result[1].Name);
-            Assert.Equal("AAA", result[2].Name);
+            Assert.AreEqual(3, result.Length);
+            Assert.AreEqual("CCC", result[0].Name);
+            Assert.AreEqual("BBB", result[1].Name);
+            Assert.AreEqual("AAA", result[2].Name);
         }
 
-        [Fact]
+        [Test]
         public void Find_Uses_Query_And_Orderby()
         {
             _collection.Insert(new Person { Name = "AAA" });
@@ -162,13 +168,13 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.Find(new { Name = Q.NotEqual("AAA") }, new { Name = OrderBy.Descending }).ToArray();
-            Assert.Equal(3, result.Length);
-            Assert.Equal("DDD", result[0].Name);
-            Assert.Equal("CCC", result[1].Name);
-            Assert.Equal("BBB", result[2].Name);
+            Assert.AreEqual(3, result.Length);
+            Assert.AreEqual("DDD", result[0].Name);
+            Assert.AreEqual("CCC", result[1].Name);
+            Assert.AreEqual("BBB", result[2].Name);
         }
 
-        [Fact]
+        [Test]
         public void Find_Uses_Query_And_Orderby_And_Limit()
         {
             _collection.Insert(new Person { Name = "AAA" });
@@ -178,12 +184,12 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.Find(new { Name = Q.NotEqual("DDD") }, new { Name = OrderBy.Descending }, 2, 0).ToArray();
-            Assert.Equal(2, result.Length);
-            Assert.Equal("CCC", result[0].Name);
-            Assert.Equal("BBB", result[1].Name);
+            Assert.AreEqual(2, result.Length);
+            Assert.AreEqual("CCC", result[0].Name);
+            Assert.AreEqual("BBB", result[1].Name);
         }
 
-        [Fact]
+        [Test]
         public void Find_Uses_Null_Qualifier()
         {
             _collection.Insert(new Person { Name = null });
@@ -193,15 +199,15 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.Find(new { Name = Q.IsNull() }, new { Name = OrderBy.Descending }, 2, 0).ToArray();
-            Assert.Equal(1, result.Length);
-            Assert.Equal(null, result[0].Name);
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual(null, result[0].Name);
 
             result = _collection.Find(new { Name = Q.IsNotNull() }, new { Name = OrderBy.Descending }).ToArray();
-            Assert.Equal(4, result.Length);
-            Assert.Equal("DDD", result[0].Name);
+            Assert.AreEqual(4, result.Length);
+            Assert.AreEqual("DDD", result[0].Name);
         }
 
-        [Fact]
+        [Test]
         public void FindUsesLimitAndSkip()
         {
             _collection.Insert(new Person { Name = "BBB" });
@@ -210,11 +216,11 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "DDD" });
 
             var result = _collection.Find(new { }, 1, 1).ToArray();
-            Assert.Equal(1, result.Length);
-            Assert.Equal("CCC", result[0].Name);
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual("CCC", result[0].Name);
         }
 
-        [Fact]
+        [Test]
         public void FindCanQueryEmbeddedArray()
         {
             _collection.Delete(new { });
@@ -248,11 +254,11 @@ namespace Norm.Tests
             var elem = new Expando();
             elem["Relatives"] = "Charlie";
             var a = _collection.Find(elem).ToArray();
-            Assert.Equal(1, a.Length);
+            Assert.AreEqual(1, a.Length);
         }
 
 
-        [Fact]
+        [Test]
         public void BasicQueryUsingProperty()
         {
             _collection.Insert(new Person { Name = "Lisa Cool", Address = { Street = "300 Main St", City = "Anytown", State = "CO", Zip = "45123" } });
@@ -261,11 +267,11 @@ namespace Norm.Tests
 
             var matchRegex = new Regex("^.{4}Cool$");
             var results = _collection.Find(new { Name = matchRegex }).ToArray();
-            Assert.Equal(2, results.Length);
+            Assert.AreEqual(2, results.Length);
             Assert.True(results.All(y => matchRegex.IsMatch(y.Name)));
         }
 
-        [Fact]
+        [Test]
         public void BasicQueryWithSort()
         {
             //remove everything from the collection.
@@ -276,13 +282,13 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "Second", LastContact = new DateTime(2005, 1, 1) });
 
             var people = _collection.Find(new { }, new { LastContact = 1 }).ToArray();
-            Assert.Equal(3, people.Length);
-            Assert.Equal("First", people[0].Name);
-            Assert.Equal("Second", people[1].Name);
-            Assert.Equal("Third", people[2].Name);
+            Assert.AreEqual(3, people.Length);
+            Assert.AreEqual("First", people[0].Name);
+            Assert.AreEqual("Second", people[1].Name);
+            Assert.AreEqual("Third", people[2].Name);
         }
 
-        [Fact]
+        [Test]
         public void BasicQueryWithMultiSortOrdering()
         {
             //remove everything from the collection.
@@ -293,13 +299,13 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "Second", LastContact = new DateTime(2005, 1, 1) });
 
             var people = _collection.Find(new { }, new { LastContact = -1, Name = 1 }).ToArray();
-            Assert.Equal(3, people.Length);
-            Assert.Equal("Third", people[0].Name);
-            Assert.Equal("First", people[1].Name);
-            Assert.Equal("Second", people[2].Name);
+            Assert.AreEqual(3, people.Length);
+            Assert.AreEqual("Third", people[0].Name);
+            Assert.AreEqual("First", people[1].Name);
+            Assert.AreEqual("Second", people[2].Name);
         }
 
-        [Fact]
+        [Test]
         public void BasicQueryUsingChildProperty()
         {
             _collection.Insert(new Person { Name = "Joe Cool", Address = { Street = "123 Main St", City = "Anytown", State = "CO", Zip = "45123" } });
@@ -309,9 +315,9 @@ namespace Norm.Tests
             query["Address.City"] = Q.Equals<string>("Anytown");
 
             var results = _collection.Find(query);
-            Assert.Equal(2, results.Count());
+            Assert.AreEqual(2, results.Count());
         }
-        [Fact]
+        [Test]
         public void QueryWithinEmbeddedArray()
         {
 
@@ -321,11 +327,11 @@ namespace Norm.Tests
             _collection.Insert(post2);
 
             var results = _collection.Find(new { Relatives = "commentA" });
-            Assert.Equal("Second", results.First().Name);
+            Assert.AreEqual("Second", results.First().Name);
         }
 
 
-        [Fact]
+        [Test]
         public void Distinct_On_Collection_Should_Return_Arrays_As_Value_If_Earlier_Than_1_5_0()
         {
             var isLessThan150 = Regex.IsMatch(_buildInfo.Version, "^([01][.][01234])");
@@ -339,11 +345,11 @@ namespace Norm.Tests
                 _collection.Insert(new Person { Name = "Jay Cool", Relatives = new List<string>(new[] { "Sam Cool" }) });
 
                 var results = _collection.Distinct<string[]>("Relatives");
-                Assert.Equal(3, results.Count());
+                Assert.AreEqual(3, results.Count());
             }
         }
 
-        [Fact]
+        [Test]
         public void Distinct_On_Collection_Should_Return_Array_Values_In_1_5_0_Or_Later()
         {
             var isLessThan150 = Regex.IsMatch(_buildInfo.Version, "^([01][.][01234])");
@@ -357,11 +363,11 @@ namespace Norm.Tests
                 _collection.Insert(new Person { Name = "Jay Cool", Relatives = new List<string>(new[] { "Sam Cool" }) });
 
                 var results = _collection.Distinct<string>("Relatives");
-                Assert.Equal(4, results.Count());
+                Assert.AreEqual(4, results.Count());
             }
         }
 
-        [Fact]
+        [Test]
         public void DistinctOnSimpleProperty()
         {
             _collection.Insert(new Person { Name = "Joe Cool", Relatives = new List<string>(new[] { "Tom Cool", "Sam Cool" }) });
@@ -370,10 +376,10 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "Jay Cool", Relatives = new List<string>(new[] { "Sam Cool" }) });
 
             var results = _collection.Distinct<string>("Name");
-            Assert.Equal(4, results.Count());
+            Assert.AreEqual(4, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void DistinctOnComplexProperty()
         {
             _collection.Insert(new Person { Name = "Joe Cool", Address = new Address { State = "CA" } });
@@ -382,10 +388,10 @@ namespace Norm.Tests
             _collection.Insert(new Person { Name = "Jay Cool", Address = new Address { State = "NY" } });
 
             var results = _collection.Distinct<Address>("Address");
-            Assert.Equal(3, results.Count());
+            Assert.AreEqual(3, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindAndModify()
         {
             _collection.Insert(new Person { Name = "Joe Cool", Age = 10 });
@@ -394,13 +400,13 @@ namespace Norm.Tests
             update["$inc"] = new { Age = 1 };
 
             var result = _collection.FindAndModify(new { Name = "Joe Cool" }, update);
-            Assert.Equal(10, result.Age);
+            Assert.AreEqual(10, result.Age);
 
             var result2 = _collection.Find(new { Name = "Joe Cool" }).FirstOrDefault();
-            Assert.Equal(11, result2.Age);
+            Assert.AreEqual(11, result2.Age);
         }
 
-        [Fact]
+        [Test]
         public void FindAndModifyWithSort()
         {
             _collection.Insert(new Person { Name = "Joe Cool", Age = 10 });
@@ -410,15 +416,15 @@ namespace Norm.Tests
             update["$inc"] = new { Age = 1 };
 
             var result = _collection.FindAndModify(new { Name = "Joe Cool" }, update, new { Age = Norm.OrderBy.Descending });
-            Assert.Equal(15, result.Age);
+            Assert.AreEqual(15, result.Age);
 
             var result2 = _collection.Find(new { Name = "Joe Cool" }).OrderByDescending(x => x.Age).ToList();
-            Assert.Equal(16, result2[0].Age);
-            Assert.Equal(10, result2[1].Age);
+            Assert.AreEqual(16, result2[0].Age);
+            Assert.AreEqual(10, result2[1].Age);
 
         }
 
-        [Fact]
+        [Test]
         public void FindAndModifyReturnsNullWhenQueryNotFound()
         {
             _collection.Insert(new Person { Name = "Joe Cool", Age = 10 });
@@ -431,10 +437,10 @@ namespace Norm.Tests
             Assert.Null(result);
 
             var result2 = _collection.Find(new { Age = 15 }).ToList();
-            Assert.Equal(1, result2.Count);
+            Assert.AreEqual(1, result2.Count);
         }
 
-        [Fact]
+        [Test]
         public void SliceOperatorBringsBackCorrectItems()
         {
             var isLessThan151 = Regex.IsMatch(_buildInfo.Version, "^(([01][.][01234])|(1.5.0))");
@@ -444,7 +450,7 @@ namespace Norm.Tests
                 _collection.Insert(p);
                 var result = _collection.Find(new { }, new { _id = 1 }, new { Relatives = Q.Slice(1) }, 1, 0).FirstOrDefault();
                 Assert.NotNull(result);
-                Assert.Equal("Joe", result.Relatives.First());
+                Assert.AreEqual("Joe", result.Relatives.First());
 
                 result = _collection.Find(new { }, new { _id = 1 }, new { Relatives = Q.Slice(1, 2) }, 1, 0).FirstOrDefault();
                 Assert.NotNull(result);
