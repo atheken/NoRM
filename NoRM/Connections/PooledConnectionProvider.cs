@@ -7,7 +7,7 @@ namespace Norm
     /// <summary>
     /// The pooled connection provider.
     /// </summary>
-    internal class PooledConnectionProvider : ConnectionProvider
+    public class PooledConnectionProvider : ConnectionProvider
     {
         private readonly ConnectionOptions _builder;
         private readonly Stack<IConnection> _freeConnections = new Stack<IConnection>();

@@ -7,6 +7,7 @@ using Norm.BSON;
 using System.Linq;
 using System.Globalization;
 using Norm.Configuration;
+using bser = Norm.BSON.BsonSerializer;
 
 namespace Norm.Tests
 {
@@ -17,7 +18,7 @@ namespace Norm.Tests
         public void DoesntSerializeIgnoredProperties()
         {
             var o = new GeneralDTO {IgnoredProperty = 4};
-            Assert.AreEqual(0, BsonDeserializer.Deserialize<GeneralDTO>(BsonSerializer.Serialize(o)).IgnoredProperty);
+            Assert.AreEqual(0, BsonDeserializer.Deserialize<GeneralDTO>(bser.Serialize(o)).IgnoredProperty);
         }
 
         [Test]

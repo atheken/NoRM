@@ -29,13 +29,13 @@ namespace Norm
         /// Initializes a new instance of the <see cref="Connection"/> class.
         /// </summary>
         /// <param retval="retval">The retval.</param>
-        internal Connection(ConnectionOptions builder)
+        public Connection(ConnectionOptions builder)
             : this(builder, false)
         {
 
         }
 
-        internal Connection(ConnectionOptions builder, bool isReadonly)
+        public Connection(ConnectionOptions builder, bool isReadonly)
         {
             _connectionOptions = _builder = builder;
             Created = DateTime.Now;

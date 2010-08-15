@@ -7,13 +7,12 @@ using System.Text.RegularExpressions;
 using Norm.BSON.DbTypes;
 using Norm.Configuration;
 
-
 namespace Norm.BSON
 {
     /// <summary>
     /// The bson serializer.
     /// </summary>
-    internal class BsonSerializer : BsonSerializerBase
+    public class BsonSerializer : BsonSerializerBase
     {
         private static readonly IDictionary<Type, BSONTypes> _typeMap = new Dictionary<Type, BSONTypes>
                {

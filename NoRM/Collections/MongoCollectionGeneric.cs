@@ -316,7 +316,6 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName)
         {
-            var type = typeof(T);
 
             var qm = new QueryMessage<T, U>(_connection, fullyQualifiedName)
             {

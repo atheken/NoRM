@@ -5,7 +5,7 @@ namespace Norm
     /// <summary>
     /// The connection provider factory.
     /// </summary>
-    internal static class ConnectionProviderFactory
+    public static class ConnectionProviderFactory
     {
         private static readonly object _lock = new object();
         private static volatile IDictionary<string, ConnectionOptions> _cachedBuilders = 
