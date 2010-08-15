@@ -8,11 +8,25 @@ using Norm;
 using Norm.GridFS;
 using System.IO;
 
-namespace NoRM.Tests.GridFS
+namespace Norm.Tests.GridFS
 {
     [TestFixture]
     public class GridFileCollectionTests
     {
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
         [SetUp]
         public void Setup()
         {

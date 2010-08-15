@@ -12,7 +12,7 @@ using Norm;
 using Norm.Tests;
 using Norm.BSON.DbTypes;
 
-namespace NoRM.Tests.DBTypeTests
+namespace Norm.Tests.DBTypeTests
 {
     [TestFixture]
     public class GridFSTests

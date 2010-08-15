@@ -9,6 +9,20 @@ namespace Norm.Tests
     [TestFixture]
     public class DbRefTests
     {
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
         [SetUp]
         public void Setup()
         {

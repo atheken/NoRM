@@ -8,6 +8,7 @@ namespace Norm.Tests
     [TestFixture]
 	public class TypeHelperTests
 	{
+		
 		[Test]
 		public void Can_get_discriminator_for_type()
 		{

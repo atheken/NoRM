@@ -10,9 +10,25 @@ namespace Norm.Tests.CollectionUpdateTests
     [TestFixture]
     public class UpdateModifiersTests : IDisposable
     {
-        private readonly IMongo _server;
+	    private readonly IMongo _server;
         private BuildInfoResponse _buildInfo = null;
         private readonly IMongoCollection<Post> _collection;
+
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetupTestFixture ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDownTestFixture ()
+		{
+			_proc.Dispose ();
+		}
+
+
 
 
         public UpdateModifiersTests()

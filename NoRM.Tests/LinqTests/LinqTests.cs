@@ -12,6 +12,20 @@ namespace Norm.Tests
     [TestFixture]
     public class LinqTests
     {
+		private Mongod _proc;
+		
+		[TestFixtureSetUp]
+		public void SetupTestFixture ()
+		{
+			_proc = new Mongod ();
+		}
+		
+		[TestFixtureTearDown]
+		public void TearDownTestFixture ()
+		{
+			_proc.Dispose ();
+		}
+		
         [SetUp]
         public void Setup()
         {

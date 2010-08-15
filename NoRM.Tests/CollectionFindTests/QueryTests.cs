@@ -12,7 +12,6 @@ using Norm.Collections;
 
 namespace Norm.Tests
 {
-
     [TestFixture]
     public class QueryTests
     {

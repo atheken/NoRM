@@ -10,6 +10,20 @@ namespace Norm.Tests
     [TestFixture]
     public class WhereQualifierTests
     {
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
         private IMongo _server;
         private IMongoCollection<TestClass> _collection;
         

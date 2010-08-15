@@ -6,6 +6,20 @@ namespace Norm.Tests
     [TestFixture]
     public class MapReduceTests
     {
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
         private const string _map = "function(){emit(0, this.Price);}";
         private const string _reduce = "function(key, values){var sumPrice = 0;for(var i = 0; i < values.length; ++i){sumPrice += values[i];} return sumPrice;}";
 

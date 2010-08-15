@@ -12,6 +12,20 @@ namespace Norm.Tests
     [TestFixture]
     public class MongoOptimizationTests
     {
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
         [Test]
         public void MongoCollectionEnsuresIndicies()
         {

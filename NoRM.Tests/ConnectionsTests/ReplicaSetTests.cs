@@ -8,7 +8,7 @@ using Norm.Protocol.SystemMessages.Responses;
 using NUnit.Framework;
 using t = System.Threading;
 
-namespace NoRM.Tests.ConnectionsTests
+namespace Norm.Tests.ConnectionsTests
 {
     [TestFixture]
     public class ReplicaSetTests

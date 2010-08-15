@@ -5,11 +5,12 @@ using System.Text;
 using NUnit.Framework;
 using Norm.BSON;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
     [TestFixture]
     public class JSONParserTests
     {
+		
         private ObjectParser _parser = new ObjectParser();
 
         [Test]

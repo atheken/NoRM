@@ -110,6 +110,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestClasses.cs" />
     <Compile Include="TypeHelperTests.cs" />
+    <Compile Include="Helpers\MongodHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NoRM\NoRM.csproj">
@@ -120,6 +121,7 @@
   <ItemGroup>
     <None Include="App.config">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

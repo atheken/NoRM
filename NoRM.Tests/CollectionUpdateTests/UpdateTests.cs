@@ -10,6 +10,20 @@ namespace Norm.Tests
     [TestFixture]
     public class UpdateTests 
     {
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void FixtureSetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void FixtureTearDown ()
+		{
+			_proc.Dispose ();
+		}
+
         private  IMongo _server;
         private  IMongoCollection<CheeseClubContact> _collection;
        

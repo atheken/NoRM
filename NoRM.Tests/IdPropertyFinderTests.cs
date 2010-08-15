@@ -9,6 +9,7 @@ namespace Norm.Tests
     [TestFixture]
     public class IdPropertyFinderTests
     {
+		
         [Test]
         public void Can_Determine_Id_When_Entity_Has__id_Property()
         {
