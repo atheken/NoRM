@@ -12,7 +12,7 @@ namespace Norm
     /// <summary>
     /// The set of connection options associated with a particular URI.
     /// </summary>
-    public class ConnectionOptions : IOptionsContainer, ICloneable, IDisposable
+    public class ConnectionOptions : IOptionsContainer, ICloneable
     {
         private String _connectionString;
         private bool _isNew = true;
@@ -353,14 +353,9 @@ namespace Norm
         private bool _disposed;
         private Timer _updateTimer;
 
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
-                _updateTimer.Stop();
-                _updateTimer.Dispose();
-                _disposed = true;
-            }
+        ~ConnectionOptions(){
+            _updateTimer.Stop();
+            _updateTimer.Dispose();
         }
 
     }
