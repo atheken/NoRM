@@ -45,10 +45,12 @@ namespace Norm
         }
 
         public int ID { get; set; }
+
         /// <summary>
         /// The host name and port of the node on this replica set.
         /// </summary>
         public string Host { get; set; }
+
         /// <summary>
         /// The number votes available to this node.
         /// </summary>

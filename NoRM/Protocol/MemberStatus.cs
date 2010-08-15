@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Norm.Protocol
 {
-    public enum ReplicaSetState
+    public enum MemberStatus
     {
         StartingUpPhase1 = 0,
         Primary = 1,

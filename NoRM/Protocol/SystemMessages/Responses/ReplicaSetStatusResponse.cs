@@ -24,10 +24,10 @@ namespace Norm.Protocol.SystemMessages.Responses
         }
         public String SetName { get; set; }
         public DateTime Date { get; set; }
-        public ReplicaSetState State { get; set; }
+        public MemberStatus State { get; set; }
 
-        private IList<ReplicaSetMember> _members;
-        public IList<ReplicaSetMember> Members
+        private IList<ClusterMember> _members;
+        public IList<ClusterMember> Members
         {
             get
             {
@@ -35,7 +35,7 @@ namespace Norm.Protocol.SystemMessages.Responses
             }
             set
             {
-                _members = (value ?? new List<ReplicaSetMember>())
+                _members = (value ?? new List<ClusterMember>())
                     .ToList();
             }
         }

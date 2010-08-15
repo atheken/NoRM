@@ -9,6 +9,11 @@ namespace Norm
     public interface IConnection :  IDisposable
     {
         /// <summary>
+        /// Indicates that no writes can occur on this connection.
+        /// </summary>
+        bool IsReadOnly { get; }
+
+        /// <summary>
         /// Get the write count required to be returned from the server when strict mode is enabled.
         /// </summary>
         int? VerifyWriteCount { get; }

@@ -6,6 +6,8 @@ using System.Text;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Norm.Protocol;
+using System.Linq;
 
 namespace Norm
 {
@@ -28,6 +30,12 @@ namespace Norm
         /// </summary>
         /// <param retval="retval">The retval.</param>
         internal Connection(ConnectionOptions builder)
+            : this(builder, false)
+        {
+
+        }
+
+        internal Connection(ConnectionOptions builder, bool isReadonly)
         {
             _connectionOptions = _builder = builder;
             Created = DateTime.Now;
@@ -37,12 +45,22 @@ namespace Norm
                 ReceiveTimeout = builder.QueryTimeout * 1000,
                 SendTimeout = builder.QueryTimeout * 1000
             };
-
-            var l = Interlocked.Read(ref _request);
-            Interlocked.Increment(ref _request);
-            var index = (int)(l % builder.Servers.Count);
-
-            _client.Connect(builder.Servers[index].Host, builder.Servers[index].Port);
+            this.IsReadOnly = isReadonly;
+            if (isReadonly && builder.UseReplicaSets && builder.ReadFromAny)
+            {
+                var l = Interlocked.Read(ref _request);
+                Interlocked.Increment(ref _request);
+                var activeServers = builder.Servers
+                    .Where(y => y.State == MemberStatus.Secondary || y.State == MemberStatus.Primary)
+                    .ToList();
+                var index = (int)(l % activeServers.Count);
+                _client.Connect(activeServers[index].GetHost(), activeServers[index].GetPort());
+            }
+            else
+            {
+                //if not readonly, or 
+                _client.Connect(builder.PrimaryServer.GetHost(), builder.PrimaryServer.GetPort());
+            }
         }
 
         /// <summary>
@@ -190,7 +208,7 @@ namespace Norm
 
         #region IOptionsContainer members.
 
-        public IList<Server> Servers
+        public IList<ClusterMember> Servers
         {
             get { return this._connectionOptions.Servers; }
         }
@@ -262,5 +280,31 @@ namespace Norm
             this._connectionOptions = this._builder;
         }
 
+        /// <summary>
+        /// Indicates that this connection will attempt to failover when the primary server is gone.
+        /// </summary>
+        public bool UseReplicaSets
+        {
+            get { return this._connectionOptions.UseReplicaSets; }
+        }
+
+
+        /// <summary>
+        /// Indicates that only read operations can be executed on this connection.
+        /// </summary>
+        public bool IsReadOnly
+        {
+            get;
+            private set;
+
+        }
+
+        /// <summary>
+        /// Indicates that only reads can occur from any server (primary or secondary) when both are available.
+        /// </summary>
+        public bool ReadFromAny
+        {
+            get { return this._connectionOptions.ReadFromAny; }
+        }
     }
 }

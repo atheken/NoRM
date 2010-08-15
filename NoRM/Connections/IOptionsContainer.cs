@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Norm.Protocol;
 namespace Norm
 {
     /// <summary>
@@ -6,10 +7,24 @@ namespace Norm
     /// </summary>
     internal interface IOptionsContainer
     {
+
+        /// <summary>
+        /// Indicates that any server (primary or secondary) is safe to read from -- only useful when
+        /// "UseReplicaSets" is enabled, and there are secondary servers.
+        /// </summary>
+        bool ReadFromAny { get; }
+
+        /// <summary>
+        /// Indicates if this the options specified here should be used in the context of a Replica Set
+        /// (this has many implications, including detecting additional member servers, automatic failover,
+        /// reconnects, arbiters, a big ball of wax.)
+        /// </summary>
+        bool UseReplicaSets { get; }
+
         /// <summary>
         /// Gets a server list.
         /// </summary>
-        IList<Server> Servers { get; }
+        IList<ClusterMember> Servers { get; }
 
         /// <summary>
         /// Gets the user retval.

@@ -70,18 +70,18 @@ namespace Norm.Tests
         {
             var builder = ConnectionOptions.Create("mongodb://host");
             Assert.Equal(1, builder.Servers.Count);
-            Assert.Equal("host", builder.Servers[0].Host);
-            Assert.Equal(27017, builder.Servers[0].Port);
+            Assert.Equal("host", builder.Servers[0].GetHost());
+            Assert.Equal(27017, builder.Servers[0].GetPort());
         }
         [Fact]
         public void ParsesSingleHostWithPort()
         {
             var builder = ConnectionOptions.Create("mongodb://host:123");
             Assert.Equal(1, builder.Servers.Count);
-            Assert.Equal("host", builder.Servers[0].Host);
-            Assert.Equal(123, builder.Servers[0].Port);
+            Assert.Equal("host", builder.Servers[0].GetHost());
+            Assert.Equal(123, builder.Servers[0].GetPort());
         }
-       
+
         [Fact]
         public void ThrowsExceptionForInvalidOption()
         {
@@ -98,7 +98,7 @@ namespace Norm.Tests
         {
             Assert.Throws<FormatException>(() => ConnectionOptions.Create("mongodb://localhost?querytimeout=glenn"));
         }
-      
+
         [Fact]
         public void ThrowsExceptionForInvalidPoolingValue()
         {
@@ -125,7 +125,7 @@ namespace Norm.Tests
             Assert.Equal(true, ConnectionOptions.Create("mongodb://localhost?strict=true").StrictMode);
             Assert.Equal(false, ConnectionOptions.Create("mongodb://localhost?strict=false").StrictMode);
         }
-       
+
         [Fact]
         public void QueryTimeoutIs30ByDefault()
         {
@@ -134,7 +134,7 @@ namespace Norm.Tests
         [Fact]
         public void ParsesQueryTimeoutOption()
         {
-            Assert.Equal(15, ConnectionOptions.Create("mongodb://localhost?querytimeout=15").QueryTimeout);            
+            Assert.Equal(15, ConnectionOptions.Create("mongodb://localhost?querytimeout=15").QueryTimeout);
         }
         [Fact]
         public void PoolingIsOnByDefault()
@@ -179,13 +179,13 @@ namespace Norm.Tests
         {
             Assert.Equal(13, ConnectionOptions.Create("mongodb://localhost?lifetime=13").Lifetime);
         }
-                
+
         [Fact]
         public void ParsesComplexConnectionString()
         {
             var builder = ConnectionOptions.Create("mongodb://its:over@host:9001/dbz?strict=false&pooling=true&poolsize=100");
-            Assert.Equal("host", builder.Servers[0].Host);
-            Assert.Equal(9001, builder.Servers[0].Port);
+            Assert.Equal("host", builder.Servers[0].GetHost());
+            Assert.Equal(9001, builder.Servers[0].GetPort());
             Assert.Equal("dbz", builder.Database);
             Assert.Equal("its", builder.UserName);
             Assert.Equal("over", builder.Password);

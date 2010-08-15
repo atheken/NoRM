@@ -6,11 +6,14 @@ using Norm.Configuration;
 
 namespace Norm.Protocol
 {
-    public class ReplicaSetMember
+    /// <summary>
+    /// Defines a node of a cluster.
+    /// </summary>
+    public class ClusterMember
     {
-        static ReplicaSetMember()
+        static ClusterMember()
         {
-            MongoConfiguration.Initialize(j => j.For<ReplicaSetMember>(
+            MongoConfiguration.Initialize(j => j.For<ClusterMember>(
                 r =>
                 {
                     r.ForProperty(l => l.ServerName).UseAlias("name");
@@ -22,7 +25,7 @@ namespace Norm.Protocol
                 }));
         }
 
-        public ReplicaSetMember()
+        public ClusterMember()
         {
             Health = 1;
             LastHeartbeat = DateTime.Now;
@@ -30,7 +33,39 @@ namespace Norm.Protocol
 
         private int _id { get; set; }
 
-        public ReplicaSetState State { get; set; }
+        private static int DEFAULT_PORT = 27017;
+
+        private String[] SplitServerName()
+        {
+            return this.ServerName.Split(':');
+        }
+
+        /// <summary>
+        /// Produce the "port" part of the server name, or the default MongoDB port (27017)
+        /// </summary>
+        /// <returns></returns>
+        public int GetPort()
+        {
+            int outval = DEFAULT_PORT;
+            var s = this.SplitServerName();
+            if (s.Length == 2)
+            {
+                outval = Int32.Parse(s[1]);
+            }
+
+            return outval;
+        }
+
+        /// <summary>
+        /// Produce the "host" part of the servername"
+        /// </summary>
+        /// <returns></returns>
+        public string GetHost()
+        {
+            return this.SplitServerName()[0];
+        }
+
+        public MemberStatus State { get; set; }
 
         /// <summary>
         /// Is this the server from which the replica set information was pulled?

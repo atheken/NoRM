@@ -4,13 +4,15 @@ using System.Configuration;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Linq;
+using Norm.Protocol;
+using System.Timers;
 
 namespace Norm
 {
     /// <summary>
     /// The set of connection options associated with a particular URI.
     /// </summary>
-    public class ConnectionOptions : IOptionsContainer, ICloneable
+    public class ConnectionOptions : IOptionsContainer, ICloneable, IDisposable
     {
         private String _connectionString;
         private bool _isNew = true;
@@ -40,7 +42,8 @@ namespace Norm
                   {"poolsize", (v, b) =>{ if(!b._isNew){throw new MongoException("PoolSize cannot be provided as an override option");} b.PoolSize = int.Parse(v);}},
                   {"timeout", (v, b) =>{ if(!b._isNew){throw new MongoException("Timeout cannot be provided as an override option");} b.Timeout = int.Parse(v);}},
                   {"lifetime", (v, b) =>{ if(!b._isNew){throw new MongoException("Lifetime cannot be provided as an override option");} b.Lifetime = int.Parse(v);}},
-                  {"verifywritecount", (v,b)=> b.VerifyWriteCount = int.Parse(v)}
+                  {"verifywritecount", (v,b)=> b.VerifyWriteCount = int.Parse(v)},
+                  {"readfromany",(v,b)=>b.ReadFromAny = bool.Parse(v)}
               };
         #endregion
 
@@ -57,10 +60,46 @@ namespace Norm
             Lifetime = 15;
         }
 
+        private List<ClusterMember> _servers;
+        private ClusterMember _primaryServer;
+        private List<ClusterMember> _secondaryServers;
+
         /// <summary>
         /// Gets a server list.
         /// </summary>
-        public IList<Server> Servers { get; set; }
+        public IList<ClusterMember> Servers
+        {
+            get { return this._servers; }
+            set
+            {
+                this._servers = value.OrderBy(y => y.State == MemberStatus.Primary).ToList();
+                this._primaryServer = _servers.SingleOrDefault(y => y.State == MemberStatus.Primary);
+                this._secondaryServers = _servers.Where(y => y.State == MemberStatus.Secondary).ToList();
+            }
+        }
+
+        /// <summary>
+        /// Returns the primary server in the replica set, if there is such a thing.
+        /// </summary>
+        public ClusterMember PrimaryServer
+        {
+            get
+            {
+                return this._primaryServer;
+            }
+        }
+
+        /// <summary>
+        /// Returns the the Secondary servers in the Replica Set
+        /// (if these conntection options are taking part in in one)
+        /// </summary>
+        public IEnumerable<ClusterMember> SecondaryServers
+        {
+            get
+            {
+                return this._secondaryServers;
+            }
+        }
 
         /// <summary>
         /// Gets the user retval.
@@ -155,9 +194,22 @@ namespace Norm
                     port = conn.Port;
                     port = port == -1 ? DEFAULT_PORT : port;
                 }
-                catch { port = DEFAULT_PORT; };
-                retval.Servers = new List<Server>(1);
-                retval.Servers.Add(new Server() { Host = conn.Host, Port = port });
+                catch
+                {
+                    port = DEFAULT_PORT;
+                };
+
+                retval.Servers = new List<ClusterMember>(1)
+                {
+                    new ClusterMember() {
+                        ServerName = conn.Host + ":" + port.ToString(),
+                        State = MemberStatus.Primary, 
+                        Health = 1, 
+                        ErrorMessage = "", 
+                        LastHeartbeat = DateTime.Now, 
+                        Uptime = 0 
+                    }
+                };
                 var isReplicaSet = conn.Scheme.Equals("mongodbrs", StringComparison.InvariantCultureIgnoreCase);
 
                 if (!String.IsNullOrEmpty(conn.UserInfo))
@@ -172,25 +224,11 @@ namespace Norm
 
                 if (isReplicaSet)
                 {
-                    //do some special replica set stuff.
-                    var format = "mongodb://{0}:{1}/admin?pooling=false";
-                    if (!String.IsNullOrEmpty(conn.UserInfo))
-                    {
-                        format = "mongodb://{2}@{0}:{1}/admin?pooling=false";
-                    }
-
-                    var admin = new MongoAdmin(String.Format(format,
-                        retval.Servers[0].Host, retval.Servers[0].Port, conn.UserInfo));
-                    var rs = admin.GetReplicaSetStatus();
-                    retval.Servers =
-                        rs.Members.Select(y =>
-                        {
-                            var s = new Server();
-                            var parts = y.ServerName.Split(':');
-                            s.Host = parts[0];
-                            s.Port = parts.Length == 2 ? Int32.Parse(parts[1]) : DEFAULT_PORT;
-                            return s;
-                        }).ToList();
+                    retval.UseReplicaSets = true;
+                    retval.RequeryMemberServers();
+                    retval._updateTimer = new Timer(60000);
+                    retval._updateTimer.Elapsed += (o, e) => retval.RequeryMemberServers();
+                    retval._updateTimer.Start();
                 }
 
 
@@ -203,6 +241,44 @@ namespace Norm
                 throw new MongoException("The connection string passed does not appear to be a valid Uri, it should be of the form: " +
                     "'mongodb[rs]://[user:password]@host:[port]/[replicaSetName]/dbname?[options]' where the parts in brackets are optional.");
             }
+        }
+
+        /// <summary>
+        /// Should be executed periodically to make sure everything is active.
+        /// </summary>
+        private void RequeryMemberServers()
+        {
+            if (UseReplicaSets)
+            {
+
+                //do some special replica set stuff.
+                var format = "mongodb://{0}:{1}/admin?pooling=false";
+                if (!String.IsNullOrEmpty(this.UserName) && !String.IsNullOrEmpty(this.Password))
+                {
+                    format = "mongodb://{2}:{3}@{0}:{1}/admin?pooling=false";
+                }
+
+                var servers = this.Servers;
+
+                foreach (var s in servers)
+                {
+                    using (var admin = new MongoAdmin(String.Format(format, s.GetHost(),
+                        s.GetPort(), this.UserName, this.Password)))
+                    {
+                        try
+                        {
+                            this.Servers = admin.GetReplicaSetStatus().Members
+                                .OrderBy(y => y.State == MemberStatus.Primary).ToList();
+                            break;
+                        }
+                        catch
+                        {
+                            //try the next server on the list.
+                        }
+                    }
+                }
+            }
+
         }
 
 
@@ -259,6 +335,32 @@ namespace Norm
         public object Clone()
         {
             return ConnectionOptions.Create(this._connectionString);
+        }
+
+        public bool UseReplicaSets
+        {
+            get;
+            private set;
+        }
+
+
+        public bool ReadFromAny
+        {
+            get;
+            private set;
+        }
+
+        private bool _disposed;
+        private Timer _updateTimer;
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _updateTimer.Stop();
+                _updateTimer.Dispose();
+                _disposed = true;
+            }
         }
 
     }
