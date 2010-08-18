@@ -70,43 +70,43 @@ namespace Norm.BSON.DbTypes
         }
 
         /// <summary>TODO::Description.</summary>
-        protected class FileChunk
-        {
-            /// <summary>
-            /// Causes the property mapping to kick in.
-            /// </summary>
-            static FileChunk()
-            {
-                MongoConfiguration.Initialize(cfg =>
-                    cfg.For<FileChunk>(j =>
-                    {
-                        j.UseCollectionNamed("chunks");
-                        j.ForProperty(k => k.SequenceID).UseAlias("n");
-                        j.ForProperty(k => k.FileID).UseAlias("files_id");
-                        j.ForProperty(k => k.Payload).UseAlias("data");
-                    })
-                );
-            }
-            /// <summary>
-            /// The unique id for this chunk.
-            /// </summary>
-            public ObjectId ID { get; set; }
+		//protected class FileChunk
+		//{
+		//    /// <summary>
+		//    /// Causes the property mapping to kick in.
+		//    /// </summary>
+		//    static FileChunk()
+		//    {
+		//        MongoConfiguration.Initialize(cfg =>
+		//            cfg.For<FileChunk>(j =>
+		//            {
+		//                j.UseCollectionNamed("chunks");
+		//                j.ForProperty(k => k.SequenceID).UseAlias("n");
+		//                j.ForProperty(k => k.FileID).UseAlias("files_id");
+		//                j.ForProperty(k => k.Payload).UseAlias("data");
+		//            })
+		//        );
+		//    }
+		//    /// <summary>
+		//    /// The unique id for this chunk.
+		//    /// </summary>
+		//    public ObjectId ID { get; set; }
 
-            /// <summary>
-            /// The order of this chunk with relation to it's siblings.
-            /// </summary>
-            public int SequenceID { get; set; }
+		//    /// <summary>
+		//    /// The order of this chunk with relation to it's siblings.
+		//    /// </summary>
+		//    public int SequenceID { get; set; }
 
-            /// <summary>
-            /// Indicates the file to which this chunk belongs.
-            /// </summary>
-            public ObjectId FileID { get; set; }
+		//    /// <summary>
+		//    /// Indicates the file to which this chunk belongs.
+		//    /// </summary>
+		//    public ObjectId FileID { get; set; }
 
-            /// <summary>
-            /// The binary data in this chunk.
-            /// </summary>
-            public byte[] Payload { get; set; }
-        }
+		//    /// <summary>
+		//    /// The binary data in this chunk.
+		//    /// </summary>
+		//    public byte[] Payload { get; set; }
+		//}
 
         /// <summary>TODO::Description.</summary>
         protected class FileMetadata

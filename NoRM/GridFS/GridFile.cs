@@ -16,9 +16,9 @@ namespace Norm.GridFS
     public class GridFile
     {
         static GridFile()
-        {
+        {			
             MongoConfiguration.Initialize(container => container.For<GridFile>(y =>
-            {
+            {				
                 y.ForProperty(j => j.Length).UseAlias("length");
                 y.ForProperty(j => j.ChunkSize).UseAlias("chunkSize");
                 y.ForProperty(j => j.UploadDate).UseAlias("uploadDate");
@@ -168,6 +168,7 @@ namespace Norm.GridFS
                         c.FileID = this.Id;
                         c.BinaryData = binary;
                         chunkNumber++;
+						CachedChunks.Add(c);
                     }
                 } while (takeCount > 0);
                 this.Length = cursor;
