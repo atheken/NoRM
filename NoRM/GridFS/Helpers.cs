@@ -12,7 +12,13 @@ namespace Norm.GridFS
     /// </summary>
     public static class Helpers
     {
-        /// <summary>
+    	static Helpers()
+    	{
+			FileChunk.InitializeMapping();
+			GridFile.InitializeMapping();
+    	}
+
+    	/// <summary>
         /// Gets a file collection from the specified collection.
         /// </summary>
         /// <typeparam name="T"></typeparam>

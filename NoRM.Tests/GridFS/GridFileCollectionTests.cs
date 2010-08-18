@@ -60,8 +60,7 @@ namespace NoRM.Tests.GridFS
     		gridFileCollection.Save(file);
 
     		var file2 = gridFileCollection.FindOne(new { _id = file.Id });
-
-
+			
     		Assert.Equal(file.Id, file2.Id);
     		Assert.Equal(file.MD5Checksum, file2.MD5Checksum);
     		Assert.Equal(file.ContentType, file2.ContentType);

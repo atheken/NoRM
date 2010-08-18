@@ -8,17 +8,23 @@ namespace Norm.GridFS
 {
     /// <summary>
     /// A piece of the a GridFS file.
-    /// </summary>    
+    /// </summary>        
     internal class FileChunk
     {
         static FileChunk()
         {
-            MongoConfiguration.Initialize(container => container.For<FileChunk>(y => {				
-                y.ForProperty(j => j.FileID).UseAlias("files_id");
-                y.ForProperty(j => j.ChunkNumber).UseAlias("n");
-                y.ForProperty(j => j.BinaryData).UseAlias("data");				
-            }));		
+           	InitializeMapping();
         }
+
+    	internal static void InitializeMapping()
+		{
+			MongoConfiguration.Initialize(container => container.For<FileChunk>(y =>
+			{
+				y.ForProperty(j => j.FileID).UseAlias("files_id");
+				y.ForProperty(j => j.ChunkNumber).UseAlias("n");
+				y.ForProperty(j => j.BinaryData).UseAlias("data");
+			}));
+		}
 
         public FileChunk()
         {
