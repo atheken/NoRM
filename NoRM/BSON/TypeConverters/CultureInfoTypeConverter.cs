@@ -20,7 +20,7 @@ namespace Norm.BSON.TypeConverters
         public object ConvertFromBson(object data)
         {
             if (data == null)
-                return CultureInfo.InvariantCulture;
+                return null;
 
             return new CultureInfo((string)data);
         }
