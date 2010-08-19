@@ -30,7 +30,7 @@ namespace Norm.Tests
         [SetUp]
         public void Setup()
         {
-            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
+            _server = Mongo.Create(TestHelper.ConnectionString ("pooling=false", "NormTests", null, null));
             _collection = _server.GetCollection<TestClass>("TestClasses");
         }
 
@@ -38,13 +38,14 @@ namespace Norm.Tests
         public void Teardown()
         {
             _server.Database.DropCollection("TestClasses");
-            using (var admin = new MongoAdmin("mongodb://localhost/NormTests?pooling=false"))
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString ("pooling=false", "NormTests", null, null)))
             {
                 admin.DropDatabase();
             }
             _server.Dispose();
         }
 
+		
         [Test]
         public void MultiQualifierAnd()
         {

@@ -150,7 +150,7 @@ namespace Norm.Tests
         {
 
             MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
-            using (var shoppers = new Shoppers(Mongo.Create("mongodb://localhost:27017/test")))
+            using (var shoppers = new Shoppers(Mongo.Create(TestHelper.ConnectionString("pooling=false","test",null,null))))
             {
                 shoppers.Drop<Shopper>();
                 shoppers.Add(new Shopper
@@ -192,7 +192,7 @@ namespace Norm.Tests
         public void Are_Queries_Fully_Linqified()
         {
             MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
-            using (var shoppers = new Shoppers(Mongo.Create("mongodb://localhost:27017/test")))
+            using (var shoppers = new Shoppers(Mongo.Create(TestHelper.ConnectionString("pooling=false","test",null,null))))
             {
                 shoppers.Drop<Shopper>();
                 shoppers.Add(new Shopper

@@ -29,6 +29,11 @@ namespace Norm.Tests
 		[Test]
 		public void TestServerHarness ()
 		{
+			using (var db = new MongoAdmin ("mongodb://localhost:27701"))
+			{
+				var d = db.GetCurrentOperations ();
+				Assert.IsNotNull (d);
+			}
 		}
 	}
 

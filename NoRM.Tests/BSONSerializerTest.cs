@@ -73,10 +73,14 @@ namespace Norm.Tests
         }
         
         [Test]
-        public void SerializationOfDatesHasMillisecondPrecision()
+        public void SerializationOfDatesHasMillisecondPrecision ()
         {
+        	var n = DateTime.Now;
+        	//some rounding issues when ticks are involved.
+			n = n - new TimeSpan (n.Ticks);
+        	
             var obj1 = new GeneralDTO { ADateTime = null };
-            var obj2 = new GeneralDTO { ADateTime = DateTime.Now };
+            var obj2 = new GeneralDTO { ADateTime = n };
 
             var obj1Bytes = BsonSerializer.Serialize(obj1);
             var obj2Bytes = BsonSerializer.Serialize(obj2);

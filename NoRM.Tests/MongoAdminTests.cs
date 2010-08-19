@@ -110,7 +110,7 @@ namespace Norm.Tests
         public void Kill_Operation_Returns()
         {
             //since we don't have any long-running ops, this is all we can test without mocks.
-            using (var mAdmin = new MongoAdmin("mongodb://127.0.0.1/admin"))
+            using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString("","admin",null,null)))
             {
                 var x = mAdmin.KillOperation(double.MaxValue);
                 Assert.AreEqual(false,x.WasSuccessful);
@@ -160,18 +160,19 @@ namespace Norm.Tests
         }
 
         [Test]
-        public void ReturnsBuildInfo()
+        public void ReturnsBuildInfo ()
         {
-            string gitVersion;
-            string version;
-            using (var process = new Process())
+        	string gitVersion;
+        	string version;
+        	using (var process = new Process ())
             {
-                process.StartInfo = new ProcessStartInfo("mongod", "--version") { RedirectStandardOutput = true, UseShellExecute = false };
+        		var mongoPath = System.Configuration.ConfigurationManager.AppSettings["mongodPath"];
+                process.StartInfo = new ProcessStartInfo(mongoPath+ "/mongod", "--version") { RedirectStandardOutput = true, UseShellExecute = false };
                 process.Start();
                 using (var stream = process.StandardOutput)
                 {
                     var data = stream.ReadToEnd();
-                    gitVersion = Regex.Match(data, "git version: ([a-f0-9]+)\r\n").Groups[1].Value;
+                    gitVersion = Regex.Match(data, "git version: ([a-f0-9]+)\b").Groups[1].Value;
                     version = Regex.Match(data, "db version v([^,]+),").Groups[1].Value;
                 }
             }

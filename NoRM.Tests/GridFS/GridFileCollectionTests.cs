@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,8 +33,8 @@ namespace Norm.Tests.GridFS
             using (var conn = Mongo.Create(TestHelper.ConnectionString("strict=false")))
             {
                 var files = conn.Database.Files();
-                files.Delete(null);
-            }
+                files.Delete(null);												
+            }		
         }
 
         [Test]

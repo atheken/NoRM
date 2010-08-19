@@ -65,7 +65,8 @@ namespace Norm.Tests.ConnectionsTests
         }
 
 //        [Fact(DisplayName = "REPLICA SET TESTS: We run all the tests together because it takes up to a minute to spin up the replica set")]
-        public void RunAllReplicaSetTests()
+        [Test]
+		public void RunAllReplicaSetTests()
         {
             this.GetReplicaSetStatusReturnsCorrectInformation();
 

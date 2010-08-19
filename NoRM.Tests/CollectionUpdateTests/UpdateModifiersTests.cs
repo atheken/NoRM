@@ -8,11 +8,11 @@ namespace Norm.Tests.CollectionUpdateTests
 {
 
     [TestFixture]
-    public class UpdateModifiersTests : IDisposable
+    public class UpdateModifiersTests
     {
-	    private readonly IMongo _server;
+	    private IMongo _server;
         private BuildInfoResponse _buildInfo = null;
-        private readonly IMongoCollection<Post> _collection;
+        private IMongoCollection<Post> _collection;
 
 		private Mongod _proc;
 
@@ -20,34 +20,25 @@ namespace Norm.Tests.CollectionUpdateTests
 		public void SetupTestFixture ()
 		{
 			_proc = new Mongod ();
+			var adminString = TestHelper.ConnectionString("pooling=false&strict=true","admin",null,null);
+			var admin = new MongoAdmin(adminString);
+            _server = Mongo.Create(TestHelper.ConnectionString("pooling=false&strict=true","NormTests",null,null));
+            _collection = _server.GetCollection<Post>("Posts");
+            _buildInfo = admin.BuildInfo();
 		}
 
 		[TestFixtureTearDown]
 		public void TearDownTestFixture ()
 		{
-			_proc.Dispose ();
-		}
-
-
-
-
-        public UpdateModifiersTests()
-        {
-            var admin = new MongoAdmin("mongodb://localhost/admin?pooling=false&strict=true");
-            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false&strict=true");
-            _collection = _server.GetCollection<Post>("Posts");
-            _buildInfo = admin.BuildInfo();
-        }
-        public void Dispose()
-        {
-            _server.Database.DropCollection("Posts");
-            using (var admin = new MongoAdmin("mongodb://localhost/NormTests?pooling=false"))
+		    _server.Database.DropCollection("Posts");
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString("pooling=false","NormTests",null,null)))
             {
                 admin.DropDatabase();
             }
             _server.Dispose();
-        }
 
+			_proc.Dispose ();
+		}
 
         [Test]
         public void PostScoreShouldBeEqualThreeWhenApplyingIncrementBy2CommandToScoreEqOne()

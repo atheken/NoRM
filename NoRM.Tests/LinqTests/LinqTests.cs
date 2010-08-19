@@ -27,23 +27,53 @@ namespace Norm.Tests
 		}
 		
         [SetUp]
-        public void Setup()
+        public void Setup ()
         {
-            MongoConfiguration.RemoveMapFor<TestProduct>();
-            MongoConfiguration.RemoveMapFor<Post>();
-            using (var session = new Session())
+        	MongoConfiguration.RemoveMapFor<TestProduct> ();
+        	MongoConfiguration.RemoveMapFor<Post> ();
+        	using (var session = new Session ())
             {
-                session.Drop<TestProduct>();
-                session.Drop<Post>();
-            }
-            using (var db = Mongo.Create(TestHelper.ConnectionString("strict=false")))
+        		session.Drop<TestProduct> ();
+        		session.Drop<Post> ();
+        	}
+        	using (var db = Mongo.Create (TestHelper.ConnectionString ("strict=false")))
             {
-                db.Database.DropCollection("acmePost");
-            }
+        		db.Database.DropCollection ("acmePost");
+        	}
         }
+		
+		[Test]
+		public void LinqQueriesShouldSupportComplexQueriesWithLongDatatypes ()
+		{
+			using (var session = new Session ()) {
+				session.Add (new TestProduct { Name = "1", Quantity = 1, LongId = 1 });
+				session.Add (new TestProduct { Name = "2", Quantity = 1, LongId = 2 });
+				session.Add (new TestProduct { Name = "3", Quantity = 0, LongId = 3 });
+				var queryable = session.Products;
+				
+				var test1 = (from t in queryable
+					where t.LongId == 3
+					select t).FirstOrDefault ();
+				Assert.NotNull (test1);
+				
+				var test2 = (from t in queryable
+					where (t.Quantity & 1) == 0
+					select t).FirstOrDefault ();
+				Assert.NotNull (test2);
+				
+				var test3 = (from t in queryable
+					where t.LongId == 3 && ((t.Quantity & 1) == 0)
+					select t).FirstOrDefault ();
+				Assert.NotNull (test3);
+				
+				//fails
+				Assert.True(queryable.QueryStructure ().IsComplex);
+			}
+		}
+
 
         [Test]
-        void ProviderDoesntChokeOnCustomCollectionNames()
+        public void ProviderDoesntChokeOnCustomCollectionNames()
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString()))
             {
@@ -1971,13 +2001,14 @@ namespace Norm.Tests
         }
 
         [Test]
-        public void FirstWhereNoResultsReturnedInWhere()
+        public void FirstWhereNoResultsReturnedInWhere ()
         {
-            using (var session = new Session())
+        	using (var session = new Session (true))
             {
-                session.Add(new TestProduct { Name = "ATest", Price = 10 });
-                session.Add(new TestProduct { Name = "BTest", Price = 22 });
-                session.Add(new TestProduct { Name = "BTest", Price = 33 });
+        		session.Add (new TestProduct { Name = "ATest", Price = 10 });
+        		session.Add (new TestProduct { Name = "BTest", Price = 22 });
+        		session.Add (new TestProduct { Name = "BTest", Price = 33 });
+				
                 var noProducct = session.Products.Where(x => x.Name == "ZTest");
                 var ex = Assert.Throws<InvalidOperationException>(() => noProducct.First());
                 Assert.AreEqual("Sequence contains no elements", ex.Message);
@@ -2079,7 +2110,7 @@ namespace Norm.Tests
         public void CanAQuerySupportArrayIdentifiers()
         {
             MongoConfiguration.Initialize(c => c.AddMap<ShopperMap>());
-            using (var shoppers = new Shoppers(Mongo.Create("mongodb://localhost:27017/test")))
+            using (var shoppers = new Shoppers(Mongo.Create(TestHelper.ConnectionString("pooling=false","test",null,null))))
             {
                 shoppers.Drop<Shopper>();
                 shoppers.Add(new Shopper
