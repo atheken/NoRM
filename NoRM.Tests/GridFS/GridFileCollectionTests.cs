@@ -125,5 +125,29 @@ namespace NoRM.Tests.GridFS
 				Assert.Equal(new byte[] { 3, 2, 1 }, gridFS.FindOne(new { _id = file.Id }).Content.ToArray());
 			}
 		}
+
+		[Fact]
+		public void Delete_Should_Remove_FileChunks()
+		{
+			using (var conn = Mongo.Create(TestHelper.ConnectionString()))
+			{
+				var ms = new MemoryStream(50000);
+				for (int i = 0; i < 2000; i++)
+				{
+					ms.Write(BitConverter.GetBytes(i), 0, 4);
+				}
+
+				var gridFS = conn.Database.Files();
+				var file = new GridFile();
+				file.ContentType = "application/unknown";
+				file.FileName = "test.raw";
+				file.Content = ms.ToArray();
+				gridFS.Save(file);
+
+				gridFS.Delete(file.Id);
+
+				Assert.Equal(0, conn.Database.GetCollection<FileChunk>("chunks").GetCollectionStatistics().Count);
+			}
+		}
     }
 }

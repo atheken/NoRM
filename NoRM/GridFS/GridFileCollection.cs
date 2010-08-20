@@ -69,7 +69,7 @@ namespace Norm.GridFS
             if (IDofFileToDelete != null)
             {
                 this.FileSummaries.Delete(new { _id = IDofFileToDelete });
-                this.FileChunks.Delete(new { _id = IDofFileToDelete });
+                this.FileChunks.Delete(new { files_id = IDofFileToDelete });
             }
             else
             {
