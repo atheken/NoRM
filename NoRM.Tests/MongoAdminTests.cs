@@ -206,6 +206,43 @@ namespace Norm.Tests
             }
         }
 
+		[Fact]
+		public void ClonesDatabase()
+		{
+			// arrange: create sourceDb with a fake object
+			const string sourceDb = "sourceDb";
+			string sourceDbConnectionString = TestHelper.ConnectionString(null, sourceDb, null, null);
+			var fakeObject = new FakeObject();
+			using (var mongo = Mongo.Create(sourceDbConnectionString))
+			{
+				mongo.GetCollection<FakeObject>().Insert(fakeObject);
+			}
+
+			// act: create destinationDb as clone of sourceDb
+			const string destinationDb = "destinationDb";
+			string destinationDbConnectionString = TestHelper.ConnectionString(null, destinationDb, null, null);
+			using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
+			{
+				admin.CloneDatabase(sourceDb, destinationDb);
+			}
+
+			// assert: verify that destinationDb exists and contains fake object
+			using (var mongo = Mongo.Create(destinationDbConnectionString))
+			{
+				Assert.Equal(fakeObject.Id, mongo.GetCollection<FakeObject>().AsQueryable().Single().Id);
+			}
+
+			// cleanup: drop both databases
+			using (var admin = new MongoAdmin(sourceDbConnectionString))
+			{
+				admin.DropDatabase();
+			}
+			using (var admin = new MongoAdmin(destinationDbConnectionString))
+			{
+				admin.DropDatabase();
+			}
+		}
+
         [Fact]
         public void DropsDatabase()
         {

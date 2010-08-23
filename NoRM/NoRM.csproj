@@ -196,6 +196,7 @@
     <Compile Include="MongoQueryExecutor.cs" />
     <Compile Include="Protocol\IUpdateWithoutId.cs" />
     <Compile Include="Protocol\Messages\FindAndModifyResult.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\CloneDatabaseRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\ExplainRequest.cs" />
     <Compile Include="Protocol\Messages\IndexOption.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
