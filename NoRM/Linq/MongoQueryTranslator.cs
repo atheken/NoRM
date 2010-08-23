@@ -1038,6 +1038,35 @@ namespace Norm.Linq
 
         private void HandleContains(MethodCallExpression m)
         {
+            if (!typeof(IEnumerable).IsAssignableFrom(m.Object.Type))
+                throw new NotSupportedException();
+
+            if (m.Object is MemberExpression)
+                HandleContainsWithMongoSource(m);
+            else if (m.Object is ConstantExpression)
+                HandleContainsWithConstantSource(m);
+            else
+                throw new NotImplementedException();
+        }
+
+        private void HandleContainsWithMongoSource(MethodCallExpression m)
+        {
+            if (m.Arguments.Count != 1)
+                throw new NotSupportedException();
+
+            _sbWhere.Append("Array.contains(");
+
+            VisitMemberAccess((MemberExpression)m.Object);
+
+            _sbWhere.Append(",");
+
+            Visit(m.Arguments[0]);
+
+            _sbWhere.Append(")");
+        }
+
+        private void HandleContainsWithConstantSource(MethodCallExpression m)
+        {
             var collection = m.Object.GetConstantValue<IEnumerable>().Cast<object>().ToArray();
             var member = VisitDeepAlias((MemberExpression)m.Arguments[0]);
 

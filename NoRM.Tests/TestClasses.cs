@@ -921,4 +921,15 @@ namespace Norm.Tests
         }
     }
 
+    public class TestContains
+    {
+        public ObjectId Id { get; private set; }
+        public string Label { get; set; }
+        public List<int> Owners { get; set; }
+
+        public TestContains()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+    }
 }

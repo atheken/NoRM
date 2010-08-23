@@ -97,6 +97,7 @@
     <Compile Include="IdPropertyFinderTests.cs" />
     <Compile Include="JSONParser.cs" />
     <Compile Include="LinqTests\LinqAggregates.cs" />
+    <Compile Include="LinqTests\LinqContainsTests.cs" />
     <Compile Include="LinqTests\LinqDeepGraph.cs" />
     <Compile Include="LinqTests\LinqTests.cs" />
     <Compile Include="MapReduceTests.cs" />
