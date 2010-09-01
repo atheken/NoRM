@@ -12,6 +12,7 @@ namespace Norm.BSON
     {
         private static readonly Type _myType = typeof(MagicProperty);
         private static readonly Type _ignoredIfNullType = typeof(MongoIgnoreIfNullAttribute);
+        private static readonly Type _immutableType = typeof(MongoImmutableAttribute);
         private static readonly Type _defaultValueType = typeof(DefaultValueAttribute);
         private readonly PropertyInfo _property;
         private readonly DefaultValueAttribute _defaultValueAttribute;
@@ -27,6 +28,7 @@ namespace Norm.BSON
         {
             _property = property;
             this.IgnoreIfNull = property.GetCustomAttributes(_ignoredIfNullType, true).Length > 0;
+            this.Immutable = property.GetCustomAttributes(_immutableType, true).Length > 0;
             var props = property.GetCustomAttributes(_defaultValueType, true);
             if (props.Length > 0)
             {
@@ -69,6 +71,15 @@ namespace Norm.BSON
             private set;
         }
         /// <summary>
+        /// Gets a value indicating whether to ignore the property on updates.
+        /// </summary>
+        /// <value><c>true</c> if ignoring; otherwise, <c>false</c>.</value>
+        public bool Immutable
+        {
+            get;
+            private set;
+        }
+        /// <summary>
         /// Returns if this PropertyInfo has DefaultValueAttribute associated
         /// with it.
         /// </summary>
@@ -100,7 +111,7 @@ namespace Norm.BSON
         /// <param retval="document">The instance on which the property should be applied.</param>
         /// <param retval="value">The value of the property in the provided instance</param>
         /// <returns></returns>
-        public bool IgnoreProperty(object document, out object value)
+        public bool IgnoreProperty(object document, out object value, SerializationPurpose purpose)
         {
             // initialize the out variable.
             value = null;
@@ -121,17 +132,24 @@ namespace Norm.BSON
                     // if it it same ignore the property
                     if (isValueSameAsDefault)
                     {
-                        ignore = true;
+                        return true;
                     }
                 }
                 // finally check if the property has the MongoIgnoreIfNull attribute.
                 // and ignore if true.
                 if (this.IgnoreIfNull && value == null)
                 {
-                    ignore = true;
+                    return true;
+                }
+
+                // If this is immutable, don't include in updates. This is true
+                // only for the value document, of course.
+                if (this.Immutable && purpose == SerializationPurpose.Update)
+                {
+                    return true;
                 }
             }
-            // return the result
+            // return the result. Should be false -- true can exit early
             return ignore;
         }
 

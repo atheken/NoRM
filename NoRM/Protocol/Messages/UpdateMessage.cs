@@ -41,7 +41,7 @@ namespace Norm.Protocol.Messages
         public void Execute()
         {
             var payload1 = GetPayload(_matchDocument);
-            var payload2 = GetPayload(_valueDocument);
+            var payload2 = GetPayload(_valueDocument, SerializationPurpose.Update);
             
             var collection = Encoding.UTF8.GetBytes(_collection);
             var collectionLength = collection.Length + 1; //+1 is for collection's null terminator which we'll be adding in a bit

@@ -40,15 +40,20 @@ namespace Norm.Protocol
             _connection = connection;
             _collection = fullyQualifiedCollName;
         }
-        
-        protected static byte[] GetPayload<X>(X data)
+
+        protected static byte[] GetPayload<X>(X data, SerializationPurpose purpose)
         {
-            var payload = BsonSerializer.Serialize(data);
+            var payload = BsonSerializer.Serialize(data, purpose);
             if (payload.Length > FOUR_MEGABYTES)
             {
                 throw new DocumentExceedsSizeLimitsException<X>(data, payload.Length);
             }
             return payload;
+        }
+        
+        protected static byte[] GetPayload<X>(X data)
+        {
+            return GetPayload(data, SerializationPurpose.None);
         }
     }
 }

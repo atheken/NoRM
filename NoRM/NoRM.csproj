@@ -77,6 +77,7 @@
     <Compile Include="Attributes\MongoIdentifierAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreAttribute.cs" />
     <Compile Include="Attributes\MongoIgnoreIfNullAttribute.cs" />
+    <Compile Include="Attributes\MongoImmutableAttribute.cs" />
     <Compile Include="BSON\BsonDeserializer.cs" />
     <Compile Include="BSON\BsonHelper.cs" />
     <Compile Include="BSON\BsonSerializerBase.cs" />
