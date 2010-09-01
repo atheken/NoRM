@@ -1,5 +1,4 @@
-﻿
-using Norm.Configuration;
+﻿using Norm.Configuration;
 using System.Collections.Generic;
 
 namespace Norm.Responses
@@ -19,13 +18,13 @@ namespace Norm.Responses
                            a.ForProperty(stat => stat.Namespace).UseAlias("ns");
                            a.ForProperty(stat => stat.Count).UseAlias("count");
                            a.ForProperty(stat => stat.Size).UseAlias("size");
+                           a.ForProperty(stat => stat.AverageObjectSize).UseAlias("avgObjSize");
                            a.ForProperty(stat => stat.StorageSize).UseAlias("storageSize");
-                           a.ForProperty(stat => stat.NumberOfIndices).UseAlias("nIndexes");
+                           a.ForProperty(stat => stat.NumberOfIndices).UseAlias("nindexes");
                            a.ForProperty(stat => stat.PaddingFactor).UseAlias("paddingFactor");
                            a.ForProperty(stat => stat.CurrentExtents).UseAlias("numExtents");
                            a.ForProperty(stat => stat.PreviousExtentSize).UseAlias("lastExtentSize");
                            a.ForProperty(stat => stat.Flags).UseAlias("flags");
-                           a.ForProperty(stat => stat.LastIndexSize).UseAlias("lIndexSize");
                            a.ForProperty(stat => stat.IndexSizes).UseAlias("indexSizes");
                            a.ForProperty(stat => stat.TotalIndexSize).UseAlias("totalIndexSize");
                        })
@@ -46,16 +45,15 @@ namespace Norm.Responses
         public long? TotalIndexSize { get; set; }
 
         /// <summary>
-        /// ?? The previous size of the indices on disk before some index operation??
+        /// Average size of an item in this collection in bytes
         /// </summary>
-        /// <value></value>
-        public long? LastIndexSize { get; set; }
+        public double AverageObjectSize { get; set; }
 
         /// <summary>
         /// Each index and the size on disk of the index.
         /// </summary>
         /// <value></value>
-        public Dictionary<string, double> IndexSizes { get; set; }
+        public Dictionary<string, long> IndexSizes { get; set; }
 
         /// <summary>
         /// Not sure what this is, correlates to "lastExtentSize"
