@@ -14,7 +14,10 @@ namespace Norm.Responses
         static ProfileLevelResponse()
         {
             MongoConfiguration.Initialize(c => c.For<ProfileLevelResponse>(a =>
-                 { a.ForProperty(auth => auth.PreviousLevel).UseAlias("was"); }));
+                 {
+                     a.ForProperty(p => p.PreviousLevel).UseAlias("was");
+                     a.ForProperty(p => p.SlowOpThreshold).UseAlias("slowms");
+                 }));
         }
 
         /// <summary>
@@ -22,5 +25,7 @@ namespace Norm.Responses
         /// </summary>
         /// <value>The previous level.</value>
         public int PreviousLevel { get; set; }
+
+        public int? SlowOpThreshold { get; set; }
     }
 }

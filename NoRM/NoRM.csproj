@@ -136,6 +136,7 @@
     <Compile Include="Commands\Qualifiers\LessThanQualifier.cs" />
     <Compile Include="Commands\Qualifiers\NotEqualQualifier.cs" />
     <Compile Include="Commands\Qualifiers\NotInQualifier.cs" />
+    <Compile Include="Commands\Qualifiers\OrQualifier.cs" />
     <Compile Include="Commands\Qualifiers\SizeQualifier.cs" />
     <Compile Include="BSON\Expando.cs" />
     <Compile Include="Commands\Qualifiers\SliceQualifier.cs" />

@@ -27,6 +27,7 @@ namespace Norm
                   {"poolsize", (v, b) => b.SetPoolSize(int.Parse(v))},
                   {"timeout", (v, b) => b.SetTimeout(int.Parse(v))},
                   {"lifetime", (v, b) => b.SetLifetime(int.Parse(v))},
+                  {"verifywritecount", (v,b)=>b.SetWriteCount(int.Parse(v))}
               }; 
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace Norm
         /// </summary>
         private ConnectionStringBuilder()
         {
+            this.VerifyWriteCount = 1;
         }
 
         /// <summary>
@@ -86,6 +88,11 @@ namespace Norm
         /// Gets the connection lifetime.
         /// </summary>
         public int Lifetime { get; private set; }
+
+        /// <summary>
+        /// Get the write count required to be returned from the server when strict mode is enabled.
+        /// </summary>
+        public int VerifyWriteCount { get; private set; }
 
         /// <summary>
         /// Creates a connection string builder.
@@ -144,6 +151,20 @@ namespace Norm
             QueryTimeout = timeout;
         }
 
+        /// <summary>
+        /// Sets the number of servers that writes must be written to before writes return when in strict mode.
+        /// </summary>
+        /// <param name="writeCount"></param>
+        public void SetWriteCount(int writeCount)
+        {
+            if (writeCount > 1)
+            {
+                this.VerifyWriteCount = writeCount;
+                this.StrictMode = true;
+            }
+        }
+
+        
 
         /// <summary>
         /// Sets strict mode.

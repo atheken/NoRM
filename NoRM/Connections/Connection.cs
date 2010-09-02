@@ -88,6 +88,7 @@ namespace Norm
         public bool StrictMode
         {
             get { return _strictMode ?? _builder.StrictMode; }
+            set { this._strictMode = value; }
         }
 
         /// <summary>
@@ -163,6 +164,24 @@ namespace Norm
         {
             ConnectionStringBuilder.BuildOptions(this, options);
         }
+
+        /// <summary>
+        /// Sets the number of servers that writes must be written to before writes return when in strict mode.
+        /// </summary>
+        /// <param name="writeCount"></param>
+        public void SetWriteCount(int writeCount)
+        {
+            if (writeCount > 1)
+            {
+                this.VerifyWriteCount = writeCount;
+                this.StrictMode = true;
+            }
+        }
+
+        /// <summary>
+        /// Get the write count required to be returned from the server when strict mode is enabled.
+        /// </summary>
+        public int VerifyWriteCount { get; private set; }
 
         /// <summary>
         /// Resets the options.

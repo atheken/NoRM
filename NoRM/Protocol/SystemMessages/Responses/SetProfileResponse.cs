@@ -12,8 +12,9 @@ namespace Norm.Responses
         {
             MongoConfiguration.Initialize(c => c.For<SetProfileResponse>(a =>
                                                    {
-                                                       a.ForProperty(auth => auth.PreviousLevel).UseAlias("was");
-                                                       a.ForProperty(auth => auth.Profile).UseAlias("profile");
+                                                       a.ForProperty(p => p.PreviousLevel).UseAlias("was");
+                                                       a.ForProperty(p => p.Profile).UseAlias("profile");
+                                                       a.ForProperty(p => p.SlowOpThreshold).UseAlias("slowms");
                                                    })
                 );
         }
@@ -25,9 +26,14 @@ namespace Norm.Responses
         public int? Profile { get; set; }
 
         /// <summary>
+        /// The threshold of "slowness" at which profile level 1 will record info queries.
+        /// </summary>
+        public int? SlowOpThreshold { get; set; }
+
+        /// <summary>
         /// The previous level.
         /// </summary>
         /// <value>The PreviousLevel property gets the PreviousLevel data member.</value>
-        public double? PreviousLevel { get; set; }
+        public int? PreviousLevel { get; set; }
     }
 }

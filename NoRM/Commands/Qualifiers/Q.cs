@@ -2,6 +2,9 @@ using System;
 ﻿using Norm.Commands.Qualifiers;
 using System.Text.RegularExpressions;
 using Norm.BSON;
+using Norm.Commands;
+using System.Collections;
+using System.Linq;
 
 namespace Norm
 {
@@ -48,6 +51,27 @@ namespace Norm
         }
 
         /// <summary>
+        /// Produces an "$or" qualifier where each of the groups is a set of criteria.
+        /// </summary>
+        /// <param name="orGroups"></param>
+        /// <returns></returns>
+        public static OrQualifier Or(params object[] orGroups)
+        {
+            return new OrQualifier(orGroups);
+        }
+
+      
+        /// <summary>
+        /// Produces an "$or" qualifier where each of the groups is a set of criteria.
+        /// </summary>
+        /// <param name="orGroups"></param>
+        /// <returns></returns>
+        public static OrQualifier Or(IEnumerable orGroups)
+        {
+            return Or(orGroups.OfType<Object>().ToArray());
+        }
+
+        /// <summary>
         /// Produces a single element $slice at the specific index.
         /// </summary>
         /// <param name="index">The single index that the slice will be used with.</param>
@@ -61,9 +85,9 @@ namespace Norm
         /// </summary>
         /// <param name="left">The first index for the slice.</param>
         /// <param name="right">The second index for the slice.</param>
-        public static SliceQualifier Slice(int left,int right)
+        public static SliceQualifier Slice(int left, int right)
         {
-            return new SliceQualifier(left,right);
+            return new SliceQualifier(left, right);
         }
 
         /// <summary>
@@ -95,7 +119,7 @@ namespace Norm
         {
             return new LessThanQualifier(value);
         }
- 
+
         /// <summary>
         /// Builds a $lte qualifier for the search.
         /// </summary>

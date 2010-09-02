@@ -474,7 +474,7 @@ namespace Norm.Collections
             insertMessage.Execute();
             if (_connection.StrictMode)
             {
-                var error = _db.LastError();
+                var error = _db.LastError(_connection.VerifyWriteCount);
                 if (error.Code > 0)
                 {
                     throw new MongoException(error.Error);
