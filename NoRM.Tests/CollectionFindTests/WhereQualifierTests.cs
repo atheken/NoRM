@@ -1,32 +1,52 @@
 using System;
 using System.Linq;
 using Norm.BSON;
-using Xunit;
+using NUnit.Framework;
 using Norm.Collections;
 
 namespace Norm.Tests
 {
 
-    public class WhereQualifierTests : IDisposable
+    [TestFixture]
+    public class WhereQualifierTests
     {
-        private readonly IMongo _server;
-        private readonly IMongoCollection<TestClass> _collection;
-        public WhereQualifierTests()
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
+        private IMongo _server;
+        private IMongoCollection<TestClass> _collection;
+        
+        [SetUp]
+        public void Setup()
         {
-            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
+            _server = Mongo.Create(TestHelper.ConnectionString ("pooling=false", "NormTests", null, null));
             _collection = _server.GetCollection<TestClass>("TestClasses");
         }
-        public void Dispose()
+
+        [TearDown]
+        public void Teardown()
         {
             _server.Database.DropCollection("TestClasses");
-            using (var admin = new MongoAdmin("mongodb://localhost/NormTests?pooling=false"))
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString ("pooling=false", "NormTests", null, null)))
             {
                 admin.DropDatabase();
             }
             _server.Dispose();
         }
 
-        [Fact]
+		
+        [Test]
         public void MultiQualifierAnd()
         {
             _collection.Insert(new TestClass { AInteger = 78 },
@@ -35,12 +55,12 @@ namespace Norm.Tests
                 new TestClass { AInteger = 81 });
 
             var result = _collection.Find(new { AInteger = Q.LessThan(81).And(Q.GreaterThan(78)) }).ToArray();
-            Assert.Equal(2, result.Length);
-            Assert.Equal(79, result[0].AInteger);
-            Assert.Equal(80, result[1].AInteger);
+            Assert.AreEqual(2, result.Length);
+            Assert.AreEqual(79, result[0].AInteger);
+            Assert.AreEqual(80, result[1].AInteger);
         }
 
-        [Fact]
+        [Test]
         public void MultiQualifieOr()
         {
             _collection.Insert(
@@ -55,12 +75,12 @@ namespace Norm.Tests
                 Q.Or(new { AInteger = Q.LessOrEqual(78) },
                 new { AInteger = Q.GreaterOrEqual(81) })
                 ).ToArray();
-            Assert.Equal(2, result.Length);
-            Assert.Equal(78, result[0].AInteger);
-            Assert.Equal(81, result[1].AInteger);
+            Assert.AreEqual(2, result.Length);
+            Assert.AreEqual(78, result[0].AInteger);
+            Assert.AreEqual(81, result[1].AInteger);
         }
 
-        [Fact]
+        [Test]
         public void WhereExpressionShouldWorkWithFlyweight()
         {
             _collection.Insert(new TestClass { ADouble = 1d });
@@ -69,12 +89,12 @@ namespace Norm.Tests
             _collection.Insert(new TestClass { ADouble = 4d });
 
             var count = _collection.Find();
-            Assert.Equal(4, count.Count());
+            Assert.AreEqual(4, count.Count());
 
             var query = new Expando();
             query["$where"] = " function(){return this.ADouble > 1;} ";
             var results = _collection.Find(query);
-            Assert.Equal(3, results.Count());
+            Assert.AreEqual(3, results.Count());
         }
     }
 }

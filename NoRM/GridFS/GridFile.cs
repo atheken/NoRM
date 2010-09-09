@@ -16,21 +16,26 @@ namespace Norm.GridFS
     public class GridFile
     {
         static GridFile()
-        {
-            MongoConfiguration.Initialize(container => container.For<GridFile>(y =>
-            {
-                y.ForProperty(j => j.Length).UseAlias("length");
-                y.ForProperty(j => j.ChunkSize).UseAlias("chunkSize");
-                y.ForProperty(j => j.UploadDate).UseAlias("uploadDate");
-                y.ForProperty(j => j.MD5Checksum).UseAlias("md5");
-                y.ForProperty(j => j.FileName).UseAlias("filename");
-                y.ForProperty(j => j.ContentType).UseAlias("contentType");
-                y.ForProperty(j => j.Aliases).UseAlias("aliases");
-            }));
+        {			
+            InitializeMapping();
         }
 
+    	internal static void InitializeMapping()
+    	{
+			MongoConfiguration.Initialize(container => container.For<GridFile>(y =>
+			{
+				y.ForProperty(j => j.Length).UseAlias("length");
+				y.ForProperty(j => j.ChunkSize).UseAlias("chunkSize");
+				y.ForProperty(j => j.UploadDate).UseAlias("uploadDate");
+				y.ForProperty(j => j.MD5Checksum).UseAlias("md5");
+				y.ForProperty(j => j.FileName).UseAlias("filename");
+				y.ForProperty(j => j.ContentType).UseAlias("contentType");
+				y.ForProperty(j => j.Aliases).UseAlias("aliases");
+			}));
+    	}
 
-        public GridFile()
+
+    	public GridFile()
         {
             this.UploadDate = DateTime.Now.ToUniversalTime();
             this.ChunkSize = (256 * 1024);//the suggested 256kB chunk size.
@@ -168,6 +173,7 @@ namespace Norm.GridFS
                         c.FileID = this.Id;
                         c.BinaryData = binary;
                         chunkNumber++;
+						CachedChunks.Add(c);
                     }
                 } while (takeCount > 0);
                 this.Length = cursor;

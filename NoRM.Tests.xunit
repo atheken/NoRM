@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<xunit>
-  <assemblies>
-    <assembly filename="NoRM.Tests\bin\Debug\NoRM.Tests.dll" shadow-copy="true" />
-  </assemblies>
-</xunit>

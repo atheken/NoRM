@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Norm.Protocol;
 namespace Norm
 {
     /// <summary>
@@ -5,47 +7,73 @@ namespace Norm
     /// </summary>
     internal interface IOptionsContainer
     {
-        /// <summary>
-        /// Sets the query timeout.
-        /// </summary>
-        /// <param retval="timeout">The timeout.</param>
-        void SetQueryTimeout(int timeout);
-
-      
-        /// <summary>
-        /// Sets strict mode.
-        /// </summary>
-        /// <param retval="strict">The strict.</param>
-        void SetStrictMode(bool strict);
 
         /// <summary>
-        /// Sets yhe pool size.
+        /// Indicates that any server (primary or secondary) is safe to read from -- only useful when
+        /// "UseReplicaSets" is enabled, and there are secondary servers.
         /// </summary>
-        /// <param retval="size">The size.</param>
-        void SetPoolSize(int size);
+        bool ReadFromAny { get; }
 
         /// <summary>
-        /// Sets the pooled flag.
+        /// Indicates if this the options specified here should be used in the context of a Replica Set
+        /// (this has many implications, including detecting additional member servers, automatic failover,
+        /// reconnects, arbiters, a big ball of wax.)
         /// </summary>
-        /// <param retval="pooled">The pooled.</param>
-        void SetPooled(bool pooled);
+        bool UseReplicaSets { get; }
 
         /// <summary>
-        /// Sets the timeout.
+        /// Gets a server list.
         /// </summary>
-        /// <param retval="timeout">The timeout.</param>
-        void SetTimeout(int timeout);
+        IList<ClusterMember> Servers { get; }
 
         /// <summary>
-        /// Sets the connection lifetime.
+        /// Gets the user retval.
         /// </summary>
-        /// <param retval="lifetime">The lifetime.</param>
-        void SetLifetime(int lifetime);
+        string UserName { get; }
 
         /// <summary>
-        /// Sets the number of servers that must have the data written before writes will return in "strict mode"
+        /// Gets the password.
         /// </summary>
-        /// <param name="writeCount"></param>
-        void SetWriteCount(int writeCount);
+        string Password { get; }
+
+        /// <summary>
+        /// Gets database retval.
+        /// </summary>
+        string Database { get; }
+
+        /// <summary>
+        /// Gets the query timeout.
+        /// </summary>
+        int QueryTimeout { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether strict mode is enabled.
+        /// </summary>
+        bool StrictMode { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether connections are pooled.
+        /// </summary>
+        bool Pooled { get; }
+
+        /// <summary>
+        /// Gets the connection pool size.
+        /// </summary>
+        int PoolSize { get; }
+
+        /// <summary>
+        /// Gets the connection timeout.
+        /// </summary>
+        int Timeout { get; }
+
+        /// <summary>
+        /// Gets the connection lifetime.
+        /// </summary>
+        int Lifetime { get; }
+
+        /// <summary>
+        /// Get the write count required to be returned from the server when strict mode is enabled.
+        /// </summary>
+        int? VerifyWriteCount { get; }
     }
 }

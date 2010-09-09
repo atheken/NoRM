@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Xunit;
+using NUnit.Framework;
 using System.IO.Compression;
 using System.Resources;
 using System.Reflection;
@@ -12,8 +12,9 @@ using Norm;
 using Norm.Tests;
 using Norm.BSON.DbTypes;
 
-namespace NoRM.Tests.DBTypeTests
+namespace Norm.Tests.DBTypeTests
 {
+    [TestFixture]
     public class GridFSTests
     {
         private MemoryStream _randomBytes = new MemoryStream(10 * 1024 * 1024);
@@ -21,7 +22,8 @@ namespace NoRM.Tests.DBTypeTests
         private byte[] _randomByteHash;
         private IMongo _db;
 
-        public GridFSTests()
+        [SetUp]
+        public void Setup()
         {
             //construct a random 10MB stream.
             Random r = new Random(DateTime.Now.Millisecond);
@@ -39,7 +41,7 @@ namespace NoRM.Tests.DBTypeTests
             }
         }
 
-        [Fact]
+        [Test]
         public void StorageOfFileIsNotLossy()
         {
             //var fcoll = this._db.GetCollection<Object>("aCollection").GetChildCollection<GridFile>("files");

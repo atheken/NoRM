@@ -23,7 +23,7 @@ namespace Norm.Configuration
         /// Gets the configuration provider instance.
         /// </summary>
         /// <value>The configuration provider.</value>
-        internal static IConfigurationContainer ConfigurationContainer
+        public static IConfigurationContainer ConfigurationContainer
         {
             get
             {
@@ -98,12 +98,12 @@ namespace Norm.Configuration
         /// <returns>
         /// Property alias if one is configured; otherwise returns the input propertyName
         /// </returns>
-        internal static string GetPropertyAlias(Type type, string propertyName)
+        public static string GetPropertyAlias(Type type, string propertyName)
         {
             return _configuration != null ? _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName) : propertyName;
         }
 
-        internal static IBsonTypeConverter GetBsonTypeConverter(Type t)
+        public static IBsonTypeConverter GetBsonTypeConverter(Type t)
         {
             return _configuration != null ? _configuration.GetTypeConverterFor(t) : null;
         }
@@ -113,7 +113,7 @@ namespace Norm.Configuration
         /// </summary>
         /// <param retval="type">The type.</param>
         /// <returns>Type's Collection retval</returns>
-        internal static string GetCollectionName(Type type)
+        public static string GetCollectionName(Type type)
         {
         	var discriminatingType = MongoDiscriminatedAttribute.GetDiscriminatingTypeFor(type);
             if (discriminatingType != null)
@@ -133,7 +133,7 @@ namespace Norm.Configuration
         /// <returns>
         /// The type's connection string if configured; otherwise null.
         /// </returns>
-        internal static string GetConnectionString(Type type)
+        public static string GetConnectionString(Type type)
         {
             return _configuration != null ? _configuration.GetConfigurationMap().GetConnectionString(type) : null;
         }

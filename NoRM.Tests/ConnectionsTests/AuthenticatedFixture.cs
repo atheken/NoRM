@@ -16,7 +16,7 @@ namespace Norm.Tests
     /// </summary>
     /// <remarks>
     /// Your user config should include an "authDbPath" if you wish to override the default, as well as 
-    /// an "authDbPort" if you wish to override the default port.
+    /// an "testPort" if you wish to override the default port.
     /// </remarks>
     public abstract class AuthenticatedFixture : MongoFixture
     {
@@ -29,7 +29,7 @@ namespace Norm.Tests
         {
             get
             {
-                return Int32.Parse(ConfigurationManager.AppSettings["authDbPort"] ?? "27018");
+                return Int32.Parse(ConfigurationManager.AppSettings["testPort"] ?? "27018");
             }
         }
 

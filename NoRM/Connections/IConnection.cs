@@ -6,12 +6,17 @@ namespace Norm
     /// <summary>
     /// A database connection
     /// </summary>
-    public interface IConnection : IDisposable
+    public interface IConnection :  IDisposable
     {
+        /// <summary>
+        /// Indicates that no writes can occur on this connection.
+        /// </summary>
+        bool IsReadOnly { get; }
+
         /// <summary>
         /// Get the write count required to be returned from the server when strict mode is enabled.
         /// </summary>
-        int VerifyWriteCount { get; }
+        int? VerifyWriteCount { get; }
 
         /// <summary>
         /// The connection string used to create this connection.

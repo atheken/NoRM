@@ -1,14 +1,30 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Norm.BSON.DbTypes;
-using Xunit;
+using NUnit.Framework;
 using Norm.Collections;
 
 namespace Norm.Tests
 {
+    [TestFixture]
     public class DbRefTests
     {
-        public DbRefTests()
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
+        [SetUp]
+        public void Setup()
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString()))
             {
@@ -19,7 +35,7 @@ namespace Norm.Tests
             }
         }
 
-        [Fact]
+        [Test]
         public void DbRefMapsToOtherDocumentsByOid()
         {
             var id = ObjectId.NewObjectId();
@@ -40,12 +56,12 @@ namespace Norm.Tests
 
                 var reference = db.GetCollection<ProductReference>().Find(new { }).First();
                 var product = reference.ProductsOrdered[0].Fetch(() => db);
-                Assert.Equal(id.Value, product._id.Value);
+                Assert.AreEqual(id.Value, product._id.Value);
             }
 
         }
 
-        [Fact]
+        [Test]
         public void DbRefMapsToOtherDocumentsByCustomId()
         {
             const string userId = "Tim Berners-Lee";
@@ -70,7 +86,7 @@ namespace Norm.Tests
                 var role = db.GetCollection<Role>().Find().First();
                 var user = role.Users[0].Fetch(() => db);
 
-                Assert.Equal(userId, user.Id);
+                Assert.AreEqual(userId, user.Id);
             }
         }
     }

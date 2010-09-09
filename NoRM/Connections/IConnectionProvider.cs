@@ -9,7 +9,7 @@ namespace Norm
         /// <summary>
         /// Gets ConnectionString.
         /// </summary>
-        ConnectionStringBuilder ConnectionString { get; }
+        ConnectionOptions ConnectionString { get; }
 
         /// <summary>
         /// The open.

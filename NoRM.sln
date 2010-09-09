@@ -20,6 +20,25 @@ Global
 		{505E617D-1F40-40AF-BDF0-730EFBC5BA95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{505E617D-1F40-40AF-BDF0-730EFBC5BA95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = NoRM.Tests\NoRM.Tests.csproj
+		Policies = $0
+		$0.StandardHeader = $1
+		$1.Text = 
+		$1.inheritsSet = Apache2License
+		$0.VersionControlPolicy = $2
+		$2.CommitMessageStyle = $3
+		$3.FirstFilePrefix = 
+		$3.FileSeparator = ", "
+		$3.LineAlign = 0
+		$2.inheritsSet = Mono
+		$0.ChangeLogPolicy = $4
+		$4.UpdateMode = None
+		$4.MessageStyle = $5
+		$5.LineAlign = 0
+		$4.inheritsSet = Mono
+		version = 0.9.8
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

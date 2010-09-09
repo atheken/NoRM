@@ -7,9 +7,9 @@ namespace Norm
     /// <summary>
     /// The pooled connection provider.
     /// </summary>
-    internal class PooledConnectionProvider : ConnectionProvider
+    public class PooledConnectionProvider : ConnectionProvider
     {
-        private readonly ConnectionStringBuilder _builder;
+        private readonly ConnectionOptions _builder;
         private readonly Stack<IConnection> _freeConnections = new Stack<IConnection>();
         private readonly List<IConnection> _invalidConnections = new List<IConnection>();
         private readonly int _lifetime;
@@ -22,8 +22,8 @@ namespace Norm
         /// <summary>
         /// Initializes a new instance of the <see cref="PooledConnectionProvider"/> class.
         /// </summary>
-        /// <param retval="builder">The builder.</param>
-        public PooledConnectionProvider(ConnectionStringBuilder builder)
+        /// <param retval="retval">The retval.</param>
+        public PooledConnectionProvider(ConnectionOptions builder)
         {
             _builder = builder;
             _timeout = builder.Timeout * 1000;
@@ -35,7 +35,7 @@ namespace Norm
         /// <summary>
         /// Gets ConnectionString.
         /// </summary>
-        public override ConnectionStringBuilder ConnectionString
+        public override ConnectionOptions ConnectionString
         {
             get { return _builder; }
         }
@@ -123,7 +123,6 @@ namespace Norm
             {
                 return false;
             }
-
             return connection.IsConnected && !connection.IsInvalid;
         }
 

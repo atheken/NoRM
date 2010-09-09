@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Xunit;
+using NUnit.Framework;
 using Norm.BSON;
 
-namespace NoRM.Tests
+namespace Norm.Tests
 {
+    [TestFixture]
     public class JSONParserTests
     {
+		
         private ObjectParser _parser = new ObjectParser();
 
-        [Fact]
+        [Test]
         public void ParserCanParseEmptyObject()
         {
             var result = _parser.ParseJSON("{}");
@@ -19,36 +21,36 @@ namespace NoRM.Tests
 
         }
 
-        [Fact]
+        [Test]
         public void ParserCanParseMemberAndNull()
         {
             var result = _parser.ParseJSON("{\"Hello\":null}");
             Assert.Null(result["Hello"]);
         }
 
-        [Fact]
+        [Test]
         public void ParserCanParseMemberAndBool()
         {
             var result = _parser.ParseJSON("{\"Hello\": true }");
-            Assert.Equal(true, result["Hello"]);
+            Assert.AreEqual(true, result["Hello"]);
         }
 
-        [Fact]
+        [Test]
         public void ParserCanParseMemberAndNumber()
         {
             var result = _parser.ParseJSON("{\"Pi\": -3.1415  , \"Pie\" : 314e-2 }");
-            Assert.Equal(-3.1415d, result["Pi"]);
-            Assert.Equal(3.14d, result["Pie"]);
+            Assert.AreEqual(-3.1415d, result["Pi"]);
+            Assert.AreEqual(3.14d, result["Pie"]);
         }
 
-        [Fact]
+        [Test]
         public void ParserCanParseMemberAndString()
         {
             var result = _parser.ParseJSON("{\"Hello\": \"World\" }");
-            Assert.Equal("World", result["Hello"]);
+            Assert.AreEqual("World", result["Hello"]);
         }
 
-        [Fact]
+        [Test]
         public void ParserCanParseArray()
         {
             var result = _parser.ParseJSON(@"{""Hello"": [1,2,3]}");
@@ -56,22 +58,22 @@ namespace NoRM.Tests
             Assert.True(values.SequenceEqual(new object[] { 1d, 2d, 3d }));
         }
 
-        [Fact]
+        [Test]
         public void ParserCanParseNestedObjects()
         {
             var result = _parser.ParseJSON(@"{""Hello"": {""a"": 1}, ""World"" : {""b"": { ""52"":""bomber"" } } }");
             var nestedObject1 = (Expando)result["Hello"];
-            Assert.Equal(1d, nestedObject1["a"]);
+            Assert.AreEqual(1d, nestedObject1["a"]);
             var nestedObject2 = (Expando)result["World"];
-            Assert.Equal("bomber", ((Expando)nestedObject2["b"])["52"]);
+            Assert.AreEqual("bomber", ((Expando)nestedObject2["b"])["52"]);
         }
 
-        [Fact]
+        [Test]
         public void ParserCanParseMultipleMembers()
         {
             var results = _parser.ParseJSON("{\"Hello\":1,\"World\":false}");
-            Assert.Equal(1d, results["Hello"]);
-            Assert.Equal(false, results["World"]);
+            Assert.AreEqual(1d, results["Hello"]);
+            Assert.AreEqual(false, results["World"]);
         }
 
     }

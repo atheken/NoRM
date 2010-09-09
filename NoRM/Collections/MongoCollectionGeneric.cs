@@ -316,7 +316,6 @@ namespace Norm.Collections
         /// <returns></returns>
         public IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName)
         {
-            var type = typeof(T);
 
             var qm = new QueryMessage<T, U>(_connection, fullyQualifiedName)
             {
@@ -474,10 +473,21 @@ namespace Norm.Collections
             insertMessage.Execute();
             if (_connection.StrictMode)
             {
-                var error = _db.LastError(_connection.VerifyWriteCount);
-                if (error.Code > 0)
+                if (_connection.VerifyWriteCount.HasValue)
                 {
-                    throw new MongoException(error.Error);
+                    var error = _db.LastError(_connection.VerifyWriteCount.Value);
+                    if (error.Code > 0)
+                    {
+                        throw new MongoException(error.Error);
+                    }
+                }
+                else
+                {
+                    var error = _db.LastError();
+                    if (error.Code > 0)
+                    {
+                        throw new MongoException(error.Error);
+                    }
                 }
             }
         }

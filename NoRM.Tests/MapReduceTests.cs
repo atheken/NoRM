@@ -1,14 +1,30 @@
 using System.Linq;
-using Xunit;
+using NUnit.Framework;
 
 namespace Norm.Tests
 {
+    [TestFixture]
     public class MapReduceTests
     {
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
         private const string _map = "function(){emit(0, this.Price);}";
         private const string _reduce = "function(key, values){var sumPrice = 0;for(var i = 0; i < values.length; ++i){sumPrice += values[i];} return sumPrice;}";
 
-        public MapReduceTests()
+        [SetUp]
+        public void Setup()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false&strict=false")))
             {
@@ -16,14 +32,14 @@ namespace Norm.Tests
             }
         }
         
-        [Fact]
+        [Test]
         public void TypedMapReduceOptionSetsCollectionName()
         {
             var options = new MapReduceOptions<ReduceProduct>();
-            Assert.Equal(typeof(ReduceProduct).Name, options.CollectionName);
+            Assert.AreEqual(typeof(ReduceProduct).Name, options.CollectionName);
         }
 
-        [Fact]
+        [Test]
         public void MapReduceCreatesACollection()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
@@ -40,11 +56,11 @@ namespace Norm.Tests
                         break;
                     }
                 }
-                Assert.Equal(true, found);
+                Assert.AreEqual(true, found);
             }
         }
 
-        [Fact]
+        [Test]
         public void TemporaryCollectionIsCleanedUpWhenConnectionIsClosed()
         {
             string name;
@@ -59,13 +75,13 @@ namespace Norm.Tests
             {
                 foreach (var c in mongo.Database.GetAllCollections())
                 {
-                    Assert.Equal(false, c.Name.EndsWith(name));
+                    Assert.AreEqual(false, c.Name.EndsWith(name));
                 }
             }
         }
 
         
-        [Fact]
+        [Test]
         public void CreatesACollectionWithTheSpecifiedOutputName()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
@@ -74,14 +90,14 @@ namespace Norm.Tests
                 var mr = mongo.Database.CreateMapReduce();
                 
                     var result = mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, OutputCollectionName = "TempMr" });
-                    Assert.Equal("TempMr", result.Result);
+                    Assert.AreEqual("TempMr", result.Result);
                 
             }
         }
 
 
 
-        [Fact]
+        [Test]
         public void ActuallydoesAMapAndReduce()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
@@ -94,13 +110,13 @@ namespace Norm.Tests
                     mr.Execute(new MapReduceOptions<ReduceProduct> {Map = _map, Reduce = _reduce, Permanant = true});
                 var collection = response.GetCollection<ProductSum>();
                 var r = collection.Find().FirstOrDefault();
-                Assert.Equal(0, r.Id);
-                Assert.Equal(4, r.Value);
+                Assert.AreEqual(0, r.Id);
+                Assert.AreEqual(4, r.Value);
 
             }
         }
 
-        [Fact]
+        [Test]
         public void MapReduceWithQuerySpecified()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
@@ -115,13 +131,13 @@ namespace Norm.Tests
                     mr.Execute(new MapReduceOptions<ReduceProduct> {Map = _map, Reduce = _reduce, Query = _query});
                 var collection = response.GetCollection<ProductSum>();
                 var r = collection.Find().FirstOrDefault();
-                Assert.Equal(0, r.Id);
-                Assert.Equal(5, r.Value);
+                Assert.AreEqual(0, r.Id);
+                Assert.AreEqual(5, r.Value);
 
             }
         }
 
-        [Fact]
+        [Test]
         public void MapReduceWithGenericMapReduceResponse()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
@@ -136,14 +152,14 @@ namespace Norm.Tests
                     mr.Execute(new MapReduceOptions<ReduceProduct> { Map = _map, Reduce = _reduce, Query = _query });
                 var collection = response.GetCollection<MapReduceResult<int, int>>();
                 var r = collection.Find().FirstOrDefault();
-                Assert.Equal(0, r.Key);
-                Assert.Equal(5, r.Value);
+                Assert.AreEqual(0, r.Key);
+                Assert.AreEqual(5, r.Value);
 
             }
         }
 
 
-        [Fact]
+        [Test]
         public void SettingLimitLimitsTheNumberOfResults()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
@@ -156,12 +172,12 @@ namespace Norm.Tests
                     mr.Execute(new MapReduceOptions<ReduceProduct>
                                    {Map = "function(){emit(this._id, this.Price);}", Reduce = _reduce, Limit = 1});
                 var collection = response.GetCollection<ProductSumObjectId>();
-                Assert.Equal(1, collection.Find().Count());
+                Assert.AreEqual(1, collection.Find().Count());
 
             }
         }
 
-        [Fact]
+        [Test]
         public void NotSettingLimitDoesntLimitTheNumberOfResults()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
@@ -174,12 +190,12 @@ namespace Norm.Tests
                     mr.Execute(new MapReduceOptions<ReduceProduct>
                                    {Map = "function(){emit(this._id, this.Price);}", Reduce = _reduce});
                 var collection = response.GetCollection<ProductSumObjectId>();
-                Assert.Equal(2, collection.Find().Count());
+                Assert.AreEqual(2, collection.Find().Count());
 
             }
         }
 
-        [Fact]
+        [Test]
         public void FinalizesTheResults()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("pooling=false")))
@@ -194,8 +210,8 @@ namespace Norm.Tests
                                    {Map = _map, Reduce = _reduce, Permanant = true, Finalize = finalize});
                 var collection = response.GetCollection<ProductSum>();
                 var r = collection.Find().FirstOrDefault();
-                Assert.Equal(0, r.Id);
-                Assert.Equal(1, r.Value);
+                Assert.AreEqual(0, r.Id);
+                Assert.AreEqual(1, r.Value);
 
             }
         }
