@@ -128,6 +128,22 @@ namespace Norm.BSON
         }
 
         /// <summary>
+        /// Creates an Expando and sets one property. Unlike the constructor, this
+        /// requires strings but is capable of creating nested expandos, e.g.
+        /// 'Owner.Parent.Id'
+        /// </summary>
+        /// <typeparam name="T">The type of the value to set</typeparam>
+        /// <param name="propertyName">The property to be set</param>
+        /// <param name="value">The value to set the property to</param>
+        /// <returns></returns>
+        public static Expando CreateAndSet<T>(string propertyName, T value)
+        {
+            Expando result = new Expando();
+            result.Set<T>(propertyName, value);
+            return result;
+        }
+
+        /// <summary>
         /// Attempts to read the value out of the flyweight, if it's not here,
         /// value is set to default(T) and the method returns false.
         /// </summary>

@@ -74,6 +74,12 @@ namespace Norm.Configuration
                     _idProperties[type] = idProp.Name;
                     retval = idProp.Name == propertyName;
                 }
+                else
+                {
+                    // Also store failed lookups, otherwise we'll call FindIdProprty over and over, which is extremely expensive!
+                    _idProperties[type] = null;
+                    retval = false;
+                }
             }
             else
             {
