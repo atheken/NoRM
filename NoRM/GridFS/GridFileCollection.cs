@@ -21,7 +21,7 @@ namespace Norm.GridFS
         public void Save(GridFile file)
         {
             this.FileSummaries.Save(file);
-            this.FileChunks.Delete(new { _id = file.Id });
+            this.FileChunks.Delete(new { files_id = file.Id });
             if (file.CachedChunks.Any())
             {
                 this.FileChunks.Insert(file.CachedChunks);
@@ -69,7 +69,7 @@ namespace Norm.GridFS
             if (IDofFileToDelete != null)
             {
                 this.FileSummaries.Delete(new { _id = IDofFileToDelete });
-                this.FileChunks.Delete(new { _id = IDofFileToDelete });
+                this.FileChunks.Delete(new { files_id = IDofFileToDelete });
             }
             else
             {
