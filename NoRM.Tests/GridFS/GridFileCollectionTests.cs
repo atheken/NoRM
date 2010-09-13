@@ -38,15 +38,16 @@ namespace Norm.Tests.GridFS
         }
 
         [Test]
-        public void Extension_Methods_Provide_Access_To_Collections()
+        public void Extension_Methods_Provide_Access_To_Collections ()
         {
-            using (var conn = Mongo.Create(TestHelper.ConnectionString("strict=false")))
+        	using (var conn = Mongo.Create (TestHelper.ConnectionString ("strict=false")))
             {
-                var fileColl = conn.Database.Files();
-                Assert.NotNull(fileColl);
+        		var fileColl = conn.Database.Files ();
+        		Assert.NotNull (fileColl);
 
-                var fileColl2 = conn.GetCollection<TestClass>().Files();
-            }
+                var fileColl2 = conn.GetCollection<TestClass> ().Files ();
+
+			}
         }
 
         [Test]
@@ -108,7 +109,7 @@ namespace Norm.Tests.GridFS
             }
         }
 
-		[Fact]
+		[Test]
 		public void File_Save_Should_Replace_Old_Content()
 		{
 			using (var conn = Mongo.Create(TestHelper.ConnectionString()))
@@ -124,11 +125,11 @@ namespace Norm.Tests.GridFS
 				file.Content = new byte[] { 3, 2, 1 };
 				gridFS.Save(file);
 
-				Assert.Equal(new byte[] { 3, 2, 1 }, gridFS.FindOne(new { _id = file.Id }).Content.ToArray());
+				Assert.Equals(new byte[] { 3, 2, 1 }, gridFS.FindOne(new { _id = file.Id }).Content.ToArray());
 			}
 		}
 
-		[Fact]
+		[Test]
 		public void Delete_Should_Remove_FileChunks()
 		{
 			using (var conn = Mongo.Create(TestHelper.ConnectionString()))
@@ -148,7 +149,7 @@ namespace Norm.Tests.GridFS
 
 				gridFS.Delete(file.Id);
 
-				Assert.Equal(0, conn.Database.GetCollection<FileChunk>("chunks").GetCollectionStatistics().Count);
+				Assert.Equals(0, conn.Database.GetCollection<FileChunk>("chunks").GetCollectionStatistics().Count);
 			}
 		}
     }

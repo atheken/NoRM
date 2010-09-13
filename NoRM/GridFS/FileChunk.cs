@@ -9,7 +9,7 @@ namespace Norm.GridFS
     /// <summary>
     /// A piece of the a GridFS file.
     /// </summary>        
-    internal class FileChunk
+    public class FileChunk
     {
         static FileChunk()
         {
