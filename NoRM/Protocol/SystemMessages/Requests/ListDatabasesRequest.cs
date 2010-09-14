@@ -1,6 +1,7 @@
 ﻿using Norm.Configuration;
+using Norm.Protocol;
 
-namespace Norm.Protocol.SystemMessages.Requests
+namespace Norm.Requests
 {
     /// <summary>
     /// A command to request the databases in a mongoDB instance.

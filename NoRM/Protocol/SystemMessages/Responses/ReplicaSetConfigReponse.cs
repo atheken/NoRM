@@ -5,7 +5,7 @@ using System.Text;
 using Norm.Responses;
 using Norm.Configuration;
 
-namespace Norm.Protocol.SystemMessages.Responses
+namespace Norm.Responses
 {
     public class ReplicaSetConfigReponse : BaseStatusMessage
     {

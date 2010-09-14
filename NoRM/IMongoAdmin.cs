@@ -10,6 +10,7 @@ namespace Norm
     {
         AssertInfoResponse AssertionInfo();
         BuildInfoResponse BuildInfo();
+		bool CloneDatabase(string sourceDatabase, string destinationDatabase, string host);
         IMongoDatabase Database { get; }
         DroppedDatabaseResponse DropDatabase();
         ForceSyncResponse ForceSync(bool async);

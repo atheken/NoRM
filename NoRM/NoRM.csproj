@@ -157,7 +157,6 @@
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\ConnectionProvider.cs" />
     <Compile Include="Connections\ConnectionProviderFactory.cs" />
-    <Compile Include="Connections\ConnectionOptions.cs" />
     <Compile Include="Connections\IConnection.cs" />
     <Compile Include="Connections\IConnectionProvider.cs" />
     <Compile Include="Connections\IOptionsContainer.cs" />
@@ -198,6 +197,7 @@
     <Compile Include="Protocol\Messages\FindAndModifyResult.cs" />
     <Compile Include="Protocol\ClusterMember.cs" />
     <Compile Include="Protocol\MemberStatus.cs" />
+    <Compile Include="Protocol\SystemMessages\Requests\CloneDatabaseRequest.cs" />
     <Compile Include="Protocol\SystemMessages\Requests\ExplainRequest.cs" />
     <Compile Include="Protocol\Messages\IndexOption.cs" />
     <Compile Include="Protocol\Messages\MapReduceMessage.cs" />
@@ -248,13 +248,14 @@
     <Compile Include="Protocol\SystemMessages\Responses\ListDatabasesResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\PreviousErrorResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ProfilingInformationResponse.cs" />
-    <Compile Include="Protocol\SystemMessages\Responses\ReplicaSetConfigReponse.cs" />
-    <Compile Include="Protocol\SystemMessages\Responses\ReplicaSetStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ServerStatusResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\SetProfileResponse.cs" />
     <Compile Include="Protocol\SystemMessages\Responses\ValidateCollectionResponse.cs" />
     <Compile Include="Protocol\SystemMessages\ISystemQuery.cs" />
+    <Compile Include="Connections\ConnectionOptions.cs" />
     <Compile Include="ReplicaSet.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ReplicaSetStatusResponse.cs" />
+    <Compile Include="Protocol\SystemMessages\Responses\ReplicaSetConfigReponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

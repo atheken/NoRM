@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Norm.Protocol.SystemMessages.Requests;
 using Norm.Responses;
-using Norm.Protocol.SystemMessages.Responses;
+using Norm.Requests;
 using Norm.BSON;
 
 namespace Norm
@@ -30,7 +29,22 @@ namespace Norm
             this.Database = new MongoDatabase(this._connectionProvider.ConnectionString.Database, this._connection);
         }
 
-        /// <summary>
+		///<summary>
+		/// Clones the database.
+		///</summary>
+		///<returns>A boolean that indicates whether the cloning operation was successful or not.</returns>
+		///<param name="sourceDatabase">The source database.</param>
+		///<param name="destinationDatabase">The destination database.</param>
+		///<param name="host">The destination database host.</param>
+		public bool CloneDatabase(string sourceDatabase, string destinationDatabase, string host = "")
+    	{
+			AssertConnectedToAdmin();
+			return Database.GetCollection<BaseStatusMessage>("$cmd")
+				.FindOne(new CloneDatabaseRequest { SourceDatabaseName = sourceDatabase, DestinationDatabaseName = destinationDatabase, Host = host}).
+				WasSuccessful;
+		}
+
+    	/// <summary>
         /// Gets Database.
         /// </summary>
         public IMongoDatabase Database

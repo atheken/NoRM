@@ -4,7 +4,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using Norm;
-using Norm.Protocol.SystemMessages.Responses;
+using Norm.Responses;
 using NUnit.Framework;
 using t = System.Threading;
 

@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using Norm.Responses;
 using Norm.Configuration;
+using Norm.Protocol;
 
-namespace Norm.Protocol.SystemMessages.Responses
+namespace Norm.Responses
 {
 
     public class ReplicaSetStatusResponse : BaseStatusMessage
