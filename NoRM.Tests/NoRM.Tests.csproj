@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -99,6 +99,7 @@
     <Compile Include="IdPropertyFinderTests.cs" />
     <Compile Include="JSONParser.cs" />
     <Compile Include="LinqTests\LinqAggregates.cs" />
+    <Compile Include="LinqTests\LinqContainsTests.cs" />
     <Compile Include="LinqTests\LinqDeepGraph.cs" />
     <Compile Include="LinqTests\LinqTests.cs" />
     <Compile Include="MapReduceTests.cs" />
