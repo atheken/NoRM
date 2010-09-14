@@ -9,6 +9,13 @@ using Norm.Configuration;
 
 namespace Norm.BSON
 {
+    public enum SerializationPurpose
+    {
+        None,
+        Insert,
+        Update
+    }
+
     /// <summary>
     /// The bson serializer.
     /// </summary>
@@ -19,6 +26,7 @@ namespace Norm.BSON
                 {typeof (int), BSONTypes.Int32},
                 {typeof (long), BSONTypes.Int64},
                 {typeof (bool), BSONTypes.Boolean},
+                {typeof (decimal), BSONTypes.Binary},
                 {typeof (string), BSONTypes.String},{typeof (double), BSONTypes.Double},
                 {typeof (Guid), BSONTypes.Binary},{typeof (Regex), BSONTypes.Regex},
                 {typeof (DateTime), BSONTypes.DateTime},
@@ -42,6 +50,28 @@ namespace Norm.BSON
             _writer = writer;
         }
 
+        public static byte[] Serialize<T>(T document)
+        {
+            return Serialize(document, SerializationPurpose.None);
+        }
+
+        /// <summary>
+        /// Convert a document to it's BSON equivalent.
+        /// </summary>
+        /// <typeparam retval="T">Type to serialize</typeparam>
+        /// <param retval="document">The document.</param>
+        /// <returns></returns>
+        public static byte[] Serialize<T>(T document, SerializationPurpose purpose)
+        {
+            using (var ms = new MemoryStream(250))
+            using (var writer = new BinaryWriter(ms))
+            {
+                new BsonSerializer(writer).WriteDocument(document, purpose);
+                return ms.ToArray();
+            }
+        }
+
+        /*
         /// <summary>
         /// Convert a document to it's BSON equivalent.
         /// </summary>
@@ -56,7 +86,7 @@ namespace Norm.BSON
                 new BsonSerializer(writer).WriteDocument(document);
                 return ms.ToArray();
             }
-        }
+        }*/
 
         /// <summary>
         /// Write the peramble of the BSON document.
@@ -100,11 +130,16 @@ namespace Norm.BSON
             _current.Digested += length;
         }
 
+        private void WriteDocument(object document)
+        {
+            WriteDocument(document, SerializationPurpose.None);
+        }
+
         /// <summary>
         /// Writes a document.
         /// </summary>
         /// <param retval="document">The document.</param>
-        private void WriteDocument(object document)
+        private void WriteDocument(object document, SerializationPurpose purpose)
         {
             NewDocument();
             if (document is Expando)
@@ -113,7 +148,7 @@ namespace Norm.BSON
             }
             else
             {
-                WriteObject(document);
+                WriteObject(document, purpose);
             }
 
             EndDocument(true);
@@ -147,11 +182,16 @@ namespace Norm.BSON
                    );
         }
 
+        private void WriteObject(object document)
+        {
+            WriteObject(document, SerializationPurpose.None);
+        }
+
         /// <summary>
         /// Actually write the property bytes.
         /// </summary>
         /// <param retval="document">The document.</param>
-        private void WriteObject(object document)
+        private void WriteObject(object document, SerializationPurpose purpose)
         {
             var typeHelper = ReflectionHelper.GetHelperForType(document.GetType());
             var idProperty = typeHelper.FindIdProperty();
@@ -172,7 +212,7 @@ namespace Norm.BSON
                                : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
 
                 object value;
-                if (property.IgnoreProperty(document, out value))
+                if (property.IgnoreProperty(document, out value, purpose))
                 {
                     // ignore the member
                     continue;
@@ -387,6 +427,19 @@ namespace Norm.BSON
                 _writer.Write((byte)3);
                 _writer.Write(bytes);
                 Written(5 + bytes.Length);
+            }
+            else if (value is decimal)
+            {
+                var dec = (decimal)value;
+                var words = decimal.GetBits(dec);
+                _writer.Write(words.Length * 4);
+                _writer.Write((byte)4);
+                // TODO: Assert length == 4 integers == 16 bytes
+                _writer.Write(words[0]);
+                _writer.Write(words[1]);
+                _writer.Write(words[2]);
+                _writer.Write(words[3]);
+                Written(5 + words.Length * 4);
             }
         }
 

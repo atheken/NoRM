@@ -6,6 +6,7 @@ using System.IO;
 using NUnit.Framework;
 using System.Text.RegularExpressions;
 using t = System.Threading;
+using System.Net.Sockets;
 
 namespace Norm.Tests
 {
@@ -68,18 +69,29 @@ namespace Norm.Tests
 			_server_process = new Process ();
 			var dataDir =TestAssemblyPath + "/data/";
 			CreateTestDataDir (dataDir);
-			
-			_server_process.StartInfo = new ProcessStartInfo { FileName = MongodPath + "mongod", 
-				Arguments = string.Format ("--port {1} --dbpath {0} --smallfiles",
+
+            string arguments = string.Format ("--port {1} --dbpath {0} --smallfiles",
 					dataDir,
 					Int32.Parse(ConfigurationManager
-						.AppSettings["testPort"] ?? "27701")), UseShellExecute = true};
+						.AppSettings["testPort"] ?? "27701"));
+
+            string executableName = Path.Combine(MongodPath, "mongod");
+			
+			_server_process.StartInfo = new ProcessStartInfo { FileName = executableName, Arguments = arguments, UseShellExecute = false, CreateNoWindow=true };
 			_server_process.Start();
 		}
 
 		public void Dispose ()
 		{
-		//	_server_process.Kill ();
+            try
+            {
+                _server_process.Kill();
+                _server_process.WaitForExit(200);
+                _server_process.Close();
+            }
+            catch
+            {
+            }
 		}
 	}
 }
