@@ -2011,9 +2011,9 @@ namespace Norm.Tests
 				
                 var noProducct = session.Products.Where(x => x.Name == "ZTest");
                 var ex = Assert.Throws<InvalidOperationException>(() => noProducct.First());
-                Assert.AreEqual("Sequence contains no elements", ex.Message);
+                Assert.IsTrue(("Sequence contains no elements" == ex.Message) || ("The source sequence is empty" == ex.Message));
             }
-        }
+		}
 
         [Test]
         public void FirstOrDefaultWhereNoResultsReturnedInWhere()

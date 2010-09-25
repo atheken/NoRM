@@ -95,8 +95,8 @@ namespace Norm.Tests
             {
                 query = string.Concat('?', query);
             }
-            var host = string.IsNullOrEmpty(_connectionStringHost) ? "localhost" : _connectionStringHost;
-            database = database ?? "NormTests";
+            var host = (string.IsNullOrEmpty(_connectionStringHost) ? "localhost": _connectionStringHost) + ":" + ConfigurationManager.AppSettings["testPort"];
+			database = database ?? "NormTests";
             return string.Format("mongodb://{0}{1}/{2}{3}", authentication, host, database, query);
         }
     }

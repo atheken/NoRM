@@ -5,10 +5,8 @@ using System.Text.RegularExpressions;
 using Norm;
 using Norm.BSON;
 using Norm.Collections;
-using Norm.Commands.Modifiers;
 using Norm.Responses;
 using NUnit.Framework;
-using Norm.Collections;
 
 namespace Norm.Tests
 {

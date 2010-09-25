@@ -46,7 +46,7 @@ namespace Norm.Tests.GridFS
         		Assert.NotNull (fileColl);
 
                 var fileColl2 = conn.GetCollection<TestClass> ().Files ();
-
+				Assert.NotNull(fileColl2);
 			}
         }
 
@@ -125,7 +125,7 @@ namespace Norm.Tests.GridFS
 				file.Content = new byte[] { 3, 2, 1 };
 				gridFS.Save(file);
 
-				Assert.Equals(new byte[] { 3, 2, 1 }, gridFS.FindOne(new { _id = file.Id }).Content.ToArray());
+				Assert.AreEqual(new byte[] { 3, 2, 1 }, gridFS.FindOne(new { _id = file.Id }).Content.ToArray());
 			}
 		}
 
@@ -149,7 +149,7 @@ namespace Norm.Tests.GridFS
 
 				gridFS.Delete(file.Id);
 
-				Assert.Equals(0, conn.Database.GetCollection<FileChunk>("chunks").GetCollectionStatistics().Count);
+				Assert.AreEqual(0, conn.Database.GetCollection<FileChunk>("chunks").GetCollectionStatistics().Count);
 			}
 		}
     }

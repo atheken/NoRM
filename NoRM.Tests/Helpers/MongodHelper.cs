@@ -79,6 +79,7 @@ namespace Norm.Tests
 			
 			_server_process.StartInfo = new ProcessStartInfo { FileName = executableName, Arguments = arguments, UseShellExecute = false, CreateNoWindow=true };
 			_server_process.Start();
+		//	System.Threading.Thread.Sleep(3000);
 		}
 
 		public void Dispose ()

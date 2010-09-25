@@ -10,7 +10,7 @@ using t = System.Threading;
 
 namespace Norm.Tests.ConnectionsTests
 {
-    [TestFixture]
+    //[TestFixture]
     public class ReplicaSetTests
     {
         private Process _server1 = null;
@@ -29,7 +29,7 @@ namespace Norm.Tests.ConnectionsTests
                 {
                     //give mongodb enough time to start.
                     var ma = new MongoAdmin("mongodb://localhost:64300/admin");
-                    var result = ma.ConfigureReplicaSet(new ReplicaSet
+                    ma.ConfigureReplicaSet(new ReplicaSet
                     {
                         ID = "testSet",
                         Members = new List<ReplicaSetNode> { 
@@ -64,7 +64,6 @@ namespace Norm.Tests.ConnectionsTests
             serverProcess.Start();
         }
 
-//        [Fact(DisplayName = "REPLICA SET TESTS: We run all the tests together because it takes up to a minute to spin up the replica set")]
         [Test]
 		public void RunAllReplicaSetTests()
         {
@@ -97,7 +96,7 @@ namespace Norm.Tests.ConnectionsTests
                         break;
                     }
                 }
-                catch (Exception ex)
+                catch(Exception)
                 {
                     //swallow this, since the replica set is not online yet.
                     t.Thread.Sleep(5000);
