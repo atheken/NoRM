@@ -19,5 +19,6 @@ LastBuild.log
 _ReSharper*
 .DS_Store
 *.pidb
+override.config
 NoRM.Tests/test-results/
-NoRM.userprefs
+*.userprefs

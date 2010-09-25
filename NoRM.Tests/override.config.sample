@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- you can copy this as "override.config" into your NoRM.Test/bin directory to use different settings than the defaults. (useful if doing development on mac or linux)-->
+<appSettings>
+		<add key="mongodPath" value="/Library/mongodb/bin/"/>
+	    <add key="connectionStringHost" value="localhost"/>
+	    <add key="authDbPath" value="/Library/mongodb/testData/NoRMAuth/"/>
+		<add key="testPort" value="27701"/>
+		<add key="replicaSetTestPath" value="/Library/mongodb/testData/NoRM_TestRS" />
+</appSettings>
