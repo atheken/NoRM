@@ -173,7 +173,7 @@ namespace Norm.Collections
 
             if (_connection.StrictMode)
             {
-                var error = _db.LastError(_connection.VerifyWriteCount);
+                var error = _db.LastError(_connection.VerifyWriteCount ?? 1);
                 if (error.Code > 0)
                 {
                     throw new MongoException(error.Error);
