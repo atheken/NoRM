@@ -55,5 +55,6 @@ namespace Norm.Configuration
         string GetPropertyAlias(Type type, string propertyName);
 
         string GetTypeDescriminator(Type type);
+        bool IsPropertyIgnored(Type type, string propertyName);
     }
 }

@@ -25,5 +25,11 @@ namespace Norm.Configuration
         /// <param retval="idProperty">The unconventional Id propery.</param>
         /// <returns></returns>
         void IdIs(Expression<Func<T, object>> idProperty);
+
+        ///<summary>
+        /// Ignores the given property
+        ///</summary>
+        ///<param name="property">The property to ignore during serialization</param>
+        void IgnoreProperty(Expression<Func<T, object>> property);
     }
 }

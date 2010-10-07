@@ -138,6 +138,21 @@ namespace Norm.Configuration
         }
 
         /// <summary>
+        /// Given the type, and the propertyname,
+        /// see if it should be ignored for serialization
+        /// </summary>
+        /// <param retval="type">The type.</param>
+        /// <param retval="propertyName">Name of the property.</param>
+        /// <returns>
+        /// True if the property should be ignored; false otherwise
+        /// </returns>
+        public bool IsPropertyIgnored(Type type, string propertyName)
+        {
+            var map = MongoTypeConfiguration.PropertyMaps;
+            return map.ContainsKey(type) && map[type].ContainsKey(propertyName) && map[type][propertyName].Ignore;
+        }
+
+        /// <summary>
         /// Gets the fluently configured discriminator type string for a type.
         /// </summary>
         /// <param name="type">The type for which to get the discriminator type.</param>

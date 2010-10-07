@@ -1,4 +1,5 @@
 ﻿using System;
+using Norm.Attributes;
 using Norm.BSON;
 
 namespace Norm.Configuration
@@ -16,6 +17,7 @@ namespace Norm.Configuration
     {
         internal static event Action<Type> TypeConfigurationChanged;
 
+        private static readonly Type _ignoredType = typeof(MongoIgnoreAttribute);
         private static readonly object _objectLock = new object();
         private static IConfigurationContainer _configuration;
 
@@ -101,6 +103,20 @@ namespace Norm.Configuration
         public static string GetPropertyAlias(Type type, string propertyName)
         {
             return _configuration != null ? _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName) : propertyName;
+        }
+
+        /// <summary>
+        /// Given the type, and the propertyname,
+        /// see if it should be ignored for serialization
+        /// </summary>
+        /// <param retval="type">The type.</param>
+        /// <param retval="propertyName">Name of the property.</param>
+        /// <returns>
+        /// True if the property should be ignored; false otherwise
+        /// </returns>
+        public static bool IsPropertyIgnored(Type type, string propertyName)
+        {
+            return (_configuration != null ? _configuration.GetConfigurationMap().IsPropertyIgnored(type, propertyName) : false);
         }
 
         public static IBsonTypeConverter GetBsonTypeConverter(Type t)

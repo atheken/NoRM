@@ -244,7 +244,8 @@ namespace Norm.BSON
             foreach (var property in properties)
             {
                 if (property.GetCustomAttributes(_ignoredType, true).Length > 0 ||
-                    property.GetIndexParameters().Length > 0)
+                    property.GetIndexParameters().Length > 0 ||
+                    MongoConfiguration.IsPropertyIgnored(property.DeclaringType, property.Name))
                 {
                     continue;
                 }

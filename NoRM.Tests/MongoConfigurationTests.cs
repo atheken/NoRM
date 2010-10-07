@@ -116,6 +116,16 @@ namespace Norm.Tests
         }
 
         [Test]
+        public void Mongo_Configuration_Can_Ignore_Property()
+        {
+            MongoConfiguration.Initialize(r => r.For<User>(u => u.IgnoreProperty(h => h.LastName)));
+            //confirm that MagicProperty is not created
+            var reflectionHelper = new ReflectionHelper(typeof (User));
+            Assert.True(reflectionHelper.GetProperties().Any(p => p.Name == "FirstName"));
+            Assert.False(reflectionHelper.GetProperties().Any(p => p.Name == "LastName"));
+        }
+
+        [Test]
         public void Mongo_Configuration_Remove_Mapping_Of_Norm_Types_Fails()
         {
             //removal of maps for Norm types is verboden.

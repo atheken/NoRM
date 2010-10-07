@@ -21,6 +21,19 @@ namespace Norm.Configuration
             }
         }
 
+        private PropertyMappingExpression CheckForPropertyExpression(Expression<Func<T, object>> idProperty)
+        {
+            var propertyName = ReflectionHelper.FindProperty(idProperty);
+            var typeKey = typeof(T);
+            CheckForPropertyMap(typeKey);
+            var expression = PropertyMaps[typeKey].ContainsKey(propertyName) ? 
+                PropertyMaps[typeKey][propertyName] :
+                new PropertyMappingExpression();
+            PropertyMaps[typeKey][propertyName] = expression;
+
+            return expression;
+        }
+
         /// <summary>
         /// Looks up property names for use with aliases.
         /// </summary>
@@ -28,12 +41,10 @@ namespace Norm.Configuration
         /// <returns></returns>
         public IPropertyMappingExpression ForProperty(Expression<Func<T, object>> sourcePropery)
         {
-            var propertyName = ReflectionHelper.FindProperty(sourcePropery);
-            var typeKey = typeof(T);
-            CheckForPropertyMap(typeKey);
-            var expression = new PropertyMappingExpression { SourcePropertyName = propertyName };
-            PropertyMaps[typeKey][propertyName] = expression;
+            var expression = CheckForPropertyExpression(sourcePropery);
+            expression.SourcePropertyName = ReflectionHelper.FindProperty(sourcePropery);
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
+
             return expression;
         }
 
@@ -44,10 +55,20 @@ namespace Norm.Configuration
         /// <returns></returns>
         public void IdIs(Expression<Func<T, object>> idProperty)
         {
-            var propertyName = ReflectionHelper.FindProperty(idProperty);
-            var typeKey = typeof (T);
-            CheckForPropertyMap(typeKey);
-            PropertyMaps[typeKey][propertyName] = new PropertyMappingExpression {IsId = true};
+            var expression = CheckForPropertyExpression(idProperty);
+            expression.IsId = true;
+            MongoConfiguration.FireTypeChangedEvent(typeof(T));
+        }
+
+        ///<summary>
+        /// Ignores the given property
+        ///</summary>
+        ///<param name="property">The property to ignore during serialization</param>
+        public void IgnoreProperty(Expression<Func<T, object>> property)
+        {
+            var expression = CheckForPropertyExpression(property);
+            expression.Ignore = true;
+            MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
 
         /// <summary>
