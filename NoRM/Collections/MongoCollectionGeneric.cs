@@ -879,6 +879,8 @@ namespace Norm.Collections
             Dictionary<Type, Func<object>> knownTypes = new Dictionary<Type, Func<object>> { 
                 { typeof(long?), () => GenerateId() }, 
                 { typeof(int?), () => Convert.ToInt32(GenerateId()) }, 
+                { typeof(long), () => GenerateId() }, 
+                { typeof(int), () => Convert.ToInt32(GenerateId()) }, 
                 { typeof(ObjectId), () => ObjectId.NewObjectId() } 
             };
 
