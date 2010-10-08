@@ -160,7 +160,17 @@ namespace Norm.BSON
         /// <returns></returns>
         private object DeserializeValue(Type type, BSONTypes storedType)
         {
-            return DeserializeValue(type, storedType, null);
+            IBsonTypeConverter converter = Configuration.GetTypeConverterFor(type);
+            if (converter != null)
+            {
+                Type serializedType = converter.SerializedType;
+                object value = DeserializeValueAfterConversion(serializedType, storedType);
+                return converter.ConvertFromBson(value);
+            }
+            else
+            {
+                return DeserializeValueAfterConversion(type, storedType);
+            }
         }
 
         /// <summary>
@@ -170,21 +180,20 @@ namespace Norm.BSON
         /// <param retval="storedType">Type of the stored.</param>
         /// <param retval="container">The container.</param>
         /// <returns></returns>
-        private object DeserializeValue(Type type, BSONTypes storedType, object container)
+        private object DeserializeList(Type type, object container)
         {
             IBsonTypeConverter converter = Configuration.GetTypeConverterFor(type);
             if (converter != null)
             {
                 Type serializedType = converter.SerializedType;
-                object value = DeserializeValueAfterConversion(serializedType, storedType, container);
+                object value = ReadList(serializedType, container);
                 return converter.ConvertFromBson(value);
             }
             else
             {
-                return DeserializeValueAfterConversion(type, storedType, container);
+                return ReadList(type, container);
             }
         }
-
 
         /// <summary>
         /// Deserializes the value after any type conversion has been applied.
@@ -193,7 +202,7 @@ namespace Norm.BSON
         /// <param name="storedType">Type of the stored.</param>
         /// <param name="container">The container.</param>
         /// <returns></returns>
-        private object DeserializeValueAfterConversion(Type type, BSONTypes storedType, object container)
+        private object DeserializeValueAfterConversion(Type type, BSONTypes storedType)
         {
             if (storedType == BSONTypes.Null)
             {
@@ -226,7 +235,7 @@ namespace Norm.BSON
             }
             if (_IEnumerableType.IsAssignableFrom(type) || storedType == BSONTypes.Array)
             {
-                return ReadList(type, container);
+                return ReadList(type, null);
             }
             if (type == typeof(bool))
             {
@@ -342,18 +351,22 @@ namespace Norm.BSON
                         NewDocument(length);
                     }
                 }
-                object container = null;
-                if (property != null && property.Setter == null)
-                {
-                    container = property.Getter(instance);
-                }
+
                 var propertyType = property != null ? property.Type : _typeMap.ContainsKey(storageType) ? _typeMap[storageType] : typeof(object);
-                var value = isNull ? null : DeserializeValue(propertyType, storageType, container);
+                object value = null;
+                if (!isNull)
+                {
+                    if (_IEnumerableType.IsAssignableFrom(type) || storageType == BSONTypes.Array)
+                        value = DeserializeList(type, property.Getter(instance));
+                    else
+                        value = DeserializeValue(propertyType, storageType);
+                }
+
                 if (property == null)
                 {
                     ((IExpando)instance)[name] = value;
                 }
-                else if (container == null && value != null && property.Setter != null)
+                else if (property.Setter != null)
                 {
                     property.Setter(instance, value);
                 }

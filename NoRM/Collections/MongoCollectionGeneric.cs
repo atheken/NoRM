@@ -892,7 +892,7 @@ namespace Norm.Collections
                     foreach (var entity in entities)
                     {
                         var value = idProperty.Getter(entity);
-                        if (value == null)
+                        if (value == null || idProperty.Type.IsValueType && value.Equals(Activator.CreateInstance(idProperty.Type)))
                         {
                             idProperty.Setter(entity, knownTypes[idProperty.Type]());
                         }
