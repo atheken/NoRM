@@ -384,6 +384,84 @@ namespace Norm.Tests
             }
         }
 
+
+
+        [Test]
+        public void when_inserting_a_new_entity_with_int_id_equals_zero_generates_a_key()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var testint = new IntId {Name = "first"} ;
+                mongo.GetCollection<IntId>("Fake").Insert(testint);
+
+                Assert.NotNull(testint.Id);
+                Assert.AreNotEqual(0, testint.Id);
+            }
+        }
+
+        [Test]
+        public void when_inserting_a_22_new_entities_with_int_id_equals_zero_generates_a_unique_key_for_each_of_them()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var idents = new List<int>();
+                for (int i = 0; i <22; i++)
+                {
+                    var testint = new IntId() ;
+                    mongo.GetCollection<IntId>("Fake").Insert(testint);
+                    idents.Add(testint.Id);
+                }
+
+                var list = mongo.GetCollection<IntId>("Fake").Find(new { _id = Q.In(idents.ToArray()) });
+
+                foreach (var item in list)
+                {
+                    Assert.True(idents.Contains(item.Id));
+                }
+
+                Assert.AreEqual(idents.Distinct().Count(), list.Select(x => x.Id).Distinct().Count());
+            }
+        }
+
+
+        [Test]
+        public void when_inserting_a_new_entity_with_long_type_id_equals_zero_generates_a_key()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var testint = new LongId() { Name = "first" };
+                mongo.GetCollection<LongId>("Fake").Insert(testint);
+
+                Assert.NotNull(testint.Id);
+                Assert.AreNotEqual(0, testint.Id);
+            }
+        }
+
+        [Test]
+        public void when_inserting_a_22_new_entities_with_long_type_id_equals_zero_generates_a_unique_key_for_each_of_them()
+        {
+            using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var idents = new List<long>();
+                for (int i = 0; i < 22; i++)
+                {
+                    var testint = new LongId();
+                    mongo.GetCollection<LongId>("Fake").Insert(testint);
+                    idents.Add(testint.Id);
+                }
+
+                var list = mongo.GetCollection<LongId>("Fake").Find(new { _id = Q.In(idents.ToArray()) });
+
+                foreach (var item in list)
+                {
+                    Assert.True(idents.Contains(item.Id));
+                }
+
+                Assert.AreEqual(idents.Distinct().Count(), list.Select(x => x.Id).Distinct().Count());
+            }
+        }
+
+
         [Test]
         public void InsertingANewEntityWithNullableIntGeneratesAKeyComplex()
         {
@@ -520,6 +598,8 @@ namespace Norm.Tests
             }
         }
 
+        
+
         private class StringIdentifier
         {
             [MongoIdentifier]
@@ -530,6 +610,12 @@ namespace Norm.Tests
         private class IntId
         {
             public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        private class LongId
+        {
+            public long Id { get; set; }
             public string Name { get; set; }
         }
     }

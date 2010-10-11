@@ -67,7 +67,7 @@ namespace Norm.Collections
         /// <summary>
         /// True if the type of this collection can be updated 
         /// (i.e. the Type specifies "_id", "ID", or a property with the attributed "MongoIdentifier").
-        /// </summary>
+        /// </summary>|?/**/
         public bool Updateable
         {
             get
@@ -106,11 +106,18 @@ namespace Norm.Collections
             var helper = TypeHelper.GetHelperForType(typeof(T));
             var idProperty = helper.FindIdProperty();
             var id = idProperty.Getter(entity);
-            if (id == null && 
-                (typeof(ObjectId).IsAssignableFrom(idProperty.Type)) ||
+            if ((id == null && 
+                ((typeof(ObjectId).IsAssignableFrom(idProperty.Type)) ||
                 (typeof(long?).IsAssignableFrom(idProperty.Type)) ||
-                (typeof(int?).IsAssignableFrom(idProperty.Type)) )
+                (typeof(int?).IsAssignableFrom(idProperty.Type)))) ||
+
+                (idProperty.Type == typeof(int) && id.Equals(0)) ||
+                (idProperty.Type == typeof(long) && id.Equals((long)0))
+
+                )
             {
+
+                  
                 Insert(entity);
             }
             else
@@ -879,19 +886,25 @@ namespace Norm.Collections
             Dictionary<Type, Func<object>> knownTypes = new Dictionary<Type, Func<object>> { 
                 { typeof(long?), () => GenerateId() }, 
                 { typeof(int?), () => Convert.ToInt32(GenerateId()) }, 
+                { typeof(int), () => Convert.ToInt32(GenerateId()) }, 
+                { typeof(long), () => GenerateId() }, 
                 { typeof(ObjectId), () => ObjectId.NewObjectId() } 
             };
 
             if (typeof(T) != typeof(Object) && typeof(T).GetInterface("IUpdateWithoutId") == null)
             {
                 var idProperty = TypeHelper.GetHelperForType(typeof(T)).FindIdProperty();
+
                 if (idProperty != null && knownTypes.ContainsKey(idProperty.Type) && idProperty.Setter != null)
                 {
                     foreach (var entity in entities)
                     {
                         var value = idProperty.Getter(entity);
-                        if (value == null)
+                        if (value == null || 
+                            (idProperty.Type==typeof(int) && value.Equals(0) )||
+                            idProperty.Type==typeof(long) && value.Equals((long)0))
                         {
+
                             idProperty.Setter(entity, knownTypes[idProperty.Type]());
                         }
                     }
