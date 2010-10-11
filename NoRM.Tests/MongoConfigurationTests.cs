@@ -227,6 +227,40 @@ namespace Norm.Tests
         }
 
         [Test]
+        public void should_ignore_name_property_when_inserting__as_specified_in_mappings()
+        {
+
+            MongoConfiguration.Initialize(c => c.AddMap<ShopperMapWithIgnoreImmutableAndIgnoreIfNullConfigurationForProperties>());
+            using (
+                Shoppers shoppers =
+                    new Shoppers(Mongo.Create(TestHelper.ConnectionString("pooling=false", "test", null, null))))
+            {
+                shoppers.Drop<Shopper>();
+                shoppers.Add(new Shopper
+                                 {
+                                     Id = ObjectId.NewObjectId(),
+                                     Name = "John",
+                                 
+                                 });
+
+                shoppers.Add(new Shopper
+                                 {
+                                     Id = ObjectId.NewObjectId(),
+                                     Name = "Jane",
+                                   
+                                 });
+
+               
+                var deepQuery = shoppers.ToList();
+
+                Assert.IsNull(deepQuery[0].Name);
+                Assert.IsNull(deepQuery[1].Name);
+
+               
+            }
+        }
+
+        [Test]
         public void Can_correctly_determine_collection_name()
         {
             var collectionName = MongoConfiguration.GetCollectionName(typeof(SuperClassObject));

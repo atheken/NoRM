@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Norm.Configuration
 {
     /// <summary>
@@ -11,6 +13,9 @@ namespace Norm.Configuration
         /// </summary>
         /// <value>The alias.</value>
         internal string Alias { get; set; }
+        internal bool IsIgnored { get; set; }
+        internal bool IsIgnoredWhenNull { get; set; }
+        internal bool IsImmutable { get; set; }
 
         /// <summary>
         /// Gets or sets whether the property is the Id for the entity.
@@ -33,6 +38,21 @@ namespace Norm.Configuration
         public void UseAlias(string alias)
         {
             Alias = alias;
+        }
+
+        public void IgnoreIfNull()
+        {
+            IsIgnoredWhenNull = true;
+        }
+
+        public void Ignore()
+        {
+            IsIgnored = true;
+        }
+
+        public void Immutable()
+        {
+            IsImmutable = true;
         }
     }
 }

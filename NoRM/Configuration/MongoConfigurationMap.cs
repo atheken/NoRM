@@ -126,7 +126,7 @@ namespace Norm.Configuration
             }
             else if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
             {
-                retval = map[type][propertyName].Alias;             
+                retval = map[type][propertyName].Alias??propertyName;             
             }
             else if (discriminator != null && discriminator != type )
             {
@@ -136,6 +136,41 @@ namespace Norm.Configuration
             }
             return retval;
         }
+
+        public bool IsPropertyIgnored(Type type, string propertyName)
+        {
+            var map = MongoTypeConfiguration.PropertyMaps;
+            var retValue = false;
+            if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            {
+                retValue = map[type][propertyName].IsIgnored;
+            }
+            return retValue;
+        }
+
+        public bool IsPropertyIgnoredWhenNull(Type type, string propertyName)
+        {
+            var map = MongoTypeConfiguration.PropertyMaps;
+            var retValue = false;
+            if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            {
+                retValue = map[type][propertyName].IsIgnoredWhenNull;
+            }
+            return retValue;
+        }
+
+        public bool IsPropertyImmutable(Type type, string propertyName)
+        {
+            var map = MongoTypeConfiguration.PropertyMaps;
+            var retValue = false;
+            if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            {
+                retValue = map[type][propertyName].IsImmutable;
+            }
+            return retValue;
+        }
+
+       
 
         /// <summary>
         /// Gets the fluently configured discriminator type string for a type.

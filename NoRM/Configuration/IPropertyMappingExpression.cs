@@ -19,5 +19,21 @@ namespace Norm.Configuration
         /// The alias.
         /// </param>
         void UseAlias(string alias);
+
+        /// <summary>
+        /// Ignores property if the value is null.
+        /// </summary>
+        void IgnoreIfNull();
+        /// <summary>
+        /// Indicates that the BSON serializer should ignore property.
+        /// </summary>
+        void Ignore();
+
+        /// <summary>
+        /// Ignores property on updates, but not on inserts, i.e. this is write-once value
+        /// </summary>
+        /// 
+        void Immutable();
+
     }
 }

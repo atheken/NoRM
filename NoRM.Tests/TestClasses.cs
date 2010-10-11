@@ -879,6 +879,25 @@ namespace Norm.Tests
         }
     }
 
+    public class ShopperMapWithIgnoreImmutableAndIgnoreIfNullConfigurationForProperties:MongoConfigurationMap
+    {
+        public ShopperMapWithIgnoreImmutableAndIgnoreIfNullConfigurationForProperties()
+        {
+            For<Shopper>(
+                config=> config.ForProperty(x => x.Name).Ignore()
+                );
+
+            For<Cart>(
+                config=>
+                    {
+
+                        config.ForProperty(x => x.Product).IgnoreIfNull();
+                        config.ForProperty(x => x.Name).Immutable();
+
+                    }
+                );
+        }
+    }
     internal class IdMap0
     {
         public ObjectId _ID { get; set; }

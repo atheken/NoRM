@@ -54,6 +54,13 @@ namespace Norm.Configuration
         /// </returns>
         string GetPropertyAlias(Type type, string propertyName);
 
+        bool IsPropertyIgnored(Type type, string propertyName);
+
+        bool IsPropertyIgnoredWhenNull(Type type, string propertyName);
+
+        bool IsPropertyImmutable(Type type, string propertyName);
+
+
         string GetTypeDescriminator(Type type);
     }
 }
