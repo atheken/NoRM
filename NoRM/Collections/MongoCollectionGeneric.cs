@@ -554,6 +554,18 @@ namespace Norm.Collections
 			// else throw Exception? (Only 1 key can be used for geospatial index)
 		}
 
+
+
+
+        public void CreateCompoundIndex(Action<ICreateIndexExpression<T>> indexes, bool isUnique)
+        {
+            ICreateIndexExpression<T> expression = new CreateIndexExpression<T>();
+            indexes(expression);
+
+            this.CreateIndex(expression.Expando, expression.CompoundName, isUnique);
+
+        }
+
         /// <summary>
         /// Gets the distinct values for the specified fieldSelectionExpando.
         /// </summary>
