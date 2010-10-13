@@ -126,7 +126,7 @@ namespace Norm.Configuration
             }
             else if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
             {
-                retval = map[type][propertyName].Alias;             
+                retval = map[type][propertyName].Alias??propertyName;             
             }
             else if (discriminator != null && discriminator != type )
             {
@@ -137,20 +137,40 @@ namespace Norm.Configuration
             return retval;
         }
 
-        /// <summary>
-        /// Given the type, and the propertyname,
-        /// see if it should be ignored for serialization
-        /// </summary>
-        /// <param retval="type">The type.</param>
-        /// <param retval="propertyName">Name of the property.</param>
-        /// <returns>
-        /// True if the property should be ignored; false otherwise
-        /// </returns>
         public bool IsPropertyIgnored(Type type, string propertyName)
         {
             var map = MongoTypeConfiguration.PropertyMaps;
-            return map.ContainsKey(type) && map[type].ContainsKey(propertyName) && map[type][propertyName].Ignore;
+            var retValue = false;
+            if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            {
+                retValue = map[type][propertyName].IsIgnored;
+            }
+            return retValue;
         }
+
+        public bool IsPropertyIgnoredWhenNull(Type type, string propertyName)
+        {
+            var map = MongoTypeConfiguration.PropertyMaps;
+            var retValue = false;
+            if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            {
+                retValue = map[type][propertyName].IsIgnoredWhenNull;
+            }
+            return retValue;
+        }
+
+        public bool IsPropertyImmutable(Type type, string propertyName)
+        {
+            var map = MongoTypeConfiguration.PropertyMaps;
+            var retValue = false;
+            if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
+            {
+                retValue = map[type][propertyName].IsImmutable;
+            }
+            return retValue;
+        }
+
+       
 
         /// <summary>
         /// Gets the fluently configured discriminator type string for a type.

@@ -14,6 +14,7 @@ namespace Norm.Configuration
         private static readonly Dictionary<Type, Type> _summaryTypes = new Dictionary<Type, Type>();
         private static readonly Dictionary<Type, bool> _discriminatedTypes = new Dictionary<Type, bool>();
 
+
         /// <summary>
         /// Gets the property maps.
         /// </summary>

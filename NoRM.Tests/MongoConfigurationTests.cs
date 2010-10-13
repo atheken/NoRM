@@ -116,16 +116,6 @@ namespace Norm.Tests
         }
 
         [Test]
-        public void Mongo_Configuration_Can_Ignore_Property()
-        {
-            MongoConfiguration.Initialize(r => r.For<User>(u => u.IgnoreProperty(h => h.LastName)));
-            //confirm that MagicProperty is not created
-            var reflectionHelper = new ReflectionHelper(typeof (User));
-            Assert.True(reflectionHelper.GetProperties().Any(p => p.Name == "FirstName"));
-            Assert.False(reflectionHelper.GetProperties().Any(p => p.Name == "LastName"));
-        }
-
-        [Test]
         public void Mongo_Configuration_Remove_Mapping_Of_Norm_Types_Fails()
         {
             //removal of maps for Norm types is verboden.
@@ -233,6 +223,40 @@ namespace Norm.Tests
                 Assert.AreEqual("John", deepQuery[0].Name);
                 Assert.AreEqual("Cart1", deepQuery[0].Cart.Name);
                 Assert.AreEqual(1, deepQuery.Count);
+            }
+        }
+
+        [Test]
+        public void should_ignore_name_property_when_inserting__as_specified_in_mappings()
+        {
+
+            MongoConfiguration.Initialize(c => c.AddMap<ShopperMapWithIgnoreImmutableAndIgnoreIfNullConfigurationForProperties>());
+            using (
+                Shoppers shoppers =
+                    new Shoppers(Mongo.Create(TestHelper.ConnectionString("pooling=false", "test", null, null))))
+            {
+                shoppers.Drop<Shopper>();
+                shoppers.Add(new Shopper
+                                 {
+                                     Id = ObjectId.NewObjectId(),
+                                     Name = "John",
+                                 
+                                 });
+
+                shoppers.Add(new Shopper
+                                 {
+                                     Id = ObjectId.NewObjectId(),
+                                     Name = "Jane",
+                                   
+                                 });
+
+               
+                var deepQuery = shoppers.ToList();
+
+                Assert.IsNull(deepQuery[0].Name);
+                Assert.IsNull(deepQuery[1].Name);
+
+               
             }
         }
 

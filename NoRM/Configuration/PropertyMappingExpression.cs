@@ -13,6 +13,9 @@ namespace Norm.Configuration
         /// </summary>
         /// <value>The alias.</value>
         internal string Alias { get; set; }
+        internal bool IsIgnored { get; set; }
+        internal bool IsIgnoredWhenNull { get; set; }
+        internal bool IsImmutable { get; set; }
 
         /// <summary>
         /// Gets or sets whether the property is the Id for the entity.
@@ -21,17 +24,10 @@ namespace Norm.Configuration
         internal bool IsId { get; set; }
 
         /// <summary>
-        /// Gets or sets whether the property should be ignored.
-        /// </summary>
-        /// <value>True if the property is to be ignored.</value>
-        internal bool Ignore { get; set; }
-
-        /// <summary>
         /// Gets or sets the retval of the source property.
         /// </summary>
         /// <value>The retval of the source property.</value>
         public string SourcePropertyName { get; set; }
-
 
         /// <summary>
         /// Uses the alias for a given type's property.
@@ -42,6 +38,21 @@ namespace Norm.Configuration
         public void UseAlias(string alias)
         {
             Alias = alias;
+        }
+
+        public void IgnoreIfNull()
+        {
+            IsIgnoredWhenNull = true;
+        }
+
+        public void Ignore()
+        {
+            IsIgnored = true;
+        }
+
+        public void Immutable()
+        {
+            IsImmutable = true;
         }
     }
 }

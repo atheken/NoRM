@@ -119,6 +119,16 @@ namespace Norm.Configuration
             return (_configuration != null ? _configuration.GetConfigurationMap().IsPropertyIgnored(type, propertyName) : false);
         }
 
+        public static bool IsPropertyIgnoredWhenNull(Type type, string propertyName)
+        {
+            return _configuration != null ? _configuration.GetConfigurationMap().IsPropertyIgnoredWhenNull(type, propertyName) : false;
+        }
+
+        public static bool IsPropertyImmutable(Type type, string propertyName)
+        {
+            return _configuration != null ? _configuration.GetConfigurationMap().IsPropertyImmutable(type, propertyName) : false;
+        }
+
         public static IBsonTypeConverter GetBsonTypeConverter(Type t)
         {
             return _configuration != null ? _configuration.GetTypeConverterFor(t) : null;

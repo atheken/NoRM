@@ -2,6 +2,7 @@
 using System.Reflection;
 using Norm.Attributes;
 using System.ComponentModel;
+using Norm.Configuration;
 
 namespace Norm.BSON
 {
@@ -27,8 +28,11 @@ namespace Norm.BSON
         public MagicProperty(PropertyInfo property, Type declaringType)
         {
             _property = property;
-            this.IgnoreIfNull = property.GetCustomAttributes(_ignoredIfNullType, true).Length > 0;
-            this.Immutable = property.GetCustomAttributes(_immutableType, true).Length > 0;
+            this.IgnoreIfNull = property.GetCustomAttributes(_ignoredIfNullType, true).Length > 0 ||
+                MongoConfiguration.IsPropertyIgnoredWhenNull(declaringType,property.Name);
+            this.Immutable = property.GetCustomAttributes(_immutableType, true).Length > 0 ||
+                MongoConfiguration.IsPropertyImmutable(declaringType,property.Name);
+
             var props = property.GetCustomAttributes(_defaultValueType, true);
             if (props.Length > 0)
             {
