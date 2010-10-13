@@ -67,7 +67,7 @@ namespace Norm.Configuration
         public void IgnoreProperty(Expression<Func<T, object>> property)
         {
             var expression = CheckForPropertyExpression(property);
-            expression.Ignore = true;
+            expression.Ignore();
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
 
