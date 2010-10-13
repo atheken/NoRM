@@ -133,7 +133,7 @@ namespace Norm.Tests
 			_collection.Insert (new Person { Name = "kde" });
 			_collection.Insert (new Person { Name = "Elfy" });
 			
-			var find = _collection.Find (Q.Where ("this.Name === 'Elfy';"));
+			var find = _collection.Find (Q.Where ("this.Name == 'Elfy';"));
 			Assert.AreEqual (1, find.Count ());
 		}
 
