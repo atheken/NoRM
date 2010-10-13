@@ -357,7 +357,7 @@ namespace Norm.BSON
                 if (!isNull)
                 {
                     if (_IEnumerableType.IsAssignableFrom(type) || storageType == BSONTypes.Array)
-                        value = DeserializeList(type, property.Getter(instance));
+                        value = DeserializeList(propertyType, property.Getter(instance));
                     else
                         value = DeserializeValue(propertyType, storageType);
                 }
