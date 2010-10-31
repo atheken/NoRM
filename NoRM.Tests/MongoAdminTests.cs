@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Xunit;
 using System.Linq;
 using System;
+using System.Configuration;
 
 namespace Norm.Tests
 {
@@ -150,7 +151,7 @@ namespace Norm.Tests
             string version;
             using (var process = new Process())
             {
-                process.StartInfo = new ProcessStartInfo("mongod", "--version") { RedirectStandardOutput = true, UseShellExecute = false };
+                process.StartInfo = new ProcessStartInfo(ConfigurationManager.AppSettings["mongodPath"], "--version") { RedirectStandardOutput = true, UseShellExecute = false };
                 process.Start();
                 using (var stream = process.StandardOutput)
                 {
