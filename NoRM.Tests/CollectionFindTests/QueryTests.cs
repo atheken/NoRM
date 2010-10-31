@@ -8,7 +8,6 @@ using Norm.Collections;
 using Norm.Commands.Modifiers;
 using Norm.Responses;
 using Xunit;
-using Norm.Collections;
 
 namespace Norm.Tests
 {
