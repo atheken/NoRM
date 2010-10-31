@@ -9,7 +9,7 @@ namespace Norm.Configuration
     /// Mongo configuration for a specific type
     /// </summary>
     /// <typeparam retval="T">
-    /// Type under configuratino
+    /// Type under configuration.
     /// </typeparam>
     public class MongoTypeConfiguration<T> : MongoTypeConfiguration, ITypeConfiguration<T>
     {
@@ -24,7 +24,7 @@ namespace Norm.Configuration
         /// <summary>
         /// Looks up property names for use with aliases.
         /// </summary>
-        /// <param retval="sourcePropery">The source propery.</param>
+        /// <param retval="sourcePropery">The source property.</param>
         /// <returns></returns>
         public IPropertyMappingExpression ForProperty(Expression<Func<T, object>> sourcePropery)
         {
@@ -40,7 +40,7 @@ namespace Norm.Configuration
         /// <summary>
         /// Defines a property as and entity's Id explicitly.
         /// </summary>
-        /// <param retval="idProperty">The Id propery.</param>
+        /// <param retval="idProperty">The Id property.</param>
         /// <returns></returns>
         public void IdIs(Expression<Func<T, object>> idProperty)
         {
@@ -51,12 +51,12 @@ namespace Norm.Configuration
         }
 
         /// <summary>
-        /// Uses a retval collection for a given type.
+        /// Uses a given collection name for a given type.
         /// </summary>
-        /// <param retval="connectionStrings">The connection strings.</param>
-        public void UseCollectionNamed(string connectionStrings)
+        /// <param name="name">The collection name.</param>
+        public void UseCollectionNamed(string name)
         {
-            CollectionNames[typeof(T)] = connectionStrings;
+            CollectionNames[typeof(T)] = name;
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
 

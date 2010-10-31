@@ -24,7 +24,7 @@ namespace Norm.Configuration
         }
 
         /// <summary>
-        /// Remove mappings for the specifed type.
+        /// Remove mappings for the specified type.
         /// </summary>
         /// <remarks>
         /// This is primarily defined for support of unit testing, 
@@ -79,7 +79,7 @@ namespace Norm.Configuration
         /// <summary>
         /// Gets the discriminated types
         /// </summary>
-        /// <value>True if a type is marked as a discriminated type, otherwise false.</value>
+        /// <value><c>true</c> if a type is marked as a discriminated type; otherwise <c>false</c>.</value>
         internal static Dictionary<Type, bool> DiscriminatedTypes
         {
             get { return _discriminatedTypes; }
