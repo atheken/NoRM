@@ -95,11 +95,11 @@ namespace Norm.BSON
             {
                 retval = deserializer.Read<T>(length);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 int toRead = deserializer._current.Length - deserializer._current.Digested;
                 deserializer._reader.ReadBytes(toRead);
-                throw ex;
+                throw;
             }
 
             return retval;
