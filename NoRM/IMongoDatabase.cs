@@ -14,7 +14,10 @@ namespace Norm
         MapReduce CreateMapReduce();
         IConnection CurrentConnection { get; }
         string DatabaseName { get; }
+        bool DropCollection<T>();
         bool DropCollection(string collectionName);
+        bool DropCollection<T>(bool throwIfNotFound);
+        bool DropCollection(string collectionName, bool throwIfNotFound);
         IEnumerable<CollectionInfo> GetAllCollections();
         IMongoCollection<T> GetCollection<T>(string collectionName);
         IMongoCollection GetCollection(string collectionName);

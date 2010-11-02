@@ -9,29 +9,29 @@ namespace Norm.Tests
     [TestFixture]
     public class DbRefTests
     {
-		private Mongod _proc;
+        private Mongod _proc;
 
-		[TestFixtureSetUp]
-		public void SetUp ()
-		{
-			_proc = new Mongod ();
-		}
+        [TestFixtureSetUp]
+        public void SetUp ()
+        {
+            _proc = new Mongod ();
+        }
 
-		[TestFixtureTearDown]
-		public void TearDown ()
-		{
-			_proc.Dispose ();
-		}
+        [TestFixtureTearDown]
+        public void TearDown ()
+        {
+            _proc.Dispose ();
+        }
 
         [SetUp]
         public void Setup()
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString()))
             {
-                db.GetCollection<TestProduct>().Delete(new { });
-                db.GetCollection<ProductReference>().Delete(new { });
-                db.GetCollection<User3>().Delete(new { });
-                db.GetCollection<Role>().Delete(new { });
+                db.Database.DropCollection<TestProduct>(false);
+                db.Database.DropCollection<ProductReference>(false);
+                db.Database.DropCollection<User3>(false);
+                db.Database.DropCollection<Role>(false);
             }
         }
 

@@ -122,9 +122,56 @@ namespace Norm
         /// <summary>
         /// Drops a collection.
         /// </summary>
-        /// <param retval="collectionName">The collection retval.</param>
-        /// <returns>The drop collection.</returns>
+        /// <typeparam name="T">The collection type.</typeparam>
+        /// <returns>
+        /// <c>true</c> if the collection was dropped; otherwise, <c>false</c> (or an exception if <see cref="MongoConnection.StrictMode" /> is enabled).
+        /// </returns>
+        public bool DropCollection<T>()
+        {
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
+            return DropCollection(collectionName);
+        }
+
+        /// <summary>
+        /// Drops a collection.
+        /// </summary>
+        /// <typeparam name="T">The collection type.</typeparam>
+        /// <param name="throwIfNotFound">Whether the exception should be thrown if collection is not found.</param>
+        /// <returns>
+        /// <c>true</c> if the collection was dropped; otherwise, <c>false</c> (if <paramref name="throwIfNotFound"/> is <c>false</c>).
+        /// </returns>
+        public bool DropCollection<T>(bool throwIfNotFound)
+        {
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
+            return DropCollection(collectionName, throwIfNotFound);
+        }
+
+        /// <summary>
+        /// Drops a collection.
+        /// </summary>
+        /// <param name="collectionName">The collection name.</param>
+        /// <returns>
+        /// <c>true</c> if the collection was dropped; otherwise, <c>false</c> (or an exception if <see cref="MongoConnection.StrictMode" /> is enabled).
+        /// </returns>
         public bool DropCollection(string collectionName)
+        {
+            return DropCollection(collectionName, null);
+        }
+
+        /// <summary>
+        /// Drops a collection.
+        /// </summary>
+        /// <param name="collectionName">The collection name.</param>
+        /// <param name="throwIfNotFound">Whether the exception should be thrown if collection is not found.</param>
+        /// <returns>
+        /// <c>true</c> if the collection was dropped; otherwise, <c>false</c> (if <paramref name="throwIfNotFound"/> is <c>false</c>).
+        /// </returns>
+        public bool DropCollection(string collectionName, bool throwIfNotFound)
+        {
+            return this.DropCollection(collectionName, (bool?)throwIfNotFound);
+        }
+
+        private bool DropCollection(string collectionName, bool? throwIfNotFound)
         {
             try
             {
@@ -132,7 +179,7 @@ namespace Norm
             }
             catch (MongoException exception)
             {
-                if (this._connection.StrictMode || exception.Message != "ns not found")
+                if ((throwIfNotFound ?? this._connection.StrictMode) || exception.Message != "ns not found")
                 {
                     throw;
                 }

@@ -1,4 +1,5 @@
 ﻿
+using System;
 namespace Norm.Configuration
 {
     /// <summary>
@@ -18,10 +19,14 @@ namespace Norm.Configuration
         /// <value>True if the property is the entity's Id.</value>
         internal bool IsId { get; set; }
 
+        internal Type Type { get; set; }
+        internal Func<object, object> Getter { get; set; }
+        internal Action<object, object> Setter { get; set; }
+
         /// <summary>
-        /// Gets or sets the retval of the source property.
+        /// Gets or sets the name of the source property.
         /// </summary>
-        /// <value>The retval of the source property.</value>
+        /// <value>The name of the source property.</value>
         public string SourcePropertyName { get; set; }
 
         /// <summary>
@@ -33,6 +38,6 @@ namespace Norm.Configuration
         public void UseAlias(string alias)
         {
             Alias = alias;
-        }
+        }        
     }
 }

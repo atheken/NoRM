@@ -103,12 +103,12 @@ namespace Norm.Tests
             Assert.NotNull(objectId);
             Assert.AreEqual(value, objectId.ToString());
         }
-		[Test]
-		public void ConversionToStringWithNullObjIsNull()
-		{
-			var obj = new { Id = (ObjectId)null };
-			string implicitString = obj.Id;
-			Assert.Null(implicitString);
-		}
+        [Test]
+        public void ConversionToStringWithNullObjIsNull()
+        {
+            var obj = new { Id = (ObjectId)null };
+            string implicitString = obj.Id;
+            Assert.Null(implicitString);
+        }
     }
 }

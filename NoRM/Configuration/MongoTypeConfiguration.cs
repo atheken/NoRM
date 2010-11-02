@@ -23,8 +23,18 @@ namespace Norm.Configuration
             get { return _typeConfigurations; }
         }
 
+        internal static IDictionary<string, PropertyMappingExpression> GetPropertyOrEmptyMap(Type type)
+        {
+            if (!PropertyMaps.ContainsKey(type))
+            {
+                return new Dictionary<string, PropertyMappingExpression>();
+            }
+            
+            return PropertyMaps[type];
+        }
+
         /// <summary>
-        /// Remove mappings for the specifed type.
+        /// Remove mappings for the specified type.
         /// </summary>
         /// <remarks>
         /// This is primarily defined for support of unit testing, 
@@ -79,7 +89,7 @@ namespace Norm.Configuration
         /// <summary>
         /// Gets the discriminated types
         /// </summary>
-        /// <value>True if a type is marked as a discriminated type, otherwise false.</value>
+        /// <value><c>true</c> if a type is marked as a discriminated type; otherwise <c>false</c>.</value>
         internal static Dictionary<Type, bool> DiscriminatedTypes
         {
             get { return _discriminatedTypes; }

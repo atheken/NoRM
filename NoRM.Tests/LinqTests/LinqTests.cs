@@ -12,64 +12,64 @@ namespace Norm.Tests
     [TestFixture]
     public class LinqTests
     {
-		private Mongod _proc;
-		
-		[TestFixtureSetUp]
-		public void SetupTestFixture ()
-		{
-			_proc = new Mongod ();
-		}
-		
-		[TestFixtureTearDown]
-		public void TearDownTestFixture ()
-		{
-			_proc.Dispose ();
-		}
-		
+        private Mongod _proc;
+        
+        [TestFixtureSetUp]
+        public void SetupTestFixture ()
+        {
+            _proc = new Mongod ();
+        }
+        
+        [TestFixtureTearDown]
+        public void TearDownTestFixture ()
+        {
+            _proc.Dispose ();
+        }
+        
         [SetUp]
         public void Setup ()
         {
-        	MongoConfiguration.RemoveMapFor<TestProduct> ();
-        	MongoConfiguration.RemoveMapFor<Post> ();
-        	using (var session = new Session ())
+            MongoConfiguration.RemoveMapFor<TestProduct> ();
+            MongoConfiguration.RemoveMapFor<Post> ();
+            using (var session = new Session ())
             {
-        		session.Drop<TestProduct> ();
-        		session.Drop<Post> ();
-        	}
-        	using (var db = Mongo.Create (TestHelper.ConnectionString ("strict=false")))
+                session.Drop<TestProduct> ();
+                session.Drop<Post> ();
+            }
+            using (var db = Mongo.Create (TestHelper.ConnectionString ("strict=false")))
             {
-        		db.Database.DropCollection ("acmePost");
-        	}
+                db.Database.DropCollection ("acmePost");
+            }
         }
-		
-		[Test]
-		public void LinqQueriesShouldSupportComplexQueriesWithLongDatatypes ()
-		{
-			using (var session = new Session ()) {
-				session.Add (new TestProduct { Name = "1", Quantity = 1, LongId = 1 });
-				session.Add (new TestProduct { Name = "2", Quantity = 1, LongId = 2 });
-				session.Add (new TestProduct { Name = "3", Quantity = 3, LongId = 3 });
-				var queryable = session.Products;
-				
-				var test1 = (from t in queryable
-					where t.LongId == 3
-					select t).FirstOrDefault ();
-				Assert.NotNull (test1);
-				
-				//this is a strange edge case, it SEEMS like it the right thing is getting populated, but mongo isn't evaluating it properly.
-				var test2 = (from t in queryable
-					where (t.Quantity & 3) == 3
-					select t).FirstOrDefault ();
-				Assert.NotNull (test2);
-				
-				
-				var test3 = (from t in queryable
-					where t.LongId == 3 && (t.Quantity & 2) == 2
-					select t).FirstOrDefault ();
-				Assert.NotNull (test3);
-				Assert.True(queryable.QueryStructure ().IsComplex);
-			}
-		}
+        
+        [Test]
+        public void LinqQueriesShouldSupportComplexQueriesWithLongDatatypes ()
+        {
+            using (var session = new Session ()) {
+                session.Add (new TestProduct { Name = "1", Quantity = 1, LongId = 1 });
+                session.Add (new TestProduct { Name = "2", Quantity = 1, LongId = 2 });
+                session.Add (new TestProduct { Name = "3", Quantity = 3, LongId = 3 });
+                var queryable = session.Products;
+                
+                var test1 = (from t in queryable
+                    where t.LongId == 3
+                    select t).FirstOrDefault ();
+                Assert.NotNull (test1);
+                
+                //this is a strange edge case, it SEEMS like it the right thing is getting populated, but mongo isn't evaluating it properly.
+                var test2 = (from t in queryable
+                    where (t.Quantity & 3) == 3
+                    select t).FirstOrDefault ();
+                Assert.NotNull (test2);
+                
+                
+                var test3 = (from t in queryable
+                    where t.LongId == 3 && (t.Quantity & 2) == 2
+                    select t).FirstOrDefault ();
+                Assert.NotNull (test3);
+                Assert.True(queryable.QueryStructure ().IsComplex);
+            }
+        }
 
 
         [Test]
@@ -2003,17 +2003,17 @@ namespace Norm.Tests
         [Test]
         public void FirstWhereNoResultsReturnedInWhere ()
         {
-        	using (var session = new Session (true))
+            using (var session = new Session (true))
             {
-        		session.Add (new TestProduct { Name = "ATest", Price = 10 });
-        		session.Add (new TestProduct { Name = "BTest", Price = 22 });
-        		session.Add (new TestProduct { Name = "BTest", Price = 33 });
-				
+                session.Add (new TestProduct { Name = "ATest", Price = 10 });
+                session.Add (new TestProduct { Name = "BTest", Price = 22 });
+                session.Add (new TestProduct { Name = "BTest", Price = 33 });
+                
                 var noProducct = session.Products.Where(x => x.Name == "ZTest");
                 var ex = Assert.Throws<InvalidOperationException>(() => noProducct.First());
                 Assert.IsTrue(("Sequence contains no elements" == ex.Message) || ("The source sequence is empty" == ex.Message));
             }
-		}
+        }
 
         [Test]
         public void FirstOrDefaultWhereNoResultsReturnedInWhere()

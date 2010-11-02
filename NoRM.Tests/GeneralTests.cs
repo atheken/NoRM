@@ -13,19 +13,19 @@ namespace Norm.Tests
     [TestFixture]
     public class GeneralTests
     {
-		private Mongod _proc;
+        private Mongod _proc;
 
-		[TestFixtureSetUp]
-		public void SetUp ()
-		{
-			_proc = new Mongod ();
-		}
+        [TestFixtureSetUp]
+        public void SetUp ()
+        {
+            _proc = new Mongod ();
+        }
 
-		[TestFixtureTearDown]
-		public void TearDown ()
-		{
-			_proc.Dispose ();
-		}
+        [TestFixtureTearDown]
+        public void TearDown ()
+        {
+            _proc.Dispose ();
+        }
 
         [Test]
         public void Get_Last_Error_Returns()

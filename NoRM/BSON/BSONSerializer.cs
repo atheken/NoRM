@@ -212,7 +212,7 @@ namespace Norm.BSON
                                : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
 
                 object value;
-                if (property.IgnoreProperty(document, out value, purpose))
+                if (!property.TryGetValueUnlessIgnored(document, purpose, out value))
                 {
                     // ignore the member
                     continue;

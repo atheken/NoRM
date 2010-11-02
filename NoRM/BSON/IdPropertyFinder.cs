@@ -11,37 +11,33 @@ namespace Norm.BSON
     ///</summary>
     public class IdPropertyFinder
     {
-        private readonly Dictionary<IdType, PropertyInfo> _idDictionary;
+        private readonly IDictionary<IdType, MagicProperty> _idDictionary;
         private readonly Type _type;
-        private PropertyInfo[] _properties;
+        private IList<MagicProperty> _properties;
         private PropertyInfo[] _interfaceProperties;
-
-        ///<summary>
-        /// Initializes new IdPropertyFinder.
-        ///</summary>
-        ///<param retval="type">The type for which an id property needs to be identified.</param>
-        public IdPropertyFinder(Type type)
-        {
-            _type = type;
-            _idDictionary = new Dictionary<IdType, PropertyInfo>(4)
-                                {
-                                    { IdType.MongoDefault, null },
-                                    { IdType.MapDefined, null },
-                                    { IdType.AttributeDefined, null },
-                                    { IdType.Conventional, null }
-                                };
-        }
-
+        
         ///<summary>
         /// Initializes new IdPropertyFinder.
         /// Use this constructor to limit the properties you want to test.
         ///</summary>
         ///<param retval="type">The type for which an id property needs to be identified.</param>
-        ///<param retval="properties">The candidate properties fo the type.</param>
-        public IdPropertyFinder(Type type, PropertyInfo[] properties)
-            : this(type)
+        ///<param retval="properties">The candidate properties for the type.</param>
+        public IdPropertyFinder(Type type, IList<MagicProperty> properties)
         {
+            if (properties.IsReadOnly)
+            {
+                throw new ArgumentException("Property collection passed to IdPropertyFinder must not be read-only.", "properties");
+            }
+
+            _type = type;
             _properties = properties;
+            _idDictionary = new Dictionary<IdType, MagicProperty>(4)
+                                {
+                                    { IdType.MongoDefault, null },
+                                    { IdType.MapDefined, null },
+                                    { IdType.AttributeDefined, null },
+                                    { IdType.Conventional, null }
+                                };           
         }
 
         ///<summary>
@@ -52,7 +48,7 @@ namespace Norm.BSON
         /// Property named Id
         /// Conflicts result in MongoConfigurationMapException.
         ///</summary>
-        public PropertyInfo IdProperty
+        public MagicProperty IdProperty
         {
             get
             {
@@ -65,18 +61,33 @@ namespace Norm.BSON
         /// <summary>
         /// Determines if the Id has been explicitly defined in a MongoConfigurationMap <see cref="MongoConfigurationMap"/>.
         /// </summary>
-        /// <param retval="idPropertyCandidate">The property retval.</param>
-        private bool PropertyIsExplicitlyMappedToId(string idPropertyCandidate)
+        /// <param retval="idPropertyCandidate">The property name.</param>
+        private bool PropertyIsExplicitlyMappedToId(MagicProperty idPropertyCandidate)
         {
-            var map = MongoTypeConfiguration.PropertyMaps;
-            if (map.ContainsKey(_type))
+            var map = MongoTypeConfiguration.GetPropertyOrEmptyMap(_type);
+            if (map.ContainsKey(idPropertyCandidate.Name))
             {
-                if (map[_type].ContainsKey(idPropertyCandidate))
-                {
-                    return map[_type][idPropertyCandidate].IsId;
-                }
+                return map[idPropertyCandidate.Name].IsId;
             }
             return false;
+        }
+
+        private MagicProperty GetCustomMappedIdProperty()
+        {
+            var map = MongoTypeConfiguration.GetPropertyOrEmptyMap(_type);
+            if (map.ContainsKey("$id"))
+            {
+                var idMapping = map["$id"];
+                return new MagicProperty(
+                    "$id", _type, new MagicPropertyConfiguration 
+                           {
+                               CustomType = idMapping.Type,
+                               CustomGetter = idMapping.Getter,
+                               CustomSetter = idMapping.Setter
+                           }
+                );
+            }
+            return null;
         }
 
         private void CheckForConflictingCandidates()
@@ -97,9 +108,14 @@ namespace Norm.BSON
             return idPropertyCandidate.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0;
         }
 
-        private bool PropertyIsAttributeDefinedId(MemberInfo idPropertyCandidate)
+        private bool PropertyIsAttributeDefinedId(MagicProperty idPropertyCandidate)
         {
-            if (HasMongoIdentifierAttribute(idPropertyCandidate))
+            if (idPropertyCandidate.Property == null)
+            {
+                return false;
+            }
+
+            if (HasMongoIdentifierAttribute(idPropertyCandidate.Property))
             {
                 return true;
             }
@@ -119,9 +135,9 @@ namespace Norm.BSON
             return false;
         }
 
-        private void AddCandidate(PropertyInfo property)
+        private void AddCandidate(MagicProperty property)
         {
-            if (PropertyIsExplicitlyMappedToId(property.Name))
+            if (PropertyIsExplicitlyMappedToId(property))
             {
                 _idDictionary[IdType.MapDefined] = property;
             }
@@ -141,16 +157,19 @@ namespace Norm.BSON
 
         private void AddCandidates()
         {
-            if(_properties == null)
-            {
-                _properties = ReflectionHelper.GetProperties(_type);
-            }
-
             _interfaceProperties = ReflectionHelper.GetInterfaceProperties(_type);
 
             foreach (var property in _properties)
             {
                 AddCandidate(property);
+            }
+
+            var customId = GetCustomMappedIdProperty();
+            if (customId != null)
+            {
+                // we can safely override, because this conflict should be handled by map itself
+                _idDictionary[IdType.MapDefined] = customId;
+                _properties.Add(customId);
             }
         }
 

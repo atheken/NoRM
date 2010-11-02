@@ -4,12 +4,14 @@ using System.Text.RegularExpressions;
 using NUnit.Framework;
 using System.Linq;
 using System;
+using System.Configuration;
+using System.IO;
 
 namespace Norm.Tests
 {
-    public class IMongoAdminTests
+    public class IMongoAdminTests : StartupHelperHarness
     {
-		[SetUp]
+        [SetUp]
         public void Setup()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString("strict=false")))
@@ -151,7 +153,10 @@ namespace Norm.Tests
             string version;
             using (var process = new Process())
             {
-                process.StartInfo = new ProcessStartInfo("mongod", "--version") { RedirectStandardOutput = true, UseShellExecute = false };
+                process.StartInfo = new ProcessStartInfo(
+                    Path.Combine(ConfigurationManager.AppSettings["mongodPath"], "mongod"),
+                    "--version"
+                ) { RedirectStandardOutput = true, UseShellExecute = false };
                 process.Start();
                 using (var stream = process.StandardOutput)
                 {

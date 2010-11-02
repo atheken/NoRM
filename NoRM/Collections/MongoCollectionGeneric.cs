@@ -106,10 +106,11 @@ namespace Norm.Collections
             var helper = TypeHelper.GetHelperForType(typeof(T));
             var idProperty = helper.FindIdProperty();
             var id = idProperty.Getter(entity);
-            if (id == null && 
-                (typeof(ObjectId).IsAssignableFrom(idProperty.Type)) ||
-                (typeof(long?).IsAssignableFrom(idProperty.Type)) ||
-                (typeof(int?).IsAssignableFrom(idProperty.Type)) )
+            if (id == null && (
+                typeof(ObjectId).IsAssignableFrom(idProperty.Type) ||
+                typeof(long?).IsAssignableFrom(idProperty.Type) ||
+                typeof(int?).IsAssignableFrom(idProperty.Type)
+            ))
             {
                 Insert(entity);
             }
@@ -484,68 +485,68 @@ namespace Norm.Collections
             this.CreateIndex(key, indexName, isUnique);
         }
 
-		/// <summary>
-		/// Asynchronously creates an index on this collection.
-		/// </summary>
-		/// <param retval="index">This is an expression of the element in the type you wish to use for geospatial index, so you can do something like:
-		/// <code>
-		/// y=>y.MyIndexedProperty
-		/// </code>
-		/// This will automatically map the MongoConfiguration aliases.
-		/// </param>
-		/// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
-		/// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
-		/// MongoDB will potentially optimize the index based on this being true.</param>
-		public void CreateGeoIndex<U>(Expression<Func<T, U>> index, string indexName, bool isUnique)
-		{
-			if (index.Body is MemberExpression)
-			{
-				var key = new Expando();
-				var me = index.Body as MemberExpression;
-				key[this.RecurseMemberExpression(me)] = "2d";
-				this.CreateIndex(key, indexName, isUnique);
-			}
-			// else throw Exception?
-		}
+        /// <summary>
+        /// Asynchronously creates an index on this collection.
+        /// </summary>
+        /// <param retval="index">This is an expression of the element in the type you wish to use for geospatial index, so you can do something like:
+        /// <code>
+        /// y=>y.MyIndexedProperty
+        /// </code>
+        /// This will automatically map the MongoConfiguration aliases.
+        /// </param>
+        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+        /// MongoDB will potentially optimize the index based on this being true.</param>
+        public void CreateGeoIndex<U>(Expression<Func<T, U>> index, string indexName, bool isUnique)
+        {
+            if (index.Body is MemberExpression)
+            {
+                var key = new Expando();
+                var me = index.Body as MemberExpression;
+                key[this.RecurseMemberExpression(me)] = "2d";
+                this.CreateIndex(key, indexName, isUnique);
+            }
+            // else throw Exception?
+        }
 
-		/// <summary>
-		/// Asynchronously creates an index on this collection.
-		/// </summary>
-		/// <param retval="index">This is an expression of the element in the type you wish to use for geospatial index, so you can do something like:
-		/// <code>
-		/// y=>y.MyIndexedProperty
-		/// </code>
-		/// This will automatically map the MongoConfiguration aliases.
-		/// </param>
-		/// <param name="compoundIndexes">This is a collection of the elements in the type you wish to index along with the direction:
-		/// <code>
-		/// new[] {
-		///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.A.B, IndexOption.Ascending),
-		///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.C.D, IndexOption.Descending),
-		/// }
-		/// </code>
-		/// This will automatically map the MongoConfiguration aliases.
-		/// </param>
-		/// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
-		/// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
-		/// MongoDB will potentially optimize the index based on this being true.</param>
-		public void CreateGeoIndex<U>(Expression<Func<T, U>> index, IEnumerable<MongoCollectionCompoundIndex<T>> compoundIndexes, string indexName, bool isUnique)
-		{
-			if (index.Body is MemberExpression)
-			{
-				var key = new Expando();
-				var me = index.Body as MemberExpression;
-				key[this.RecurseMemberExpression(me)] = "2d";
+        /// <summary>
+        /// Asynchronously creates an index on this collection.
+        /// </summary>
+        /// <param retval="index">This is an expression of the element in the type you wish to use for geospatial index, so you can do something like:
+        /// <code>
+        /// y=>y.MyIndexedProperty
+        /// </code>
+        /// This will automatically map the MongoConfiguration aliases.
+        /// </param>
+        /// <param name="compoundIndexes">This is a collection of the elements in the type you wish to index along with the direction:
+        /// <code>
+        /// new[] {
+        ///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.A.B, IndexOption.Ascending),
+        ///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.C.D, IndexOption.Descending),
+        /// }
+        /// </code>
+        /// This will automatically map the MongoConfiguration aliases.
+        /// </param>
+        /// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
+        /// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+        /// MongoDB will potentially optimize the index based on this being true.</param>
+        public void CreateGeoIndex<U>(Expression<Func<T, U>> index, IEnumerable<MongoCollectionCompoundIndex<T>> compoundIndexes, string indexName, bool isUnique)
+        {
+            if (index.Body is MemberExpression)
+            {
+                var key = new Expando();
+                var me = index.Body as MemberExpression;
+                key[this.RecurseMemberExpression(me)] = "2d";
 
-				foreach (var compoundIndex in compoundIndexes)
-				{
-					key[this.RecurseExpression(compoundIndex.Index.Body)] = compoundIndex.Direction;
-				}
+                foreach (var compoundIndex in compoundIndexes)
+                {
+                    key[this.RecurseExpression(compoundIndex.Index.Body)] = compoundIndex.Direction;
+                }
 
-				this.CreateIndex(key, indexName, isUnique);
-			}
-			// else throw Exception? (Only 1 key can be used for geospatial index)
-		}
+                this.CreateIndex(key, indexName, isUnique);
+            }
+            // else throw Exception? (Only 1 key can be used for geospatial index)
+        }
 
         /// <summary>
         /// Gets the distinct values for the specified fieldSelectionExpando.

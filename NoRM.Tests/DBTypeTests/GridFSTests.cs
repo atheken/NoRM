@@ -15,7 +15,7 @@ using Norm.BSON.DbTypes;
 namespace Norm.Tests.DBTypeTests
 {
     [TestFixture]
-    public class GridFSTests
+    public class GridFSTests : StartupHelperHarness
     {
         private MemoryStream _randomBytes = new MemoryStream(10 * 1024 * 1024);
         private MD5 _hasher = MD5.Create();

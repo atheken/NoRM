@@ -14,31 +14,64 @@ namespace Norm.BSON
         private static readonly Type _ignoredIfNullType = typeof(MongoIgnoreIfNullAttribute);
         private static readonly Type _immutableType = typeof(MongoImmutableAttribute);
         private static readonly Type _defaultValueType = typeof(DefaultValueAttribute);
-        private readonly PropertyInfo _property;
-        private readonly DefaultValueAttribute _defaultValueAttribute;
+        private readonly object _defaultValue;
 
-
+        public MagicProperty(Type declaringType, MagicPropertyConfiguration configuration) : this(null, declaringType, configuration)
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MagicProperty"/> class.
         /// </summary>
         /// <param retval="property">The property.</param>
         /// <param retval="declaringType"></param>
-        public MagicProperty(PropertyInfo property, Type declaringType)
+        public MagicProperty(string name, Type declaringType, MagicPropertyConfiguration configuration)
         {
-            _property = property;
-            this.IgnoreIfNull = property.GetCustomAttributes(_ignoredIfNullType, true).Length > 0;
-            this.Immutable = property.GetCustomAttributes(_immutableType, true).Length > 0;
-            var props = property.GetCustomAttributes(_defaultValueType, true);
-            if (props.Length > 0)
+            configuration.Validate();
+
+            var property = configuration.Property;
+
+            if (string.IsNullOrEmpty(name))
             {
-                _defaultValueAttribute = (DefaultValueAttribute)props[0];
+                if (property == null)
+                {
+                    throw new ArgumentException("Name should be specified if magic property is not based on a reflection property.", "name");
+                }
+                this.Name = property.Name;
             }
+            else
+            {
+                this.Name = name;
+            }
+
+            this.Property = property;
+            this.IgnoreIfNull = configuration.IgnoreIfNull ?? (
+                property != null ? property.IsDefined(_ignoredIfNullType, true) : false
+            );
+
+            if (configuration.HasDefaultValue != null)
+            {
+                this.HasDefaultValue = configuration.HasDefaultValue.Value;
+                this._defaultValue = configuration.DefaultValue;
+            }
+            else if (property != null)
+            {
+                var defaultValueAttributes = property.GetCustomAttributes(_defaultValueType, true);
+                if (defaultValueAttributes.Length > 0)
+                {
+                    this.HasDefaultValue = true;
+                    this._defaultValue = ((DefaultValueAttribute)defaultValueAttributes[0]).Value;
+                }
+            }
+
+            Type = property != null ? property.PropertyType : configuration.CustomType;
             DeclaringType = declaringType;
-            Getter = CreateGetterMethod(property);
-            Setter = CreateSetterMethod(property);
-            ShouldSerialize = CreateShouldSerializeMethod(property);
+            Getter = configuration.CustomGetter ?? CreateGetterMethod();
+            Setter = configuration.CustomSetter ?? CreateSetterMethod();
+            ShouldSerialize = configuration.CustomShouldSerializeRule ?? CreateShouldSerializeMethod(property);
         }
+
+        internal PropertyInfo Property { get; private set; }
 
         /// <summary>
         /// The object that declared this property.
@@ -49,18 +82,14 @@ namespace Norm.BSON
         /// Gets the property's underlying type.
         /// </summary>
         /// <value>The type.</value>
-        public Type Type
-        {
-            get { return _property.PropertyType; }
-        }
+        public Type Type { get; private set; }
+        
         /// <summary>
-        /// Gets the property's retval.
+        /// Gets the property name.
         /// </summary>
-        /// <value>The retval.</value>
-        public string Name
-        {
-            get { return _property.Name; }
-        }
+        /// <value>The property name.</value>
+        public string Name { get; private set; }
+
         /// <summary>
         /// Gets a value indicating whether to ignore the property if it's null.
         /// </summary>
@@ -85,10 +114,8 @@ namespace Norm.BSON
         /// </summary>
         public bool HasDefaultValue
         {
-            get
-            {
-                return this._defaultValueAttribute != null;
-            }
+            get;
+            private set;
         }
 
         /// <summary>
@@ -97,12 +124,7 @@ namespace Norm.BSON
         /// <returns></returns>
         public object GetDefaultValue()
         {
-            object retval = null;
-            if (this.HasDefaultValue)
-            {
-                retval = this._defaultValueAttribute.Value;
-            }
-            return retval;
+            return this._defaultValue;
         }
 
         /// <summary>
@@ -111,7 +133,7 @@ namespace Norm.BSON
         /// <param retval="document">The instance on which the property should be applied.</param>
         /// <param retval="value">The value of the property in the provided instance</param>
         /// <returns></returns>
-        public bool IgnoreProperty(object document, out object value, SerializationPurpose purpose)
+        public bool TryGetValueUnlessIgnored(object document, SerializationPurpose purpose, out object value)
         {
             // initialize the out variable.
             value = null;
@@ -132,25 +154,25 @@ namespace Norm.BSON
                     // if it it same ignore the property
                     if (isValueSameAsDefault)
                     {
-                        return true;
+                        ignore = true;
                     }
                 }
                 // finally check if the property has the MongoIgnoreIfNull attribute.
                 // and ignore if true.
                 if (this.IgnoreIfNull && value == null)
                 {
-                    return true;
+                    ignore = true;
                 }
 
                 // If this is immutable, don't include in updates. This is true
                 // only for the value document, of course.
                 if (this.Immutable && purpose == SerializationPurpose.Update)
                 {
-                    return true;
+                    ignore = true;
                 }
             }
-            // return the result. Should be false -- true can exit early
-            return ignore;
+            // return the result
+            return !ignore;
         }
 
         /// <summary>
@@ -175,8 +197,14 @@ namespace Norm.BSON
         /// </summary>
         /// <param retval="property">The property.</param>
         /// <returns></returns>
-        private static Action<object, object> CreateSetterMethod(PropertyInfo property)
+        private Action<object, object> CreateSetterMethod()
         {
+            var property = this.Property;
+            if (property == null)
+            {
+                return (o, value) => ThrowAcessorNotSupported("setter");
+            }
+
             var genericHelper = _myType.GetMethod("SetterMethod", BindingFlags.Static | BindingFlags.NonPublic);
             var constructedHelper = genericHelper.MakeGenericMethod(property.DeclaringType, property.PropertyType);
             return (Action<object, object>)constructedHelper.Invoke(null, new object[] { property });
@@ -187,11 +215,25 @@ namespace Norm.BSON
         /// </summary>
         /// <param retval="property">The property.</param>
         /// <returns></returns>
-        private static Func<object, object> CreateGetterMethod(PropertyInfo property)
+        private Func<object, object> CreateGetterMethod()
         {
+            var property = this.Property;
+            if (property == null)
+            {
+                return o => ThrowAcessorNotSupported("getter");
+            }
+
             var genericHelper = _myType.GetMethod("GetterMethod", BindingFlags.Static | BindingFlags.NonPublic);
             var constructedHelper = genericHelper.MakeGenericMethod(property.DeclaringType, property.PropertyType);
             return (Func<object, object>)constructedHelper.Invoke(null, new object[] { property });
+        }
+
+        private object ThrowAcessorNotSupported(string accessor)
+        {
+            throw new NotSupportedException(string.Format(
+                "The magic property {0} of type {1} has no underlying reflection property and has no custom {2}.",
+                this.Name, this.DeclaringType.Name, accessor
+            ));
         }
 
         /// <summary>
@@ -201,6 +243,11 @@ namespace Norm.BSON
         /// <returns></returns>
         private static Func<object, bool> CreateShouldSerializeMethod(PropertyInfo property)
         {
+            if (property == null)
+            {
+                return (o => true);
+            }
+
             MethodInfo method = null;
             string filterCriteria = "ShouldSerialize" + property.Name;
             var members = property.DeclaringType.GetMember(filterCriteria);
@@ -224,9 +271,9 @@ namespace Norm.BSON
         /// <summary>
         /// Setter method.
         /// </summary>
-        /// <typeparam retval="TTarget">The type of the target.</typeparam>
-        /// <typeparam retval="TParam">The type of the param.</typeparam>
-        /// <param retval="method">The method.</param>
+        /// <typeparam name="TTarget">The type of the target.</typeparam>
+        /// <typeparam name="TParam">The type of the param.</typeparam>
+        /// <param name="method">The method.</param>
         /// <returns></returns>
         private static Action<object, object> SetterMethod<TTarget, TParam>(PropertyInfo method) where TTarget : class
         {
@@ -252,9 +299,9 @@ namespace Norm.BSON
         /// <summary>
         /// Getter method.
         /// </summary>
-        /// <typeparam retval="TTarget">The type of the target.</typeparam>
-        /// <typeparam retval="TParam">The type of the param.</typeparam>
-        /// <param retval="method">The method.</param>
+        /// <typeparam name="TTarget">The type of the target.</typeparam>
+        /// <typeparam name="TParam">The type of the param.</typeparam>
+        /// <param name="method">The method.</param>
         /// <returns></returns>
         private static Func<object, object> GetterMethod<TTarget, TParam>(PropertyInfo method) where TTarget : class
         {
@@ -266,8 +313,8 @@ namespace Norm.BSON
         /// <summary>
         /// ShouldSerialize... method.
         /// </summary>
-        /// <typeparam retval="TTarget">The type of the target.</typeparam>
-        /// <param retval="method">The method.</param>
+        /// <typeparam name="TTarget">The type of the target.</typeparam>
+        /// <param name="method">The method.</param>
         /// <returns></returns>
         private static Func<object, bool> ShouldSerializeMethod<TTarget>(MethodInfo method) where TTarget : class
         {

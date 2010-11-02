@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+
 using Norm.BSON;
-using NUnit.Framework;
 using Norm.Collections;
+using Norm.Configuration;
+
+using NUnit.Framework;
 
 namespace Norm.Tests
 {
@@ -10,19 +14,19 @@ namespace Norm.Tests
     [TestFixture]
     public class UpdateTests 
     {
-		private Mongod _proc;
+        private Mongod _proc;
 
-		[TestFixtureSetUp]
-		public void FixtureSetUp ()
-		{
-			_proc = new Mongod ();
-		}
+        [TestFixtureSetUp]
+        public void FixtureSetUp ()
+        {
+            _proc = new Mongod ();
+        }
 
-		[TestFixtureTearDown]
-		public void FixtureTearDown ()
-		{
-			_proc.Dispose ();
-		}
+        [TestFixtureTearDown]
+        public void FixtureTearDown ()
+        {
+            _proc.Dispose ();
+        }
 
         private  IMongo _server;
         private  IMongoCollection<CheeseClubContact> _collection;
@@ -184,6 +188,32 @@ namespace Norm.Tests
 
             var results = _collection.Find();
             Assert.AreEqual(1, results.Count());
+        }
+
+        [Test]
+        public void UpdateShouldWorkWhenIdUsesCustomAndGetterSetterMap()
+        {
+            var idMap = new Dictionary<object, ObjectId>();
+            MongoConfiguration.Initialize(config => config.For<CheeseClubContactWithoutId>(typeConfig => typeConfig.IdIs(
+                contact => idMap.ContainsKey(contact) ? idMap[contact] : null,
+                (contact, id) => idMap[contact] = id
+            )));
+
+            var collection = _server.GetCollection<CheeseClubContactWithoutId>();
+            var subject = new CheeseClubContactWithoutId();
+            collection.Save(subject);
+
+            Assert.IsTrue(idMap.ContainsKey(subject));
+            Assert.IsNotNull(idMap[subject]);
+
+            subject.Name = "hello";
+            collection.Save(subject);
+
+            var latest = collection.FindOne(new { Id = idMap[subject] });
+
+            Assert.AreEqual(subject.Name, latest.Name);
+
+            _server.Database.DropCollection(typeof(CheeseClubContactWithoutId).Name);
         }
     }
 }

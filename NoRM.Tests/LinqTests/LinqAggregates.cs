@@ -10,21 +10,21 @@ namespace Norm.Tests
     [TestFixture]
     public class LinqAggregates
     {
-		private Mongod _proc;
+        private Mongod _proc;
 
-		[TestFixtureSetUp]
-		public void SetupTestFixture ()
-		{
-			_proc = new Mongod ();
-		}
+        [TestFixtureSetUp]
+        public void SetupTestFixture ()
+        {
+            _proc = new Mongod ();
+        }
 
-		[TestFixtureTearDown]
-		public void TearDownTestFixture ()
-		{
-			_proc.Dispose ();
-		}
+        [TestFixtureTearDown]
+        public void TearDownTestFixture ()
+        {
+            _proc.Dispose ();
+        }
 
-	
+    
         [SetUp]
         public void TestSetup()
         {

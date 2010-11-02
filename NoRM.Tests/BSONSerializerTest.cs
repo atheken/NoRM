@@ -75,10 +75,10 @@ namespace Norm.Tests
         [Test]
         public void SerializationOfDatesHasMillisecondPrecision ()
         {
-        	var n = DateTime.Now;
-        	//some rounding issues when ticks are involved.
-			n = n - new TimeSpan (n.Ticks);
-        	
+            var n = DateTime.Now;
+            //some rounding issues when ticks are involved.
+            n = n - new TimeSpan (n.Ticks);
+            
             var obj1 = new GeneralDTO { ADateTime = null };
             var obj2 = new GeneralDTO { ADateTime = n };
 

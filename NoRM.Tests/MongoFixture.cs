@@ -1,5 +1,8 @@
 using System;
+using System.Configuration;
 using System.Diagnostics;
+using System.IO;
+
 using NUnit.Framework;
 
 namespace Norm.Tests
@@ -17,6 +20,9 @@ namespace Norm.Tests
         protected virtual string Arguments
         {
             get { return string.Empty; }
+        }
+        protected virtual string MongodPath {
+            get { return ConfigurationManager.AppSettings["mongodPath"]; }
         }
 
         protected string ConnectionString()
@@ -50,14 +56,15 @@ namespace Norm.Tests
               {
                   StartInfo = new ProcessStartInfo
                           {
-                              FileName = "mongod",
+                              UseShellExecute = false,
+                              FileName = Path.Combine(this.MongodPath, "mongo"),
                               Arguments = string.Format("--port {0} --dbpath {1} --smallfiles {2}",
-                                this.Port, this.DataPath, this.Arguments),
-                          },
+                                this.Port, this.DataPath, this.Arguments)
+                          }
               };
-            _process.Start();
+            _process.Start();            
         }
-
+        
         public void Dispose()
         {
             _process.Kill();

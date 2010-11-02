@@ -9,7 +9,7 @@ namespace Norm.Configuration
     /// Mongo configuration for a specific type
     /// </summary>
     /// <typeparam retval="T">
-    /// Type under configuratino
+    /// Type under configuration.
     /// </typeparam>
     public class MongoTypeConfiguration<T> : MongoTypeConfiguration, ITypeConfiguration<T>
     {
@@ -24,7 +24,7 @@ namespace Norm.Configuration
         /// <summary>
         /// Looks up property names for use with aliases.
         /// </summary>
-        /// <param retval="sourcePropery">The source propery.</param>
+        /// <param retval="sourcePropery">The source property.</param>
         /// <returns></returns>
         public IPropertyMappingExpression ForProperty(Expression<Func<T, object>> sourcePropery)
         {
@@ -40,7 +40,7 @@ namespace Norm.Configuration
         /// <summary>
         /// Defines a property as and entity's Id explicitly.
         /// </summary>
-        /// <param retval="idProperty">The Id propery.</param>
+        /// <param retval="idProperty">The Id property.</param>
         /// <returns></returns>
         public void IdIs(Expression<Func<T, object>> idProperty)
         {
@@ -50,13 +50,26 @@ namespace Norm.Configuration
             PropertyMaps[typeKey][propertyName] = new PropertyMappingExpression {IsId = true};
         }
 
-        /// <summary>
-        /// Uses a retval collection for a given type.
-        /// </summary>
-        /// <param retval="connectionStrings">The connection strings.</param>
-        public void UseCollectionNamed(string connectionStrings)
+        public void IdIs<TValue>(Func<T, TValue> idGetter, Action<T, TValue> idSetter) 
         {
-            CollectionNames[typeof(T)] = connectionStrings;
+            var typeKey = typeof(T);
+            CheckForPropertyMap(typeKey);
+            PropertyMaps[typeKey]["$id"] = new PropertyMappingExpression
+            {
+                IsId = true,
+                Type = typeof(TValue),
+                Getter = x => idGetter((T)x),
+                Setter = (x, value) => idSetter((T)x, (TValue)value)
+            };
+        }
+
+        /// <summary>
+        /// Uses a given collection name for a given type.
+        /// </summary>
+        /// <param name="collectionName">The collection name.</param>
+        public void UseCollectionNamed(string collectionName)
+        {
+            CollectionNames[typeof(T)] = collectionName;
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
 
