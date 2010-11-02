@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using Xunit;
+
 using Norm.BSON;
 using Norm.Configuration;
-using Xunit;
 
 namespace Norm.Tests
 {
@@ -10,64 +14,77 @@ namespace Norm.Tests
         [Fact]
         public void Can_Determine_Id_When_Entity_Has__id_Property()
         {
-            Assert.Equal("_id", new IdPropertyFinder(typeof(EntityWithUnderscoreidProperty)).IdProperty.Name);
+            Assert.Equal("_id", CreateIdPropertyFinderFor<EntityWithUnderscoreidProperty>().IdProperty.Name);
         }
 
         [Fact]
         public void Can_Determine_Id_When_Entity_Has_Id_Property()
         {
-            Assert.Equal("Id", new IdPropertyFinder(typeof(EntityWithIdProperty)).IdProperty.Name);
+            Assert.Equal("Id", CreateIdPropertyFinderFor<EntityWithIdProperty>().IdProperty.Name);
         }
 
         [Fact]
         public void Can_Determine_Id_When_Entity_Has_Id_Identified_By_MongoIdentifierAttribute()
         {
-            Assert.Equal("UnconventionalId", new IdPropertyFinder(typeof(EntityWithAttributeDefinedId)).IdProperty.Name);
+            Assert.Equal("UnconventionalId", CreateIdPropertyFinderFor<EntityWithAttributeDefinedId>().IdProperty.Name);
         }
 
         [Fact]
         public void Can_Determine_Id_When_Entity_Has_Id_Defined_By_Map()
         {
             MongoConfiguration.Initialize(config => config.AddMap<EntityWithIdDefinedByMapConfigurationMap>());
-            Assert.Equal("UnconventionalId", new IdPropertyFinder(typeof(EntityWithIdDefinedByMap)).IdProperty.Name);
+            Assert.Equal("UnconventionalId", CreateIdPropertyFinderFor<EntityWithIdDefinedByMap>().IdProperty.Name);
         }
 
         [Fact]
         public void FindIdProperty_Throws_MongoConfigurationException_When_Entity_Has__id_And_MongoIdentifierAttribute()
         {
-            Assert.Throws<MongoConfigurationMapException>(() => new IdPropertyFinder(typeof(EntityWithUnderscoreidAndAttribute)).IdProperty);
+            Assert.Throws<MongoConfigurationMapException>(() => CreateIdPropertyFinderFor<EntityWithUnderscoreidAndAttribute>().IdProperty);
         }
 
         [Fact]
         public void FindIdProperty_Throws_MongoConfigurationException_When_Entity_Has__id_And_MappedId()
         {
             MongoConfiguration.Initialize(config => config.AddMap<EntityWithUnderscoreidAndMappedIdConfigurationMap>());
-            Assert.Throws<MongoConfigurationMapException>(() => new IdPropertyFinder(typeof(EntityWithUnderscoreidAndAttribute)).IdProperty);
+            Assert.Throws<MongoConfigurationMapException>(() => CreateIdPropertyFinderFor<EntityWithUnderscoreidAndAttribute>().IdProperty);
         }
 
         [Fact]
         public void FindIdProperty_Returns_MappedId_Property_When_Entity_Has_MappedId_And_Attribute_Defined_Id()
         {
             MongoConfiguration.Initialize(config => config.AddMap<EntityWithMappedIdAndAttributeDefindIdConfigurationMap>());
-            Assert.Equal("MappedId", new IdPropertyFinder(typeof(EntityWithMappedIdAndAttributeDefindId)).IdProperty.Name);
+            Assert.Equal("MappedId", CreateIdPropertyFinderFor<EntityWithMappedIdAndAttributeDefindId>().IdProperty.Name);
         }
 
         [Fact]
         public void FindIdProperty_Returns_Attribute_Defined_Id_Property_When_Entity_Has_Attribute_Defined_Id_And_Conventional_Id()
         {
-            Assert.Equal("AttributeDefinedId", new IdPropertyFinder(typeof(EntityWithAttributeDefindIdAndConventionalId)).IdProperty.Name);
+            Assert.Equal("AttributeDefinedId", CreateIdPropertyFinderFor<EntityWithAttributeDefindIdAndConventionalId>().IdProperty.Name);
         }
 
         [Fact]
         public void FindIdProperty_Returns_Null_When_Entity_Has_No_Id_Defined()
         {
-            Assert.Null(new IdPropertyFinder(typeof(EntityWithNoId)).IdProperty);
+            Assert.Null(CreateIdPropertyFinderFor<EntityWithNoId>().IdProperty);
         }
 
         [Fact]
-        public void FindIdPropert_Returns_Id_Specified_By_Attribute_In_Implemented_Interface()
+        public void FindIdProperty_Returns_Id_Specified_By_Attribute_In_Implemented_Interface()
         {
-            Assert.Equal("MyId", new IdPropertyFinder(typeof(DtoWithNonDefaultIdClass)).IdProperty.Name);
+            Assert.Equal("MyId", CreateIdPropertyFinderFor<DtoWithNonDefaultIdClass>().IdProperty.Name);
+        }
+
+        private IdPropertyFinder CreateIdPropertyFinderFor<T>()
+        {
+            var properties = typeof(T).GetProperties();
+            var magic = properties.Select(
+                property => new MagicProperty(typeof(T), new MagicPropertyConfiguration
+                                                         {
+                                                             Property = property
+                                                         })
+            ).ToArray();
+
+            return new IdPropertyFinder(typeof(T), magic);
         }
     }
 

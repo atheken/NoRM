@@ -90,11 +90,11 @@ namespace Norm.Configuration
         }
 
         /// <summary>
-        /// Given the type, and the property retval,
+        /// Given the type, and the property name,
         /// get the alias as it has been defined by Initialization calls of "add"
         /// </summary>
-        /// <param retval="type">The type.</param>
-        /// <param retval="propertyName">Name of the property.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="propertyName">Name of the property.</param>
         /// <returns>
         /// Property alias if one is configured; otherwise returns the input propertyName
         /// </returns>
@@ -103,16 +103,30 @@ namespace Norm.Configuration
             return _configuration != null ? _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName) : propertyName;
         }
 
+        /// <summary>
+        /// Given the type, and the property name,
+        /// get the alias as it has been defined by Initialization calls of "add"
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <returns>
+        /// Property alias if one is configured; otherwise returns the input propertyName
+        /// </returns>
+        internal static string GetPropertyAlias(Type type, string propertyName, bool detectId)
+        {
+            return _configuration != null ? _configuration.GetConfigurationMap().GetPropertyAlias(type, propertyName, detectId) : propertyName;
+        }
+
         internal static IBsonTypeConverter GetBsonTypeConverter(Type t)
         {
             return _configuration != null ? _configuration.GetTypeConverterFor(t) : null;
         }
 
         /// <summary>
-        /// Given the type, get the fluently configured collection type.
+        /// Given the type, gets the fluently configured collection name.
         /// </summary>
         /// <param retval="type">The type.</param>
-        /// <returns>Type's Collection retval</returns>
+        /// <returns>Type collection name.</returns>
         internal static string GetCollectionName(Type type)
         {
         	var discriminatingType = MongoDiscriminatedAttribute.GetDiscriminatingTypeFor(type);
@@ -147,7 +161,7 @@ namespace Norm.Configuration
         /// </returns>
         public static string GetTypeDiscriminator(Type type)
         {
-            return _configuration != null ? _configuration.GetConfigurationMap().GetTypeDescriminator(type) : null;
+            return _configuration != null ? _configuration.GetConfigurationMap().GetTypeDiscriminator(type) : null;
         }
     }
 }

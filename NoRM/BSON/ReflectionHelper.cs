@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using System.Reflection;
+
 using Norm.Attributes;
 using Norm.Configuration;
-using System.Text.RegularExpressions;
 
 namespace Norm.BSON
 {
@@ -76,6 +77,9 @@ namespace Norm.BSON
 
         public static PropertyInfo[] GetInterfaceProperties(Type type)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
             List<PropertyInfo> interfaceProperties;
             Type[] interfaces = type.GetInterfaces();
 
@@ -101,7 +105,7 @@ namespace Norm.BSON
         {
             _type = type;
             var properties = GetProperties(type);
-            _properties = LoadMagicProperties(properties, new IdPropertyFinder(type, properties).IdProperty);
+            _properties = LoadMagicProperties(type, properties);
 
             if (typeof(IExpando).IsAssignableFrom(type))
             {
@@ -136,7 +140,7 @@ namespace Norm.BSON
         /// (i.e. x => x.Name)
         /// </summary>
         /// <param retval="lambdaExpression">The lambda expression.</param>
-        /// <returns>Property retval</returns>
+        /// <returns>Property name.</returns>
         public static string FindProperty(LambdaExpression lambdaExpression)
         {
             Expression expressionToCheck = lambdaExpression;
@@ -203,10 +207,10 @@ namespace Norm.BSON
         }
 
         /// <summary>
-        /// Returns the magic property for the specified retval, or null if it doesn't exist.
+        /// Returns the magic property for the specified name, or null if it doesn't exist.
         /// </summary>
-        /// <param retval="retval">The retval.</param>
-        /// <returns></returns>
+        /// <param name="name">The name.</param>
+        /// <returns>The magic property with the specified name.</returns>
         public MagicProperty FindProperty(string name)
         {
             return _properties.ContainsKey(name) ? _properties[name] : null;
@@ -222,25 +226,15 @@ namespace Norm.BSON
                 _properties["$_id"] : _properties.ContainsKey("$id") ? _properties["$id"] : null;
         }
 
-        ///<summary>
-        /// Returns the property defined as the Id for the entity either by convention or explicitly. 
-        ///</summary>
-        ///<param retval="type">The type.</param>
-        ///<returns></returns>
-        public static PropertyInfo FindIdProperty(Type type)
-        {
-            return new IdPropertyFinder(type).IdProperty;
-        }
-
         /// <summary>
         /// Loads magic properties.
         /// </summary>
         /// <param retval="properties">The properties.</param>
         /// <param retval="idProperty">The id property.</param>
         /// <returns></returns>
-        private static IDictionary<string, MagicProperty> LoadMagicProperties(IEnumerable<PropertyInfo> properties, PropertyInfo idProperty)
+        private static IDictionary<string, MagicProperty> LoadMagicProperties(Type declaringType, IEnumerable<PropertyInfo> properties)
         {
-            var magic = new Dictionary<string, MagicProperty>(StringComparer.CurrentCultureIgnoreCase);
+            var magicList = new List<MagicProperty>();
             foreach (var property in properties)
             {
                 if (property.GetCustomAttributes(_ignoredType, true).Length > 0 ||
@@ -249,18 +243,28 @@ namespace Norm.BSON
                     continue;
                 }
 
-                //HACK: this is a latent BUG, if MongoConfiguration is altered after stashing the type helper, we die.
-                var alias = MongoConfiguration.GetPropertyAlias(property.DeclaringType, property.Name);
+                magicList.Add(new MagicProperty(property.DeclaringType, new MagicPropertyConfiguration {
+                    Property = property
+                }));
+            }
 
-                var name = (property == idProperty && alias != "$id") ? "$_id" : alias;
-                magic.Add(name, new MagicProperty(property, property.DeclaringType));
+            var idMagicProperty = new IdPropertyFinder(declaringType, magicList).IdProperty;
+
+            var magic = new Dictionary<string, MagicProperty>(StringComparer.CurrentCultureIgnoreCase);
+            foreach (var magicProperty in magicList)
+            {
+                //HACK: this is a latent BUG, if MongoConfiguration is altered after stashing the type helper, we die.
+                var alias = MongoConfiguration.GetPropertyAlias(magicProperty.DeclaringType, magicProperty.Name, false);
+
+                var name = (magicProperty == idMagicProperty && alias != "$id") ? "$_id" : alias;
+                magic.Add(name, magicProperty);
             }
 
             return magic;
         }
 
         /// <summary>
-        /// Determines the discriminator to use when serialising the type
+        /// Determines the discriminator to use when serializing the type.
         /// </summary>
         /// <returns></returns>
         public string GetTypeDiscriminator()
@@ -297,5 +301,12 @@ namespace Norm.BSON
             }
         }
 
+        public static TDelegate ConvertDelegateTo<TDelegate>(Delegate @delegate) {
+            return (TDelegate)(object)Delegate.CreateDelegate(
+                typeof(TDelegate),
+                @delegate.Target,
+                @delegate.Method
+            );
+        }
     }
 }

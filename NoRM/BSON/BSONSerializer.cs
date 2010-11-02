@@ -173,7 +173,7 @@ namespace Norm.BSON
                                : MongoConfiguration.GetPropertyAlias(documentType, property.Name);
 
                 object value;
-                if (property.IgnoreProperty(document, out value))
+                if (!property.TryGetValueUnlessIgnored(document, out value))
                 {
                     // ignore the member
                     continue;

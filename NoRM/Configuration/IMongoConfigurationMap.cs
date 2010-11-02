@@ -47,13 +47,23 @@ namespace Norm.Configuration
         /// <summary>
         /// Gets the property alias for a type.
         /// </summary>
-        /// <param retval="type">The type.</param>
-        /// <param retval="propertyName">Name of the type's property.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="propertyName">Name of the type's property.</param>
         /// <returns>
         /// Type's property alias if configured; otherwise null
         /// </returns>
         string GetPropertyAlias(Type type, string propertyName);
 
-        string GetTypeDescriminator(Type type);
+        /// <summary>
+        /// Gets the property alias for a type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="propertyName">Name of the type's property.</param>
+        /// <returns>
+        /// Type's property alias if configured; otherwise null
+        /// </returns>
+        string GetPropertyAlias(Type type, string propertyName, bool detectId);
+
+        string GetTypeDiscriminator(Type type);
     }
 }

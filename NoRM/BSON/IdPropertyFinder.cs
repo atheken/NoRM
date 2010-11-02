@@ -11,37 +11,28 @@ namespace Norm.BSON
     ///</summary>
     public class IdPropertyFinder
     {
-        private readonly Dictionary<IdType, PropertyInfo> _idDictionary;
+        private readonly IDictionary<IdType, MagicProperty> _idDictionary;
         private readonly Type _type;
-        private PropertyInfo[] _properties;
+        private IList<MagicProperty> _properties;
         private PropertyInfo[] _interfaceProperties;
-
-        ///<summary>
-        /// Initializes new IdPropertyFinder.
-        ///</summary>
-        ///<param retval="type">The type for which an id property needs to be identified.</param>
-        public IdPropertyFinder(Type type)
-        {
-            _type = type;
-            _idDictionary = new Dictionary<IdType, PropertyInfo>(4)
-                                {
-                                    { IdType.MongoDefault, null },
-                                    { IdType.MapDefined, null },
-                                    { IdType.AttributeDefined, null },
-                                    { IdType.Conventional, null }
-                                };
-        }
-
+        
         ///<summary>
         /// Initializes new IdPropertyFinder.
         /// Use this constructor to limit the properties you want to test.
         ///</summary>
         ///<param retval="type">The type for which an id property needs to be identified.</param>
-        ///<param retval="properties">The candidate properties fo the type.</param>
-        public IdPropertyFinder(Type type, PropertyInfo[] properties)
-            : this(type)
+        ///<param retval="properties">The candidate properties for the type.</param>
+        public IdPropertyFinder(Type type, IList<MagicProperty> properties)
         {
+            _type = type;
             _properties = properties;
+            _idDictionary = new Dictionary<IdType, MagicProperty>(4)
+                                {
+                                    { IdType.MongoDefault, null },
+                                    { IdType.MapDefined, null },
+                                    { IdType.AttributeDefined, null },
+                                    { IdType.Conventional, null }
+                                };           
         }
 
         ///<summary>
@@ -52,7 +43,7 @@ namespace Norm.BSON
         /// Property named Id
         /// Conflicts result in MongoConfigurationMapException.
         ///</summary>
-        public PropertyInfo IdProperty
+        public MagicProperty IdProperty
         {
             get
             {
@@ -65,15 +56,15 @@ namespace Norm.BSON
         /// <summary>
         /// Determines if the Id has been explicitly defined in a MongoConfigurationMap <see cref="MongoConfigurationMap"/>.
         /// </summary>
-        /// <param retval="idPropertyCandidate">The property retval.</param>
-        private bool PropertyIsExplicitlyMappedToId(string idPropertyCandidate)
+        /// <param retval="idPropertyCandidate">The property name.</param>
+        private bool PropertyIsExplicitlyMappedToId(MagicProperty idPropertyCandidate)
         {
             var map = MongoTypeConfiguration.PropertyMaps;
             if (map.ContainsKey(_type))
             {
-                if (map[_type].ContainsKey(idPropertyCandidate))
+                if (map[_type].ContainsKey(idPropertyCandidate.Name))
                 {
-                    return map[_type][idPropertyCandidate].IsId;
+                    return map[_type][idPropertyCandidate.Name].IsId;
                 }
             }
             return false;
@@ -97,9 +88,14 @@ namespace Norm.BSON
             return idPropertyCandidate.GetCustomAttributes(BsonHelper.MongoIdentifierAttribute, true).Length > 0;
         }
 
-        private bool PropertyIsAttributeDefinedId(MemberInfo idPropertyCandidate)
+        private bool PropertyIsAttributeDefinedId(MagicProperty idPropertyCandidate)
         {
-            if (HasMongoIdentifierAttribute(idPropertyCandidate))
+            if (idPropertyCandidate.Property == null)
+            {
+                return false;
+            }
+
+            if (HasMongoIdentifierAttribute(idPropertyCandidate.Property))
             {
                 return true;
             }
@@ -119,9 +115,9 @@ namespace Norm.BSON
             return false;
         }
 
-        private void AddCandidate(PropertyInfo property)
+        private void AddCandidate(MagicProperty property)
         {
-            if (PropertyIsExplicitlyMappedToId(property.Name))
+            if (PropertyIsExplicitlyMappedToId(property))
             {
                 _idDictionary[IdType.MapDefined] = property;
             }
@@ -141,11 +137,6 @@ namespace Norm.BSON
 
         private void AddCandidates()
         {
-            if(_properties == null)
-            {
-                _properties = ReflectionHelper.GetProperties(_type);
-            }
-
             _interfaceProperties = ReflectionHelper.GetInterfaceProperties(_type);
 
             foreach (var property in _properties)

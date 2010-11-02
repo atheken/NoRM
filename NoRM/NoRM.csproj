@@ -92,6 +92,7 @@
     <Compile Include="BSON\IBsonTypeConverter.cs" />
     <Compile Include="BSON\IdPropertyFinder.cs" />
     <Compile Include="BSON\IExpando.cs" />
+    <Compile Include="BSON\MagicPropertyConfiguration.cs" />
     <Compile Include="BSON\Lists\ArrayWrapper.cs" />
     <Compile Include="BSON\Lists\BaseWrapper.cs" />
     <Compile Include="BSON\Lists\CollectionWrapper.cs" />
@@ -145,7 +146,7 @@
     <Compile Include="Configuration\IMongoConfigurationMap.cs" />
     <Compile Include="Configuration\IPropertyMappingExpression.cs" />
     <Compile Include="Configuration\ITypeConfiguration.cs" />
-    <Compile Include="Configuration\ITypedConfigurationGeneric.cs" />
+    <Compile Include="Configuration\ITypeConfigurationGeneric.cs" />
     <Compile Include="Configuration\MongoConfiguration.cs" />
     <Compile Include="Configuration\MongoConfigurationMap.cs" />
     <Compile Include="Configuration\MongoConfigurationMapException.cs" />
@@ -268,6 +269,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
