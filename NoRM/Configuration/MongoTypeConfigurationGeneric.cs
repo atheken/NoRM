@@ -50,13 +50,26 @@ namespace Norm.Configuration
             PropertyMaps[typeKey][propertyName] = new PropertyMappingExpression {IsId = true};
         }
 
+        public void IdIs<TValue>(Func<T, TValue> idGetter, Action<T, TValue> idSetter) 
+        {
+            var typeKey = typeof(T);
+            CheckForPropertyMap(typeKey);
+            PropertyMaps[typeKey]["$id"] = new PropertyMappingExpression
+            {
+                IsId = true,
+                Type = typeof(TValue),
+                Getter = x => idGetter((T)x),
+                Setter = (x, value) => idSetter((T)x, (TValue)value)
+            };
+        }
+
         /// <summary>
         /// Uses a given collection name for a given type.
         /// </summary>
-        /// <param name="name">The collection name.</param>
-        public void UseCollectionNamed(string name)
+        /// <param name="collectionName">The collection name.</param>
+        public void UseCollectionNamed(string collectionName)
         {
-            CollectionNames[typeof(T)] = name;
+            CollectionNames[typeof(T)] = collectionName;
             MongoConfiguration.FireTypeChangedEvent(typeof(T));
         }
 

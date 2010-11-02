@@ -240,6 +240,11 @@ namespace Norm.Tests
         public string FavoriteCheese { get; set; }
     }
 
+    internal class CheeseClubContactWithoutId {
+        public string Name { get; set; }
+        public string FavoriteCheese { get; set; }
+    }
+
     internal class ProductReference
     {
         public ProductReference()

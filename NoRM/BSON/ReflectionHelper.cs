@@ -300,13 +300,5 @@ namespace Norm.BSON
                 }
             }
         }
-
-        public static TDelegate ConvertDelegateTo<TDelegate>(Delegate @delegate) {
-            return (TDelegate)(object)Delegate.CreateDelegate(
-                typeof(TDelegate),
-                @delegate.Target,
-                @delegate.Method
-            );
-        }
     }
 }

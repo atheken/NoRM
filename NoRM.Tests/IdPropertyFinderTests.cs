@@ -65,7 +65,24 @@ namespace Norm.Tests
         [Fact]
         public void FindIdProperty_Returns_Null_When_Entity_Has_No_Id_Defined()
         {
+            MongoConfiguration.Initialize(config => config.RemoveFor<EntityWithNoId>());
             Assert.Null(CreateIdPropertyFinderFor<EntityWithNoId>().IdProperty);
+        }
+
+        [Fact]
+        public void FindIdProperty_Returns_Mapped_Id_With_Correct_Getter_And_Setter() 
+        {
+            object id = null;
+            MongoConfiguration.Initialize(config => config.For<EntityWithNoId>(t => t.IdIs(
+                x => id,
+                (x, value) => { id = value; }
+            )));
+            var idProperty = CreateIdPropertyFinderFor<EntityWithNoId>().IdProperty;
+            var propertyValue = new object();
+            idProperty.Setter(null, propertyValue);
+
+            Assert.Same(propertyValue, idProperty.Getter(null));
+            Assert.Same(propertyValue, id);
         }
 
         [Fact]
@@ -82,7 +99,7 @@ namespace Norm.Tests
                                                          {
                                                              Property = property
                                                          })
-            ).ToArray();
+            ).ToList();
 
             return new IdPropertyFinder(typeof(T), magic);
         }

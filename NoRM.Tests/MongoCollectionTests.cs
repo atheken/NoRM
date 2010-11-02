@@ -217,9 +217,10 @@ namespace Norm.Tests
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString()))
             {
+                db.Database.DropCollection<TestProduct>();
                 MongoConfiguration.Initialize(j => j.For<TestProduct>(k =>
                     k.ForProperty(x => x.Inventory).UseAlias("inv")));
-
+                
                 var prods = db.GetCollection<TestProduct>();
                 prods.CreateIndex(j => new { j.Available, j.Inventory.Count }, "complexIndex", true, IndexOption.Ascending);
             }

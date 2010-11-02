@@ -24,6 +24,11 @@ namespace Norm.BSON
         ///<param retval="properties">The candidate properties for the type.</param>
         public IdPropertyFinder(Type type, IList<MagicProperty> properties)
         {
+            if (properties.IsReadOnly)
+            {
+                throw new ArgumentException("Property collection passed to IdPropertyFinder must not be read-only.", "properties");
+            }
+
             _type = type;
             _properties = properties;
             _idDictionary = new Dictionary<IdType, MagicProperty>(4)
@@ -59,15 +64,30 @@ namespace Norm.BSON
         /// <param retval="idPropertyCandidate">The property name.</param>
         private bool PropertyIsExplicitlyMappedToId(MagicProperty idPropertyCandidate)
         {
-            var map = MongoTypeConfiguration.PropertyMaps;
-            if (map.ContainsKey(_type))
+            var map = MongoTypeConfiguration.GetPropertyOrEmptyMap(_type);
+            if (map.ContainsKey(idPropertyCandidate.Name))
             {
-                if (map[_type].ContainsKey(idPropertyCandidate.Name))
-                {
-                    return map[_type][idPropertyCandidate.Name].IsId;
-                }
+                return map[idPropertyCandidate.Name].IsId;
             }
             return false;
+        }
+
+        private MagicProperty GetCustomMappedIdProperty()
+        {
+            var map = MongoTypeConfiguration.GetPropertyOrEmptyMap(_type);
+            if (map.ContainsKey("$id"))
+            {
+                var idMapping = map["$id"];
+                return new MagicProperty(
+                    "$id", _type, new MagicPropertyConfiguration 
+                           {
+                               CustomType = idMapping.Type,
+                               CustomGetter = idMapping.Getter,
+                               CustomSetter = idMapping.Setter
+                           }
+                );
+            }
+            return null;
         }
 
         private void CheckForConflictingCandidates()
@@ -142,6 +162,14 @@ namespace Norm.BSON
             foreach (var property in _properties)
             {
                 AddCandidate(property);
+            }
+
+            var customId = GetCustomMappedIdProperty();
+            if (customId != null)
+            {
+                // we can safely override, because this conflict should be handled by map itself
+                _idDictionary[IdType.MapDefined] = customId;
+                _properties.Add(customId);
             }
         }
 

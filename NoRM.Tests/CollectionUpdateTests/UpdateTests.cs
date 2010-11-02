@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using Norm.BSON;
+
 using Xunit;
+
+using Norm.BSON;
 using Norm.Collections;
+using Norm.Configuration;
 
 namespace Norm.Tests
 {
@@ -164,6 +168,32 @@ namespace Norm.Tests
 
             var results = _collection.Find();
             Assert.Equal(1, results.Count());
+        }
+
+        [Fact]
+        public void UpdateShouldWorkWhenIdUsesCustomAndGetterSetterMap()
+        {
+            var idMap = new Dictionary<object, ObjectId>();
+            MongoConfiguration.Initialize(config => config.For<CheeseClubContactWithoutId>(typeConfig => typeConfig.IdIs(
+                contact => idMap.ContainsKey(contact) ? idMap[contact] : null,
+                (contact, id) => idMap[contact] = id
+            )));
+
+            var collection = _server.GetCollection<CheeseClubContactWithoutId>();
+            var subject = new CheeseClubContactWithoutId();
+            collection.Save(subject);
+
+            Assert.True(idMap.ContainsKey(subject));
+            Assert.NotNull(idMap[subject]);
+
+            subject.Name = "hello";
+            collection.Save(subject);
+
+            var latest = collection.FindOne(new { Id = idMap[subject] });
+
+            Assert.Equal(subject.Name, latest.Name);
+
+            _server.Database.DropCollection(typeof(CheeseClubContactWithoutId).Name);
         }
     }
 }

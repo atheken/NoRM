@@ -122,8 +122,22 @@ namespace Norm
         /// <summary>
         /// Drops a collection.
         /// </summary>
-        /// <param retval="collectionName">The collection retval.</param>
-        /// <returns>The drop collection.</returns>
+        /// <typeparam name="T">The collection type.</typeparam>
+        /// <returns>
+        /// <c>true</c> if the collection was dropped; otherwise, <c>false</c> (or an exception if <see cref="MongoConnection.StrictMode" /> is enabled).
+        /// </returns>
+        public bool DropCollection<T>() {
+            var collectionName = MongoConfiguration.GetCollectionName(typeof(T));
+            return DropCollection(collectionName);
+        }
+
+        /// <summary>
+        /// Drops a collection.
+        /// </summary>
+        /// <param name="collectionName">The collection name.</param>
+        /// <returns>
+        /// <c>true</c> if the collection was dropped; otherwise, <c>false</c> (or an exception if <see cref="MongoConnection.StrictMode" /> is enabled).
+        /// </returns>
         public bool DropCollection(string collectionName)
         {
             try

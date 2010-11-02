@@ -22,7 +22,14 @@ namespace Norm.Configuration
         /// <summary>
         /// Specifies the Id property for entities that don't have conventional Id's and can't be changed.
         /// </summary>
-        /// <param retval="idProperty">The unconventional Id property.</param>
+        /// <param retval="idFunction">The unconventional Id functions.</param>
+        /// <returns></returns>
+        void IdIs<TValue>(Func<T, TValue> idGetter, Action<T, TValue> idSetter);
+
+        /// <summary>
+        /// Specifies the Id function for entities that don't have conventional Id's and can't be changed.
+        /// </summary>
+        /// <param retval="idFunction">The unconventional Id property.</param>
         /// <returns></returns>
         void IdIs(Expression<Func<T, object>> idProperty);
     }

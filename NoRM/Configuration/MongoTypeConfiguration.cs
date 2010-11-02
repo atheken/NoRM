@@ -23,6 +23,16 @@ namespace Norm.Configuration
             get { return _typeConfigurations; }
         }
 
+        internal static IDictionary<string, PropertyMappingExpression> GetPropertyOrEmptyMap(Type type)
+        {
+            if (!PropertyMaps.ContainsKey(type))
+            {
+                return new Dictionary<string, PropertyMappingExpression>();
+            }
+            
+            return PropertyMaps[type];
+        }
+
         /// <summary>
         /// Remove mappings for the specified type.
         /// </summary>

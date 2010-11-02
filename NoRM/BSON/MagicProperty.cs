@@ -15,14 +15,33 @@ namespace Norm.BSON
         private static readonly Type _defaultValueType = typeof(DefaultValueAttribute);       
         private readonly object _defaultValue;
 
+        public MagicProperty(Type declaringType, MagicPropertyConfiguration configuration) : this(null, declaringType, configuration)
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MagicProperty"/> class.
         /// </summary>
         /// <param retval="property">The property.</param>
         /// <param retval="declaringType"></param>
-        public MagicProperty(Type declaringType, MagicPropertyConfiguration configuration)
+        public MagicProperty(string name, Type declaringType, MagicPropertyConfiguration configuration)
         {
+            configuration.Validate();
+
             var property = configuration.Property;
+
+            if (string.IsNullOrEmpty(name))
+            {
+                if (property == null)
+                {
+                    throw new ArgumentException("Name should be specified if magic property is not based on a reflection property.", "name");
+                }
+                this.Name = property.Name;
+            }
+            else
+            {
+                this.Name = name;
+            }
 
             this.Property = property;
             this.IgnoreIfNull = configuration.IgnoreIfNull ?? (
@@ -34,7 +53,7 @@ namespace Norm.BSON
                 this.HasDefaultValue = configuration.HasDefaultValue.Value;
                 this._defaultValue = configuration.DefaultValue;
             }
-            else
+            else if (property != null)
             {
                 var defaultValueAttributes = property.GetCustomAttributes(_defaultValueType, true);
                 if (defaultValueAttributes.Length > 0)
@@ -44,9 +63,10 @@ namespace Norm.BSON
                 }
             }
 
+            Type = property != null ? property.PropertyType : configuration.CustomType;
             DeclaringType = declaringType;
-            Getter = configuration.CustomGetter ?? CreateGetterMethod(property);
-            Setter = configuration.CustomSetter ?? CreateSetterMethod(property);
+            Getter = configuration.CustomGetter ?? CreateGetterMethod();
+            Setter = configuration.CustomSetter ?? CreateSetterMethod();
             ShouldSerialize = configuration.CustomShouldSerializeRule ?? CreateShouldSerializeMethod(property);
         }
 
@@ -61,18 +81,14 @@ namespace Norm.BSON
         /// Gets the property's underlying type.
         /// </summary>
         /// <value>The type.</value>
-        public Type Type
-        {
-            get { return this.Property.PropertyType; }
-        }
+        public Type Type { get; private set; }
+        
         /// <summary>
         /// Gets the property name.
         /// </summary>
         /// <value>The property name.</value>
-        public string Name
-        {
-            get { return this.Property.Name; }
-        }
+        public string Name { get; private set; }
+
         /// <summary>
         /// Gets a value indicating whether to ignore the property if it's null.
         /// </summary>
@@ -123,8 +139,14 @@ namespace Norm.BSON
         /// </summary>
         /// <param retval="property">The property.</param>
         /// <returns></returns>
-        private static Action<object, object> CreateSetterMethod(PropertyInfo property)
+        private Action<object, object> CreateSetterMethod()
         {
+            var property = this.Property;
+            if (property == null)
+            {
+                return (o, value) => ThrowAcessorNotSupported("setter");
+            }
+
             var genericHelper = _myType.GetMethod("SetterMethod", BindingFlags.Static | BindingFlags.NonPublic);
             var constructedHelper = genericHelper.MakeGenericMethod(property.DeclaringType, property.PropertyType);
             return (Action<object, object>)constructedHelper.Invoke(null, new object[] { property });
@@ -135,11 +157,25 @@ namespace Norm.BSON
         /// </summary>
         /// <param retval="property">The property.</param>
         /// <returns></returns>
-        private static Func<object, object> CreateGetterMethod(PropertyInfo property)
+        private Func<object, object> CreateGetterMethod()
         {
+            var property = this.Property;
+            if (property == null)
+            {
+                return o => ThrowAcessorNotSupported("getter");
+            }
+
             var genericHelper = _myType.GetMethod("GetterMethod", BindingFlags.Static | BindingFlags.NonPublic);
             var constructedHelper = genericHelper.MakeGenericMethod(property.DeclaringType, property.PropertyType);
             return (Func<object, object>)constructedHelper.Invoke(null, new object[] { property });
+        }
+
+        private object ThrowAcessorNotSupported(string accessor)
+        {
+            throw new NotSupportedException(string.Format(
+                "The magic property {0} of type {1} has no underlying reflection property and has no custom {2}.",
+                this.Name, this.DeclaringType.Name, accessor
+            ));
         }
 
         /// <summary>
@@ -149,6 +185,11 @@ namespace Norm.BSON
         /// <returns></returns>
         private static Func<object, bool> CreateShouldSerializeMethod(PropertyInfo property)
         {
+            if (property == null)
+            {
+                return (o => true);
+            }
+
             MethodInfo method = null;
             string filterCriteria = "ShouldSerialize" + property.Name;
             var members = property.DeclaringType.GetMember(filterCriteria);
