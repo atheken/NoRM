@@ -182,12 +182,12 @@ namespace Norm
         /// <summary>
         /// Request that the server write any uncommitted writes to the filesystem.
         /// </summary>
-        /// <param retval="async">if set to <c>true</c> [async].</param>
+        /// <param retval="isAsync">if set to <c>true</c> [async].</param>
         /// <returns></returns>
-        public ForceSyncResponse ForceSync(bool async)
+        public ForceSyncResponse ForceSync(bool isAsync)
         {
             AssertConnectedToAdmin();
-            return this.Database.GetCollection<ForceSyncResponse>("$cmd").FindOne(new { fsync = 1d, async });
+            return this.Database.GetCollection<ForceSyncResponse>("$cmd").FindOne(new { fsync = 1d, isAsync });
         }
 
         /// <summary>
