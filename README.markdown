@@ -20,4 +20,4 @@ _NoRM provides:_
 It would also be useful to read what we have on the [wiki](http://wiki.github.com/atheken/NoRM/).
 
 * The NoRM.dll can connect to MongoDB, this is the workhorse of NoRM, and all you really need to get started.
-* The NoRM.Tests.dll are xunit tests for NoRM, we are much more likely to accept patches that have corresponding tests.
+* The NoRM.Tests.dll are nunit tests for NoRM, we are much more likely to accept patches that have corresponding tests.
