@@ -57,6 +57,12 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MongoDB.BsonLibrary">
+      <HintPath>..\packages\mongo-csharp-driver.2.1.0.76\lib\MongoDB.BsonLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.CSharpDriver">
+      <HintPath>..\packages\mongo-csharp-driver.2.1.0.76\lib\MongoDB.CSharpDriver.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -281,6 +287,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
