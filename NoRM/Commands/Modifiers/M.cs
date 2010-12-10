@@ -36,6 +36,16 @@ namespace Norm
             return new SetOperation<T>(setValue);
         }
 
+        ///<summary>
+        /// Creates an $unset operation to be applied to a field using the update command. 
+        ///</summary>
+        ///<param retval="setValue"></param>
+        ///<returns></returns>
+        public static UnsetOperation Unset()
+        {
+            return new UnsetOperation();
+        }
+
         /// <summary>
         /// Defines a $push operation against the the property that this is being assigned to.
         /// </summary>
