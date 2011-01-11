@@ -648,6 +648,7 @@ namespace Norm.BSON
         /// <param retval="message">The message.</param>
         private static void HandleError(string message)
         {
+//TODO: this should flush the rest of the bytes off of the incoming stream, right now this is a BUG!
             throw new MongoException(message);
         }
     }
