@@ -11,7 +11,6 @@ namespace Norm.Configuration
         private static readonly Dictionary<Type, string> _collectionNames = new Dictionary<Type, string>();
         private static readonly Dictionary<Type, string> _connectionStrings = new Dictionary<Type, string>();
         private static readonly Dictionary<Type, Dictionary<string, PropertyMappingExpression>> _typeConfigurations = new Dictionary<Type, Dictionary<string, PropertyMappingExpression>>();
-        private static readonly Dictionary<Type, Type> _summaryTypes = new Dictionary<Type, Type>();
         private static readonly Dictionary<Type, bool> _discriminatedTypes = new Dictionary<Type, bool>();
 
         /// <summary>

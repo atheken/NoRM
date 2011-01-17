@@ -14,8 +14,8 @@ namespace Norm.Protocol.Messages
     {
         private readonly List<T> _results;
         private readonly int _limit;
+		private readonly MongoOp _originalOperation;
         
-        private MongoOp _originalOperation;
         /// <summary>
         /// Initializes a new instance of the <see cref="ReplyMessage{T}"/> class.
         /// Processes a response stream.

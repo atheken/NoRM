@@ -350,7 +350,6 @@ namespace Norm
             private set;
         }
 
-        private bool _disposed;
         private Timer _updateTimer;
 
         ~ConnectionOptions()

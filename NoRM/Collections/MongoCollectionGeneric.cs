@@ -107,9 +107,9 @@ namespace Norm.Collections
             var idProperty = helper.FindIdProperty();
             var id = idProperty.Getter(entity);
             if (id == null && 
-                (typeof(ObjectId).IsAssignableFrom(idProperty.Type)) ||
+                (typeof(ObjectId).IsAssignableFrom(idProperty.Type) ||
                 (typeof(long?).IsAssignableFrom(idProperty.Type)) ||
-                (typeof(int?).IsAssignableFrom(idProperty.Type)) )
+                (typeof(int?).IsAssignableFrom(idProperty.Type))) )
             {
                 Insert(entity);
             }
@@ -274,7 +274,7 @@ namespace Norm.Collections
         /// Find objects in the collection without any qualifiers.
         /// </summary>
         /// <returns></returns>
-        new public IEnumerable<T> Find()
+        public IEnumerable<T> Find()
         {
             // this is a hack to get a value that will test for null into the serializer.
             return Find(new object(), Int32.MaxValue, FullyQualifiedName);
@@ -345,7 +345,7 @@ namespace Norm.Collections
         /// A count on this collection without any filter.
         /// </summary>
         /// <returns>The count.</returns>
-        new public long Count()
+         public long Count()
         {
             return Count(new { });
         }
@@ -354,7 +354,7 @@ namespace Norm.Collections
         /// The get collection statistics.
         /// </summary>
         /// <returns></returns>
-        public new CollectionStatistics GetCollectionStatistics()
+        public CollectionStatistics GetCollectionStatistics()
         {
             return _db.GetCollectionStatistics(_collectionName);
         }
@@ -627,7 +627,6 @@ namespace Norm.Collections
                 Query = template,
                 OrderBy = orderBy
             };
-            var type = typeof(T);
             return new MongoQueryExecutor<T, U>(qm);
         }
 
@@ -876,6 +875,7 @@ namespace Norm.Collections
         /// <param retval="entities">The entities.</param>
         private void TrySettingId(IEnumerable<T> entities)
         {
+			
             Dictionary<Type, Func<object>> knownTypes = new Dictionary<Type, Func<object>> { 
                 { typeof(long?), () => GenerateId() }, 
                 { typeof(int?), () => Convert.ToInt32(GenerateId()) }, 

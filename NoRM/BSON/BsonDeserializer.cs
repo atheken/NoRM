@@ -15,7 +15,6 @@ namespace Norm.BSON
     public class BsonDeserializer : BsonSerializerBase
     {
         private static readonly Type _IEnumerableType = typeof(IEnumerable);
-        private static readonly Type _IDictionaryType = typeof(IDictionary<,>);
 
         private readonly static IDictionary<BSONTypes, Type> _typeMap = new Dictionary<BSONTypes, Type>
          {

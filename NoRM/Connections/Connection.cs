@@ -266,8 +266,6 @@ namespace Norm
 
         #endregion
 
-        private static readonly Regex _rxConnectStringWithOutQuery = new Regex("^([^?]+)", RegexOptions.Compiled);
-
         public void LoadOptions(string options)
         {
             var newOpts = ((ConnectionOptions)_builder.Clone());
