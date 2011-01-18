@@ -1,4 +1,11 @@
 using NUnit.Framework;
+using Norm;
+using Norm.BSON;
+using System;
+using System.Security.Cryptography;
+using System.Text;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Norm.Tests
 {
@@ -6,11 +13,35 @@ namespace Norm.Tests
     public class NormalConnectionProviderAuthenticationTests : AuthenticatedFixture
     {
 		private Mongod _proc;
-
+		
+		private string Hash(String instring)
+		{
+			using (var md5 = MD5.Create())
+			{
+                var rawDigest = Encoding.UTF8.GetBytes(string.Concat(instring));
+                var hashed = md5.ComputeHash(rawDigest);
+                var sb = new StringBuilder(hashed.Length * 2);
+                Array.ForEach(hashed, b => sb.Append(b.ToString("X2")));
+                return sb.ToString().ToLower();
+            }
+		}
+		
 		[TestFixtureSetUp]
 		public void SetUp ()
 		{
-			_proc = new Mongod ();
+			var authed = new Mongod();
+			
+			using(var db = Mongo.Create(this.NonAuthenticatedConnectionString("admin")))
+			{
+				 db.Database.GetCollection<object>("system.users").Insert(new {user="admin", pwd=Hash("admin:monogo:admin")});
+			}
+			using(var db = Mongo.Create(this.NonAuthenticatedConnectionString("main"))){
+				 db.Database.GetCollection<object>("system.users").Insert(new {user="usr", pwd=Hash("usr:monogo:pss")});
+			}
+			
+			authed.Dispose();
+			
+			_proc = new Mongod (true);
 		}
 
 		[TestFixtureTearDown]
@@ -28,7 +59,6 @@ namespace Norm.Tests
             Assert.AreEqual("auth fails", ex.Message);
         }
 
-        //won't pass on some 1.3.x builds of the server, but will pass against newest, or stable (1.2.3).
         [Test]
         public void AuthenticatesWithProperCredentials()
         {

@@ -38,6 +38,11 @@ namespace Norm.Tests
             get { return " --auth"; }
         }
         
+		protected string NonAuthenticatedConnectionString(String collectionName)
+		{
+			return string.Format("mongodb://localhost:{0}/{1}", Port,collectionName);	
+		}
+		
         protected string AuthenticatedConnectionString(string userName, string password)
         {
             return string.Format("mongodb://{0}:{1}@localhost:{2}/main", userName, password, this.Port);
