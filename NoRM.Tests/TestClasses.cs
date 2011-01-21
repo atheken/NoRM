@@ -543,6 +543,7 @@ namespace Norm.Tests
         public Flags32? Flags32 { get; set; }
         public Flags64? Flags64 { get; set; }
         internal IEnumerable<Person> AnIEnumerable { get; set; }
+		internal IEnumerable<object> AnIEnumerableOfObjects { get; set; }
 
         [MongoIgnore]
         public int IgnoredProperty { get; set; }

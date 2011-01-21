@@ -156,6 +156,16 @@ namespace Norm.Tests
             Assert.Equal(2, gto2.AnIEnumerable.Count());
         }
 
+		[Fact]
+		public void SerializationOfIEnumerableOfObjectShouldBeSupported()
+		{
+			var gto = new GeneralDTO { AnIEnumerableOfObjects = new List<object>() { 1,"a string" } };
+			var bytes = BsonSerializer.Serialize(gto);
+
+			var gto2 = BsonDeserializer.Deserialize<GeneralDTO>(bytes);
+			Assert.Equal(2, gto2.AnIEnumerableOfObjects.Count());
+		}
+
         [Fact]
         public void SerializationOfIntsAreNotLossy()
         {
