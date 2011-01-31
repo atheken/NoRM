@@ -98,11 +98,14 @@ namespace Norm.BSON
             }
             finally
             {
-                int toRead = deserializer._current.Length - deserializer._current.Digested;
-
-				if (toRead >= 0)
+				if (deserializer._current != null)
 				{
-					deserializer._reader.ReadBytes(toRead);
+					int toRead = deserializer._current.Length - deserializer._current.Digested;
+
+					if (toRead > 0)
+					{
+						deserializer._reader.ReadBytes(toRead);
+					}
 				}
             }
 
