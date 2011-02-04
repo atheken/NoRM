@@ -75,9 +75,15 @@ namespace Norm.Tests.GridFS
                 Assert.AreEqual(file.Id, file2.Id);
                 Assert.AreEqual(file.MD5Checksum, file2.MD5Checksum);
                 Assert.AreEqual(file.ContentType, file2.ContentType);
-                //Mongo stores dates as long, therefore, we have to use double->long rounding.
-                Assert.AreEqual((long)((file.UploadDate - DateTime.MinValue)).TotalMilliseconds,
-                    (long)(file2.UploadDate - DateTime.MinValue).TotalMilliseconds);
+				var t1 =(long) (file.UploadDate - DateTime.MinValue).TotalMilliseconds;
+				var t2 =(long) (file2.UploadDate - DateTime.MinValue).TotalMilliseconds;
+				
+				var diff = Math.Max(t1,t2) - Math.Min(t1,t2);
+				
+                //Mongo stores dates as long, therefore, we have to use double->long 
+				//NOTE: Rounding on Mono seems to round differently than .net, so we accept "close": 2ms
+				Assert.LessOrEqual(diff, 2L);
+				Assert.GreaterOrEqual(diff, 0);
                 Assert.True(file.Aliases.SequenceEqual(file2.Aliases));
                 Assert.True(file.Content.SequenceEqual(file2.Content));
             }

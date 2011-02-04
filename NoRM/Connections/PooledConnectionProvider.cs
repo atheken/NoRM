@@ -12,9 +12,9 @@ namespace Norm
         private readonly ConnectionOptions _builder;
         private readonly Stack<IConnection> _freeConnections = new Stack<IConnection>();
         private readonly List<IConnection> _invalidConnections = new List<IConnection>();
+		private readonly Timer _maintenanceTimer;
         private readonly int _lifetime;
         private readonly object _lock = new object();
-        private readonly Timer _maintenanceTimer;
         private readonly int _poolSize;
         private readonly int _timeout;
         private readonly List<IConnection> _usedConnections = new List<IConnection>();

@@ -38,8 +38,6 @@ namespace Norm.Responses
                 );
         }
 
-        private Dictionary<string, object> _properties = new Dictionary<string, object>(0);
-
         /// <summary>TODO::Description.</summary>
         /// <value>The operation Id</value>
         public int? OperationId { get; set; }
