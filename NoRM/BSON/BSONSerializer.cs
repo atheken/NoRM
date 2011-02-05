@@ -159,6 +159,11 @@ namespace Norm.BSON
             var documentType = document.GetType();
             var discriminator = typeHelper.GetTypeDiscriminator();
 
+            //Need to see if MongoConfigurationMap.UseAsDiscriminator() was used
+            if (discriminator == null)
+            {
+                discriminator = MongoConfiguration.GetTypeDiscriminator(document.GetType());
+            }
             if (String.IsNullOrEmpty(discriminator) == false)
             {
                 SerializeMember("__type", discriminator);
