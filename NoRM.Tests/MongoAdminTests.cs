@@ -97,7 +97,7 @@ namespace Norm.Tests
         public void Kill_Operation_Returns()
         {
             //since we don't have any long-running ops, this is all we can test without mocks.
-            using (var mAdmin = new MongoAdmin("mongodb://127.0.0.1/admin"))
+            using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var x = mAdmin.KillOperation(double.MaxValue);
                 Assert.AreEqual(false,x.WasSuccessful);
