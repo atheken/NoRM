@@ -38,14 +38,21 @@ namespace Norm.Tests
         }
     }
 
-    public class Mongod : IDisposable
-    {
-        /// <summary>
-        /// The path to the MongoDB "stuff"
-        /// </summary>
-        private static String MongodPath {
-            get { return ConfigurationManager.AppSettings["mongodPath"]; }
-        }
+	public class Mongod : IDisposable
+	{
+		
+		private bool _authEnabled = false;
+		
+		public Mongod():this(false)
+		{
+		}
+		
+		/// <summary>
+		/// The path to the MongoDB "stuff"
+		/// </summary>
+		private static String MongodPath {
+			get { return ConfigurationManager.AppSettings["mongodPath"]; }
+		}
 
         private static String TestAssemblyPath {
             get {
@@ -64,17 +71,26 @@ namespace Norm.Tests
 
         private Process _server_process;
 
-        public Mongod ()
-        {
-            _server_process = new Process ();
-            var dataDir =TestAssemblyPath + "/data/";
-            CreateTestDataDir (dataDir);
-
-            string arguments = string.Format ("--port {1} --dbpath {0} --smallfiles",
+		public Mongod (bool authEnabled)
+		{
+			
+			_authEnabled = authEnabled;
+			_server_process = new Process ();
+			
+			var dataDir = _authEnabled ? TestAssemblyPath + "../../../etc/testAuthData/" : TestAssemblyPath + "/data/";
+			Console.WriteLine(dataDir);
+			
+			if(!_authEnabled)
+			{
+				CreateTestDataDir (dataDir);
+			}
+            string arguments = string.Format ("--port {1} --dbpath {0} --noprealloc",
                     dataDir,
                     Int32.Parse(ConfigurationManager
                         .AppSettings["testPort"] ?? "27701"));
-
+			
+			arguments = _authEnabled ? arguments + " --auth" : arguments;
+			
             string executableName = Path.Combine(MongodPath, "mongod");
             
             _server_process.StartInfo = new ProcessStartInfo { FileName = executableName, Arguments = arguments, UseShellExecute = false, CreateNoWindow=true };

@@ -61,6 +61,7 @@ namespace Norm
                 //if not readonly, or 
                 _client.Connect(builder.PrimaryServer.GetHost(), builder.PrimaryServer.GetPort());
             }
+			_client.ReceiveTimeout = builder.QueryTimeout * 1000;
         }
 
         /// <summary>
