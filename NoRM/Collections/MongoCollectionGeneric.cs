@@ -396,8 +396,20 @@ namespace Norm.Collections
                 var me = fieldSelection.Body as MemberExpression;
                 fieldSelectionExpando[me.GetPropertyAlias()] = 1;
             }
+            // Concrete typed expressions
+            else if (fieldSelection.Body is MemberInitExpression)
+            {
+                var initExpression = (fieldSelection.Body as MemberInitExpression);
+                foreach (var assignment in initExpression.Bindings.OfType<MemberAssignment>())
+                {
+                    if (assignment.Expression is MemberExpression)
+                    {
+                        var expression = assignment.Expression as MemberExpression;
+                        fieldSelectionExpando[expression.GetPropertyAlias()] = 1;
+                    }
+                }
+            }
             #endregion
-
 
             var qm = new QueryMessage<T, U>(_connection, fullName)
             {
