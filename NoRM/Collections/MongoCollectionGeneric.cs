@@ -352,7 +352,7 @@ namespace Norm.Collections
                     update,
                     sort,
                     @new,
-                    @upsert
+                    upsert
                 }).Value;
 
                 return returnValue;
@@ -365,6 +365,18 @@ namespace Norm.Collections
                 throw;
             }
         }
+
+        public T FindAndModify(Expression<Func<T, bool>> query, Action<IModifierExpression<T>> update, Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> sort = null, bool @new = false, bool upsert = false)
+        {
+          var translator = new MongoQueryTranslator {CollectionName = _collectionName};
+          var where = translator.Translate(PartialEvaluator.Eval(query)).Where;
+          var order = sort != null ? translator.Translate(PartialEvaluator.Eval(sort)).Sort : new Expando();
+          var modifierExpression = new ModifierExpression<T>();
+          update(modifierExpression);
+
+          return FindAndModify(where, modifierExpression.Expression, order, @new, upsert);
+        }
+
 
         public IEnumerable<T> Find<U, O, Z>(U template, O orderBy, Z fieldSelector, int limit, int skip)
         {

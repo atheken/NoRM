@@ -167,9 +167,8 @@ namespace Norm
 
         public static T FindAndModify<T, U, X>(this IMongoCollection<T> collection, U query, X update)
         {
-            return collection.FindAndModify<U, X, object>(query, update, new { });
+          return collection.FindAndModify<U, X, object>(query, update, new { });
         }
-
 
         /// <summary>
         /// Overload of Update that updates one document and doesn't upsert if no matches are found.
