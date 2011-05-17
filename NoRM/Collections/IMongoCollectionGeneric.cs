@@ -111,7 +111,7 @@ namespace Norm.Collections
         /// <param name="update">A modifier object</param>
         /// <param name="sort">If multiple docs match, choose the first one in the specified sort order as the object to manipulate</param>
         /// <returns></returns>
-        T FindAndModify<U, X, Y>(U query, X update, Y sort);
+        T FindAndModify<U, X, Y>(U query, X update, Y sort, bool @new = false, bool upsert = false);
 
         /// <summary>
         /// Locates documents that match the template, in the order specified.

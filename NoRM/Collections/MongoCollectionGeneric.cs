@@ -339,7 +339,7 @@ namespace Norm.Collections
         /// <param name="update">A modifier object</param>
         /// <param name="sort">If multiple docs match, choose the first one in the specified sort order as the object to manipulate</param>
         /// <returns></returns>
-        public T FindAndModify<U, X, Y>(U query, X update, Y sort)
+        public T FindAndModify<U, X, Y>(U query, X update, Y sort, bool @new = false, bool upsert = false)
         {
             var cmdColl = this._db.GetCollection<FindAndModifyResult<T>>("$cmd");
 
@@ -348,9 +348,11 @@ namespace Norm.Collections
                 var returnValue = cmdColl.FindOne(new
                 {
                     findandmodify = this._collectionName,
-                    query = query,
-                    update = update,
-                    sort = sort
+                    query,
+                    update,
+                    sort,
+                    @new,
+                    @upsert
                 }).Value;
 
                 return returnValue;
