@@ -1,4 +1,3 @@
-
 using Norm.Configuration;
 
 namespace Norm.Responses
@@ -12,7 +11,7 @@ namespace Norm.Responses
         {
             MongoConfiguration.Initialize(c => c.For<LastErrorResponse>(a =>
                                                    {
-                                                       a.ForProperty(auth => auth.NumberOfErrors).UseAlias("n");
+                                                       a.ForProperty(auth => auth.NumberOfUpdates).UseAlias("n");
                                                        a.ForProperty(auth => auth.Error).UseAlias("err");
                                                        a.ForProperty(auth => auth.Code).UseAlias("code");
                                                    })
@@ -20,10 +19,10 @@ namespace Norm.Responses
         }
 
         /// <summary>
-        /// Gets the number of errors.
+        /// Gets the number of updates.
         /// </summary>
-        /// <value>The number of errors.</value>
-        public long? NumberOfErrors { get; set; }
+        /// <value>The number of updates.</value>
+        public long? NumberOfUpdates{ get; set; }
 
         /// <summary>
         /// Gets the error.
