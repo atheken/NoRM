@@ -7,7 +7,7 @@ namespace Norm.Protocol
     /// </summary>
     public class Message
     {
-        protected const int FOUR_MEGABYTES = 4 * 1024 * 1024;
+        protected const int EIGHT_MEGABYTES = 8 * 1024 * 1024;
         
         /// <summary>TODO::Description.</summary>
         protected string _collection;
@@ -44,7 +44,7 @@ namespace Norm.Protocol
         protected static byte[] GetPayload<X>(X data)
         {
             var payload = BsonSerializer.Serialize(data);
-            if (payload.Length > FOUR_MEGABYTES)
+            if (payload.Length > EIGHT_MEGABYTES)
             {
                 throw new DocumentExceedsSizeLimitsException<X>(data, payload.Length);
             }
