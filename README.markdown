@@ -1,5 +1,5 @@
-NoRM is no longer actively developed, please consider using the official 10gen driver in conjunction with [FluentMongo](https://github.com/craiggwilson/fluent-mongo)
----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+NoRM is no longer actively developed, please consider using the [official 10gen driver](https://github.com/mongodb/mongo-csharp-driver)  in conjunction with [FluentMongo](https://github.com/craiggwilson/fluent-mongo)
+---
 
 NoRM is a .Net library for connecting to the document-oriented database, MongoDB.
 =================================================================================
