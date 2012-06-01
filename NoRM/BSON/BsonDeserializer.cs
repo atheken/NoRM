@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Norm.Configuration;
+using System.Linq;
 
 
 namespace Norm.BSON
@@ -95,11 +96,17 @@ namespace Norm.BSON
             {
                 retval = deserializer.Read<T>(length);
             }
-            catch (Exception ex)
+            finally
             {
-                int toRead = deserializer._current.Length - deserializer._current.Digested;
-                deserializer._reader.ReadBytes(toRead);
-                throw ex;
+				if (deserializer._current != null)
+				{
+					int toRead = deserializer._current.Length - deserializer._current.Digested;
+
+					if (toRead > 0)
+					{
+						deserializer._reader.ReadBytes(toRead);
+					}
+				}
             }
 
             return retval;
@@ -392,12 +399,32 @@ namespace Norm.BSON
             while (!IsDone())
             {
                 var storageType = ReadType();
-                ReadName();
-                if (storageType == BSONTypes.Object)
-                {
-                    NewDocument(_reader.ReadInt32());
-                }
-                var specificItemType = isObject ? _typeMap[storageType] : itemType;
+				ReadName();
+				if (storageType == BSONTypes.Object)
+				{
+					NewDocument(_reader.ReadInt32());
+				}
+            	/* //Rather than throw an error because there is a type mismatch, let the deserializer finish deserializing to keep things in sync.  
+				 * //When the mismatched type is added back to the original array, there will be a more "natural" excerption.
+				if (_typeMap.Values.Contains(itemType) && 
+					(!_typeMap.Keys.Contains(storageType) || itemType.IsAssignableFrom(_typeMap[storageType])))
+				{
+					throw new Exception("Unable to deserialize list of type " + listType.Name + 
+						" because the an array value retrieved from MongoDB is of type " + storageType + 
+						", which is not compatible with list item type " + itemType);
+				}
+				*/
+            	var specificItemType = isObject ? _typeMap[storageType] : itemType;
+
+				if (storageType == BSONTypes.Array)
+				{
+					//if typeof(object) was specified here, after recursion, 
+					//we'd end up with typeof(List<Expando>) from above (line 388ish).
+					//Expando does not encompass value objects, right?  This may be an array of strings 
+					//and other types mixed in.
+					specificItemType = typeof(List<object>);
+				}
+
                 var value = DeserializeValue(specificItemType, storageType);
                 wrapper.Add(value);
             }
