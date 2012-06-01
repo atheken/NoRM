@@ -433,9 +433,9 @@ namespace Norm.BSON
         /// <returns></returns>
         private object ReadDictionary(Type listType, object existingContainer)
         {
-            var valueType = ListHelper.GetDictionarValueType(listType);
+            var itemType = ListHelper.GetDictionarValueType(listType);
             var container = existingContainer == null ?
-                ListHelper.CreateDictionary(listType, ListHelper.GetDictionarKeyType(listType), valueType)
+                ListHelper.CreateDictionary(listType, ListHelper.GetDictionarKeyType(listType), itemType)
                 : (IDictionary)existingContainer;
 
             while (!IsDone())
@@ -447,7 +447,9 @@ namespace Norm.BSON
                 {
                     NewDocument(_reader.ReadInt32());
                 }
-                var value = DeserializeValue(valueType, storageType);
+				var isObject = typeof(object) == itemType;
+				var specificItemType = isObject ? _typeMap[storageType] : itemType;
+				var value = DeserializeValue(specificItemType, storageType);
                 container.Add(key, value);
             }
             return container;

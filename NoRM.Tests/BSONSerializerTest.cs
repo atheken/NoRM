@@ -156,6 +156,16 @@ namespace Norm.Tests
             Assert.Equal(2, gto2.AnIEnumerable.Count());
         }
 
+		[Fact]
+		public void SerializationOfIEnumerableOfObjectShouldBeSupported()
+		{
+			var gto = new GeneralDTO { AnIEnumerableOfObjects = new List<object>() { 1,"a string" } };
+			var bytes = BsonSerializer.Serialize(gto);
+
+			var gto2 = BsonDeserializer.Deserialize<GeneralDTO>(bytes);
+			Assert.Equal(2, gto2.AnIEnumerableOfObjects.Count());
+		}
+
         [Fact]
         public void SerializationOfIntsAreNotLossy()
         {
@@ -436,7 +446,19 @@ namespace Norm.Tests
             Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
             Assert.Equal(2, end.Names.ElementAt(0).Value);
         }
-       
+		[Fact]
+		public void SerializesIDictionaryWithObjectValueType()
+		{
+			var start = new IDictionaryObjectWithObjectAsValueType();
+			start.Names.Add("Duncan Idaho", 2);
+			var bytes = BsonSerializer.Serialize(start);
+			var end = BsonDeserializer.Deserialize<IDictionaryObjectWithObjectAsValueType>(bytes);
+			Assert.Equal(1, end.Names.Count);
+			Assert.Equal("Duncan Idaho", end.Names.ElementAt(0).Key);
+			Assert.Equal(2, end.Names.ElementAt(0).Value);
+		}
+      
+ 
         [Fact]
         public void SerializesReadonlyDictionary()
         {

@@ -481,6 +481,23 @@ namespace Norm.Tests
             set { _lookup = value; }
         }
     }
+
+	public class IDictionaryObjectWithObjectAsValueType
+	{
+		private IDictionary<string, object> _lookup;
+		public IDictionary<string, object> Names
+		{
+			get
+			{
+				if (_lookup == null)
+				{
+					_lookup = new Dictionary<string, object>();
+				}
+				return _lookup;
+			}
+			set { _lookup = value; }
+		}
+	}
     public class ReadOnlyDictionary
     {
         private IDictionary<string, int> _lookup;
@@ -526,6 +543,7 @@ namespace Norm.Tests
         public Flags32? Flags32 { get; set; }
         public Flags64? Flags64 { get; set; }
         internal IEnumerable<Person> AnIEnumerable { get; set; }
+		internal IEnumerable<object> AnIEnumerableOfObjects { get; set; }
 
         [MongoIgnore]
         public int IgnoredProperty { get; set; }
