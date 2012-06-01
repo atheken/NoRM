@@ -8,7 +8,7 @@ using Norm;
 
 namespace NoRM.Tests.LinqTests
 {
-    public class LinqContainsTests
+    public class LinqContainsTests : StartupHelperHarness
     {
         [Test]
         public void WhenAddItems_ThenCheckContains()

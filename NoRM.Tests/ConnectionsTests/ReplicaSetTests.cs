@@ -11,6 +11,7 @@ using t = System.Threading;
 namespace Norm.Tests.ConnectionsTests
 {
     //[TestFixture]
+    [Ignore]
     public class ReplicaSetTests
     {
         private Process _server1 = null;
@@ -65,7 +66,7 @@ namespace Norm.Tests.ConnectionsTests
         }
 
         [Test]
-		public void RunAllReplicaSetTests()
+        public void RunAllReplicaSetTests()
         {
             this.GetReplicaSetStatusReturnsCorrectInformation();
 

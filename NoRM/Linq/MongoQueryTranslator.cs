@@ -649,10 +649,6 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            if (_lastOperator == " == " || _lastOperator == " != ")
-                            {
-                                _sbWhere.Remove(_sbWhere.Length - 2, 1);
-                            }
                             _sbWhere.Append(GetJavaScriptConstantValue(c.Value));
                             SetFlyValue(c.Value);
                         }

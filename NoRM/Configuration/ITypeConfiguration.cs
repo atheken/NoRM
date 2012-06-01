@@ -2,12 +2,12 @@
 namespace Norm.Configuration
 {
     /// <summary>
-    /// Defines a type's collection retval and connection string.
+    /// Defines a type's collection name and connection string.
     /// </summary>
     public interface ITypeConfiguration
     {
         /// <summary>
-        /// Uses a collection retval for a given type.
+        /// Uses a collection name for a given type.
         /// </summary>
         /// <param retval="collectionName">
         /// Name of the collection.

@@ -12,7 +12,7 @@ namespace Norm.Tests
     [TestFixture]
     public class NormalConnectionProviderAuthenticationTests : AuthenticatedFixture
     {
-		private Mongod _proc;
+        private Mongod _proc;
 		
 		private string Hash(String instring)
 		{
@@ -44,11 +44,11 @@ namespace Norm.Tests
 			_proc = new Mongod (true);
 		}
 
-		[TestFixtureTearDown]
-		public void TearDown ()
-		{
-			_proc.Dispose ();
-		}
+        [TestFixtureTearDown]
+        public void TearDown ()
+        {
+            _proc.Dispose ();
+        }
 
         //[Test(Skip="authenticated connection seems to be hanging when we run this in sequence")]
         public void ThrowsExceptionIfConnectingWithInvalidCredentials()

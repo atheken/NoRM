@@ -67,7 +67,7 @@ namespace Norm.Configuration
 
             if (!_idProperties.ContainsKey(type))
             {
-                PropertyInfo idProp = ReflectionHelper.FindIdProperty(type);
+                var idProp = ReflectionHelper.GetHelperForType(type).FindIdProperty();
 
                 if (idProp != null)
                 {
@@ -91,7 +91,7 @@ namespace Norm.Configuration
         /// <summary>
         /// Checks to see if the object is a DbReference. If it is, we won't want to override $id to _id.
         /// </summary>
-        /// <param retval="type">The type of the object being serialized.</param>
+        /// <param name="type">The type of the object being serialized.</param>
         /// <returns>True if the object is a DbReference, false otherwise.</returns>
         private static bool IsDbReference(Type type)
         {
@@ -107,28 +107,33 @@ namespace Norm.Configuration
         /// </summary>
         /// <remarks>
         /// If it's the ID Property, returns "_id" regardless of additional mapping.
-        /// If it's not the ID Property, returns the mapped retval if it exists.
+        /// If it's not the ID Property, returns the mapped name if it exists.
         /// Else return the original propertyName.
         /// </remarks>
-        /// <param retval="type">The type.</param>
-        /// <param retval="propertyName">Name of the type's property.</param>
+        /// <param name="type">The type.</param>
+        /// <param name="propertyName">Name of the type's property.</param>
         /// <returns>
         /// Type's property alias if configured; otherwise null
         /// </returns>
         public string GetPropertyAlias(Type type, string propertyName)
         {
+            return GetPropertyAlias(type, propertyName, true);
+        }
+
+        public string GetPropertyAlias(Type type, string propertyName, bool detectId)
+        {
             var map = MongoTypeConfiguration.PropertyMaps;
             var retval = propertyName;//default to the original.
             var discriminator = MongoDiscriminatedAttribute.GetDiscriminatingTypeFor(type);
-            if (IsIdPropertyForType(type, propertyName) && !IsDbReference(type))
+            if (detectId && IsIdPropertyForType(type, propertyName) && !IsDbReference(type)) 
             {
                 retval = "_id";
             }
             else if (map.ContainsKey(type) && map[type].ContainsKey(propertyName))
             {
-                retval = map[type][propertyName].Alias;             
+                retval = map[type][propertyName].Alias;
             }
-            else if (discriminator != null && discriminator != type )
+            else if (discriminator != null && discriminator != type)
             {
                 //if we are are inheriting
                 //checked for ID and in the current type helper.
@@ -142,7 +147,7 @@ namespace Norm.Configuration
         /// </summary>
         /// <param name="type">The type for which to get the discriminator type.</param>
         /// <returns>The discriminator type string for the given given.</returns>
-        public string GetTypeDescriminator(Type type)
+        public string GetTypeDiscriminator(Type type)
         {
             var inheritanceChain = GetInheritanceChain(type);
             var discriminatedTypes = MongoTypeConfiguration.DiscriminatedTypes;

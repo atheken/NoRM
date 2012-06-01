@@ -13,19 +13,19 @@ namespace Norm.Tests.GridFS
     [TestFixture]
     public class GridFileCollectionTests
     {
-		private Mongod _proc;
+        private Mongod _proc;
 
-		[TestFixtureSetUp]
-		public void SetUp ()
-		{
-			_proc = new Mongod ();
-		}
+        [TestFixtureSetUp]
+        public void SetUp ()
+        {
+            _proc = new Mongod ();
+        }
 
-		[TestFixtureTearDown]
-		public void TearDown ()
-		{
-			_proc.Dispose ();
-		}
+        [TestFixtureTearDown]
+        public void TearDown ()
+        {
+            _proc.Dispose ();
+        }
 
         [SetUp]
         public void Setup()
@@ -40,14 +40,14 @@ namespace Norm.Tests.GridFS
         [Test]
         public void Extension_Methods_Provide_Access_To_Collections ()
         {
-        	using (var conn = Mongo.Create (TestHelper.ConnectionString ("strict=false")))
+            using (var conn = Mongo.Create (TestHelper.ConnectionString ("strict=false")))
             {
-        		var fileColl = conn.Database.Files ();
-        		Assert.NotNull (fileColl);
+                var fileColl = conn.Database.Files ();
+                Assert.NotNull (fileColl);
 
                 var fileColl2 = conn.GetCollection<TestClass> ().Files ();
-				Assert.NotNull(fileColl2);
-			}
+                Assert.NotNull(fileColl2);
+            }
         }
 
         [Test]
@@ -115,48 +115,48 @@ namespace Norm.Tests.GridFS
             }
         }
 
-		[Test]
-		public void File_Save_Should_Replace_Old_Content()
-		{
-			using (var conn = Mongo.Create(TestHelper.ConnectionString()))
-			{
-				var gridFS = conn.Database.Files();
-				var file = new GridFile
-				{
-					ContentType = "application/unknown",
-					FileName = "test.raw",
-					Content = new byte[] { 1, 2, 3 }
-				};
-				gridFS.Save(file);
-				file.Content = new byte[] { 3, 2, 1 };
-				gridFS.Save(file);
+        [Test]
+        public void File_Save_Should_Replace_Old_Content()
+        {
+            using (var conn = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var gridFS = conn.Database.Files();
+                var file = new GridFile
+                {
+                    ContentType = "application/unknown",
+                    FileName = "test.raw",
+                    Content = new byte[] { 1, 2, 3 }
+                };
+                gridFS.Save(file);
+                file.Content = new byte[] { 3, 2, 1 };
+                gridFS.Save(file);
 
-				Assert.AreEqual(new byte[] { 3, 2, 1 }, gridFS.FindOne(new { _id = file.Id }).Content.ToArray());
-			}
-		}
+                Assert.AreEqual(new byte[] { 3, 2, 1 }, gridFS.FindOne(new { _id = file.Id }).Content.ToArray());
+            }
+        }
 
-		[Test]
-		public void Delete_Should_Remove_FileChunks()
-		{
-			using (var conn = Mongo.Create(TestHelper.ConnectionString()))
-			{
-				var ms = new MemoryStream(50000);
-				for (int i = 0; i < 2000; i++)
-				{
-					ms.Write(BitConverter.GetBytes(i), 0, 4);
-				}
+        [Test]
+        public void Delete_Should_Remove_FileChunks()
+        {
+            using (var conn = Mongo.Create(TestHelper.ConnectionString()))
+            {
+                var ms = new MemoryStream(50000);
+                for (int i = 0; i < 2000; i++)
+                {
+                    ms.Write(BitConverter.GetBytes(i), 0, 4);
+                }
 
-				var gridFS = conn.Database.Files();
-				var file = new GridFile();
-				file.ContentType = "application/unknown";
-				file.FileName = "test.raw";
-				file.Content = ms.ToArray();
-				gridFS.Save(file);
+                var gridFS = conn.Database.Files();
+                var file = new GridFile();
+                file.ContentType = "application/unknown";
+                file.FileName = "test.raw";
+                file.Content = ms.ToArray();
+                gridFS.Save(file);
 
-				gridFS.Delete(file.Id);
+                gridFS.Delete(file.Id);
 
-				Assert.AreEqual(0, conn.Database.GetCollection<FileChunk>("chunks").GetCollectionStatistics().Count);
-			}
-		}
+                Assert.AreEqual(0, conn.Database.GetCollection<FileChunk>("chunks").GetCollectionStatistics().Count);
+            }
+        }
     }
 }
