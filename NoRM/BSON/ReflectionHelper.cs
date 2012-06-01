@@ -166,7 +166,7 @@ namespace Norm.BSON
                                 "lambdaExpression");
                         }
 
-                        return memberExpression.Member.Name;
+                        return MongoConfiguration.GetPropertyAlias(memberExpression.Expression.Type, memberExpression.Member.Name);
 
                     default:
                         done = true;

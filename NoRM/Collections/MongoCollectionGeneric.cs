@@ -339,7 +339,7 @@ namespace Norm.Collections
         /// <param name="update">A modifier object</param>
         /// <param name="sort">If multiple docs match, choose the first one in the specified sort order as the object to manipulate</param>
         /// <returns></returns>
-        public T FindAndModify<U, X, Y>(U query, X update, Y sort)
+        public T FindAndModify<U, X, Y>(U query, X update, Y sort, bool @new = false, bool upsert = false)
         {
             var cmdColl = this._db.GetCollection<FindAndModifyResult<T>>("$cmd");
 
@@ -348,9 +348,11 @@ namespace Norm.Collections
                 var returnValue = cmdColl.FindOne(new
                 {
                     findandmodify = this._collectionName,
-                    query = query,
-                    update = update,
-                    sort = sort
+                    query,
+                    update,
+                    sort,
+                    @new,
+                    upsert
                 }).Value;
 
                 return returnValue;
@@ -363,6 +365,18 @@ namespace Norm.Collections
                 throw;
             }
         }
+
+        public T FindAndModify(Expression<Func<T, bool>> query, Action<IModifierExpression<T>> update, Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> sort = null, bool @new = false, bool upsert = false)
+        {
+          var translator = new MongoQueryTranslator {CollectionName = _collectionName};
+          var where = translator.Translate(PartialEvaluator.Eval(query)).Where;
+          var order = sort != null ? translator.Translate(PartialEvaluator.Eval(sort)).Sort : new Expando();
+          var modifierExpression = new ModifierExpression<T>();
+          update(modifierExpression);
+
+          return FindAndModify(where, modifierExpression.Expression, order, @new, upsert);
+        }
+
 
         public IEnumerable<T> Find<U, O, Z>(U template, O orderBy, Z fieldSelector, int limit, int skip)
         {

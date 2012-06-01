@@ -101,17 +101,30 @@ namespace Norm.Collections
         /// <returns></returns>
         IEnumerable<X> MapReduce<X>(MapReduceOptions<T> options);
 
+      /// <summary>
+      /// This command can be used to atomically modify a document (at most one) and return it.
+      /// </summary>
+      /// <typeparam name="U"></typeparam>
+      /// <typeparam name="X"></typeparam>
+      /// <typeparam name="Y"></typeparam>
+      /// <param name="query">The document template used to find the document to find and modify</param>
+      /// <param name="update">A modifier object</param>
+      /// <param name="sort">If multiple docs match, choose the first one in the specified sort order as the object to manipulate</param>
+      /// <param name="new">If true - return modified object, otherwise - original</param>
+      /// <param name="upsert">Create object if not exist</param>
+      /// <returns></returns>
+      T FindAndModify<U, X, Y>(U query, X update, Y sort, bool @new = false, bool upsert = false);
+
         /// <summary>
         /// This command can be used to atomically modify a document (at most one) and return it.
         /// </summary>
-        /// <typeparam name="U"></typeparam>
-        /// <typeparam name="X"></typeparam>
-        /// <typeparam name="Y"></typeparam>
-        /// <param name="query">The document template used to find the document to find and modify</param>
-        /// <param name="update">A modifier object</param>
+        /// <param name="query">The document query used to find the document to find and modify</param>
+        /// <param name="update">A modifier expression</param>
         /// <param name="sort">If multiple docs match, choose the first one in the specified sort order as the object to manipulate</param>
+        /// <param name="new">If true - return modified object, otherwise - original</param>
+        /// <param name="upsert">Create object if not exist</param>
         /// <returns></returns>
-        T FindAndModify<U, X, Y>(U query, X update, Y sort);
+        T FindAndModify(Expression<Func<T, bool>> query, Action<IModifierExpression<T>> update, Expression<Func<IQueryable<T>, IOrderedQueryable<T>>> sort = null, bool @new = false, bool upsert = false);
 
         /// <summary>
         /// Locates documents that match the template, in the order specified.
