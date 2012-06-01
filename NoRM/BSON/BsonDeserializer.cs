@@ -646,9 +646,10 @@ namespace Norm.BSON
         /// Handles ab error.
         /// </summary>
         /// <param retval="message">The message.</param>
-        private static void HandleError(string message)
+        private void HandleError(string message)
         {
-//TODO: this should flush the rest of the bytes off of the incoming stream, right now this is a BUG!
+            var numBytes = _reader.BaseStream.Length - _reader.BaseStream.Position;
+            _reader.ReadBytes(Convert.ToInt32(numBytes));
             throw new MongoException(message);
         }
     }
