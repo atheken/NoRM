@@ -65,6 +65,21 @@ namespace Norm.Tests.CollectionUpdateTests
             Assert.Equal(3, result.Score);
         }
         [Fact]
+        public void PostTitleShouldNotExistWhenApplyingUnsetModifierCommandToTitle()
+        {
+            var post = new Post { Title = "About the name 2", Score = 3 };
+            _collection.Insert(post);
+
+            _collection.UpdateOne(new { _id = post.Id }, new { Title = M.Unset() });
+
+            var expandoCollection = _server.GetCollection<Norm.BSON.Expando>("Posts");
+
+            var result = expandoCollection.FindOne(new { _id = post.Id });
+
+            Assert.False(result.Contains("Title"));
+            Assert.Equal(3, result.Get<int>("Score"));
+        }
+        [Fact]
         public void PostCommentsCountShouldBeEqualOneWhenApplyingPushModifierCommandToPostWithNoComments()
         {
             var post = new Post { Title = "About the name 2", Score = 3 };

@@ -115,6 +115,7 @@
     <Compile Include="Collections\MongoCollectionGeneric.cs" />
     <Compile Include="Collections\HiLoIdGenerator.cs" />
     <Compile Include="Commands\Modifiers\AddToSetOperation.cs" />
+    <Compile Include="Commands\Modifiers\UnsetOperation.cs" />
     <Compile Include="Commands\Modifiers\IModifierExpression.cs" />
     <Compile Include="Commands\Modifiers\ModifierExpression.cs" />
     <Compile Include="Commands\Modifiers\PopOperation.cs" />
