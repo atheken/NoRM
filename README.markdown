@@ -4,7 +4,7 @@ NoRM is no longer actively developed, please consider using the [official 10gen 
 NoRM is a .Net library for connecting to the document-oriented database, MongoDB.
 =================================================================================
 
-Please check the project website for more samples and a screencast: [normproject.org](http://normproject.org)
+Please check the project website for more samples and a screencast: http://vimeo.com/13138838
 
 If you have any questions or ideas, please use the [Google Group](http://groups.google.com/group/norm-mongodb) to convey them (Hint: this will also be a good way to be notified when we get close to a release)
 
