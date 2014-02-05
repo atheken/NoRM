@@ -203,7 +203,9 @@ namespace Norm
         /// <summary>TODO::Description.</summary>
         public LastErrorResponse LastError()
         {
-            return GetCollection<LastErrorResponse>("$cmd").FindOne(new { getlasterror = 1 });
+            var errors = GetCollection<LastErrorResponse>("$cmd");
+
+            return errors != null && errors.Count() > 0 ? errors.FindOne(new {getlasterror = 1}) : new LastErrorResponse();
         }
 
         /// <summary>
