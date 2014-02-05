@@ -27,6 +27,7 @@ namespace Norm.Collections
     {
         private static Dictionary<int, object> _compiledTransforms = new Dictionary<int, object>();
         private static CollectionHiLoIdGenerator _collectionHiLoIdGenerator = new CollectionHiLoIdGenerator(20);
+		private static CollectionSequenceIdGenerator _collectionSequenceIdGenerator = new CollectionSequenceIdGenerator();
 
         /// <summary>
         /// This will have a different instance for each concrete version of <see cref="MongoCollection{T}"/>
@@ -396,8 +397,20 @@ namespace Norm.Collections
                 var me = fieldSelection.Body as MemberExpression;
                 fieldSelectionExpando[me.GetPropertyAlias()] = 1;
             }
+            // Concrete typed expressions
+            else if (fieldSelection.Body is MemberInitExpression)
+            {
+                var initExpression = (fieldSelection.Body as MemberInitExpression);
+                foreach (var assignment in initExpression.Bindings.OfType<MemberAssignment>())
+                {
+                    if (assignment.Expression is MemberExpression)
+                    {
+                        var expression = assignment.Expression as MemberExpression;
+                        fieldSelectionExpando[expression.GetPropertyAlias()] = 1;
+                    }
+                }
+            }
             #endregion
-
 
             var qm = new QueryMessage<T, U>(_connection, fullName)
             {
@@ -583,5 +596,14 @@ namespace Norm.Collections
             return _collectionHiLoIdGenerator.GenerateId(_db, _collectionName);
         }
 
+
+		/// <summary>
+		/// Generates a new identity value using the Sequence Id generator
+		/// </summary>
+		/// <returns>New identity value</returns>
+		public long GenerateSequenceId()
+		{
+			return _collectionSequenceIdGenerator.GenerateId(_db, _collectionName);
+		}
     }
 }

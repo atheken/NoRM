@@ -222,5 +222,11 @@ namespace Norm.Collections
         /// </summary>
         /// <returns>New identity value</returns>
         long GenerateId();
+
+    	/// <summary>
+    	/// Generates a new identity value using the Sequence Id generator
+    	/// </summary>
+    	/// <returns>New identity value</returns>
+    	long GenerateSequenceId();
     }
 }
