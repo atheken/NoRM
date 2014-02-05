@@ -107,6 +107,7 @@
     <Compile Include="BSON\ModifierCommand.cs" />
     <Compile Include="BSON\ReflectionHelper.cs" />
     <Compile Include="BSON\TypeConverters\CultureInfoTypeConverter.cs" />
+    <Compile Include="BSON\TypeConverters\TimeSpanTypeConverter.cs" />
     <Compile Include="Collections\CreateCollectionOptions.cs" />
     <Compile Include="Collections\IMongoCollectionGeneric.cs" />
     <Compile Include="Collections\MongoCollection.cs" />

@@ -71,6 +71,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BSON\TypeConverters\TimeSpanTypeConverterTests.cs" />
     <Compile Include="CollectionFindTests\DocSizeTests.cs" />
     <Compile Include="CollectionFindTests\MongoSearchQualifierTests.cs" />
     <Compile Include="CollectionFindTests\QueryTests.cs" />
