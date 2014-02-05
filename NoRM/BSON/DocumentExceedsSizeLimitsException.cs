@@ -3,7 +3,7 @@
 namespace Norm.BSON
 {
     /// <summary>
-    /// An exception that can be thrown by MongoCollection when the document is more than the MongoDB limit of 4MB.
+    /// An exception that can be thrown by MongoCollection when the document is more than the MongoDB limit of 8MB.
     /// </summary>
     /// <typeparam retval="T">
     /// The type of the document that was serialized.
