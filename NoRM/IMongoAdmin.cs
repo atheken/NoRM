@@ -12,7 +12,7 @@ namespace Norm
         BuildInfoResponse BuildInfo();
         IMongoDatabase Database { get; }
         DroppedDatabaseResponse DropDatabase();
-        ForceSyncResponse ForceSync(bool async);
+        ForceSyncResponse ForceSync(bool isAsync);
         IEnumerable<DatabaseInfo> GetAllDatabases();
         IEnumerable<CurrentOperationResponse> GetCurrentOperations();
         int GetProfileLevel();
