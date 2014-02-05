@@ -78,12 +78,14 @@ namespace Norm.Protocol.Messages
         /// <value>The Map property gets/sets the Map data member.</value>
         public int NumberToSkip { get; set; }
 
+
         /// <summary>
         /// Causes this message to be sent and a repsonse to be generated.
         /// </summary>
         /// <returns></returns>
         public ReplyMessage<T> Execute()
         {
+           
             var payload1 = GetPayload();
             var payload2 = new byte[0];
             if (this.FieldSelection != null)
@@ -102,21 +104,27 @@ namespace Norm.Protocol.Messages
             Buffer.BlockCopy(BitConverter.GetBytes(NumberToSkip), 0, header, 20 + collectionLength, 4);
             Buffer.BlockCopy(BitConverter.GetBytes(NumberToTake), 0, header, 24 + collectionLength, 4);
 
-            _connection.Write(header, 0, header.Length);
-            _connection.Write(payload1, 0, payload1.Length);
-            _connection.Write(payload2, 0, payload2.Length);
-
-            var stream = _connection.GetStream();
-            while (!stream.DataAvailable)
+            lock (_connection)
             {
-                Thread.Sleep(1);
-            }
+                _connection.Write(header, 0, header.Length);
+                _connection.Write(payload1, 0, payload1.Length);
+                _connection.Write(payload2, 0, payload2.Length);
 
-            if (!stream.DataAvailable)
-            {
-                throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + _connection.QueryTimeout.ToString());
+                var stream = _connection.GetStream();
+                while (!stream.DataAvailable)
+                {
+                    Thread.Sleep(1);
+                }
+
+                if (!stream.DataAvailable)
+                {
+                    throw new TimeoutException(
+                        "MongoDB did not return a reply in the specified time for this context: " +
+                        _connection.QueryTimeout.ToString());
+                }
+                return new ReplyMessage<T>(_connection, this._collection, new BinaryReader(new BufferedStream(stream)),
+                                           MongoOp.Query, this.NumberToTake);
             }
-            return new ReplyMessage<T>(_connection, this._collection, new BinaryReader(new BufferedStream(stream)), MongoOp.Query, this.NumberToTake);
         }
 
         /// <summary>
