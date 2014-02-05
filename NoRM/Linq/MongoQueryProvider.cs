@@ -76,7 +76,9 @@ namespace Norm.Linq
         S IQueryProvider.Execute<S>(Expression expression)
         {
             object result = ExecuteQuery<S>(expression);
-            return (S)Convert.ChangeType(result, typeof(S));
+            if (result is IConvertible)
+                return (S)Convert.ChangeType(result, typeof(S));
+            return (S)ExecuteQuery<S>(expression);
         }
 
         /// <summary>
