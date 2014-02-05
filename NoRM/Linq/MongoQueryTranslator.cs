@@ -455,7 +455,17 @@ namespace Norm.Linq
                 graphParts[i] = MongoConfiguration.GetPropertyAlias(typeToQuery, graph[i]);
 
                 if (property.PropertyType.IsGenericType)
-                    typeToQuery = property.PropertyType.GetGenericArguments()[0];
+                {
+                    if (property.PropertyType.IsAssignableFrom(typeof(IEnumerable)))
+                    {
+                        typeToQuery = property.PropertyType.GetGenericArguments()[0];
+                    }
+                    else
+                    {
+                        typeToQuery = property.PropertyType;
+                    }
+
+                }
                 else
                     typeToQuery = property.PropertyType.HasElementType ? property.PropertyType.GetElementType() : property.PropertyType;
             }
