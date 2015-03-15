@@ -1,21 +1,36 @@
-using Xunit;
+using NUnit.Framework;
 
 namespace Norm.Tests
 {
+    [TestFixture]
     public class NormalConnectionProviderTests
     {
-        [Fact]
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
+        [Test]
         public void CreatesANewConnectionForEachOpen()
         {
             IConnection connection1 = null;
             IConnection connection2 = null;
-            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString()));
+            var provider = new NormalConnectionProvider(ConnectionOptions.Create(TestHelper.ConnectionString()));
             
             try
             {            
                 connection1 = provider.Open(null);
                 connection2 = provider.Open(null);
-                Assert.NotSame(connection1, connection2);
+                Assert.AreNotSame(connection1, connection2);
             }
             finally
             {
@@ -24,10 +39,10 @@ namespace Norm.Tests
             }
         }
 
-        [Fact]
+        [Test]
         public void ClosesTheUnderlyingConnection()
         {
-            var provider = new NormalConnectionProvider(ConnectionStringBuilder.Create(TestHelper.ConnectionString()));
+            var provider = new NormalConnectionProvider(ConnectionOptions.Create(TestHelper.ConnectionString()));
             var connection = provider.Open(null);
             provider.Close(connection);
             Assert.Null(connection.Client.Client);

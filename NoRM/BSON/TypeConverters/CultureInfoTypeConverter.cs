@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 
-
 namespace Norm.BSON.TypeConverters
 {
     public class CultureInfoTypeConverter : IBsonTypeConverter
@@ -20,6 +19,9 @@ namespace Norm.BSON.TypeConverters
 
         public object ConvertFromBson(object data)
         {
+            if (data == null)
+                return null;
+
             return new CultureInfo((string)data);
         }
 

@@ -1,6 +1,7 @@
 ﻿using Norm.Configuration;
+using Norm.Protocol;
 
-namespace Norm.Protocol.SystemMessages.Requests
+namespace Norm.Requests
 {
     /// <summary>
     /// The drop database request.

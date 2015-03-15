@@ -18,3 +18,7 @@ LastBuild.log
 .svn
 _ReSharper*
 .DS_Store
+*.pidb
+override.config
+NoRM.Tests/test-results/
+*.userprefs

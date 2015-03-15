@@ -8,6 +8,8 @@ namespace Norm.Responses
     /// </summary>
     public class ServerStatusResponse : BaseStatusMessage
     {
+		private object btree{get;set;}
+		
         /// <summary>TODO::Description.</summary>
         /// <value></value>
         public double? Uptime { get; set; }

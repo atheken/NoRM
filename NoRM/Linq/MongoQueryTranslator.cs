@@ -19,7 +19,7 @@ namespace Norm.Linq
 
         private int _takeCount = Int32.MaxValue;
         private string _lastFlyProperty = string.Empty;
-        private string _lastOperator = " === ";
+        private string _lastOperator = " == ";
         private List<string> _prefixAlias = new List<string>();
 
         private StringBuilder _sbWhere;
@@ -378,7 +378,7 @@ namespace Norm.Linq
             Visit(expr);
             if (IsPredicate(expr))
             {
-                //_sbWhere.Append(" === true");
+                //_sbWhere.Append(" == true");
                 SetFlyValue(!IsNotOperator);
             }
             return expr;
@@ -486,11 +486,11 @@ namespace Norm.Linq
                     IsComplex = true;
                     break;
                 case ExpressionType.Equal:
-                    _lastOperator = " === ";
+                    _lastOperator = " == ";
                     currentOperator = _lastOperator;
                     break;
                 case ExpressionType.NotEqual:
-                    _lastOperator = " !== ";
+                    _lastOperator = " != ";
                     currentOperator = _lastOperator;
                     break;
                 case ExpressionType.LessThan:
@@ -649,7 +649,7 @@ namespace Norm.Linq
                     case TypeCode.Object:
                         if (c.Value is ObjectId)
                         {
-                            if (_lastOperator == " === " || _lastOperator == " !== ")
+                            if (_lastOperator == " == " || _lastOperator == " != ")
                             {
                                 _sbWhere.Remove(_sbWhere.Length - 2, 1);
                             }
@@ -727,7 +727,7 @@ namespace Norm.Linq
 
                             _sbWhere.Append("(");
                             Visit(m.Object);
-                            _sbWhere.AppendFormat(".indexOf(\"{0}\")===0)", value.EscapeJavaScriptString());
+                            _sbWhere.AppendFormat(".indexOf(\"{0}\")==0)", value.EscapeJavaScriptString());
 
                             SetFlyValue(new Regex("^" + Regex.Escape(value)));
 
@@ -746,7 +746,7 @@ namespace Norm.Linq
                             Visit(m.Object);
                             _sbWhere.AppendFormat(".length - {0}) >= 0 && ", value.Length);
                             Visit(m.Object);
-                            _sbWhere.AppendFormat(".lastIndexOf(\"{0}\") === (", value.EscapeJavaScriptString());
+                            _sbWhere.AppendFormat(".lastIndexOf(\"{0}\") == (", value.EscapeJavaScriptString());
                             Visit(m.Object);
                             _sbWhere.AppendFormat(".length - {0}))", value.Length);
 
@@ -928,7 +928,7 @@ namespace Norm.Linq
 
         private bool CanGetQualifier(string op, object value)
         {
-            if (op == " !== " || op == " === ")
+            if (op == " != " || op == " == ")
                 return true;
 
             if (value != null && (value.GetType().IsAssignableFrom(typeof(double))
@@ -959,9 +959,9 @@ namespace Norm.Linq
         {
             switch (op)
             {
-                case " === ":
+                case " == ":
                     return value;
-                case " !== ":
+                case " != ":
                     return Q.NotEqual(value).AsExpando();
                 case " > ":
                     return Q.GreaterThan(value).AsExpando();
@@ -1038,6 +1038,35 @@ namespace Norm.Linq
 
         private void HandleContains(MethodCallExpression m)
         {
+            if (!typeof(IEnumerable).IsAssignableFrom(m.Object.Type))
+                throw new NotSupportedException();
+
+            if (m.Object is MemberExpression)
+                HandleContainsWithMongoSource(m);
+            else if (m.Object is ConstantExpression)
+                HandleContainsWithConstantSource(m);
+            else
+                throw new NotImplementedException();
+        }
+
+        private void HandleContainsWithMongoSource(MethodCallExpression m)
+        {
+            if (m.Arguments.Count != 1)
+                throw new NotSupportedException();
+
+            _sbWhere.Append("Array.contains(");
+
+            VisitMemberAccess((MemberExpression)m.Object);
+
+            _sbWhere.Append(",");
+
+            Visit(m.Arguments[0]);
+
+            _sbWhere.Append(")");
+        }
+
+        private void HandleContainsWithConstantSource(MethodCallExpression m)
+        {
             var collection = m.Object.GetConstantValue<IEnumerable>().Cast<object>().ToArray();
             var member = VisitDeepAlias((MemberExpression)m.Arguments[0]);
 
@@ -1050,7 +1079,7 @@ namespace Norm.Linq
                         _sbWhere.Append("this.");
 
                     _sbWhere.Append(member);
-                    _sbWhere.Append(" === ");
+                    _sbWhere.Append(" == ");
                     _sbWhere.Append(GetJavaScriptConstantValue(item));
                     _sbWhere.Append(" || ");
                 }

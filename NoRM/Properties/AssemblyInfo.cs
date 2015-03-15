@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-[assembly: AssemblyTitle("Norm")]
+[assembly: AssemblyTitle("NoRM")]
 [assembly: AssemblyDescription("Provides a driver for the document database MongoDB")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
@@ -18,4 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: Guid("2f767b68-9d93-4f67-a9d8-7f14774ec63f")]
 [assembly: AssemblyVersion("1.0")]
 [assembly: AssemblyFileVersion("1.0")]
-[assembly: InternalsVisibleTo("Norm.Tests")] //suck it!
+//[assembly: InternalsVisibleTo("NoRM.Tests")] //suck it!
+
+//[assembly: AssemblyDelaySign(false)]
+//[assembly: AssemblyKeyFile("../../../Norm.snk")]

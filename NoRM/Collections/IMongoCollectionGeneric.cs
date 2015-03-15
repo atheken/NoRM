@@ -84,6 +84,47 @@ namespace Norm.Collections
         /// <returns></returns>
         IEnumerable<X> MapReduce<U, X>(U template, string map, string reduce);
 
+		/// <summary>
+		/// Asynchronously creates an index on this collection.
+		/// </summary>
+		/// <param retval="index">This is an expression of the elements in the type you wish to index, so you can do something like:
+		/// <code>
+		/// y=>y.MyIndexedProperty
+		/// </code>
+		/// or, if you have a multi-fieldSelectionExpando index, you can do this:
+		/// <code>
+		/// y=> new { y.PropertyA, y.PropertyB.Property1, y.PropertyC }
+		/// </code>
+		/// This will automatically map the MongoConfiguration aliases.
+		/// </param>
+		/// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
+		/// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+		/// MongoDB will potentially optimize the index based on this being true.</param>
+		void CreateGeoIndex<U>(Expression<Func<T, U>> index, string indexName, bool isUnique);
+
+		/// <summary>
+		/// Asynchronously creates an index on this collection.
+		/// </summary>
+		/// <param retval="index">This is an expression of the element in the type you wish to use for geospatial index, so you can do something like:
+		/// <code>
+		/// y=>y.MyIndexedProperty
+		/// </code>
+		/// This will automatically map the MongoConfiguration aliases.
+		/// </param>
+		/// <param name="compoundIndexes">This is a collection of the elements in the type you wish to index along with the direction:
+		/// <code>
+		/// new[] {
+		///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.A.B, IndexOption.Ascending),
+		///     new MongoCollectionCompoundIndex&lt;MyData&gt;(o => o.C.D, IndexOption.Descending),
+		/// }
+		/// </code>
+		/// This will automatically map the MongoConfiguration aliases.
+		/// </param>
+		/// <param retval="indexName">The retval of the index as it should appear in the special "system.indexes" child collection.</param>
+		/// <param retval="isUnique">True if MongoDB can expect that each document will have a unique combination for this fieldSelectionExpando. 
+		/// MongoDB will potentially optimize the index based on this being true.</param>
+		void CreateGeoIndex<U>(Expression<Func<T, U>> index, IEnumerable<MongoCollectionCompoundIndex<T>> compoundIndexes, string indexName, bool isUnique);
+
         /// <summary>
         /// Execute the mapreduce with a limiting query and finalize on this collection.
         /// </summary>
@@ -132,7 +173,7 @@ namespace Norm.Collections
         /// <returns></returns>
         IEnumerable<T> Find<U, S>(U template, S orderBy, int limit, int skip, string fullyQualifiedName);
 
-        IEnumerable<T> Find<U, O, Z>(U template, O orderBy, Z fieldSelector, int limit, int skip);
+//        IEnumerable<T> Find<U, O, Z>(U template, O orderBy, Z fieldSelector, int limit, int skip);
 
         IEnumerable<Z> Find<U, O, Z>(U template, O orderBy, int limit, int skip, String fullName, Expression<Func<T, Z>> fieldSelection);
 

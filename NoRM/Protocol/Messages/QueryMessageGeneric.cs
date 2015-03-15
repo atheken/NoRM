@@ -107,16 +107,7 @@ namespace Norm.Protocol.Messages
             _connection.Write(payload2, 0, payload2.Length);
 
             var stream = _connection.GetStream();
-            while (!stream.DataAvailable)
-            {
-                Thread.Sleep(1);
-            }
-
-            if (!stream.DataAvailable)
-            {
-                throw new TimeoutException("MongoDB did not return a reply in the specified time for this context: " + _connection.QueryTimeout.ToString());
-            }
-            return new ReplyMessage<T>(_connection, this._collection, new BinaryReader(new BufferedStream(stream)), MongoOp.Query, this.NumberToTake);
+			return new ReplyMessage<T>(_connection, this._collection, new BinaryReader(new BufferedStream(stream)), MongoOp.Query, this.NumberToTake);
         }
 
         /// <summary>

@@ -7,14 +7,29 @@ using Norm.Collections;
 using Norm.Configuration;
 using Norm.Protocol.Messages;
 using Norm.Linq;
-using Xunit;
+using NUnit.Framework;
 
 namespace Norm.Tests
 {
+    [TestFixture]
     public class MongoCollectionTests
     {
+		private Mongod _proc;
 
-        public MongoCollectionTests()
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
+        [SetUp]
+        public void Setup()
         {
             MongoConfiguration.RemoveMapFor<Address>();
             MongoConfiguration.RemoveMapFor<TestProduct>();
@@ -24,20 +39,21 @@ namespace Norm.Tests
             {
                 mongo.Database.DropCollection("Fake");
                 mongo.Database.DropCollection("Faker");
+                mongo.Database.DropCollection("TestProduct");
             }
         }
 
-        [Fact]
+        [Test]
         public void CollectionName_For_Deeply_Generic_Collection_Is_Legal_And_Reasonable()
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var coll = db.GetCollection<GenericSuperClass<List<String>>>();
-                Assert.Equal("NormTests.GenericSuperClass_List_String", coll.FullyQualifiedName);
+                Assert.AreEqual("NormTests.GenericSuperClass_List_String", coll.FullyQualifiedName);
             }
         }
 
-        [Fact]
+        [Test]
         public void Find_On_Unspecified_Type_Returns_Expando_When_No_Discriminator_Available()
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString("strict=false")))
@@ -51,11 +67,11 @@ namespace Norm.Tests
 
                 var allObjs = coll.Find().ToArray();
                 Assert.True(allObjs.All(y => y is Expando));
-                Assert.Equal(3, allObjs.Length);
+                Assert.AreEqual(3, allObjs.Length);
             }
         }
 
-        [Fact(Skip = "This test is timing out")]
+        //[Fact(Skip = "This test is timing out")]
         public void Get_Collection_Statistics_Works()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -65,11 +81,11 @@ namespace Norm.Tests
                 coll.Insert(new IntId { Id = 5, Name = "Test 2" });
                 var stats = coll.GetCollectionStatistics();
                 Assert.NotNull(stats);
-                Assert.Equal(stats.Count, 2);
+                Assert.AreEqual(stats.Count, 2);
             }
         }
 
-        [Fact]
+        [Test]
         public void Find_On_Collection_Returning_More_Than_4MB_Of_Docs_Works()
         {
             //this tests Cursor management in the ReplyMessage<T>, 
@@ -108,13 +124,13 @@ namespace Norm.Tests
                 }
                 var bytes = junkInTheTrunk.SelectMany(y => Norm.BSON.BsonSerializer.Serialize(y)).Count();
 
-                Assert.InRange(bytes, 4194304, Int32.MaxValue);
+                Assert.IsTrue(bytes >= 4194304 && bytes < Int32.MaxValue);
                 mongo.GetCollection<TestProduct>("Fake").Insert(junkInTheTrunk);
-                Assert.Equal(16000, mongo.GetCollection<TestProduct>("Fake").Find().Count());
+                Assert.AreEqual(16000, mongo.GetCollection<TestProduct>("Fake").Find().Count());
             }
         }
 
-        [Fact]
+        [Test]
         public void Find_Subset_Returns_Appropriate_Subset()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
@@ -143,24 +159,24 @@ namespace Norm.Tests
                 var subset = db.GetCollection<TestProduct>().Find(new { }, new { }, Int32.MaxValue, 0,
                     j => new { SupplierName = j.Supplier.Name, Cost = j.Price, Id = j._id }).ToArray();
 
-                Assert.Equal("Bob's house of pancakes", subset[0].SupplierName);
-                Assert.Equal(42.42f, subset[0].Cost);
-                Assert.Equal(oid, subset[0].Id);
+                Assert.AreEqual("Bob's house of pancakes", subset[0].SupplierName);
+                Assert.AreEqual(42.42f, subset[0].Cost);
+                Assert.AreEqual(oid, subset[0].Id);
             }
         }
 
 
-        [Fact]
+        [Test]
         public void SaveOrInsertThrowsExceptionIfTypeDoesntHaveAnId()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Insert(new Address()));
-                Assert.Equal("This collection does not accept insertions/updates, this is due to the fact that the collection's type Norm.Tests.Address does not specify an identifier property", ex.Message);
+                Assert.AreEqual("This collection does not accept insertions/updates, this is due to the fact that the collection's type Norm.Tests.Address does not specify an identifier property", ex.Message);
             }
         }
 
-        [Fact]
+        [Test]
         public void InsertsNewEntityWithNonObjectIdKey()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -168,16 +184,16 @@ namespace Norm.Tests
                 mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test 1" });
                 mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 5, Name = "Test 2" });
                 var found = mongo.GetCollection<IntId>("Fake").Find();
-                Assert.Equal(2, found.Count());
-                Assert.Equal(4, found.ElementAt(0).Id);
-                Assert.Equal("Test 1", found.ElementAt(0).Name);
-                Assert.Equal(5, found.ElementAt(1).Id);
-                Assert.Equal("Test 2", found.ElementAt(1).Name);
+                Assert.AreEqual(2, found.Count());
+                Assert.AreEqual(4, found.ElementAt(0).Id);
+                Assert.AreEqual("Test 1", found.ElementAt(0).Name);
+                Assert.AreEqual(5, found.ElementAt(1).Id);
+                Assert.AreEqual("Test 2", found.ElementAt(1).Name);
 
             }
         }
 
-        [Fact]
+        [Test]
         public void InsertThrowsExcpetionOnDuplicateKeyAndStrictMode()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("strict=true")))
@@ -189,7 +205,7 @@ namespace Norm.Tests
             }
         }
 
-        [Fact]
+        [Test]
         public void MongoCollectionEnsuresDeleteIndices()
         {
             using (var session = new Session())
@@ -208,11 +224,11 @@ namespace Norm.Tests
                 session.DB.GetCollection<TestProduct>().DeleteIndices(out i);
 
                 //it's TWO because there's always an index on _id by default.
-                Assert.Equal(2, i);
+                Assert.AreEqual(2, i);
 
             }
         }
-        [Fact]
+        [Test]
         public void Collection_Creates_Complex_Index()
         {
             using (var db = Mongo.Create(TestHelper.ConnectionString()))
@@ -226,7 +242,7 @@ namespace Norm.Tests
         }
 
 
-        [Fact]
+        [Test]
         public void MongoCollectionEnsuresDeletIndexByName()
         {
             using (var session = new Session())
@@ -246,12 +262,12 @@ namespace Norm.Tests
                 session.DB.GetCollection<TestProduct>().DeleteIndex("TestIndex1", out i);
                 session.DB.GetCollection<TestProduct>().DeleteIndex("TestIndex2", out j);
 
-                Assert.Equal(4, i);
-                Assert.Equal(3, j);
+                Assert.AreEqual(4, i);
+                Assert.AreEqual(3, j);
             }
         }
 
-        [Fact]
+        [Test]
         public void UpdatesEntityWithNonObjectIdKey()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -259,32 +275,32 @@ namespace Norm.Tests
                 mongo.GetCollection<IntId>("Fake").Insert(new IntId { Id = 4, Name = "Test" });
                 mongo.GetCollection<IntId>("Fake").Update(new { Id = 4 }, new { Name = "Updated" }, false, false);
                 var found = mongo.GetCollection<IntId>("Fake").Find();
-                Assert.Equal(1, found.Count());
-                Assert.Equal(4, found.ElementAt(0).Id);
-                Assert.Equal("Updated", found.ElementAt(0).Name);
+                Assert.AreEqual(1, found.Count());
+                Assert.AreEqual(4, found.ElementAt(0).Id);
+                Assert.AreEqual("Updated", found.ElementAt(0).Name);
             }
         }
 
-        [Fact]
+        [Test]
         public void InsertsNewEntityWithObjectIdKey()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var id1 = ObjectId.NewObjectId();
                 var id2 = ObjectId.NewObjectId();
-                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id1, Name = "Prod1", Price=3 });
-                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id2, Name = "Prod2" , Price=4});
+                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id1, Name = "Prod1", Price = 3 });
+                mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id2, Name = "Prod2", Price = 4 });
                 var found = mongo.GetCollection<TestProduct>("Fake").Find();
-                Assert.Equal(2, found.Count());
-                Assert.Equal(id1, found.ElementAt(0)._id);
-                Assert.Equal("Prod1", found.ElementAt(0).Name);
-                Assert.Equal(id2, found.ElementAt(1)._id);
-                Assert.Equal("Prod2", found.ElementAt(1).Name);
+                Assert.AreEqual(2, found.Count());
+                Assert.AreEqual(id1, found.ElementAt(0)._id);
+                Assert.AreEqual("Prod1", found.ElementAt(0).Name);
+                Assert.AreEqual(id2, found.ElementAt(1)._id);
+                Assert.AreEqual("Prod2", found.ElementAt(1).Name);
 
             }
         }
 
-        [Fact]
+        [Test]
         public void UpdatesEntityWithObjectIdKey()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -293,13 +309,13 @@ namespace Norm.Tests
                 mongo.GetCollection<TestProduct>("Fake").Insert(new TestProduct { _id = id, Name = "Prod" });
                 mongo.GetCollection<TestProduct>("Fake").Update(new { _id = id }, new { Name = "Updated Prod" }, false, false);
                 var found = mongo.GetCollection<TestProduct>("Fake").Find();
-                Assert.Equal(1, found.Count());
-                Assert.Equal(id, found.ElementAt(0)._id);
-                Assert.Equal("Updated Prod", found.ElementAt(0).Name);
+                Assert.AreEqual(1, found.Count());
+                Assert.AreEqual(id, found.ElementAt(0)._id);
+                Assert.AreEqual("Updated Prod", found.ElementAt(0).Name);
             }
         }
 
-        [Fact]
+        [Test]
         public void SavingANewEntityWithObjectIdKeyGeneratesAKey()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -307,10 +323,10 @@ namespace Norm.Tests
                 var product = new TestProduct { _id = null };
                 mongo.GetCollection<TestProduct>("Fake").Insert(product);
                 Assert.NotNull(product._id);
-                Assert.NotEqual(ObjectId.Empty, product._id);
+                Assert.AreNotEqual(ObjectId.Empty, product._id);
             }
         }
-        [Fact]
+        [Test]
         public void InsertingANewEntityWithObjectIdKeyGeneratesAKey()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -318,11 +334,11 @@ namespace Norm.Tests
                 var product = new TestProduct { _id = null };
                 mongo.GetCollection<TestProduct>("Fake").Insert(product);
                 Assert.NotNull(product._id);
-                Assert.NotEqual(ObjectId.Empty, product._id);
+                Assert.AreNotEqual(ObjectId.Empty, product._id);
             }
         }
 
-        [Fact]
+        [Test]
         public void InsertingMultipleNewEntityWithObjectIdKeyGeneratesAKey()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -331,13 +347,13 @@ namespace Norm.Tests
                 var product2 = new TestProduct { _id = null };
                 mongo.GetCollection<TestProduct>("Fake").Insert(new[] { product1, product2 });
                 Assert.NotNull(product1._id);
-                Assert.NotEqual(ObjectId.Empty, product1._id);
+                Assert.AreNotEqual(ObjectId.Empty, product1._id);
                 Assert.NotNull(product2._id);
-                Assert.NotEqual(ObjectId.Empty, product2._id);
+                Assert.AreNotEqual(ObjectId.Empty, product2._id);
             }
         }
 
-        [Fact]
+        [Test]
         public void InsertingANewEntityGeneratingTheIntKeyFirst()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -351,11 +367,11 @@ namespace Norm.Tests
                 var result = collection.FindOne(new { _id = testint._id });
 
                 Assert.NotNull(testint._id);
-                Assert.Equal(result.Name, "TestMe");
+                Assert.AreEqual(result.Name, "TestMe");
             }
         }
 
-        [Fact]
+        [Test]
         public void InsertingANewEntityWithNullableIntGeneratesAKey()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -364,11 +380,11 @@ namespace Norm.Tests
                 mongo.GetCollection<TestIntGeneration>("Fake").Insert(testint);
 
                 Assert.NotNull(testint._id);
-                Assert.NotEqual(0, testint._id.Value);
+                Assert.AreNotEqual(0, testint._id.Value);
             }
         }
 
-        [Fact]
+        [Test]
         public void InsertingANewEntityWithNullableIntGeneratesAKeyComplex()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -388,11 +404,11 @@ namespace Norm.Tests
                     Assert.True(idents.Contains(item._id.Value));
                 }
 
-                Assert.Equal(idents.Distinct().Count(), list.Select(x => x._id.Value).Distinct().Count());
+                Assert.AreEqual(idents.Distinct().Count(), list.Select(x => x._id.Value).Distinct().Count());
             }
         }
 
-        [Fact]
+        [Test]
         public void InsertingANewEntityWithNullableIntGeneratesAKeyComplexWith2Collections()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -426,35 +442,35 @@ namespace Norm.Tests
                     Assert.True(idents2.Contains(item._id.Value));
                 }
 
-                Assert.Equal(idents.Distinct().Count(), list.Select(x => x._id.Value).Distinct().Count());
-                Assert.Equal(idents2.Distinct().Count(), list2.Select(x => x._id.Value).Distinct().Count());
+                Assert.AreEqual(idents.Distinct().Count(), list.Select(x => x._id.Value).Distinct().Count());
+                Assert.AreEqual(idents2.Distinct().Count(), list2.Select(x => x._id.Value).Distinct().Count());
             }
         }
 
-        [Fact]
+        [Test]
         public void DeletesObjectsBasedOnTemplate()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var collection = mongo.GetCollection<TestProduct>("Fake");
                 collection.Insert(new[] { new TestProduct { Price = 10 }, new TestProduct { Price = 5 }, new TestProduct { Price = 1 } });
-                Assert.Equal(3, collection.Count());
+                Assert.AreEqual(3, collection.Count());
                 collection.Delete(new { Price = 1 });
-                Assert.Equal(2, collection.Count());
-                Assert.Equal(0, collection.Count(new { Price = 1 }));
+                Assert.AreEqual(2, collection.Count());
+                Assert.AreEqual(0, collection.Count(new { Price = 1 }));
             }
         }
 
-        [Fact]
+        [Test]
         public void ThrowsExceptionWhenAttemptingToDeleteIdLessEntity()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => mongo.GetCollection<Address>("Fake").Delete(new Address()));
-                Assert.Equal("Cannot delete Norm.Tests.Address since it has no id property", ex.Message);
+                Assert.AreEqual("Cannot delete Norm.Tests.Address since it has no id property", ex.Message);
             }
         }
-        [Fact]
+        [Test]
         public void DeletesEntityBasedOnItsId()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString()))
@@ -463,14 +479,14 @@ namespace Norm.Tests
                 var product1 = new TestProduct();
                 var product2 = new TestProduct();
                 collection.Insert(new[] { product1, product2 });
-                Assert.Equal(2, collection.Count());
+                Assert.AreEqual(2, collection.Count());
                 collection.Delete(product1);
-                Assert.Equal(1, collection.Count());
-                Assert.Equal(1, collection.Count(new { Id = product2._id }));
+                Assert.AreEqual(1, collection.Count());
+                Assert.AreEqual(1, collection.Count(new { Id = product2._id }));
             }
         }
 
-        [Fact]
+        [Test]
         public void MapReduceIsSuccessful()
         {
             var _map = "function(){emit(0, this.Price);}";
@@ -483,24 +499,24 @@ namespace Norm.Tests
                 collection.Insert(new ReduceProduct { Price = 1.5f }, new ReduceProduct { Price = 2.5f });
                 var r = collection.MapReduce<ProductSum>(_map, _reduce).FirstOrDefault();
 
-                Assert.Equal(4, r.Value);
+                Assert.AreEqual(4, r.Value);
             }
         }
 
 
-        [Fact]
+        [Test]
         public void StringAsIdentifierDoesTranslation()
         {
             using (var mongo = Mongo.Create(TestHelper.ConnectionString("strict=false")))
             {
-                
+
                 var collection = mongo.GetCollection<StringIdentifier>();
                 mongo.Database.DropCollection("StringIdentifier");
                 collection.Insert(new StringIdentifier { CollectionName = "test", ServerHi = 2 });
-                
+
                 var result = collection.AsQueryable().Where(x => x.CollectionName == "test").SingleOrDefault();
-                
-                Assert.Equal(2, result.ServerHi);
+
+                Assert.AreEqual(2, result.ServerHi);
             }
         }
 

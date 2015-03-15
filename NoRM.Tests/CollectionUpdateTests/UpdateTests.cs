@@ -1,21 +1,41 @@
 using System;
 using System.Linq;
 using Norm.BSON;
-using Xunit;
+using NUnit.Framework;
 using Norm.Collections;
 
 namespace Norm.Tests
 {
-    public class UpdateTests : IDisposable
+
+    [TestFixture]
+    public class UpdateTests 
     {
-        private readonly IMongo _server;
-        private readonly IMongoCollection<CheeseClubContact> _collection;
-        public UpdateTests()
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void FixtureSetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void FixtureTearDown ()
+		{
+			_proc.Dispose ();
+		}
+
+        private  IMongo _server;
+        private  IMongoCollection<CheeseClubContact> _collection;
+       
+        [SetUp]
+        public void Setup()
         {
-            _server = Mongo.Create("mongodb://localhost/NormTests?pooling=false");
+            _server = Mongo.Create(TestHelper.ConnectionString("pooling=false","NormTests",null,null));
             _collection = _server.GetCollection<CheeseClubContact>("CheeseClubContacts");
         }
-        public void Dispose()
+
+        [TearDown]
+        public void TearDown()
         {
             try
             {
@@ -29,14 +49,14 @@ namespace Norm.Tests
                 }
             }
 
-            using (var admin = new MongoAdmin("mongodb://localhost/NormTests?pooling=false"))
+            using (var admin = new MongoAdmin(TestHelper.ConnectionString ("pooling=false", "NormTests", null, null)))
             {
                 admin.DropDatabase();
             }
             _server.Dispose();
         }
 
-        [Fact]
+        [Test]
         public void Save_Inserts_Or_Updates()
         {
             var c = new CheeseClubContact();
@@ -44,16 +64,16 @@ namespace Norm.Tests
             _collection.Save(c);
             var a = _collection.FindOne(new { c.Id });
             //prove it was inserted.
-            Assert.Equal(c.Id, a.Id);
+            Assert.AreEqual(c.Id, a.Id);
 
             c.Name = "hello";
             _collection.Save(c);
             var b = _collection.FindOne(new { c.Id });
             //prove that it was updated.
-            Assert.Equal(c.Name, b.Name);
+            Assert.AreEqual(c.Name, b.Name);
         }
 
-        [Fact]
+        [Test]
         public void Save_should_insert_and_then_update_when_id_is_nullable_int()
         {
             var collection = _server.GetCollection<CheeseClubContactWithNullableIntId>();
@@ -62,34 +82,34 @@ namespace Norm.Tests
 
             var a = collection.FindOne(new { subject.Id });
             //prove it was inserted.
-            Assert.Equal(subject.Id, a.Id);
+            Assert.AreEqual(subject.Id, a.Id);
 
             subject.Name = "hello";
             collection.Save(subject);
 
             var b = collection.FindOne(new { subject.Id });
             //prove that it was updated.
-            Assert.Equal(subject.Name, b.Name);
+            Assert.AreEqual(subject.Name, b.Name);
 
             _server.Database.DropCollection(typeof(CheeseClubContactWithNullableIntId).Name);
         }
 
-        [Fact]
+        [Test]
         public void Update_Multiple_With_Lambda_Works()
         {
             _collection.Insert(new CheeseClubContact { Name = "Hello" }, new CheeseClubContact { Name = "World" });
             _collection.Update(new { Name = Q.NotEqual("") }, h => h.SetValue(y => y.Name, "Cheese"), true, false);
-            Assert.Equal(2, _collection.Find(new { Name = "Cheese" }).Count());
+            Assert.AreEqual(2, _collection.Find(new { Name = "Cheese" }).Count());
         }
 
-        [Fact]
+        [Test]
         public void BasicUsageOfUpdateOne()
         {
             var aPerson = new CheeseClubContact { Name = "Joe", FavoriteCheese = "Cheddar" };
             _collection.Insert(aPerson);
 
             var count = _collection.Find();
-            Assert.Equal(1, count.Count());
+            Assert.AreEqual(1, count.Count());
 
             var matchDocument = new { Name = "Joe" };
             aPerson.FavoriteCheese = "Gouda";
@@ -101,17 +121,17 @@ namespace Norm.Tests
 
             var retreivedPerson = _collection.FindOne(query);
 
-            Assert.Equal("Gouda", retreivedPerson.FavoriteCheese);
+            Assert.AreEqual("Gouda", retreivedPerson.FavoriteCheese);
         }
 
-        [Fact]
+        [Test]
         public void BasicUsageOfUpdateOneUsingObjectId()
         {
             var aPerson = new CheeseClubContact { Name = "Joe", FavoriteCheese = "American" };
             _collection.Insert(aPerson);
 
             var results = _collection.Find();
-            Assert.Equal(1, results.Count());
+            Assert.AreEqual(1, results.Count());
 
             var matchDocument = new { _id = aPerson.Id };
             aPerson.FavoriteCheese = "Velveeta";
@@ -123,10 +143,10 @@ namespace Norm.Tests
 
             var retreivedPerson = _collection.FindOne(query);
 
-            Assert.Equal("Velveeta", retreivedPerson.FavoriteCheese);
+            Assert.AreEqual("Velveeta", retreivedPerson.FavoriteCheese);
         }
 
-        [Fact]
+        [Test]
         public void UpdateMustSpecifyEverything()
         {
             //Note, when doing an update, MongoDB replaces everything in your document except the id. So, if you don't re-specify a property, it'll disappear.
@@ -151,7 +171,7 @@ namespace Norm.Tests
             Assert.Null(retreivedPerson.FavoriteCheese);
         }
 
-        [Fact]
+        [Test]
         public void UsingUpsertToInsertOnUpdate()
         {
             //Upsert will update an existing document if it can find a match, otherwise it will insert.
@@ -163,7 +183,7 @@ namespace Norm.Tests
             _collection.Update(matchDocument, aPerson, false, true);
 
             var results = _collection.Find();
-            Assert.Equal(1, results.Count());
+            Assert.AreEqual(1, results.Count());
         }
     }
 }

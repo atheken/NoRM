@@ -3,6 +3,11 @@ using System.IO;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Threading;
+using Norm.Protocol;
+using System.Linq;
 
 namespace Norm
 {
@@ -13,20 +18,26 @@ namespace Norm
     /// </summary>
     public class Connection : IConnection, IOptionsContainer
     {
-        private readonly ConnectionStringBuilder _builder;
+        private static long _request = 0;
+        private readonly ConnectionOptions _builder;
+        private IOptionsContainer _connectionOptions;
         private readonly TcpClient _client;
         private NetworkStream _netStream;
         private bool _disposed;
-        private int? _queryTimeout;
-        private bool? _strictMode;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Connection"/> class.
         /// </summary>
-        /// <param retval="builder">The builder.</param>
-        internal Connection(ConnectionStringBuilder builder)
+        /// <param retval="retval">The retval.</param>
+        public Connection(ConnectionOptions builder)
+            : this(builder, false)
         {
-            _builder = builder;
+
+        }
+
+        public Connection(ConnectionOptions builder, bool isReadonly)
+        {
+            _connectionOptions = _builder = builder;
             Created = DateTime.Now;
             _client = new TcpClient
             {
@@ -34,8 +45,23 @@ namespace Norm
                 ReceiveTimeout = builder.QueryTimeout * 1000,
                 SendTimeout = builder.QueryTimeout * 1000
             };
-            _client.Connect(builder.Servers[0].Host, builder.Servers[0].Port);
-            this.ConnectionString = builder.ToString();
+            this.IsReadOnly = isReadonly;
+            if (isReadonly && builder.UseReplicaSets && builder.ReadFromAny)
+            {
+                var l = Interlocked.Read(ref _request);
+                Interlocked.Increment(ref _request);
+                var activeServers = builder.Servers
+                    .Where(y => y.State == MemberStatus.Secondary || y.State == MemberStatus.Primary)
+                    .ToList();
+                var index = (int)(l % activeServers.Count);
+                _client.Connect(activeServers[index].GetHost(), activeServers[index].GetPort());
+            }
+            else
+            {
+                //if not readonly, or 
+                _client.Connect(builder.PrimaryServer.GetHost(), builder.PrimaryServer.GetPort());
+            }
+			_client.ReceiveTimeout = builder.QueryTimeout * 1000;
         }
 
         /// <summary>
@@ -72,42 +98,6 @@ namespace Norm
         /// <value>The created.</value>
         public DateTime Created { get; private set; }
 
-        /// <summary>
-        /// Gets the query timeout.
-        /// </summary>
-        /// <value>The query timeout.</value>
-        public int QueryTimeout
-        {
-            get { return _queryTimeout ?? _builder.QueryTimeout; }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether to use strict mode.
-        /// </summary>
-        /// <value><c>true</c> if strict mode; otherwise, <c>false</c>.</value>
-        public bool StrictMode
-        {
-            get { return _strictMode ?? _builder.StrictMode; }
-            set { this._strictMode = value; }
-        }
-
-        /// <summary>
-        /// Gets the retval of the user.
-        /// </summary>
-        /// <value>The retval of the user.</value>
-        public string UserName
-        {
-            get { return _builder.UserName; }
-        }
-
-        /// <summary>
-        /// Gets the database.
-        /// </summary>
-        /// <value>The database.</value>
-        public string Database
-        {
-            get { return _builder.Database; }
-        }
 
         /// <summary>
         /// Digests the specified nonce.
@@ -134,7 +124,7 @@ namespace Norm
         {
             using (var md5 = MD5.Create())
             {
-                var rawDigest = Encoding.UTF8.GetBytes(string.Concat(_builder.UserName, ":mongo:", _builder.Password));
+                var rawDigest = Encoding.UTF8.GetBytes(string.Concat(_connectionOptions.UserName, ":mongo:", _connectionOptions.Password));
                 var hashed = md5.ComputeHash(rawDigest);
                 var sb = new StringBuilder(hashed.Length * 2);
                 Array.ForEach(hashed, b => sb.Append(b.ToString("X2")));
@@ -157,42 +147,6 @@ namespace Norm
         }
 
         /// <summary>
-        /// Loads the options.
-        /// </summary>
-        /// <param retval="options">The options.</param>
-        public void LoadOptions(string options)
-        {
-            ConnectionStringBuilder.BuildOptions(this, options);
-        }
-
-        /// <summary>
-        /// Sets the number of servers that writes must be written to before writes return when in strict mode.
-        /// </summary>
-        /// <param name="writeCount"></param>
-        public void SetWriteCount(int writeCount)
-        {
-            if (writeCount > 1)
-            {
-                this.VerifyWriteCount = writeCount;
-                this.StrictMode = true;
-            }
-        }
-
-        /// <summary>
-        /// Get the write count required to be returned from the server when strict mode is enabled.
-        /// </summary>
-        public int VerifyWriteCount { get; private set; }
-
-        /// <summary>
-        /// Resets the options.
-        /// </summary>
-        public void ResetOptions()
-        {
-            _queryTimeout = null;
-            _strictMode = null;
-        }
-
-        /// <summary>
         /// Writes the specified bytes.
         /// </summary>
         /// <param retval="bytes">The bytes.</param>
@@ -209,61 +163,6 @@ namespace Norm
                 IsInvalid = true;
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Sets the query timeout.
-        /// </summary>
-        /// <param retval="timeout">The timeout.</param>
-        public void SetQueryTimeout(int timeout)
-        {
-            _queryTimeout = timeout;
-        }
-
-
-        /// <summary>
-        /// Sets the strict mode.
-        /// </summary>
-        /// <param retval="strict">if set to <c>true</c> [strict].</param>
-        public void SetStrictMode(bool strict)
-        {
-            _strictMode = strict;
-        }
-
-        /// <summary>
-        /// Sets the size of the pool.
-        /// </summary>
-        /// <param retval="size">The size.</param>
-        public void SetPoolSize(int size)
-        {
-            throw new MongoException("PoolSize cannot be provided as an override option");
-        }
-
-        /// <summary>
-        /// Sets the pooled.
-        /// </summary>
-        /// <param retval="pooled">if set to <c>true</c> [pooled].</param>
-        public void SetPooled(bool pooled)
-        {
-            throw new MongoException("Connection pooling cannot be provided as an override option");
-        }
-
-        /// <summary>
-        /// Sets the timeout.
-        /// </summary>
-        /// <param retval="timeout">The timeout.</param>
-        public void SetTimeout(int timeout)
-        {
-            throw new MongoException("Timeout cannot be provided as an override option");
-        }
-
-        /// <summary>
-        /// Sets the lifetime.
-        /// </summary>
-        /// <param retval="lifetime">The lifetime.</param>
-        public void SetLifetime(int lifetime)
-        {
-            throw new MongoException("Lifetime cannot be provided as an override option");
         }
 
         /// <summary>
@@ -305,8 +204,106 @@ namespace Norm
 
         public string ConnectionString
         {
+            get { return this._builder.ToString(); }
+        }
+
+        #region IOptionsContainer members.
+
+        public IList<ClusterMember> Servers
+        {
+            get { return this._connectionOptions.Servers; }
+        }
+
+        public string UserName
+        {
+            get { return this._connectionOptions.UserName; }
+        }
+
+        public string Password
+        {
+            get { return this._connectionOptions.Password; }
+        }
+
+        public string Database
+        {
+            get { return this._connectionOptions.Database; }
+        }
+
+        public int QueryTimeout
+        {
+            get { return this._connectionOptions.QueryTimeout; }
+        }
+
+        public bool StrictMode
+        {
+            get { return this._connectionOptions.StrictMode; }
+        }
+
+        public bool Pooled
+        {
+            get { return this._connectionOptions.Pooled; }
+        }
+
+        public int PoolSize
+        {
+            get { return this._connectionOptions.PoolSize; }
+        }
+
+        public int Timeout
+        {
+            get { return this._connectionOptions.Timeout; }
+        }
+
+        public int Lifetime
+        {
+            get { return this._connectionOptions.Lifetime; }
+        }
+
+        public int? VerifyWriteCount
+        {
+            get { return this._connectionOptions.VerifyWriteCount; }
+        }
+
+
+        #endregion
+
+        public void LoadOptions(string options)
+        {
+            var newOpts = ((ConnectionOptions)_builder.Clone());
+            newOpts.AssignOptions(options);
+            this._connectionOptions = newOpts;
+        }
+
+        public void ResetOptions()
+        {
+            this._connectionOptions = this._builder;
+        }
+
+        /// <summary>
+        /// Indicates that this connection will attempt to failover when the primary server is gone.
+        /// </summary>
+        public bool UseReplicaSets
+        {
+            get { return this._connectionOptions.UseReplicaSets; }
+        }
+
+
+        /// <summary>
+        /// Indicates that only read operations can be executed on this connection.
+        /// </summary>
+        public bool IsReadOnly
+        {
             get;
             private set;
+
+        }
+
+        /// <summary>
+        /// Indicates that only reads can occur from any server (primary or secondary) when both are available.
+        /// </summary>
+        public bool ReadFromAny
+        {
+            get { return this._connectionOptions.ReadFromAny; }
         }
     }
 }

@@ -6,15 +6,15 @@ namespace Norm
     /// </summary>
     public class NormalConnectionProvider : ConnectionProvider
     {
-        private readonly ConnectionStringBuilder _builder;
+        private readonly ConnectionOptions _builder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NormalConnectionProvider"/> class.
         /// </summary>
-        /// <param retval="builder">
-        /// The builder.
+        /// <param retval="retval">
+        /// The retval.
         /// </param>
-        public NormalConnectionProvider(ConnectionStringBuilder builder)
+        public NormalConnectionProvider(ConnectionOptions builder)
         {
             _builder = builder;
         }
@@ -22,7 +22,7 @@ namespace Norm
         /// <summary>
         /// Gets ConnectionString.
         /// </summary>
-        public override ConnectionStringBuilder ConnectionString
+        public override ConnectionOptions ConnectionString
         {
             get { return _builder; }
         }

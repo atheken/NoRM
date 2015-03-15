@@ -1,24 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
+using NUnit.Framework;
 using Norm.Collections;
 
 namespace Norm.Tests
 {
-    
-    public class MongoSearchQualifierTests : IDisposable
-    {
-        private readonly IMongoCollection<TestClass> _coll;
-        private readonly IMongo _server;
 
-        public MongoSearchQualifierTests()
+    [TestFixture]
+    public class MongoSearchQualifierTests
+    {
+		private Mongod _proc;
+
+		[TestFixtureSetUp]
+		public void SetUp ()
+		{
+			_proc = new Mongod ();
+		}
+
+		[TestFixtureTearDown]
+		public void TearDown ()
+		{
+			_proc.Dispose ();
+		}
+
+        private IMongoCollection<TestClass> _coll;
+        private IMongo _server;
+
+        [SetUp]
+        public void Setup()
         {
             _server = Mongo.Create(TestHelper.ConnectionString("pooling=false"));
             _coll = _server.GetCollection<TestClass>("TestClasses");
         }
 
-        public void Dispose()
+        [TearDown]
+        public void Teardown()
         {
             _server.Database.DropCollection("TestClasses");
             using (var admin = new MongoAdmin(TestHelper.ConnectionString("pooling=false")))
@@ -28,7 +45,7 @@ namespace Norm.Tests
             _server.Dispose();
         }
 
-        [Fact]
+        [Test]
         public void FindOneReturnsSomething()
         {
             _coll.Insert(new TestClass { ADouble = 1d });
@@ -36,7 +53,7 @@ namespace Norm.Tests
             Assert.NotNull(found);
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierAll()
         {
             _coll.Insert(new TestClass { ADouble = 1d, AStringArray = (new[] { "a", "b", "c" }).ToList() });
@@ -47,10 +64,10 @@ namespace Norm.Tests
             _coll.Insert(new TestClass { ADouble = 1d, AStringArray = (new[] { "a", "b", "c" }).ToList() });
 
             var results = _coll.Find(new { AStringArray = Q.All("a", "b") });
-            Assert.Equal(2, results.Count());
+            Assert.AreEqual(2, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierExists()
         {
             _coll.Insert(new TestClass { ADouble = 1d },
@@ -60,10 +77,10 @@ namespace Norm.Tests
                          new TestClass { ADouble = 5d });
 
             var results = _coll.Find(new { ADouble = Q.Exists(true) });
-            Assert.Equal(5, results.Count());
+            Assert.AreEqual(5, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierEquals()
         {
             _coll.Insert(new TestClass { ADouble = 1 });
@@ -73,10 +90,10 @@ namespace Norm.Tests
             _coll.Insert(new TestClass { ADouble = 5 });
 
             var results = _coll.Find(new { ADouble = Q.Equals(1d) });
-            Assert.Equal(results.Count(), 2);
+            Assert.AreEqual(results.Count(), 2);
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierNotEqual()
         {
             // TODO this is failing currently. shouldn't be, I don't think?
@@ -87,10 +104,10 @@ namespace Norm.Tests
                          new TestClass { ADouble = 5d });
 
             var results = _coll.Find(new { ADouble = Q.NotEqual(2d) });
-            Assert.Equal(4, results.Count());
+            Assert.AreEqual(4, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierIn()
         {
             _coll.Insert(new TestClass { ADouble = 1 },
@@ -101,10 +118,10 @@ namespace Norm.Tests
                          new TestClass { ADouble = 5 });
 
             var results = _coll.Find(new { ADouble = Q.In(1d) });
-            Assert.Equal(2, results.Count());
+            Assert.AreEqual(2, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierNotIn()
         {
             // TODO this is failing - need to check with AT and see if I'm doing this right.
@@ -115,10 +132,10 @@ namespace Norm.Tests
                          new TestClass { ADouble = 5d });
 
             var results = _coll.Find(new { ADouble = Q.NotIn(1d, 3d, 5d) });
-            Assert.Equal(2, results.Count());
+            Assert.AreEqual(2, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierGreaterThan()
         {
             _coll.Insert(new TestClass { ADouble = 1d },
@@ -128,10 +145,10 @@ namespace Norm.Tests
                          new TestClass { ADouble = 5d });
 
             var results = _coll.Find(new { ADouble = Q.GreaterThan(2d) });
-            Assert.Equal(3, results.Count());
+            Assert.AreEqual(3, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierGreaterOrEqual()
         {
             _coll.Insert(new TestClass { ADouble = 1d },
@@ -141,10 +158,10 @@ namespace Norm.Tests
                          new TestClass { ADouble = 5d });
 
             var results = _coll.Find(new { ADouble = Q.GreaterOrEqual(2d) });
-            Assert.Equal(4, results.Count());
+            Assert.AreEqual(4, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierLessThan()
         {
             _coll.Insert(new TestClass { ADouble = 1d },
@@ -154,10 +171,10 @@ namespace Norm.Tests
                          new TestClass { ADouble = 5d });
 
             var results = _coll.Find(new { ADouble = Q.LessThan(2d) });
-            Assert.Equal(1, results.Count());
+            Assert.AreEqual(1, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierLessOrEqual()
         {
             _coll.Insert(new TestClass { ADouble = 1d },
@@ -167,10 +184,10 @@ namespace Norm.Tests
                          new TestClass { ADouble = 5d });
 
             var results = _coll.Find(new { ADouble = Q.LessOrEqual(2d) });
-            Assert.Equal(2, results.Count());
+            Assert.AreEqual(2, results.Count());
         }
 
-        [Fact]
+        [Test]
         public void FindOneQualifierSize()
         {
             _coll.Insert(new TestClass { AStringArray = new[] { "one" }.ToList() });
@@ -181,7 +198,7 @@ namespace Norm.Tests
             _coll.Insert(new TestClass { AStringArray = new[] { "one", "two", "three", "four", "five" }.ToList() });
 
             var results = _coll.Find(new { AStringArray = Q.Size(3d) });
-            Assert.Equal(2, results.Count());
+            Assert.AreEqual(2, results.Count());
         }
 
     }

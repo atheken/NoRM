@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Xunit;
+using NUnit.Framework;
 using System.Linq;
 using System;
 
@@ -9,7 +9,8 @@ namespace Norm.Tests
 {
     public class IMongoAdminTests
     {
-        public IMongoAdminTests()
+		[SetUp]
+        public void Setup()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString("strict=false")))
             {
@@ -17,7 +18,7 @@ namespace Norm.Tests
             }
         }
 
-        [Fact]
+        [Test]
         public void Set_Profile_Level_Changes_Profile_Level_And_Reports_Change()
         {
             using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
@@ -32,19 +33,19 @@ namespace Norm.Tests
         }
 
 
-        [Fact]
+        [Test]
         public void Get_Assert_Info_Returns_Results()
         {
             using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var aInfo = mAdmin.AssertionInfo();
                 Assert.NotNull(aInfo);
-                Assert.Equal(true, aInfo.WasSuccessful);
+                Assert.AreEqual(true, aInfo.WasSuccessful);
             }
 
         }
 
-        [Fact]
+        [Test]
         public void Get_CurrentOp_Returns()
         {
             using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
@@ -54,17 +55,17 @@ namespace Norm.Tests
 
         }
 
-        [Fact]
+        [Test]
         public void Get_CurrentOp_Returns_Results()
         {
             using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var a = mAdmin.PreviousErrors();
-                Assert.Equal(true, a.WasSuccessful);
+                Assert.AreEqual(true, a.WasSuccessful);
             }
         }
 
-        [Fact]
+        [Test]
         public void Get_Current_Profile_Level()
         {
             using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
@@ -75,12 +76,12 @@ namespace Norm.Tests
                     mAdmin.SetProfileLevel(2);
 
                 }
-                Assert.Equal(2, mAdmin.GetProfileLevel());
+                Assert.AreEqual(2, mAdmin.GetProfileLevel());
                 mAdmin.SetProfileLevel(level);
             }
         }
 
-        [Fact]
+        [Test]
         public void Repair_Database_Returns()
         {
             using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
@@ -90,20 +91,20 @@ namespace Norm.Tests
         }
 
 
-        [Fact]
+        [Test]
         public void Kill_Operation_Returns()
         {
             //since we don't have any long-running ops, this is all we can test without mocks.
             using (var mAdmin = new MongoAdmin("mongodb://127.0.0.1/admin"))
             {
                 var x = mAdmin.KillOperation(double.MaxValue);
-                Assert.Equal(false,x.WasSuccessful);
-                Assert.Equal("no op number field specified?",x["err"]);
+                Assert.AreEqual(false,x.WasSuccessful);
+                Assert.AreEqual("no op number field specified?",x["err"]);
             }
         }
 
 
-        [Fact]
+        [Test]
         public void Reset_Last_Error_Returns()
         {
             using (var mAdmin = new MongoAdmin(TestHelper.ConnectionString()))
@@ -113,7 +114,7 @@ namespace Norm.Tests
         }
 
 
-        [Fact]
+        [Test]
         public void ListsAllDatabases()
         {
             var expected = new List<string> { "admin", "NormTests", "local" };
@@ -131,19 +132,19 @@ namespace Norm.Tests
                     expected.Remove(db.Name);
                 }
             }
-            Assert.Equal(0, expected.Count);
+            Assert.AreEqual(0, expected.Count);
         }
-        [Fact]
+        [Test]
         public void ListsAllDatabasesThrowsExceptionIfNotConnectedToAdmin()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => admin.GetAllDatabases());
-                Assert.Equal("This command is only valid when connected to admin", ex.Message);
+                Assert.AreEqual("This command is only valid when connected to admin", ex.Message);
             }
         }
 
-        [Fact]
+        [Test]
         public void ReturnsBuildInfo()
         {
             string gitVersion;
@@ -163,22 +164,22 @@ namespace Norm.Tests
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var info = admin.BuildInfo();
-                Assert.Equal(true, info.WasSuccessful);
-                Assert.Equal(gitVersion, info.GitVersion);
-                Assert.Equal(version, info.Version);
+                Assert.AreEqual(true, info.WasSuccessful);
+                Assert.AreEqual(gitVersion, info.GitVersion);
+                Assert.AreEqual(version, info.Version);
             }
         }
-        [Fact]
+        [Test]
         public void BuildInfoThrowsExceptionIfNotConnectedToAdmin()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => admin.BuildInfo());
-                Assert.Equal("This command is only valid when connected to admin", ex.Message);
+                Assert.AreEqual("This command is only valid when connected to admin", ex.Message);
             }
         }
 
-        [Fact]
+        [Test]
         public void ForceSyncDoesSomethingOk()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
@@ -186,7 +187,7 @@ namespace Norm.Tests
                 if (!admin.BuildInfo().SystemInformation.ToLower().Contains("windows"))
                 {
                     var response = admin.ForceSync(true);
-                    Assert.Equal(true, response.WasSuccessful);
+                    Assert.AreEqual(true, response.WasSuccessful);
                     Assert.True(response.NumberOfFiles > 0); //don't know what this is
                 }
                 else
@@ -196,17 +197,17 @@ namespace Norm.Tests
                 }
             }
         }
-        [Fact]
+        [Test]
         public void ForceSyncThrowsExceptionIfNotConnectedToAdmin()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var ex = Assert.Throws<MongoException>(() => admin.ForceSync(true));
-                Assert.Equal("This command is only valid when connected to admin", ex.Message);
+                Assert.AreEqual("This command is only valid when connected to admin", ex.Message);
             }
         }
 
-        [Fact]
+        [Test]
         public void DropsDatabase()
         {
             //create another database
@@ -223,28 +224,28 @@ namespace Norm.Tests
             {
                 foreach (var db in admin.GetAllDatabases())
                 {
-                    Assert.NotEqual("NormTests", db.Name);
+                    Assert.AreNotEqual("NormTests", db.Name);
                 }
             }
         }
 
-        [Fact]
+        [Test]
         public void GetsServerStatus()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString()))
             {
                 var status = admin.ServerStatus();
-                Assert.Equal(true, status.WasSuccessful);
+                Assert.AreEqual(true, status.WasSuccessful);
             }
         }
 
-        [Fact]
+        [Test]
         public void ReturnsEmptyInProcessResponse()
         {
             using (var admin = new MongoAdmin(TestHelper.ConnectionString(null, "admin", null, null)))
             {
                 var response = admin.GetCurrentOperations();
-                Assert.Equal(0, response.Count());
+                Assert.AreEqual(0, response.Count());
             }
         }
 

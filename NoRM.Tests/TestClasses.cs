@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -57,6 +57,7 @@ namespace Norm.Tests
         public string AString { get; set; }
         public int? AInteger { get; set; }
         public List<String> AStringArray { get; set; }
+		
     }
 
     internal class TestHelper
@@ -94,8 +95,8 @@ namespace Norm.Tests
             {
                 query = string.Concat('?', query);
             }
-            var host = string.IsNullOrEmpty(_connectionStringHost) ? "localhost" : _connectionStringHost;
-            database = database ?? "NormTests";
+            var host = (string.IsNullOrEmpty(_connectionStringHost) ? "localhost": _connectionStringHost) + ":" + ConfigurationManager.AppSettings["testPort"];
+			database = database ?? "NormTests";
             return string.Format("mongodb://{0}{1}/{2}{3}", authentication, host, database, query);
         }
     }
@@ -106,10 +107,16 @@ namespace Norm.Tests
         
         private readonly IMongo _provider;
 
-        public Session()
-        {
-            _provider = Mongo.Create("mongodb://127.0.0.1/NormTests?strict=false");
-        }
+     	public Session (bool strict)
+		{
+			_provider = Mongo.Create (TestHelper.ConnectionString ("strict=" + strict));
+			
+		}
+		
+		public Session () : this(false)
+		{
+		
+		}
 
         public IMongoDatabase DB { get { return this._provider.Database; } }
 
@@ -348,13 +355,14 @@ namespace Norm.Tests
 
     internal class TestProduct
     {
-        public TestProduct()
+        public TestProduct ()
         {
-            Supplier = new Supplier();
-            _id = ObjectId.NewObjectId();
-            Inventory = new List<InventoryChange>();
-            this.UniqueID = Guid.NewGuid();
+        	Supplier = new Supplier ();
+        	_id = ObjectId.NewObjectId ();
+        	Inventory = new List<InventoryChange> ();
+        	this.UniqueID = Guid.NewGuid ();
         }
+		public long? LongId {get;set;}
         public List<InventoryChange> Inventory { get; set; }
         public ObjectId _id { get; set; }
         public Guid UniqueID { get; set; }
@@ -921,4 +929,15 @@ namespace Norm.Tests
         }
     }
 
+    public class TestContains
+    {
+        public ObjectId Id { get; private set; }
+        public string Label { get; set; }
+        public List<int> Owners { get; set; }
+
+        public TestContains()
+        {
+            Id = ObjectId.NewObjectId();
+        }
+    }
 }

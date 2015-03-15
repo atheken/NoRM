@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Norm.Protocol.SystemMessages.Requests;
 using Norm.Responses;
+using Norm.Requests;
+using Norm.BSON;
 
 namespace Norm
 {
@@ -28,7 +29,22 @@ namespace Norm
             this.Database = new MongoDatabase(this._connectionProvider.ConnectionString.Database, this._connection);
         }
 
-        /// <summary>
+		///<summary>
+		/// Clones the database.
+		///</summary>
+		///<returns>A boolean that indicates whether the cloning operation was successful or not.</returns>
+		///<param name="sourceDatabase">The source database.</param>
+		///<param name="destinationDatabase">The destination database.</param>
+		///<param name="host">The destination database host.</param>
+		public bool CloneDatabase(string sourceDatabase, string destinationDatabase, string host = "")
+    	{
+			AssertConnectedToAdmin();
+			return Database.GetCollection<BaseStatusMessage>("$cmd")
+				.FindOne(new CloneDatabaseRequest { SourceDatabaseName = sourceDatabase, DestinationDatabaseName = destinationDatabase, Host = host}).
+				WasSuccessful;
+		}
+
+    	/// <summary>
         /// Gets Database.
         /// </summary>
         public IMongoDatabase Database
@@ -225,6 +241,33 @@ namespace Norm
             this._disposed = true;
         }
 
+
+        private T ExecuteCommand<T>(Object command)
+        {
+            return this.Database.GetCollection<T>("$cmd").FindOne(command);
+        }
+
+        public void ReplicaSetPrimaryStepDown()
+        {
+            this.ExecuteCommand<Expando>(new { replSetStepDown = true });
+        }
+
+        public ReplicaSetStatusResponse GetReplicaSetStatus()
+        {
+            return this.ExecuteCommand<ReplicaSetStatusResponse>(new { replSetGetStatus = 1 });
+        }
+
+        /// <summary>
+        /// Initialize a new config.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        public ReplicaSetConfigReponse ConfigureReplicaSet(ReplicaSet config, bool reconfigure)
+        {
+            return reconfigure ?
+                this.ExecuteCommand<ReplicaSetConfigReponse>(new { replSetReconfig = config }) :
+                this.ExecuteCommand<ReplicaSetConfigReponse>(new { replSetInitiate = config });
+        }
 
         /// <summary>
         /// Releases unmanaged resources and performs other cleanup operations before the
